@@ -1,4 +1,5 @@
 import {
+  _requestId,
   _id,
   _price,
   _times,
@@ -9,6 +10,11 @@ import {
   _postTitles,
   _description,
   _productNames,
+  _requester,
+  _category,
+  _deadline,
+  _status,
+  _priority,
 } from './_mock';
 
 // ----------------------------------------------------------------------
@@ -187,3 +193,17 @@ export const _notifications = [
     isUnRead: false,
   },
 ];
+
+
+// ----------------------------------------------------------------------
+
+export const _projects = [...Array(24)].map((_, index) => ({
+  requestId: _requestId(index),
+  requester: _requester(index),
+  category: _category(index),
+  deadline: _deadline(index),
+  status: _status(index),
+  priority: _priority(index),
+}));
+
+// ----------------------------------------------------------------------

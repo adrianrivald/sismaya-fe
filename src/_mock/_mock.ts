@@ -1,5 +1,82 @@
 export const _id = (index: number) => `e99f09a7-dd88-49d5-b1c8-1daf80c2d7b${index}`;
+export const _requestId = (index: number) => [
+  '#1234',
+  '#5678',
+  '#9101',
+  '#1011',
+  '#1234',
+  '#5678',
+  '#9101',
+  '#1234',
+  '#5678',
+  '#9101'
+][index]
 
+export const _requester = (index: number) => [
+  'Alice',
+  'Bob',
+  'Cynthia',
+  'Daniel',
+  'Elvis',
+  'Freya',
+  'Gianna',
+  'Harry',
+  'Iffy',
+  'Juliet',
+][index]
+
+export const _category = (index: number) => [
+  'Inspection Preventive Maintenance',
+  'Kalibrasi',
+  'Uji Alat',
+  'Laporan Kasus',
+  'Laporan Kasus',
+  'Kalibrasi',
+  'Kalibrasi',
+  'Inspection Preventive Maintenance',
+  'Kalibrasi',
+  'Kalibrasi',
+][index]
+
+export const _deadline = (index: number) => [
+  '-',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024',
+  '31 November 2024', 
+][index]
+
+export const _status = (index: number) => [
+  'Requested',
+  'On Progress',
+  'Resolved',
+  'Canceled',
+  'On Progress',
+  'On Progress' ,
+  'On Progress',
+  'Resolved',
+  'Resolved',
+  'Canceled'
+][index]
+
+
+export const _priority = (index: number) => [
+  'CITO',
+  'Medium',
+  'Low',
+  'High',
+  'Medium',
+  'High',
+  'High',
+  'High',
+  'High',
+  'High',
+][index]
 export const _times = (index: number) =>
   // 'MM/DD/YYYY'
   [
