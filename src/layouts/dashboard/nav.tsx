@@ -24,7 +24,13 @@ import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 // ----------------------------------------------------------------------
 
 export type NavContentProps = {
-  data: {
+  dataTop: {
+    path: string;
+    title: string;
+    icon: React.ReactNode;
+    info?: React.ReactNode;
+  }[];
+  dataBottom: {
     path: string;
     title: string;
     icon: React.ReactNode;
@@ -40,7 +46,8 @@ export type NavContentProps = {
 
 export function NavDesktop({
   sx,
-  data,
+  dataTop,
+  dataBottom,
   slots,
   workspaces,
   layoutQuery,
@@ -63,12 +70,12 @@ export function NavDesktop({
         width: 'var(--layout-nav-vertical-width)',
         borderRight: `1px solid var(--layout-nav-border-color, ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)})`,
         [theme.breakpoints.up(layoutQuery)]: {
-          display: 'flex',
+          display: 'block',
         },
         ...sx,
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} />
+      <NavContent dataTop={dataTop} dataBottom={dataBottom} slots={slots} workspaces={workspaces} />
     </Box>
   );
 }
@@ -77,7 +84,8 @@ export function NavDesktop({
 
 export function NavMobile({
   sx,
-  data,
+  dataTop,
+  dataBottom,
   open,
   slots,
   onClose,
@@ -107,14 +115,14 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} />
+      <NavContent dataTop={dataTop} dataBottom={dataBottom} slots={slots} workspaces={workspaces} />
     </Drawer>
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
+export function NavContent({ dataTop, dataBottom, slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
 
   return (
@@ -123,12 +131,83 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
       {slots?.topArea}
 
-      <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
-
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
+          <Box
+            color="var(--layout-nav-item-color)"
+            fontWeight="bold"
+            mt={4}
+            sx={{
+              pl: 2,
+              py: 1,
+              gap: 2,
+            }}
+            component="span"
+          >
+            GENERAL
+          </Box>
           <Box component="ul" gap={0.5} display="flex" flexDirection="column">
-            {data.map((item) => {
+            {dataTop.map((item) => {
+              const isActived = item.path === pathname;
+
+              return (
+                <ListItem disableGutters disablePadding key={item.title}>
+                  <ListItemButton
+                    disableGutters
+                    component={RouterLink}
+                    href={item.path}
+                    sx={{
+                      pl: 2,
+                      py: 1,
+                      gap: 2,
+                      pr: 1.5,
+                      borderRadius: 0.75,
+                      typography: 'body2',
+                      fontWeight: 'fontWeightMedium',
+                      color: 'var(--layout-nav-item-color)',
+                      minHeight: 'var(--layout-nav-item-height)',
+                      ...(isActived && {
+                        fontWeight: 'fontWeightSemiBold',
+                        bgcolor: 'var(--layout-nav-item-active-bg)',
+                        color: 'var(--layout-nav-item-active-color)',
+                        '&:hover': {
+                          bgcolor: 'var(--layout-nav-item-hover-bg)',
+                        },
+                      }),
+                    }}
+                  >
+                    <Box component="span" sx={{ width: 24, height: 24 }}>
+                      {item.icon}
+                    </Box>
+
+                    <Box component="span" flexGrow={1}>
+                      {item.title}
+                    </Box>
+
+                    {item.info && item.info}
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </Box>
+        </Box>
+
+        <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
+          <Box
+            color="var(--layout-nav-item-color)"
+            fontWeight="bold"
+            mt={4}
+            sx={{
+              pl: 2,
+              py: 1,
+              gap: 2,
+            }}
+            component="span"
+          >
+            MANAGEMENT
+          </Box>
+          <Box component="ul" gap={0.5} display="flex" flexDirection="column">
+            {dataBottom.map((item) => {
               const isActived = item.path === pathname;
 
               return (
@@ -175,8 +254,6 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
       </Scrollbar>
 
       {slots?.bottomArea}
-
-      <NavUpgrade />
     </>
   );
 }
