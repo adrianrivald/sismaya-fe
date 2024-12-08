@@ -9,6 +9,7 @@ import { useScrollToTop } from 'src/hooks/use-scroll-to-top';
 import { ThemeProvider } from 'src/theme/theme-provider';
 
 import { Iconify } from 'src/components/iconify';
+import { AuthProvider } from './sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
 
@@ -37,8 +38,10 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <Router />
-      {githubButton}
+      <AuthProvider>
+        <Router />
+        {githubButton}
+      </AuthProvider>
     </ThemeProvider>
   );
 }
