@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
-import TableRow from '@mui/material/TableRow';
+import TableR from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import MenuList from '@mui/material/MenuList';
 import TableCell from '@mui/material/TableCell';
@@ -15,23 +15,13 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export type UserProps = {
-  id: string;
-  name: string;
-  role: string;
-  status: string;
-  company: string;
-  avatarUrl: string;
-  isVerified: boolean;
-};
-
-type UserTableRowProps = {
-  row: UserProps;
+type TableRowProps = {
+  row: any;
   selected: boolean;
   onSelectRow: () => void;
 };
 
-export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
+export function TableRow({ row, selected, onSelectRow }: TableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -44,40 +34,27 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
   return (
     <>
-      <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
-        <TableCell padding="checkbox">
+      <TableR hover tabIndex={-1} role="checkbox" selected={selected}>
+        {/* <TableCell padding="checkbox">
           <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
-        </TableCell>
+        </TableCell> */}
 
-        <TableCell component="th" scope="row">
-          <Box gap={2} display="flex" alignItems="center">
-            <Avatar alt={row.name} src={row.avatarUrl} />
-            {row.name}
-          </Box>
-        </TableCell>
+        <TableCell>{row.requestId}</TableCell>
 
-        <TableCell>{row.company}</TableCell>
-
-        <TableCell>{row.role}</TableCell>
-
-        <TableCell align="center">
-          {row.isVerified ? (
-            <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
-          ) : (
-            '-'
-          )}
-        </TableCell>
-
+        <TableCell>{row.requester}</TableCell>
+        <TableCell align="center">{row.category}</TableCell>
+        <TableCell>{row.deadline}</TableCell>
         <TableCell>
           <Label color={(row.status === 'banned' && 'error') || 'success'}>{row.status}</Label>
         </TableCell>
+        <TableCell>{row.priority}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
-      </TableRow>
+      </TableR>
 
       <Popover
         open={!!openPopover}

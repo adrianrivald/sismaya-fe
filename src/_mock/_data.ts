@@ -197,7 +197,8 @@ export const _notifications = [
 
 // ----------------------------------------------------------------------
 
-export const _projects = [...Array(24)].map((_, index) => ({
+export const _projects = [...Array(10)].map((_, index) => ({
+  id: _id(index),
   requestId: _requestId(index),
   requester: _requester(index),
   category: _category(index),
