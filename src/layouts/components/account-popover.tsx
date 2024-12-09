@@ -15,6 +15,7 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
 
@@ -28,6 +29,7 @@ export type AccountPopoverProps = IconButtonProps & {
 };
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
+  const { logout } = useAuth();
   const router = useRouter();
 
   const pathname = usePathname();
@@ -49,6 +51,10 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     },
     [handleClosePopover, router]
   );
+
+  const onLogout = async () => {
+    await logout();
+  };
 
   return (
     <>
@@ -129,7 +135,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button fullWidth color="error" size="medium" variant="text">
+          <Button onClick={onLogout} fullWidth color="error" size="medium" variant="text">
             Logout
           </Button>
         </Box>

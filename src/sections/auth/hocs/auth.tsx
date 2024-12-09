@@ -1,11 +1,20 @@
+import { AuthLayout } from 'src/layouts/auth';
+import { SignInPage } from 'src/routes/sections';
 import { useAuth } from '../providers/auth';
 import { SignInView } from '../sign-in-view';
 
 export function withAuth(WrappedApp: React.ComponentType) {
   function AppWithAuth() {
     const { isAuth } = useAuth();
+    console.log(isAuth, 'isAuth');
 
-    return isAuth ? <WrappedApp /> : <SignInView />;
+    return isAuth ? (
+      <WrappedApp />
+    ) : (
+      <AuthLayout>
+        <SignInPage />
+      </AuthLayout>
+    );
   }
 
   const displayName = WrappedApp.displayName || WrappedApp.name || 'AppComponent';
