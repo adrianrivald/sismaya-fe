@@ -22,61 +22,58 @@ export function CreateInternalCompanyView() {
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, control, formState }) => {
-            console.log(formState, 'formstate');
-            return (
-              <Grid container spacing={3} xs={12}>
-                <Grid item xs={12} md={12}>
-                  <TextField
-                    error={Boolean(formState?.errors?.name)}
-                    sx={{
-                      width: '100%',
-                    }}
-                    label="Nama"
-                    {...register('name', {
-                      required: 'Nama harus diisi',
-                    })}
-                  />
-                  {formState?.errors?.name && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.name?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid item xs={12} md={12}>
-                  <TextField
-                    error={Boolean(formState?.errors?.description)}
-                    multiline
-                    sx={{
-                      width: '100%',
-                    }}
-                    label="Deskripsi"
-                    rows={4}
-                    {...register('description', {
-                      required: 'Deskripsi harus diisi',
-                    })}
-                  />
-                  {formState?.errors?.description && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.description?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Box
-                  display="flex"
-                  justifyContent="end"
-                  width="100%"
+          {({ register, control, formState }) => (
+            <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.name)}
                   sx={{
-                    mt: 4,
+                    width: '100%',
                   }}
-                >
-                  <Button type="submit" variant="contained" color="primary">
-                    Submit
-                  </Button>
-                </Box>
+                  label="Nama"
+                  {...register('name', {
+                    required: 'Nama harus diisi',
+                  })}
+                />
+                {formState?.errors?.name && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.name?.message)}
+                  </FormHelperText>
+                )}
               </Grid>
-            );
-          }}
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.description)}
+                  multiline
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Deskripsi"
+                  rows={4}
+                  {...register('description', {
+                    required: 'Deskripsi harus diisi',
+                  })}
+                />
+                {formState?.errors?.description && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.description?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Box
+                display="flex"
+                justifyContent="end"
+                width="100%"
+                sx={{
+                  mt: 4,
+                }}
+              >
+                <Button type="submit" variant="contained" color="primary">
+                  Submit
+                </Button>
+              </Box>
+            </Grid>
+          )}
         </Form>
       </Grid>
     </DashboardContent>

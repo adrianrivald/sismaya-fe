@@ -10,6 +10,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
+import { Form } from 'src/components/form/form';
+import { FormHelperText } from '@mui/material';
 import { useAuth } from './providers/auth';
 
 // ----------------------------------------------------------------------
@@ -20,10 +22,10 @@ export function SignInView() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = useCallback(
-    async (e: any) => {
-      console.log(e, 'value');
-      await login({ username: 'test', password: 'test' });
+  const handleSubmit = useCallback(
+    async (formData: any) => {
+      console.log(formData, 'value');
+      await login({ username: formData?.username, password: formData?.password });
       router.push('/');
     },
     [router, login]
@@ -31,48 +33,64 @@ export function SignInView() {
 
   const renderForm = (
     <Box display="flex" flexDirection="column" alignItems="flex-end">
-      <TextField
-        fullWidth
-        name="email"
-        label="Email address"
-        defaultValue="hello@gmail.com"
-        InputLabelProps={{ shrink: true }}
-        sx={{ mb: 3 }}
-      />
+      <Form width="100%" onSubmit={handleSubmit}>
+        {({ register, control, formState }) => (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                error={Boolean(formState?.errors?.email)}
+                fullWidth
+                label="Email address"
+                InputLabelProps={{ shrink: true }}
+                {...register('email', {
+                  required: 'Email harus diisi',
+                })}
+              />
 
-      {/* <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+              {formState?.errors?.email && (
+                <FormHelperText sx={{ color: 'error.main' }}>
+                  {String(formState?.errors?.email?.message)}
+                </FormHelperText>
+              )}
+            </Box>
+            {/* <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
         Forgot password?
       </Link> */}
 
-      <TextField
-        fullWidth
-        name="password"
-        label="Password"
-        defaultValue="@demo1234"
-        InputLabelProps={{ shrink: true }}
-        type={showPassword ? 'text' : 'password'}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 3 }}
-      />
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                error={Boolean(formState?.errors?.password)}
+                fullWidth
+                label="Password"
+                {...register('password', {
+                  required: 'Password harus diisi',
+                })}
+                InputLabelProps={{ shrink: true }}
+                type={showPassword ? 'text' : 'password'}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                        <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        color="inherit"
-        variant="contained"
-        onClick={handleSignIn}
-      >
-        Sign in
-      </LoadingButton>
+              {formState?.errors?.password && (
+                <FormHelperText sx={{ color: 'error.main' }}>
+                  {String(formState?.errors?.password?.message)}
+                </FormHelperText>
+              )}
+            </Box>
+
+            <LoadingButton fullWidth size="large" type="submit" color="inherit" variant="contained">
+              Sign in
+            </LoadingButton>
+          </>
+        )}
+      </Form>
     </Box>
   );
 

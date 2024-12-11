@@ -154,7 +154,6 @@ export function NavContent({
   const pathname = usePathname();
   const location = useLocation();
 
-  console.log(location, 'location');
   return (
     <>
       <Logo />
@@ -324,7 +323,7 @@ export function NavContent({
             </AccordionDetails>
           </Accordion>
           <Accordion
-            defaultExpanded={Boolean(['internal-company', 'client-company'].indexOf(pathname))}
+            defaultExpanded={Boolean(['/internal-company', '/client-company'].includes(pathname))}
           >
             <AccordionSummary
               // expandIcon={<ExpandMoreIcon />}
