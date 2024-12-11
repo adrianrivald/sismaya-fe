@@ -1,7 +1,7 @@
 import { Table } from 'src/components/table/table';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -33,12 +33,22 @@ const columns = [
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-        KMI Request Management
-      </Typography>
-      <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
-        <Typography variant="h5">Request</Typography>
-        <Typography variant="h5">KMI Request Management</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
+            KMI Request Management
+          </Typography>
+          <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
+            <Typography>Request</Typography>
+            <Typography color="grey.500">•</Typography>
+            <Typography color="grey.500">KMI Request Management</Typography>
+          </Box>
+        </Box>
+        <Box>
+          <Button variant="contained" color="primary">
+            Create New Request
+          </Button>
+        </Box>
       </Box>
 
       <Grid container spacing={3}>

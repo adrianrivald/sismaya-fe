@@ -3,7 +3,7 @@ import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
 
-const icon = (name: string) => (
+export const icon = (name: string) => (
   <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
 );
 
@@ -22,8 +22,38 @@ export const navDataTop = [
 
 export const navDataBottom = [
   {
-    title: 'Request',
-    path: '/request',
-    icon: icon('ic-chat'),
+    title: 'SIM',
+    path: '/sim',
+  },
+  {
+    title: 'SAS',
+    path: '/sas',
+  },
+  {
+    title: 'KMI',
+    path: '/kmi',
+  },
+  {
+    title: 'FPA',
+    path: '/fpa',
+  },
+];
+
+export const navMasterData = [
+  {
+    title: 'Internal Company',
+    path: '/internal-company',
+  },
+  {
+    title: 'Client Company',
+    path: '/client-company',
+  },
+  {
+    title: 'User',
+    path: '/user',
+  },
+  {
+    title: 'FPA',
+    path: '/fpa',
   },
 ];

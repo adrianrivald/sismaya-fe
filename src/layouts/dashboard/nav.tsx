@@ -15,11 +15,14 @@ import { varAlpha } from 'src/theme/styles';
 
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
+import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 
 import { NavUpgrade } from '../components/nav-upgrade';
 import { WorkspacesPopover } from '../components/workspaces-popover';
 
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
+import { icon } from '../config-nav-dashboard';
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +36,11 @@ export type NavContentProps = {
   dataBottom: {
     path: string;
     title: string;
-    icon: React.ReactNode;
+    info?: React.ReactNode;
+  }[];
+  dataMaster: {
+    path: string;
+    title: string;
     info?: React.ReactNode;
   }[];
   slots?: {
@@ -48,6 +55,7 @@ export function NavDesktop({
   sx,
   dataTop,
   dataBottom,
+  dataMaster,
   slots,
   workspaces,
   layoutQuery,
@@ -75,7 +83,13 @@ export function NavDesktop({
         ...sx,
       }}
     >
-      <NavContent dataTop={dataTop} dataBottom={dataBottom} slots={slots} workspaces={workspaces} />
+      <NavContent
+        dataTop={dataTop}
+        dataBottom={dataBottom}
+        dataMaster={dataMaster}
+        slots={slots}
+        workspaces={workspaces}
+      />
     </Box>
   );
 }
@@ -86,6 +100,7 @@ export function NavMobile({
   sx,
   dataTop,
   dataBottom,
+  dataMaster,
   open,
   slots,
   onClose,
@@ -115,16 +130,31 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent dataTop={dataTop} dataBottom={dataBottom} slots={slots} workspaces={workspaces} />
+      <NavContent
+        dataTop={dataTop}
+        dataBottom={dataBottom}
+        dataMaster={dataMaster}
+        slots={slots}
+        workspaces={workspaces}
+      />
     </Drawer>
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ dataTop, dataBottom, slots, workspaces, sx }: NavContentProps) {
+export function NavContent({
+  dataTop,
+  dataBottom,
+  dataMaster,
+  slots,
+  workspaces,
+  sx,
+}: NavContentProps) {
   const pathname = usePathname();
+  const location = useLocation();
 
+  console.log(location, 'location');
   return (
     <>
       <Logo />
@@ -206,50 +236,180 @@ export function NavContent({ dataTop, dataBottom, slots, workspaces, sx }: NavCo
           >
             MANAGEMENT
           </Box>
-          <Box component="ul" gap={0.5} display="flex" flexDirection="column">
-            {dataBottom.map((item) => {
-              const isActived = item.path === pathname;
+          {/* <Box component="ul" gap={0.5} display="flex" flexDirection="column"> */}
+          <Accordion>
+            <AccordionSummary
+              // expandIcon={<ExpandMoreIcon />}
+              sx={{
+                p: 0,
+              }}
+              aria-controls="panel-content"
+              id=""
+            >
+              <ListItem disableGutters disablePadding key="request">
+                <ListItemButton
+                  disableGutters
+                  sx={{
+                    pl: 2,
+                    py: 1,
+                    gap: 2,
+                    pr: 1.5,
+                    borderRadius: 0.75,
+                    typography: 'body2',
+                    fontWeight: 'fontWeightMedium',
+                    color: 'var(--layout-nav-item-color)',
+                    minHeight: 'var(--layout-nav-item-height)',
+                    // ...(isActived && {
+                    //   fontWeight: 'fontWeightSemiBold',
+                    //   bgcolor: 'var(--layout-nav-item-active-bg)',
+                    //   color: 'var(--layout-nav-item-active-color)',
+                    //   '&:hover': {
+                    //     bgcolor: 'var(--layout-nav-item-hover-bg)',
+                    //   },
+                    // }),
+                  }}
+                >
+                  <Box component="span" sx={{ width: 24, height: 24 }}>
+                    {icon('ic-chat')}
+                  </Box>
 
-              return (
-                <ListItem disableGutters disablePadding key={item.title}>
-                  <ListItemButton
-                    disableGutters
-                    component={RouterLink}
-                    href={item.path}
-                    sx={{
-                      pl: 2,
-                      py: 1,
-                      gap: 2,
-                      pr: 1.5,
-                      borderRadius: 0.75,
-                      typography: 'body2',
-                      fontWeight: 'fontWeightMedium',
-                      color: 'var(--layout-nav-item-color)',
-                      minHeight: 'var(--layout-nav-item-height)',
-                      ...(isActived && {
-                        fontWeight: 'fontWeightSemiBold',
-                        bgcolor: 'var(--layout-nav-item-active-bg)',
-                        color: 'var(--layout-nav-item-active-color)',
-                        '&:hover': {
-                          bgcolor: 'var(--layout-nav-item-hover-bg)',
-                        },
-                      }),
-                    }}
-                  >
-                    <Box component="span" sx={{ width: 24, height: 24 }}>
-                      {item.icon}
-                    </Box>
+                  <Box component="span" flexGrow={1}>
+                    Request
+                  </Box>
 
-                    <Box component="span" flexGrow={1}>
-                      {item.title}
-                    </Box>
+                  {/* {item.info && item.info} */}
+                </ListItemButton>
+              </ListItem>
+            </AccordionSummary>
 
-                    {item.info && item.info}
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
-          </Box>
+            <AccordionDetails>
+              {dataBottom.map((item) => {
+                const isActived = item.path === pathname;
+
+                return (
+                  <ListItem disableGutters disablePadding key={item.title}>
+                    <ListItemButton
+                      disableGutters
+                      component={RouterLink}
+                      href={item.path}
+                      sx={{
+                        pl: 2,
+                        py: 1,
+                        gap: 2,
+                        pr: 1.5,
+                        borderRadius: 0.75,
+                        typography: 'body2',
+                        fontWeight: 'fontWeightMedium',
+                        color: 'var(--layout-nav-item-color)',
+                        minHeight: 'var(--layout-nav-item-height)',
+                        ...(isActived && {
+                          fontWeight: 'fontWeightSemiBold',
+                          bgcolor: 'var(--layout-nav-item-active-bg)',
+                          color: 'var(--layout-nav-item-active-color)',
+                          '&:hover': {
+                            bgcolor: 'var(--layout-nav-item-hover-bg)',
+                          },
+                        }),
+                      }}
+                    >
+                      <Box component="span" flexGrow={1}>
+                        {item.title}
+                      </Box>
+
+                      {item.info && item.info}
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary
+              // expandIcon={<ExpandMoreIcon />}
+              sx={{
+                p: 0,
+              }}
+              aria-controls="panel-content"
+              id=""
+            >
+              <ListItem disableGutters disablePadding key="request">
+                <ListItemButton
+                  disableGutters
+                  sx={{
+                    pl: 2,
+                    py: 1,
+                    gap: 2,
+                    pr: 1.5,
+                    borderRadius: 0.75,
+                    typography: 'body2',
+                    fontWeight: 'fontWeightMedium',
+                    color: 'var(--layout-nav-item-color)',
+                    minHeight: 'var(--layout-nav-item-height)',
+                    // ...(isActived && {
+                    //   fontWeight: 'fontWeightSemiBold',
+                    //   bgcolor: 'var(--layout-nav-item-active-bg)',
+                    //   color: 'var(--layout-nav-item-active-color)',
+                    //   '&:hover': {
+                    //     bgcolor: 'var(--layout-nav-item-hover-bg)',
+                    //   },
+                    // }),
+                  }}
+                >
+                  <Box component="span" sx={{ width: 24, height: 24 }}>
+                    {icon('ic-chat')}
+                  </Box>
+
+                  <Box component="span" flexGrow={1}>
+                    Master Data
+                  </Box>
+
+                  {/* {item.info && item.info} */}
+                </ListItemButton>
+              </ListItem>
+            </AccordionSummary>
+
+            <AccordionDetails>
+              {dataMaster.map((item) => {
+                const isActived = item.path === pathname;
+
+                return (
+                  <ListItem disableGutters disablePadding key={item.title}>
+                    <ListItemButton
+                      disableGutters
+                      component={RouterLink}
+                      href={item.path}
+                      sx={{
+                        pl: 2,
+                        py: 1,
+                        gap: 2,
+                        pr: 1.5,
+                        borderRadius: 0.75,
+                        typography: 'body2',
+                        fontWeight: 'fontWeightMedium',
+                        color: 'var(--layout-nav-item-color)',
+                        minHeight: 'var(--layout-nav-item-height)',
+                        ...(isActived && {
+                          fontWeight: 'fontWeightSemiBold',
+                          bgcolor: 'var(--layout-nav-item-active-bg)',
+                          color: 'var(--layout-nav-item-active-color)',
+                          '&:hover': {
+                            bgcolor: 'var(--layout-nav-item-hover-bg)',
+                          },
+                        }),
+                      }}
+                    >
+                      <Box component="span" flexGrow={1}>
+                        {item.title}
+                      </Box>
+
+                      {item.info && item.info}
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </AccordionDetails>
+          </Accordion>
+          {/* </Box> */}
         </Box>
       </Scrollbar>
 

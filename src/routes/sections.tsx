@@ -12,6 +12,15 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 
 export const HomePage = lazy(() => import('src/pages/home'));
 export const RequestDetailPage = lazy(() => import('src/pages/request/request-detail'));
+
+// Master Data
+export const InternalCompanyListPage = lazy(
+  () => import('src/pages/master-data/internal-company/list')
+);
+export const ClientCompanyListPage = lazy(
+  () => import('src/pages/master-data/client-company/list')
+);
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
@@ -47,6 +56,10 @@ export function Router() {
         { path: 'request/:id', element: <RequestDetailPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
+
+        // Master Data
+        { path: 'internal-company', element: <InternalCompanyListPage /> },
+        { path: 'client-company', element: <ClientCompanyListPage /> },
       ],
     },
     {

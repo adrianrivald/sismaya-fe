@@ -1,8 +1,8 @@
-{
+  {
   "primary": {
     "lighter": "#D0ECFE",
     "light": "#73BAFB",
-    "main": "#1877F2",
+    "main": "#005B7F",
     "dark": "#0C44AE",
     "darker": "#042174",
     "contrastText": "#FFFFFF"
@@ -58,6 +58,9 @@
     "700": "#454F5B",
     "800": "#1C252E",
     "900": "#141A21"
+  },
+  "blue": {
+    "500" : "#005B7F"
   },
   "common": {
     "black": "#000000",
