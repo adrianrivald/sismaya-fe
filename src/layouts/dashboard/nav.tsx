@@ -370,7 +370,7 @@ export function NavContent({
 
             <AccordionDetails>
               {dataMaster.map((item) => {
-                const isActived = item.path === pathname;
+                const isActived = pathname.includes(item.path);
 
                 return (
                   <ListItem disableGutters disablePadding key={item.title}>

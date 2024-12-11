@@ -14,9 +14,16 @@ export const HomePage = lazy(() => import('src/pages/home'));
 export const RequestDetailPage = lazy(() => import('src/pages/request/request-detail'));
 
 // Master Data
+
+// Internal Company
 export const InternalCompanyListPage = lazy(
   () => import('src/pages/master-data/internal-company/list')
 );
+export const InternalCompanyCreatePage = lazy(
+  () => import('src/pages/master-data/internal-company/create')
+);
+
+// Client Company
 export const ClientCompanyListPage = lazy(
   () => import('src/pages/master-data/client-company/list')
 );
@@ -59,6 +66,7 @@ export function Router() {
 
         // Master Data
         { path: 'internal-company', element: <InternalCompanyListPage /> },
+        { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
         { path: 'client-company', element: <ClientCompanyListPage /> },
       ],
     },

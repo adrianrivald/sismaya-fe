@@ -5,6 +5,7 @@ import { Box, Button } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useNavigate } from 'react-router-dom';
 
 export type ProjectProps = {
   id: string;
@@ -29,6 +30,11 @@ const columns = [
 ];
 
 export function InternalCompanyView() {
+  const navigate = useNavigate();
+  const onClickAddNew = () => {
+    navigate('/internal-company/create');
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -43,7 +49,7 @@ export function InternalCompanyView() {
           </Box>
         </Box>
         <Box>
-          <Button variant="contained" color="primary">
+          <Button onClick={onClickAddNew} variant="contained" color="primary">
             Create New Internal Company
           </Button>
         </Box>

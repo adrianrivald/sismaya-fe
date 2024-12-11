@@ -2,8 +2,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ZodType, ZodTypeDef } from 'zod';
 import type { UseFormReturn, SubmitHandler, UseFormProps } from 'react-hook-form';
+import { Box, BoxProps } from '@mui/material';
 
-interface FormProps<TFormValues, ZSchema> {
+interface FormProps<TFormValues, ZSchema>
+  extends Omit<BoxProps, 'children' | 'onSubmit' | 'component'> {
   children: (methods: UseFormReturn<any>) => React.ReactNode;
   onSubmit: SubmitHandler<any>;
   options?: Omit<UseFormProps<any>, 'resolver'>;
@@ -21,11 +23,12 @@ export function Form<
   });
 
   return (
-    <form
+    <Box
+      component="form"
       onSubmit={methods.handleSubmit(onSubmit, (formError) => console.log(formError))}
       {...restProps}
     >
       {children(methods)}
-    </form>
+    </Box>
   );
 }
