@@ -284,7 +284,7 @@ export function NavContent({
 
             <AccordionDetails>
               {dataBottom.map((item) => {
-                const isActived = item.path === pathname;
+                const isActived = pathname.includes(item.path);
 
                 return (
                   <ListItem disableGutters disablePadding key={item.title}>
@@ -323,7 +323,9 @@ export function NavContent({
               })}
             </AccordionDetails>
           </Accordion>
-          <Accordion>
+          <Accordion
+            defaultExpanded={Boolean(['internal-company', 'client-company'].indexOf(pathname))}
+          >
             <AccordionSummary
               // expandIcon={<ExpandMoreIcon />}
               sx={{
