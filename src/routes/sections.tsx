@@ -22,6 +22,9 @@ export const InternalCompanyListPage = lazy(
 export const InternalCompanyCreatePage = lazy(
   () => import('src/pages/master-data/internal-company/create')
 );
+export const InternalCompanyEditPage = lazy(
+  () => import('src/pages/master-data/internal-company/edit')
+);
 
 // Client Company
 export const ClientCompanyListPage = lazy(
@@ -67,6 +70,7 @@ export function Router() {
         // Master Data
         { path: 'internal-company', element: <InternalCompanyListPage /> },
         { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
+        { path: 'internal-company/:id', element: <InternalCompanyEditPage /> },
         { path: 'client-company', element: <ClientCompanyListPage /> },
       ],
     },

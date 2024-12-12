@@ -4,9 +4,19 @@ import { Box, Button, FormHelperText, Grid, TextField } from '@mui/material';
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
+import { useNavigate } from 'react-router-dom';
+import { LoadingButton } from '@mui/lab';
+import React from 'react';
 
 export function CreateInternalCompanyView() {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
   const handleSubmit = (formData: any) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate('/internal-company/test');
+    }, 1000);
     console.log(formData, 'test');
   };
   return (
@@ -34,6 +44,7 @@ export function CreateInternalCompanyView() {
                   {...register('name', {
                     required: 'Nama harus diisi',
                   })}
+                  autoComplete="off"
                 />
                 {formState?.errors?.name && (
                   <FormHelperText sx={{ color: 'error.main' }}>
@@ -43,6 +54,7 @@ export function CreateInternalCompanyView() {
               </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
+                  autoComplete="off"
                   error={Boolean(formState?.errors?.description)}
                   multiline
                   sx={{
@@ -68,9 +80,19 @@ export function CreateInternalCompanyView() {
                   mt: 4,
                 }}
               >
-                <Button type="submit" variant="contained" color="primary">
+                <LoadingButton
+                  size="small"
+                  loading={isLoading}
+                  loadingIndicator="Mengirim..."
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    width: 120,
+                  }}
+                >
                   Submit
-                </Button>
+                </LoadingButton>
               </Box>
             </Grid>
           )}
