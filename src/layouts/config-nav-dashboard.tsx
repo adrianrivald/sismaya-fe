@@ -52,8 +52,4 @@ export const navMasterData = [
     title: 'User',
     path: '/user',
   },
-  {
-    title: 'FPA',
-    path: '/fpa',
-  },
 ];

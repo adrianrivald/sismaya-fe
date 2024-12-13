@@ -51,7 +51,7 @@ export function EditClientCompanyView() {
   console.log(API_URL, 'API URL');
   const theme = useTheme();
   const defaultDummyData = {
-    name: 'Test nama',
+    name: 'Test Name',
     description: 'Test desc',
     division: ['Div 1', 'Div 2'],
   };

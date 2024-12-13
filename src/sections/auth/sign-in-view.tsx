@@ -43,7 +43,7 @@ export function SignInView() {
                 label="Email address"
                 InputLabelProps={{ shrink: true }}
                 {...register('email', {
-                  required: 'Email harus diisi',
+                  required: 'Email must be filled out',
                 })}
               />
 
@@ -63,7 +63,7 @@ export function SignInView() {
                 fullWidth
                 label="Password"
                 {...register('password', {
-                  required: 'Password harus diisi',
+                  required: 'Password must be filled out',
                 })}
                 InputLabelProps={{ shrink: true }}
                 type={showPassword ? 'text' : 'password'}

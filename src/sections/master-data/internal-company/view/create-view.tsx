@@ -40,9 +40,9 @@ export function CreateInternalCompanyView() {
                   sx={{
                     width: '100%',
                   }}
-                  label="Nama"
+                  label="Name"
                   {...register('name', {
-                    required: 'Nama harus diisi',
+                    required: 'Name must be filled out',
                   })}
                   autoComplete="off"
                 />
@@ -63,7 +63,7 @@ export function CreateInternalCompanyView() {
                   label="Deskripsi"
                   rows={4}
                   {...register('description', {
-                    required: 'Deskripsi harus diisi',
+                    required: 'Deskripsi must be filled out',
                   })}
                 />
                 {formState?.errors?.description && (
@@ -83,7 +83,7 @@ export function CreateInternalCompanyView() {
                 <LoadingButton
                   size="small"
                   loading={isLoading}
-                  loadingIndicator="Mengirim..."
+                  loadingIndicator="Submitting..."
                   type="submit"
                   variant="contained"
                   color="primary"

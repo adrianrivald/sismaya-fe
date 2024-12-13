@@ -50,7 +50,7 @@ export function EditInternalCompanyView() {
   console.log(API_URL, 'API URL');
   const theme = useTheme();
   const defaultDummyData = {
-    name: 'Test nama',
+    name: 'Test Name',
     description: 'Test desc',
     status: 'todo',
     category: ['Cat 1', 'Cat 2'],
@@ -99,9 +99,9 @@ export function EditInternalCompanyView() {
                   sx={{
                     width: '100%',
                   }}
-                  label="Nama"
+                  label="Name"
                   {...register('name', {
-                    required: 'Nama harus diisi',
+                    required: 'Name must be filled out',
                   })}
                 />
                 {formState?.errors?.name && (
@@ -120,7 +120,7 @@ export function EditInternalCompanyView() {
                   label="Deskripsi"
                   rows={4}
                   {...register('description', {
-                    required: 'Deskripsi harus diisi',
+                    required: 'Deskripsi must be filled out',
                   })}
                 />
                 {formState?.errors?.description && (
@@ -167,7 +167,7 @@ export function EditInternalCompanyView() {
                   id="upload-pic"
                   sx={{ display: 'none' }}
                   {...register('photo', {
-                    required: 'Gambar harus diisi',
+                    required: 'Gambar must be filled out',
                   })}
                 /> */}
               </Grid>
@@ -185,7 +185,7 @@ export function EditInternalCompanyView() {
                       <Select
                         error={Boolean(formState?.errors?.status)}
                         {...register('status', {
-                          required: 'Status harus diisi',
+                          required: 'Status must be filled out',
                         })}
                         label="Status"
                         value="todo"
@@ -209,7 +209,7 @@ export function EditInternalCompanyView() {
                       <Select
                         error={Boolean(formState?.errors?.category)}
                         {...register('category', {
-                          required: 'Kategori harus diisi',
+                          required: 'Kategori must be filled out',
                         })}
                         label="Kategori"
                         // onChange={handleChange}
@@ -236,7 +236,7 @@ export function EditInternalCompanyView() {
                     labelId="demo-simple-select-outlined-label-type"
                     id="category"
                     {...register('category', {
-                      required: 'Kategori harus diisi',
+                      required: 'Kategori must be filled out',
                     })}
                     multiple
                     value={selectedCat}
@@ -273,7 +273,7 @@ export function EditInternalCompanyView() {
                     labelId="demo-simple-select-outlined-label-type"
                     id="product"
                     {...register('product', {
-                      required: 'Produk harus diisi',
+                      required: 'Produk must be filled out',
                     })}
                     multiple
                     value={selectedCat}
