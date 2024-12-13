@@ -23,6 +23,7 @@ import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import React from 'react';
+import { API_URL } from 'src/constants';
 
 const categories = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'];
 
@@ -46,7 +47,14 @@ function getStyles(name: string, selectedCat: readonly string[], theme: Theme) {
 }
 
 export function EditInternalCompanyView() {
+  console.log(API_URL, 'API URL');
   const theme = useTheme();
+  const defaultDummyData = {
+    name: 'Test nama',
+    description: 'Test desc',
+    status: 'todo',
+    category: ['Cat 1', 'Cat 2'],
+  };
   const [selectedCat, setSelectedCat] = React.useState<string[]>([]);
 
   const handleChange = (event: SelectChangeEvent<typeof selectedCat>) => {
@@ -79,10 +87,7 @@ export function EditInternalCompanyView() {
           onSubmit={handleSubmit}
           options={{
             defaultValues: {
-              name: 'Test nama',
-              description: 'Test desc',
-              status: 'todo',
-              category: 'cat2',
+              ...defaultDummyData,
             },
           }}
         >
@@ -183,7 +188,7 @@ export function EditInternalCompanyView() {
                           required: 'Status harus diisi',
                         })}
                         label="Status"
-                        value={'todo'}
+                        value="todo"
                         // onChange={handleChange}
                       >
                         <MenuItem value="todo">Todo</MenuItem>

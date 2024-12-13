@@ -15,7 +15,7 @@ export function CreateInternalCompanyView() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      navigate('/internal-company/test');
+      navigate('/internal-company/test/edit');
     }, 1000);
     console.log(formData, 'test');
   };

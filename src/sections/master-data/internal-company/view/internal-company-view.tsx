@@ -6,6 +6,7 @@ import { Box, Button } from '@mui/material';
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
+import { useFaqList } from 'src/services/test/use-faq-list';
 
 export type ProjectProps = {
   id: string;
@@ -30,6 +31,8 @@ const columns = [
 ];
 
 export function InternalCompanyView() {
+  const { isEmpty, getDataTableProps } = useFaqList({});
+  console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('/internal-company/create');

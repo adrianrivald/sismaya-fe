@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTable } from 'src/hooks/use-table';
+import { useTable } from 'src/utils/hooks/use-table';
 import { Card, TableBody, TablePagination } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import TableContainer from '@mui/material/TableContainer';

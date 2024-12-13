@@ -105,5 +105,7 @@ module.exports = {
         'internal-pattern': ['src/**'],
       },
     ],
+    // Custom rules
+    'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
   },
 };

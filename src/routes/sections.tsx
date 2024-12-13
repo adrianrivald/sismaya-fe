@@ -30,6 +30,12 @@ export const InternalCompanyEditPage = lazy(
 export const ClientCompanyListPage = lazy(
   () => import('src/pages/master-data/client-company/list')
 );
+export const ClientCompanyCreatePage = lazy(
+  () => import('src/pages/master-data/client-company/create')
+);
+export const ClientCompanyEditPage = lazy(
+  () => import('src/pages/master-data/client-company/edit')
+);
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -70,8 +76,10 @@ export function Router() {
         // Master Data
         { path: 'internal-company', element: <InternalCompanyListPage /> },
         { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
-        { path: 'internal-company/:id', element: <InternalCompanyEditPage /> },
+        { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
         { path: 'client-company', element: <ClientCompanyListPage /> },
+        { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
+        { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
       ],
     },
     {

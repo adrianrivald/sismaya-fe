@@ -2,6 +2,8 @@ import ReactDOM from 'react-dom/client';
 import { Suspense, StrictMode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './utils/query-client';
 
 import App from './app';
 import { withAuth } from './sections/auth/hocs/auth';
@@ -19,9 +21,11 @@ root.render(
       <BrowserRouter>
         <Suspense>
           <ThemeProvider>
-            <AuthProvider>
-              <AppWithAuth />
-            </AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <AppWithAuth />
+              </AuthProvider>
+            </QueryClientProvider>
           </ThemeProvider>
         </Suspense>
       </BrowserRouter>
