@@ -7,7 +7,6 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
-  Input,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -26,6 +25,7 @@ import React from 'react';
 import { API_URL } from 'src/constants';
 
 const categories = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'];
+const products = ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5'];
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -46,6 +46,15 @@ function getStyles(name: string, selectedCat: readonly string[], theme: Theme) {
   };
 }
 
+function getStylesProduct(name: string, selectedProduct: readonly string[], theme: Theme) {
+  return {
+    fontWeight:
+      selectedProduct.indexOf(name) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
+
 export function EditInternalCompanyView() {
   console.log(API_URL, 'API URL');
   const theme = useTheme();
@@ -54,14 +63,28 @@ export function EditInternalCompanyView() {
     description: 'Test desc',
     status: 'todo',
     category: ['Cat 1', 'Cat 2'],
+    product: ['Product 2', 'Product 4'],
   };
-  const [selectedCat, setSelectedCat] = React.useState<string[]>([]);
+  const [selectedCat, setSelectedCat] = React.useState<string[]>(defaultDummyData?.category ?? []);
+  const [selectedProduct, setSelectedProduct] = React.useState<string[]>(
+    defaultDummyData?.product ?? []
+  );
 
   const handleChange = (event: SelectChangeEvent<typeof selectedCat>) => {
     const {
       target: { value },
     } = event;
     setSelectedCat(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value
+    );
+  };
+
+  const handleChangeProduct = (event: SelectChangeEvent<typeof selectedProduct>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedProduct(
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value
     );
@@ -276,8 +299,8 @@ export function EditInternalCompanyView() {
                       required: 'Produk must be filled out',
                     })}
                     multiple
-                    value={selectedCat}
-                    onChange={handleChange}
+                    value={selectedProduct}
+                    onChange={handleChangeProduct}
                     input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -288,16 +311,20 @@ export function EditInternalCompanyView() {
                     )}
                     MenuProps={MenuProps}
                   >
-                    {categories.map((name) => (
-                      <MenuItem key={name} value={name} style={getStyles(name, selectedCat, theme)}>
+                    {products.map((name) => (
+                      <MenuItem
+                        key={name}
+                        value={name}
+                        style={getStyles(name, selectedProduct, theme)}
+                      >
                         {name}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-                {formState?.errors?.category && (
+                {formState?.errors?.product && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.category?.message)}
+                    {String(formState?.errors?.product?.message)}
                   </FormHelperText>
                 )}
               </Grid>

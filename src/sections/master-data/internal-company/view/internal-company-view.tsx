@@ -6,7 +6,9 @@ import { Box, Button } from '@mui/material';
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
-import { useFaqList } from 'src/services/test/use-faq-list';
+import { useCoinList } from 'src/services/test/use-coin-list';
+import { DataTable } from 'src/components/table/data-tables';
+import { createColumnHelper } from '@tanstack/react-table';
 
 export type ProjectProps = {
   id: string;
@@ -20,6 +22,25 @@ export type ProjectProps = {
 
 // ----------------------------------------------------------------------
 
+// const columnHelper = createColumnHelper<any>();
+
+// const columns = [
+//   columnHelper.accessor('package_name', {
+//     header: 'Label',
+//   }),
+
+//   columnHelper.accessor('package_coin_value', {
+//     header: 'Nominal',
+//   }),
+
+//   columnHelper.accessor('bonus_coin', {
+//     header: 'Bonus',
+//   }),
+//   columnHelper.accessor('package_price', {
+//     header: 'Harga Normal',
+//   }),
+// ];
+
 const columns = [
   { id: 'requestId', label: 'Requiest ID' },
   { id: 'requester', label: 'Requester' },
@@ -31,7 +52,7 @@ const columns = [
 ];
 
 export function InternalCompanyView() {
-  const { isEmpty, getDataTableProps } = useFaqList({});
+  const { isEmpty, getDataTableProps } = useCoinList({}, false);
   console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
@@ -60,6 +81,7 @@ export function InternalCompanyView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
+          {/* <DataTable columns={columns} {...getDataTableProps()} /> */}
           <Table columns={columns} data={_projects} />
         </Grid>
       </Grid>

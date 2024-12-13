@@ -7,6 +7,7 @@ import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
+import { Iconify } from 'src/components/iconify';
 
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
@@ -18,12 +19,8 @@ import { Scrollbar } from 'src/components/scrollbar';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 
-import { NavUpgrade } from '../components/nav-upgrade';
-import { WorkspacesPopover } from '../components/workspaces-popover';
-
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 import { icon } from '../config-nav-dashboard';
-import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 

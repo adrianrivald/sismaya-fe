@@ -1,14 +1,15 @@
 
 import { PaginationState } from '@tanstack/react-table';
+import { useLocation } from 'react-router-dom';
 import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
-import { http } from 'src/utils/http';
+import { http, RequestInitClient } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-function fetchFaqList(params: Partial<any>) {
+function fetchCoinList(params: Partial<any>, isEnglish: boolean) {
   const baseUrl = window.location.origin;
-  const endpointUrl = new URL('/cms/blog/faq', baseUrl);
+  const endpointUrl = new URL('/cms/packages', baseUrl);
 
   if (params.active) {
     endpointUrl.searchParams.append('active', params.active);
@@ -24,14 +25,15 @@ function fetchFaqList(params: Partial<any>) {
     ...params,
   });
 
+
   return http<WithPagination<any>>(
     endpointUrl.toString().replace(baseUrl, '')
   );
 }
 
-export function useFaqList(params: Partial<any> = {}) {
+export function useCoinList(params: Partial<any>, isEnglish: boolean) {
   return usePaginationQuery(
-    ['blog-faq', params.keyword, params.active, params.order, params.platform],
-    (paginationState) => fetchFaqList({ ...params, ...paginationState })
+    ['coin', params.keyword, params.active, params.order, params.platform, isEnglish],
+    (paginationState) => fetchCoinList({ ...params, ...paginationState }, isEnglish)
   );
 }
