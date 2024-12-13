@@ -23,6 +23,7 @@ import { WorkspacesPopover } from '../components/workspaces-popover';
 
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 import { icon } from '../config-nav-dashboard';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -357,7 +358,7 @@ export function NavContent({
                   }}
                 >
                   <Box component="span" sx={{ width: 24, height: 24 }}>
-                    {icon('ic-chat')}
+                    <Iconify icon="solar:database-bold" />
                   </Box>
 
                   <Box component="span" flexGrow={1}>
