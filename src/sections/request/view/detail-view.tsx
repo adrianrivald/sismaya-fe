@@ -28,7 +28,7 @@ const columns = [
   { id: '', label: 'Action' },
 ];
 
-export function RequestDetail() {
+export function RequestDetailView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>

@@ -2,6 +2,7 @@ import { Table } from 'src/components/table/table';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -31,6 +32,12 @@ const columns = [
 ];
 
 export function OverviewAnalyticsView() {
+  const navigate = useNavigate();
+
+  const onClickAddNew = () => {
+    navigate('/request/create');
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -45,7 +52,7 @@ export function OverviewAnalyticsView() {
           </Box>
         </Box>
         <Box>
-          <Button variant="contained" color="primary">
+          <Button onClick={onClickAddNew} variant="contained" color="primary">
             Create New Request
           </Button>
         </Box>

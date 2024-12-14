@@ -11,7 +11,10 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
+
+// Request
 export const RequestDetailPage = lazy(() => import('src/pages/request/request-detail'));
+export const RequestCreatePage = lazy(() => import('src/pages/request/create'));
 
 // Master Data
 
@@ -74,9 +77,12 @@ export function Router() {
       ),
       children: [
         { element: <HomePage />, index: true },
-        { path: 'request/:id', element: <RequestDetailPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
+
+        // Request
+        { path: 'request/:id', element: <RequestDetailPage /> },
+        { path: 'request/create', element: <RequestCreatePage /> },
 
         // Master Data
         // Internal Company

@@ -1,1 +1,2 @@
-export * from "./request-detail"
+export * from "./detail-view"
+export * from "./create-view"

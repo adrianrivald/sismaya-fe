@@ -23,6 +23,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import React from 'react';
 import { API_URL } from 'src/constants';
+import { FieldDropzone } from 'src/components/form';
 
 const categories = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'];
 const products = ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5'];
@@ -154,45 +155,14 @@ export function EditInternalCompanyView() {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <FormLabel htmlFor="upload-pic">
-                  <Box
-                    display="flex"
-                    sx={{
-                      cursor: 'pointer',
-                      border: 1,
-                      borderColor: formState?.errors?.photo
-                        ? theme.palette.error.main
-                        : theme.palette.grey[500],
-                      borderStyle: 'dashed',
-                      borderRadius: 4,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      padding: 16,
-                      height: '200px',
-                      '&:hover': {
-                        backgroundColor: theme.palette.grey[100],
-                        cursor: 'pointer',
-                      },
-                    }}
-                  >
-                    Upload Foto
-                  </Box>
-                </FormLabel>
-                <FormHelperText>Maksimum ukuran file sebesar 5mb</FormHelperText>
-
-                {formState?.errors?.photo && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.photo?.message)}
-                  </FormHelperText>
-                )}
-                {/* <Input
-                  type="file"
-                  id="upload-pic"
-                  sx={{ display: 'none' }}
-                  {...register('photo', {
-                    required: 'Gambar must be filled out',
-                  })}
-                /> */}
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                  }}
+                />
               </Grid>
 
               <Grid item xs={12} md={12}>

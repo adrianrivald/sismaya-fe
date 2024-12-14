@@ -25,6 +25,7 @@ import { Form } from 'src/components/form/form';
 import React from 'react';
 import { API_URL } from 'src/constants';
 import { UseFormSetValue } from 'react-hook-form';
+import { FieldDropzone } from 'src/components/form';
 
 const divisions = ['Div 1', 'Div 2', 'Div 3', 'Div 4', 'Div 5'];
 
@@ -95,7 +96,7 @@ export function EditClientCompanyView() {
             },
           }}
         >
-          {({ register, watch, formState, setValue }) => {
+          {({ register, watch, control, formState, setValue }) => {
             console.log(formState.errors, 'formstate');
             console.log(watch(), 'watch');
             return (
@@ -139,44 +140,20 @@ export function EditClientCompanyView() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <FormLabel htmlFor="upload-pic">
-                    <Box
-                      display="flex"
-                      sx={{
-                        cursor: 'pointer',
-                        border: 1,
-                        borderColor: formState?.errors?.photo
-                          ? theme.palette.error.main
-                          : theme.palette.grey[500],
-                        borderStyle: 'dashed',
-                        borderRadius: 4,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        padding: 16,
-                        height: '200px',
-                        '&:hover': {
-                          backgroundColor: theme.palette.grey[100],
-                          cursor: 'pointer',
+                  <FieldDropzone
+                    label="Upload Picture"
+                    helperText="Picture maximum 5mb size"
+                    controller={{
+                      name: 'cover',
+                      control,
+                      rules: {
+                        required: {
+                          value: true,
+                          message: 'Picture must be uploaded',
                         },
-                      }}
-                    >
-                      Upload Foto
-                    </Box>
-                  </FormLabel>
-                  <FormHelperText>File maximum size is 5mb</FormHelperText>
-
-                  {formState?.errors?.photo && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.photo?.message)}
-                    </FormHelperText>
-                  )}
-                  <Input
-                    type="file"
-                    id="upload-pic"
-                    sx={{ display: 'none' }}
-                    {...register('photo', {
-                      required: 'Photo must be uploaded',
-                    })}
+                      },
+                    }}
+                    error={formState.errors?.cover}
                   />
                 </Grid>
 

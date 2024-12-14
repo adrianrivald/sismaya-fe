@@ -1,16 +1,15 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-
-import { RequestDetailView } from 'src/sections/request/view';
+import { CreateRequestView } from 'src/sections/request/view/create-view';
 
 // ----------------------------------------------------------------------
 
-export default function RequestDetailPage() {
+export default function RequestCreatePage() {
   return (
     <>
       <Helmet>
-        <title> {`Request Detail - ${CONFIG.appName}`}</title>
+        <title> {`Create Request - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -18,7 +17,7 @@ export default function RequestDetailPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <RequestDetailView />
+      <CreateRequestView />
     </>
   );
 }
