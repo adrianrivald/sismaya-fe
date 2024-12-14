@@ -3,18 +3,15 @@ import {
   Box,
   Grid,
   TableContainer,
-  useTheme,
   Table,
   TableRow,
   TableCell,
-  TableHead,
   TableBody,
   Input,
 } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { StatusBadge } from '../status-badge';
 
@@ -124,12 +121,13 @@ export function RequestDetailView() {
                           sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
                         >
                           {/* {files?.map((file) => ( */}
-                          <Box display="flex" gap={1} alignItems="center">
+                          <Box display="flex" gap={3} alignItems="center">
                             <Box component="img" src="/assets/icons/file.png" />
                             <Box>
                               <Typography fontWeight="bold">Daftar alat kalibrasi.xls</Typography>2
                               Mb
                             </Box>
+                            <SvgColor src="/assets/icons/ic-download.svg" />
                           </Box>
                           {/* ))} */}
                         </Box>
