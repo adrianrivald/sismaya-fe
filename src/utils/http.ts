@@ -1,4 +1,4 @@
-import { API_URL_TEST } from 'src/constants';
+import { API_URL } from 'src/constants';
 import { joinURL, withQuery, type QueryObject } from 'ufo';
 import * as sessionService from '../sections/auth/session/session';
 
@@ -79,7 +79,7 @@ export function http<TData = unknown>(
     ...customConfig
   } = requestInit ?? {};
 
-  const baseUrl = baseURL ?? API_URL_TEST;
+  const baseUrl = baseURL ?? API_URL;
   const url = baseUrl ? joinURL(baseUrl, endpoint) : endpoint;
   const urlWithQuery = withQuery(url, params);
 
