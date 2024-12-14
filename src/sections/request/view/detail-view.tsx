@@ -14,9 +14,9 @@ import {
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { StatusBadge } from '../status-badge';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
+import { StatusBadge } from '../status-badge';
 
 export type ProjectProps = {
   id: string;
@@ -180,13 +180,13 @@ export function RequestDetailView() {
               justifyContent="space-between"
             >
               <Box display="flex" justifyContent="center" alignItems="center" px={2}>
-                <SvgColor src={`/assets/icons/ic-emoji.svg`} />
+                <SvgColor src="/assets/icons/ic-emoji.svg" />
               </Box>
               <Input disableUnderline type="text" />
               <Box display="flex" alignItems="center" gap={2}>
-                <SvgColor width={18} height={18} src={`/assets/icons/ic-image.svg`} />
-                <SvgColor width={18} height={18} src={`/assets/icons/ic-clip.svg`} />
-                <SvgColor width={18} height={18} src={`/assets/icons/ic-mic.svg`} />
+                <SvgColor width={18} height={18} src="/assets/icons/ic-image.svg" />
+                <SvgColor width={18} height={18} src="/assets/icons/ic-clip.svg" />
+                <SvgColor width={18} height={18} src="/assets/icons/ic-mic.svg" />
               </Box>
               <Box
                 p={2}
@@ -198,7 +198,7 @@ export function RequestDetailView() {
                   borderColor: 'grey.300',
                 }}
               >
-                <SvgColor width={24} height={24} src={`/assets/icons/ic-send.svg`} />
+                <SvgColor width={24} height={24} src="/assets/icons/ic-send.svg" />
               </Box>
             </Box>
           </Box>

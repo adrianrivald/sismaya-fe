@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
 import { statusColorMap } from 'src/constants/status';
+import { Box, Typography } from '@mui/material';
 
 interface StatusProps {
   label: string; // "Requested" | "more" | "and more"
