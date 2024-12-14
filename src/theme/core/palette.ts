@@ -56,6 +56,9 @@ export type ColorType = 'primary' | 'secondary' | 'info' | 'success' | 'warning'
 
 // ----------------------------------------------------------------------
 
+// Blue
+export const blue = createPaletteChannel(COLORS.blue);
+
 // Grey
 export const grey = createPaletteChannel(COLORS.grey);
 
@@ -124,6 +127,7 @@ export const basePalette = {
   warning,
   error,
   grey,
+  blue,
   common,
   divider: varAlpha(grey['500Channel'], 0.2),
   action,
