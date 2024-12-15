@@ -26,6 +26,8 @@ import React from 'react';
 import { API_URL } from 'src/constants';
 import { UseFormSetValue } from 'react-hook-form';
 import { FieldDropzone } from 'src/components/form';
+import { Bounce, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const divisions = ['Div 1', 'Div 2', 'Div 3', 'Div 4', 'Div 5'];
 
@@ -49,31 +51,27 @@ function getStyles(name: string, selectedDiv: readonly string[], theme: Theme) {
 }
 
 export function EditClientCompanyView() {
-  console.log(API_URL, 'API URL');
+  const navigate = useNavigate();
   const theme = useTheme();
   const defaultDummyData = {
     name: 'Test Name',
     description: 'Test desc',
     division: [],
   };
-  const [selectedDiv, setSelectedDiv] = React.useState<string[]>(defaultDummyData?.division ?? []);
-
-  const handleChange = (
-    event: SelectChangeEvent<typeof selectedDiv>,
-    setValue: UseFormSetValue<any>
-  ) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedDiv(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value
-    );
-    setValue('division', typeof value === 'string' ? value.split(',') : value);
-  };
 
   const handleSubmit = (formData: any) => {
-    console.log(formData, 'test');
+    toast.success('Data added successfully', {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+    navigate('/client-company');
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -169,12 +167,11 @@ export function EditClientCompanyView() {
                         required: 'Division must be filled out',
                       })}
                       multiple
-                      value={selectedDiv}
-                      onChange={(e) => handleChange(e, setValue)}
+                      value={watch('division')}
                       input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                       renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {selected.map((value) => (
+                          {watch('division').map((value: any) => (
                             <Chip key={value} label={value} />
                           ))}
                         </Box>
@@ -185,7 +182,7 @@ export function EditClientCompanyView() {
                         <MenuItem
                           key={name}
                           value={name}
-                          style={getStyles(name, selectedDiv, theme)}
+                          style={getStyles(name, watch('division'), theme)}
                         >
                           {name}
                         </MenuItem>

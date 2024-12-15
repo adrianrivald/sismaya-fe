@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React from 'react';
 import { Iconify } from 'src/components/iconify';
+import { Bounce, toast } from 'react-toastify';
 
 export function CreateUserView() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -26,9 +27,22 @@ export function CreateUserView() {
   const navigate = useNavigate();
   const handleSubmit = (formData: any) => {
     setIsLoading(true);
+
     setTimeout(() => {
       setIsLoading(false);
-      navigate('/user/test/edit');
+
+      toast.success('Data added successfully', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+      navigate('/user');
     }, 1000);
     console.log(formData, 'test');
   };

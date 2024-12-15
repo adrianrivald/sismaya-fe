@@ -24,6 +24,8 @@ import { Form } from 'src/components/form/form';
 import React from 'react';
 import { API_URL } from 'src/constants';
 import { FieldDropzone } from 'src/components/form';
+import { Bounce, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const categories = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'];
 const products = ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5'];
@@ -58,6 +60,7 @@ function getStylesProduct(name: string, selectedProduct: readonly string[], them
 
 export function EditInternalCompanyView() {
   console.log(API_URL, 'API URL');
+  const navigate = useNavigate();
   const [selectedStatuses, setSelectedStatuses] = React.useState([
     {
       status: null,
@@ -95,7 +98,18 @@ export function EditInternalCompanyView() {
   };
 
   const handleSubmit = (formData: any) => {
-    console.log(formData, 'test');
+    toast.success('Data added successfully', {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+    navigate('/internal-company');
   };
   return (
     <DashboardContent maxWidth="xl">
