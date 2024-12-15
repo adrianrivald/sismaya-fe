@@ -58,6 +58,12 @@ function getStylesProduct(name: string, selectedProduct: readonly string[], them
 
 export function EditInternalCompanyView() {
   console.log(API_URL, 'API URL');
+  const [selectedStatuses, setSelectedStatuses] = React.useState([
+    {
+      status: null,
+      type: null,
+    },
+  ]);
   const theme = useTheme();
   const defaultDummyData = {
     name: 'Test Name',
@@ -65,6 +71,27 @@ export function EditInternalCompanyView() {
     // status: 'todo',
     category: ['Cat 1', 'Cat 2'],
     product: ['Product 2', 'Product 3'],
+  };
+
+  const onAddStatus = () => {
+    setSelectedStatuses([
+      ...selectedStatuses,
+      [
+        {
+          status: null,
+          type: null,
+        },
+      ],
+    ] as any);
+  };
+
+  const handleChangeStatus = (e: SelectChangeEvent<string>, index: number) => {
+    const value = e?.target?.value;
+    console.log(value, 'status');
+  };
+  const handleChangeType = (e: SelectChangeEvent<string>, index: number) => {
+    const value = e?.target?.value;
+    console.log(value, 'tipetipe');
   };
 
   const handleSubmit = (formData: any) => {
@@ -142,58 +169,67 @@ export function EditInternalCompanyView() {
               </Grid>
 
               <Grid item xs={12} md={12}>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  spacing={3}
-                  alignItems="center"
-                >
-                  <Box width="50%">
-                    <FormControl fullWidth>
-                      <InputLabel id="status">Status</InputLabel>
-                      <Select
-                        error={Boolean(formState?.errors?.status)}
-                        {...register('status', {
-                          required: 'Status must be filled out',
-                        })}
-                        label="Status"
-                        // onChange={handleChange}
-                      >
-                        <MenuItem value="todo">Todo</MenuItem>
-                        <MenuItem value="in-progress">In Progress</MenuItem>
-                        <MenuItem value="done">Done</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.status && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.status?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {selectedStatuses?.map((item, index) => (
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                      alignItems="center"
+                    >
+                      <Box width="50%">
+                        <FormControl fullWidth>
+                          <InputLabel id="status">Status</InputLabel>
+                          <Select
+                            error={Boolean(formState?.errors?.status)}
+                            {...register('status', {
+                              required: 'Status must be filled out',
+                            })}
+                            label="Status"
+                            onChange={(e: SelectChangeEvent<string>) =>
+                              handleChangeStatus(e, index)
+                            }
+                          >
+                            <MenuItem value="stat1">Backlog</MenuItem>
+                            <MenuItem value="stat2">In Review</MenuItem>
+                            <MenuItem value="stat3">Almost Done</MenuItem>
+                          </Select>
+                        </FormControl>
+                        {formState?.errors?.status && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.status?.message)}
+                          </FormHelperText>
+                        )}
+                      </Box>
 
-                  <Box width="50%">
-                    <FormControl fullWidth>
-                      <InputLabel id="category">Kategori</InputLabel>
-                      <Select
-                        error={Boolean(formState?.errors?.category)}
-                        {...register('category', {
-                          required: 'Kategori must be filled out',
-                        })}
-                        label="Kategori"
-                        // onChange={handleChange}
-                      >
-                        <MenuItem value="cat1">Cat 1</MenuItem>
-                        <MenuItem value="cat2">Cat 2</MenuItem>
-                        <MenuItem value="cat3">Cat 3</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.category && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.category?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                </Stack>
+                      <Box width="50%">
+                        <FormControl fullWidth>
+                          <InputLabel id="type">Type</InputLabel>
+                          <Select
+                            error={Boolean(formState?.errors?.type)}
+                            {...register('type', {
+                              required: 'Type must be filled out',
+                            })}
+                            label="Type"
+                            onChange={(e: SelectChangeEvent<string>) => handleChangeType(e, index)}
+                          >
+                            <MenuItem value="todo">Todo</MenuItem>
+                            <MenuItem value="inprogress">In Progress</MenuItem>
+                            <MenuItem value="done">Done</MenuItem>
+                          </Select>
+                        </FormControl>
+                        {formState?.errors?.type && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.type?.message)}
+                          </FormHelperText>
+                        )}
+                      </Box>
+                    </Stack>
+                  ))}
+                </Box>
+                <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
+                  Add More
+                </Button>
               </Grid>
 
               <Grid item xs={12} md={12}>
