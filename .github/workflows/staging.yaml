@@ -17,7 +17,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          cd /home/sismedika/app/sismedia-sim
+          cd /home/sismedika/app/sismaya-sim
           git stash
           git pull origin staging
           npm i
