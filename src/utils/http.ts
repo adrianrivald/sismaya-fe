@@ -100,7 +100,7 @@ export function http<TData = unknown>(
 
     if (response.status === 401 && !response.url.includes('auth/login')) {
       sessionService.flushStorage();
-      window.location.reload();
+      // window.location.reload();
     }
 
     const reason = (responseData as HttpResponseError).message;

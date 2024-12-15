@@ -52,8 +52,8 @@ const columns = [
 ];
 
 export function InternalCompanyView() {
-  const { isEmpty, getDataTableProps } = useCoinList({}, false);
-  console.log(getDataTableProps(), 'get data table props');
+  // const { isEmpty, getDataTableProps } = useCoinList({}, false);
+  // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('/internal-company/create');

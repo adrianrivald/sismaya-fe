@@ -27,6 +27,7 @@ import { API_URL } from 'src/constants';
 import { UseFormSetValue } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useNavigate } from 'react-router-dom';
+import { FieldDropzone } from 'src/components/form';
 
 export function CreateClientCompanyView() {
   const theme = useTheme();
@@ -53,7 +54,7 @@ export function CreateClientCompanyView() {
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, watch, formState, setValue }) => {
+          {({ register, watch, formState, setValue, control }) => {
             console.log(formState.errors, 'formstate');
             console.log(watch(), 'watch');
             return (
@@ -97,44 +98,20 @@ export function CreateClientCompanyView() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <FormLabel htmlFor="upload-pic">
-                    <Box
-                      display="flex"
-                      sx={{
-                        cursor: 'pointer',
-                        border: 1,
-                        borderColor: formState?.errors?.photo
-                          ? theme.palette.error.main
-                          : theme.palette.grey[500],
-                        borderStyle: 'dashed',
-                        borderRadius: 4,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        padding: 16,
-                        height: '200px',
-                        '&:hover': {
-                          backgroundColor: theme.palette.grey[100],
-                          cursor: 'pointer',
+                  <FieldDropzone
+                    label="Upload Picture"
+                    helperText="Picture maximum 5mb size"
+                    controller={{
+                      name: 'cover',
+                      control,
+                      rules: {
+                        required: {
+                          value: true,
+                          message: 'Picture must be uploaded',
                         },
-                      }}
-                    >
-                      Upload Picture
-                    </Box>
-                  </FormLabel>
-                  <FormHelperText>File maximum size is 5mb</FormHelperText>
-
-                  {formState?.errors?.photo && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.photo?.message)}
-                    </FormHelperText>
-                  )}
-                  <Input
-                    type="file"
-                    id="upload-pic"
-                    sx={{ display: 'none' }}
-                    {...register('photo', {
-                      required: 'Photo must be uploaded',
-                    })}
+                      },
+                    }}
+                    error={formState.errors?.cover}
                   />
                 </Grid>
 

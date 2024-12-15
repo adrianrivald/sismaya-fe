@@ -28,7 +28,6 @@ export function SignInView() {
       console.log(formData, 'value');
       try {
         await login({ email: formData?.email, password: formData?.password });
-        router.push('/');
       } catch (error) {
         toast.error('Login failed, please try again', {
           position: 'top-right',
@@ -43,7 +42,7 @@ export function SignInView() {
         });
       }
     },
-    [router, login]
+    [login]
   );
 
   const renderForm = (

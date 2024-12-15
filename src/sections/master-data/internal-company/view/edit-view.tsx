@@ -62,33 +62,9 @@ export function EditInternalCompanyView() {
   const defaultDummyData = {
     name: 'Test Name',
     description: 'Test desc',
-    status: 'todo',
+    // status: 'todo',
     category: ['Cat 1', 'Cat 2'],
-    product: ['Product 2', 'Product 4'],
-  };
-  const [selectedCat, setSelectedCat] = React.useState<string[]>(defaultDummyData?.category ?? []);
-  const [selectedProduct, setSelectedProduct] = React.useState<string[]>(
-    defaultDummyData?.product ?? []
-  );
-
-  const handleChange = (event: SelectChangeEvent<typeof selectedCat>) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedCat(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value
-    );
-  };
-
-  const handleChangeProduct = (event: SelectChangeEvent<typeof selectedProduct>) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedProduct(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value
-    );
+    product: ['Product 2', 'Product 3'],
   };
 
   const handleSubmit = (formData: any) => {
@@ -115,7 +91,7 @@ export function EditInternalCompanyView() {
             },
           }}
         >
-          {({ register, control, formState }) => (
+          {({ register, control, watch, formState }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <TextField
@@ -181,7 +157,6 @@ export function EditInternalCompanyView() {
                           required: 'Status must be filled out',
                         })}
                         label="Status"
-                        value="todo"
                         // onChange={handleChange}
                       >
                         <MenuItem value="todo">Todo</MenuItem>
@@ -232,12 +207,11 @@ export function EditInternalCompanyView() {
                       required: 'Kategori must be filled out',
                     })}
                     multiple
-                    value={selectedCat}
-                    onChange={handleChange}
+                    value={watch('category')}
                     input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
+                        {watch('category').map((value: any) => (
                           <Chip key={value} label={value} />
                         ))}
                       </Box>
@@ -245,7 +219,11 @@ export function EditInternalCompanyView() {
                     MenuProps={MenuProps}
                   >
                     {categories.map((name) => (
-                      <MenuItem key={name} value={name} style={getStyles(name, selectedCat, theme)}>
+                      <MenuItem
+                        key={name}
+                        value={name}
+                        style={getStyles(name, watch('category'), theme)}
+                      >
                         {name}
                       </MenuItem>
                     ))}
@@ -269,12 +247,11 @@ export function EditInternalCompanyView() {
                       required: 'Produk must be filled out',
                     })}
                     multiple
-                    value={selectedProduct}
-                    onChange={handleChangeProduct}
+                    value={watch('product')}
                     input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
+                        {watch('product').map((value: any) => (
                           <Chip key={value} label={value} />
                         ))}
                       </Box>
@@ -285,7 +262,7 @@ export function EditInternalCompanyView() {
                       <MenuItem
                         key={name}
                         value={name}
-                        style={getStyles(name, selectedProduct, theme)}
+                        style={getStyles(name, watch('product'), theme)}
                       >
                         {name}
                       </MenuItem>

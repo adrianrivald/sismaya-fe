@@ -54,7 +54,7 @@ export function EditClientCompanyView() {
   const defaultDummyData = {
     name: 'Test Name',
     description: 'Test desc',
-    division: ['Div 1', 'Div 2'],
+    division: [],
   };
   const [selectedDiv, setSelectedDiv] = React.useState<string[]>(defaultDummyData?.division ?? []);
 

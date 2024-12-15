@@ -33,11 +33,12 @@ export function AuthProvider(props: React.PropsWithChildren) {
   // const { data: user = null } = useProfile({ enabled: accessToken !== null });
 
   async function login(formField: LoginCredentialsDTO) {
-    const { token } = await loginUser(formField);
-    // const token =
-    //   'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vZXNwcmVzc28tYXBpLmdvb2RkcmVhbWVyLmlkL2FwaS9jbXMvYXV0aC9sb2dpbi9hZG1pbiIsImlhdCI6MTczMTk3ODE5OCwiZXhwIjoxNzM4MDI2MTk4LCJuYmYiOjE3MzE5NzgxOTgsImp0aSI6IlpBT1FXd2tNRng3VndtbWkiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.4eh32lJndfjrJThs2fNF6uYmZTZP2CDQFISFKpyRdP8';
+    // const { token } = await loginUser(formField);
+    const token =
+      'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vZXNwcmVzc28tYXBpLmdvb2RkcmVhbWVyLmlkL2FwaS9jbXMvYXV0aC9sb2dpbi9hZG1pbiIsImlhdCI6MTczMTk3ODE5OCwiZXhwIjoxNzM4MDI2MTk4LCJuYmYiOjE3MzE5NzgxOTgsImp0aSI6IlpBT1FXd2tNRng3VndtbWkiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.4eh32lJndfjrJThs2fNF6uYmZTZP2CDQFISFKpyRdP8';
     sessionService.setSession(token);
     setAccessToken(token);
+    // navigate('/');
   }
 
   async function logout() {
