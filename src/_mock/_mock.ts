@@ -307,3 +307,23 @@ export const _productNames = (index: number) =>
     'Nike React Art3mis',
     'Nike React Infinity Run Flyknit A.I.R. Chaz Bear',
   ][index];
+
+  export const _nameIntComp = (index: number) => [
+    'Internal Comp1',
+  ][index]
+  
+  export const _descriptionIntComp = (index: number) => [
+    'Contoh deskripsi',
+  ][index]
+  
+  export const _categoryIntComp = (index: number) => [
+    'Cat 1',
+  ][index]
+  
+  export const _productIntComp = (index: number) => [
+    'Prod 1',
+  ][index]
+  
+  export const _statusIntComp = (index: number) => [
+    'Todo',
+  ][index]

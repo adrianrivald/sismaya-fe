@@ -1,4 +1,3 @@
-import { Table } from 'src/components/table/table';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button } from '@mui/material';
@@ -6,6 +5,8 @@ import { Box, Button } from '@mui/material';
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
+import { Table } from '../sample/table/table';
+import { _userComp } from '../sample/data';
 
 export type ProjectProps = {
   id: string;
@@ -20,12 +21,12 @@ export type ProjectProps = {
 // ----------------------------------------------------------------------
 
 const columns = [
-  { id: 'requestId', label: 'Requiest ID' },
-  { id: 'requester', label: 'Requester' },
-  { id: 'category', label: 'Category', align: 'center' },
-  { id: 'deadline', label: 'Project Deadline' },
-  { id: 'status', label: 'Status' },
-  { id: 'priority', label: 'Priority' },
+  { id: 'name', label: 'Name' },
+  { id: 'company', label: 'Company' },
+  { id: 'division', label: 'Division' },
+  { id: 'email', label: 'Email' },
+  { id: 'phone', label: 'Phone' },
+  { id: 'role', label: 'Role' },
   { id: '', label: 'Action' },
 ];
 
@@ -57,7 +58,7 @@ export function UserView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <Table columns={columns} data={_projects} />
+          <Table columns={columns} data={_userComp} />
         </Grid>
       </Grid>
     </DashboardContent>

@@ -12,6 +12,7 @@ import { useRouter } from 'src/routes/hooks';
 import { Iconify } from 'src/components/iconify';
 import { Form } from 'src/components/form/form';
 import { FormHelperText } from '@mui/material';
+import { Bounce, toast } from 'react-toastify';
 import { useAuth } from './providers/auth';
 
 // ----------------------------------------------------------------------
@@ -25,16 +26,30 @@ export function SignInView() {
   const handleSubmit = useCallback(
     async (formData: any) => {
       console.log(formData, 'value');
-      await login({ username: formData?.username, password: formData?.password });
-      router.push('/');
+      try {
+        await login({ email: formData?.email, password: formData?.password });
+      } catch (error) {
+        console.log(error, 'er');
+        toast.error(error?.message, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        });
+      }
     },
-    [router, login]
+    [login]
   );
 
   const renderForm = (
     <Box display="flex" flexDirection="column" alignItems="flex-end">
       <Form width="100%" onSubmit={handleSubmit}>
-        {({ register, control, formState }) => (
+        {({ register, formState }) => (
           <>
             <Box sx={{ mb: 3 }}>
               <TextField
@@ -44,6 +59,10 @@ export function SignInView() {
                 InputLabelProps={{ shrink: true }}
                 {...register('email', {
                   required: 'Email must be filled out',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address',
+                  },
                 })}
               />
 

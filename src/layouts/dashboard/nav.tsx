@@ -150,7 +150,10 @@ export function NavContent({
   sx,
 }: NavContentProps) {
   const pathname = usePathname();
-  const location = useLocation();
+  const currentMenu = window.location.href.split('/')[3];
+
+  console.log(['internal-company', 'client-company'].includes(currentMenu), 'is internal?');
+  console.log(currentMenu, 'location');
 
   return (
     <>
@@ -321,7 +324,7 @@ export function NavContent({
             </AccordionDetails>
           </Accordion>
           <Accordion
-            defaultExpanded={Boolean(['/internal-company', '/client-company'].includes(pathname))}
+            defaultExpanded={['internal-company', 'client-company', 'user'].includes(currentMenu)}
           >
             <AccordionSummary
               // expandIcon={<ExpandMoreIcon />}
