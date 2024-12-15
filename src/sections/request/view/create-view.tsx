@@ -201,7 +201,7 @@ export function CreateRequestView() {
                     }}
                   >
                     <Typography fontWeight="bold">CITO Status</Typography>
-                    <FormControlLabel control={<Checkbox defaultChecked />} label="Request CITO" />
+                    <FormControlLabel control={<Checkbox />} label="Request CITO" />
                   </Box>
                   <Box
                     sx={{
