@@ -29,7 +29,8 @@ export function SignInView() {
       try {
         await login({ email: formData?.email, password: formData?.password });
       } catch (error) {
-        toast.error('Login failed, please try again', {
+        console.log(error, 'er');
+        toast.error(error?.message, {
           position: 'top-right',
           autoClose: 5000,
           hideProgressBar: true,

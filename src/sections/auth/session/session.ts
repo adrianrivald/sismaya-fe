@@ -1,3 +1,5 @@
+import { API_URL } from "src/constants";
+
 const STORAGE_KEY = 'session';
 
 export function getSession() {
@@ -14,7 +16,7 @@ export function flushStorage() {
 
 export async function flushSession() {
   // use `fetch` instead of `http` from `utils` to prevent circular dependency
-  await window.fetch(`/auth/logout`, {
+  await window.fetch(`${API_URL}/logout`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',

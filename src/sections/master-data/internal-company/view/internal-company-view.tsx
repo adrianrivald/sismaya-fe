@@ -6,9 +6,9 @@ import { Box, Button } from '@mui/material';
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
-import { useCoinList } from 'src/services/test/use-coin-list';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper } from '@tanstack/react-table';
+import { useInternalCompanyList } from 'src/services/master-data/internal-company/use-internal-company';
 
 export type ProjectProps = {
   id: string;
@@ -52,7 +52,7 @@ const columns = [
 ];
 
 export function InternalCompanyView() {
-  // const { isEmpty, getDataTableProps } = useCoinList({}, false);
+  const { isEmpty, getDataTableProps } = useInternalCompanyList({}, false);
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
