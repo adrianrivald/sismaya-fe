@@ -1,4 +1,3 @@
-import { Table } from 'src/components/table/table';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button } from '@mui/material';
@@ -9,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useInternalCompanyList } from 'src/services/master-data/internal-company/use-internal-company';
+import { Table } from '../sample/table/table';
+import { _internalComp } from '../sample/data';
 
 export type ProjectProps = {
   id: string;
@@ -42,12 +43,12 @@ export type ProjectProps = {
 // ];
 
 const columns = [
-  { id: 'requestId', label: 'Requiest ID' },
-  { id: 'requester', label: 'Requester' },
-  { id: 'category', label: 'Category', align: 'center' },
-  { id: 'deadline', label: 'Project Deadline' },
+  { id: 'name', label: 'Name' },
+  { id: 'desc', label: 'Description' },
+  { id: 'picture', label: 'Picture' },
   { id: 'status', label: 'Status' },
-  { id: 'priority', label: 'Priority' },
+  { id: 'category', label: 'Category' },
+  { id: 'product', label: 'Product' },
   { id: '', label: 'Action' },
 ];
 
@@ -82,7 +83,7 @@ export function InternalCompanyView() {
       <Grid container spacing={3}>
         <Grid xs={12}>
           {/* <DataTable columns={columns} {...getDataTableProps()} /> */}
-          <Table columns={columns} data={_projects} />
+          <Table columns={columns} data={_internalComp} />
         </Grid>
       </Grid>
     </DashboardContent>

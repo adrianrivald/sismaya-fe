@@ -15,11 +15,6 @@ import {
   _deadline,
   _status,
   _priority,
-  _nameIntComp,
-  _descriptionIntComp,
-  _categoryIntComp,
-  _productIntComp,
-  _statusIntComp,
 } from './_mock';
 
 // ----------------------------------------------------------------------
@@ -213,13 +208,3 @@ export const _projects = [...Array(10)].map((_, index) => ({
 }));
 
 // ----------------------------------------------------------------------
-
-
-export const _internalComp = [...Array(10)].map((_, index) => ({
-  id: _id(index),
-  requestId: _nameIntComp(index),
-  requester: _descriptionIntComp(index),
-  category: _categoryIntComp(index),
-  deadline: _productIntComp(index),
-  status: _statusIntComp(index),
-}));
