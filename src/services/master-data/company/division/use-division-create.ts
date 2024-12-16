@@ -26,8 +26,7 @@ export function useAddDivision() {
       {
           onSuccess: (res: any) => {
           const companyId = res?.data?.company_id
-          console.log(companyId,'companyId')
-          queryClient.invalidateQueries(['company-items', companyId]);
+          queryClient.invalidateQueries({queryKey: ['company-items', companyId]});
           queryClient.invalidateQueries(['division-items', companyId]);
         },
         onError: (error) => {

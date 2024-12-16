@@ -1,37 +1,27 @@
-import React, { useId } from 'react';
+import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import {
-  Box,
-  Button,
-  IconButton,
-  MenuItem,
-  menuItemClasses,
-  MenuList,
-  Popover,
-  TableCell,
-} from '@mui/material';
+import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
+import { useCompanyList } from 'src/services/master-data/company/use-company-list';
+import { useDeleteCompanyById } from 'src/services/master-data/company';
 
-import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
-import { useCompanyList } from 'src/services/master-data/company/use-company-list';
 import { Companies } from './types';
 
 // ----------------------------------------------------------------------
 
 interface PopoverProps {
-  handleClosePopover: () => void;
-  handleOpenPopover: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   handleEdit: (id: number) => void;
+  handleDelete: (id: number) => void;
 }
 
 const columnHelper = createColumnHelper<Companies>();
 
-const columns = (popoverProps: PopoverProps, openPopover: HTMLButtonElement | null) => [
+const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
     header: 'Name',
   }),
@@ -46,20 +36,14 @@ const columns = (popoverProps: PopoverProps, openPopover: HTMLButtonElement | nu
 
   columnHelper.display({
     id: 'actions',
-    cell: (info) => ButtonActions(info, popoverProps, openPopover),
+    cell: (info) => ButtonActions(info, popoverProps),
   }),
 ];
 
-function ButtonActions(
-  props: CellContext<Companies, unknown>,
-  popoverProps: PopoverProps,
-  openPopover: HTMLButtonElement | null
-) {
+function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleClosePopover, handleEdit, handleOpenPopover } = popoverProps;
-  const formId = useId();
-  // const { mutateAsync: deleteBanner } = useDeleteBanner();
+  const { handleEdit, handleDelete } = popoverProps;
   return (
     <MenuList
       disablePadding
@@ -82,7 +66,7 @@ function ButtonActions(
         Edit
       </MenuItem>
 
-      <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
+      <MenuItem onClick={() => handleDelete(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
       </MenuItem>
@@ -102,7 +86,7 @@ function ButtonActions(
 
 export function InternalCompanyView() {
   const { isEmpty, getDataTableProps } = useCompanyList({}, 'vendor');
-
+  const { mutate: deleteCompanyById } = useDeleteCompanyById();
   const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
 
   // console.log(getDataTableProps(), 'get data table props');
@@ -116,15 +100,11 @@ export function InternalCompanyView() {
       navigate(`${id}/edit`);
     };
 
-    const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
-      setOpenPopover(event.currentTarget);
+    const handleDelete = (id: number) => {
+      deleteCompanyById(id);
     };
 
-    const handleClosePopover = () => {
-      setOpenPopover(null);
-    };
-
-    return { handleEdit, handleOpenPopover, handleClosePopover };
+    return { handleEdit, handleDelete };
   };
 
   return (
@@ -149,7 +129,7 @@ export function InternalCompanyView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs(), openPopover)} {...getDataTableProps()} />
+          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
         </Grid>
       </Grid>
     </DashboardContent>

@@ -39,13 +39,10 @@ import { Iconify } from 'src/components/iconify';
 
 export function EditClientCompanyView() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { data, refetch } = useCompanyById(Number(id));
+  const { data } = useCompanyById(Number(id));
   const { mutate: updateCompany } = useUpdateCompany();
-  const { data: departmentByCompany } = useDivisionByCompanyId(Number(id));
-  const { mutate: deleteDivision } = useDeleteDivisionItem();
+  const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
   const { mutate: addDivision } = useAddDivision();
-  console.log(departmentByCompany, 'departmentByCompany');
   const [departments, setDepartments] = React.useState(data?.department ?? []);
   const [department, setDepartment] = React.useState('');
 
@@ -60,7 +57,7 @@ export function EditClientCompanyView() {
       name: department,
       company_id: data?.id,
     });
-    refetch();
+    setDepartment('');
   };
 
   const handleSubmit = (formData: any) => {
@@ -84,8 +81,8 @@ export function EditClientCompanyView() {
     setDepartment(e.target.value);
   };
 
-  const onClickDelete = async (id: number) => {
-    await deleteDivision(id);
+  const onClickDelete = async (divisionId: number) => {
+    await deleteDivision(divisionId);
   };
 
   useEffect(() => {
@@ -181,7 +178,7 @@ export function EditClientCompanyView() {
                           width: '100%',
                         }}
                         label="Division"
-                        value={departments[index].name}
+                        value={item.name}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           onChangeDivision(e, index)
                         }
@@ -207,7 +204,7 @@ export function EditClientCompanyView() {
                         }}
                       >
                         <MenuItem
-                          onClick={() => onClickDelete(departments[index].id)}
+                          onClick={() => onClickDelete(item?.id)}
                           sx={{ color: 'error.main' }}
                         >
                           <Iconify icon="solar:trash-bin-trash-bold" />
