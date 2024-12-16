@@ -2,15 +2,13 @@ import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
-import { useCompanyList } from 'src/services/master-data/company/use-company-list';
-import { useDeleteCompanyById } from 'src/services/master-data/company';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
-import { useUserList } from 'src/services/master-data/user';
+import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
 import { Users } from './types';
 
 // ----------------------------------------------------------------------
@@ -77,7 +75,7 @@ function ButtonActions(props: CellContext<Users, unknown>, popoverProps: Popover
 
 export function UserView() {
   const { isEmpty, getDataTableProps } = useUserList({});
-  const { mutate: deleteCompanyById } = useDeleteCompanyById();
+  const { mutate: deleteUserById } = useDeleteUserById();
 
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
@@ -91,7 +89,7 @@ export function UserView() {
     };
 
     const handleDelete = (id: number) => {
-      deleteCompanyById(id);
+      deleteUserById(id);
     };
 
     return { handleEdit, handleDelete };
