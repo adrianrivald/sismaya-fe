@@ -3,20 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
-export type StoreDeparment = {
+export type UpdateDepartment = {
   name:string;
-  company_id?: number
+  id: number;
+  company_id: number
 };
 
-export function useAddDivision() {
+export function useUpdateDivision() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate()
     return useMutation(
-      async (formData: StoreDeparment) => {
-        const { name, company_id } = formData;
+      async (formData: UpdateDepartment) => {
+        const { name, id, company_id } = formData;
   
   
-        return http(`departments`, {
+        return http(`departments/${id}`, {
+        method: "PUT",
           data: {
             name,
             company_id
@@ -28,7 +29,7 @@ export function useAddDivision() {
           const companyId = res?.data?.company_id
           queryClient.invalidateQueries({queryKey: ['company-items', companyId]});
           queryClient.invalidateQueries(['division-items', companyId]);
-          toast.success('Data added successfully', {
+          toast.success('Data updated successfully', {
             position: 'top-right',
             autoClose: 5000,
             hideProgressBar: true,

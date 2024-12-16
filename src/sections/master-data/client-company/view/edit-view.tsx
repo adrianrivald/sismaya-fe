@@ -32,8 +32,8 @@ import {
   useAddDivision,
   useCompanyById,
   useDeleteDivisionItem,
-  useDivisionByCompanyId,
   useUpdateCompany,
+  useUpdateDivision,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
 
@@ -43,6 +43,7 @@ export function EditClientCompanyView() {
   const { mutate: updateCompany } = useUpdateCompany();
   const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
   const { mutate: addDivision } = useAddDivision();
+  const { mutate: updateDivision } = useUpdateDivision();
   const [departments, setDepartments] = React.useState(data?.department ?? []);
   const [department, setDepartment] = React.useState('');
 
@@ -68,11 +69,16 @@ export function EditClientCompanyView() {
     });
   };
 
-  const onChangeDivision = (e: React.ChangeEvent<HTMLInputElement>, itemIndex: number) => {
+  React.useEffect(() => {
+    setDepartments(data?.department ?? []);
+  }, [data]);
+
+  const onChangeDivision = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
     setDepartments((prevDepartments) => {
       const updatedDeparments = [...prevDepartments];
       // Update the string at the specified index
-      updatedDeparments[itemIndex].name = e.target.value;
+      const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
+      updatedDeparments[index].name = e.target.value;
       return updatedDeparments;
     });
   };
@@ -83,6 +89,14 @@ export function EditClientCompanyView() {
 
   const onClickDelete = async (divisionId: number) => {
     await deleteDivision(divisionId);
+  };
+
+  const onClickEdit = async (value: string, divisionId: number) => {
+    await updateDivision({
+      name: value,
+      id: divisionId,
+      company_id: Number(id),
+    });
   };
 
   useEffect(() => {
@@ -180,11 +194,11 @@ export function EditClientCompanyView() {
                         label="Division"
                         value={item.name}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onChangeDivision(e, index)
+                          onChangeDivision(e, item?.id)
                         }
-                        InputProps={{
-                          readOnly: true,
-                        }}
+                        // InputProps={{
+                        //   readOnly: true,
+                        // }}
                       />
 
                       <MenuList
@@ -203,6 +217,10 @@ export function EditClientCompanyView() {
                           },
                         }}
                       >
+                        <MenuItem onClick={() => onClickEdit(departments[index].name, item?.id)}>
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
+                        </MenuItem>
                         <MenuItem
                           onClick={() => onClickDelete(item?.id)}
                           sx={{ color: 'error.main' }}
