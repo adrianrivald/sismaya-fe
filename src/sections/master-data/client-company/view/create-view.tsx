@@ -28,7 +28,7 @@ import { UseFormSetValue } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useNavigate } from 'react-router-dom';
 import { FieldDropzone } from 'src/components/form';
-import { CompanyDTO } from 'src/services/master-data/schemas/company-schema';
+import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import { useAddCompany } from 'src/services/master-data/company';
 
 export function CreateClientCompanyView() {

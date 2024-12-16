@@ -7,7 +7,7 @@ import { http, RequestInitClient } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-function fetchCompanyList(params: Partial<any>, type: string) {
+export function fetchCompanyList(params: Partial<any>, type: string) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/companies', baseUrl);
 

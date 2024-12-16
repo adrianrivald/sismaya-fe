@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
-import { CompanyDTO } from "../schemas/company-schema";
+import { CompanyDTO } from "./schemas/company-schema";
 import { Company } from "./types";
 
 export type StoreCompany = CompanyDTO & {type: string};

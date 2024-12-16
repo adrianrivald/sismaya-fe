@@ -7,9 +7,10 @@ import { http, RequestInitClient } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-function fetchCoinList(params: Partial<any>, isEnglish: boolean) {
+function fetchUserList(params: Partial<any>, ) {
   const baseUrl = window.location.origin;
-  const endpointUrl = new URL('/cms/packages', baseUrl);
+  const endpointUrl = new URL('/users', baseUrl);
+
 
   if (params.active) {
     endpointUrl.searchParams.append('active', params.active);
@@ -31,9 +32,9 @@ function fetchCoinList(params: Partial<any>, isEnglish: boolean) {
   );
 }
 
-export function useCoinList(params: Partial<any>, isEnglish: boolean) {
+export function useUserList(params: Partial<any>) {
   return usePaginationQuery(
-    ['coin', params.keyword, params.active, params.order, params.platform, isEnglish],
-    (paginationState) => fetchCoinList({ ...params, ...paginationState }, isEnglish)
+    ['user', params.keyword, params.active, params.order, params.platform],
+    (paginationState) => fetchUserList({ ...params, ...paginationState })
   );
 }

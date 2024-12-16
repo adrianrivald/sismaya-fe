@@ -19,32 +19,20 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React from 'react';
 import { Iconify } from 'src/components/iconify';
-import { Bounce, toast } from 'react-toastify';
+import { useAddUser } from 'src/services/master-data/user';
+import { UserDTO, userSchema } from 'src/services/master-data/user/schemas/user-schema';
+import { useRole } from 'src/services/master-data/role';
+import { FieldDropzone } from 'src/components/form';
 
 export function CreateUserView() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = (formData: any) => {
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-
-      toast.success('Data added successfully', {
-        position: 'top-right',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce,
-      });
-      navigate('/user');
-    }, 1000);
-    console.log(formData, 'test');
+  const { mutate: addUser } = useAddUser();
+  const { data: roles } = useRole();
+  const handleSubmit = (formData: UserDTO) => {
+    addUser({
+      ...formData,
+    });
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -58,9 +46,19 @@ export function CreateUserView() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit}>
+        <Form width="100%" onSubmit={handleSubmit} schema={userSchema}>
           {({ register, control, formState }) => (
             <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                  }}
+                />
+              </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.name)}
@@ -80,7 +78,7 @@ export function CreateUserView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={12}>
+              {/* <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <InputLabel id="select-company">Company</InputLabel>
                   <Select
@@ -122,7 +120,7 @@ export function CreateUserView() {
                     {String(formState?.errors?.division?.message)}
                   </FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.email)}
@@ -200,19 +198,18 @@ export function CreateUserView() {
                   <InputLabel id="select-role">Role</InputLabel>
                   <Select
                     labelId="select-role"
-                    error={Boolean(formState?.errors?.role)}
-                    {...register('role', {
+                    error={Boolean(formState?.errors?.role_id)}
+                    {...register('role_id', {
                       required: 'Role must be filled out',
                     })}
                     label="Role"
                   >
-                    <MenuItem value="admin">Admin</MenuItem>
-                    <MenuItem value="staff">Staff</MenuItem>
+                    {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
                   </Select>
                 </FormControl>
-                {formState?.errors?.role && (
+                {formState?.errors?.role_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.role?.message)}
+                    {String(formState?.errors?.role_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>

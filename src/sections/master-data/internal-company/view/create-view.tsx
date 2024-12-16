@@ -7,7 +7,7 @@ import { Form } from 'src/components/form/form';
 import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React from 'react';
-import { CompanyDTO, companySchema } from 'src/services/master-data/schemas/company-schema';
+import { CompanyDTO, companySchema } from 'src/services/master-data/company/schemas/company-schema';
 import { useAddCompany } from 'src/services/master-data/company';
 
 export function CreateInternalCompanyView() {
