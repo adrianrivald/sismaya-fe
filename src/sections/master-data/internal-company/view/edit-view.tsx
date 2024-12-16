@@ -16,6 +16,8 @@ import {
   TextField,
   useTheme,
   Theme,
+  MenuList,
+  menuItemClasses,
 } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
@@ -26,12 +28,38 @@ import { API_URL } from 'src/constants';
 import { FieldDropzone } from 'src/components/form';
 import { Bounce, toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCompanyById } from 'src/services/master-data/company';
+import {
+  useAddCategory,
+  useAddProduct,
+  useCompanyById,
+  useDeleteCategoryItem,
+  useDeleteProductItem,
+  useUpdateCategory,
+  useUpdateCompany,
+  useUpdateProduct,
+} from 'src/services/master-data/company';
+import { Iconify } from 'src/components/iconify';
+import { companySchema } from 'src/services/master-data/company/schemas/company-schema';
 
 export function EditInternalCompanyView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data } = useCompanyById(Number(id));
+  const { mutate: updateCompany } = useUpdateCompany();
+
+  // Category CRUD
+  const { mutate: deleteCategory } = useDeleteCategoryItem(Number(id));
+  const { mutate: addCategory } = useAddCategory();
+  const { mutate: updateCategory } = useUpdateCategory();
+  const [categories, setCategories] = React.useState(data?.categories ?? []);
+  const [category, setCategory] = React.useState('');
+
+  // Product CRUD
+  const { mutate: deleteProduct } = useDeleteProductItem(Number(id));
+  const { mutate: addProduct } = useAddProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
+  const [products, setProducts] = React.useState(data?.products ?? []);
+  const [product, setProduct] = React.useState('');
 
   const [selectedStatuses, setSelectedStatuses] = React.useState([
     {
@@ -39,9 +67,6 @@ export function EditInternalCompanyView() {
       type: null,
     },
   ]);
-
-  const [categories, setCategories] = React.useState(['']);
-  const [products, setProducts] = React.useState(['']);
 
   const defaultValues = {
     name: data?.name,
@@ -63,13 +88,83 @@ export function EditInternalCompanyView() {
     ] as any);
   };
 
+  // Category
   const onAddCategory = () => {
-    setCategories([...categories, ''] as any);
+    addCategory({
+      name: category,
+      company_id: data?.id,
+    });
+    setCategory('');
   };
 
-  const onAddProduct = () => {
-    setProducts([...products, ''] as any);
+  const onChangeCategory = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setCategories((prevCategories) => {
+      const updatedCategories = [...prevCategories];
+      // Update the string at the specified index
+      const index = updatedCategories?.findIndex((item) => item?.id === itemId);
+      updatedCategories[index].name = e.target.value;
+      return updatedCategories;
+    });
   };
+
+  const onChangeCategoryNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCategory(e.target.value);
+  };
+
+  const onClickDeleteCategory = async (categoryId: number) => {
+    await deleteCategory(categoryId);
+  };
+
+  const onClickEditCategory = async (value: string, categoryId: number) => {
+    await updateCategory({
+      name: value,
+      id: categoryId,
+      company_id: Number(id),
+    });
+  };
+
+  // Product
+  const onAddProduct = () => {
+    addProduct({
+      name: product,
+      company_id: data?.id,
+    });
+    setProduct('');
+  };
+
+  const onChangeProduct = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setProducts((prevProducts) => {
+      const updatedProducts = [...prevProducts];
+      // Update the string at the specified index
+      const index = updatedProducts?.findIndex((item) => item?.id === itemId);
+      updatedProducts[index].name = e.target.value;
+      return updatedProducts;
+    });
+  };
+
+  const onChangeProductNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value, 'value product');
+    setProduct(e.target.value);
+  };
+
+  const onClickDeleteProduct = async (productId: number) => {
+    await deleteProduct(productId);
+  };
+
+  const onClickEditProduct = async (value: string, productId: number) => {
+    await updateProduct({
+      name: value,
+      id: productId,
+      company_id: Number(id),
+    });
+  };
+
+  React.useEffect(() => {
+    setProducts(data?.products ?? []);
+  }, [data]);
+  React.useEffect(() => {
+    setCategories(data?.categories ?? []);
+  }, [data]);
 
   const handleChangeStatus = (e: SelectChangeEvent<string>, index: number) => {
     const value = e?.target?.value;
@@ -113,6 +208,7 @@ export function EditInternalCompanyView() {
               ...defaultValues,
             },
           }}
+          schema={companySchema}
         >
           {({ register, control, watch, formState }) => (
             <Grid container spacing={3} xs={12}>
@@ -222,7 +318,7 @@ export function EditInternalCompanyView() {
                   Category
                 </Typography>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  {categories?.map((item, index) => (
+                  {data?.categories?.map((item, index) => (
                     <Stack
                       direction="row"
                       justifyContent="space-between"
@@ -235,8 +331,45 @@ export function EditInternalCompanyView() {
                           width: '100%',
                         }}
                         label="Category"
-                        {...register('category')}
+                        value={item.name}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          onChangeCategory(e, item?.id)
+                        }
+                        // InputProps={{
+                        //   readOnly: true,
+                        // }}
                       />
+
+                      <MenuList
+                        disablePadding
+                        sx={{
+                          p: 0.5,
+                          gap: 0.5,
+                          width: 140,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          [`& .${menuItemClasses.root}`]: {
+                            px: 1,
+                            gap: 2,
+                            borderRadius: 0.75,
+                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                          },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => onClickEditCategory(categories[index].name, item?.id)}
+                        >
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => onClickDeleteCategory(item?.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" />
+                          Delete
+                        </MenuItem>
+                      </MenuList>
                       {formState?.errors?.category && (
                         <FormHelperText sx={{ color: 'error.main' }}>
                           {String(formState?.errors?.category?.message)}
@@ -244,6 +377,27 @@ export function EditInternalCompanyView() {
                       )}
                     </Stack>
                   ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <TextField
+                      error={Boolean(formState?.errors?.category)}
+                      sx={{
+                        width: '100%',
+                      }}
+                      label="Category"
+                      value={category}
+                      onChange={onChangeCategoryNew}
+                    />
+                    {formState?.errors?.category && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.category?.message)}
+                      </FormHelperText>
+                    )}
+                  </Stack>
                 </Box>
                 <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
                   Add More
@@ -255,7 +409,7 @@ export function EditInternalCompanyView() {
                   Product
                 </Typography>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  {products?.map((item, index) => (
+                  {data?.products?.map((item, index) => (
                     <Stack
                       direction="row"
                       justifyContent="space-between"
@@ -263,13 +417,50 @@ export function EditInternalCompanyView() {
                       alignItems="center"
                     >
                       <TextField
-                        error={Boolean(formState?.errors?.products)}
+                        error={Boolean(formState?.errors?.product)}
                         sx={{
                           width: '100%',
                         }}
                         label="Product"
-                        {...register('product')}
+                        value={item.name}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          onChangeProduct(e, item?.id)
+                        }
+                        // InputProps={{
+                        //   readOnly: true,
+                        // }}
                       />
+
+                      <MenuList
+                        disablePadding
+                        sx={{
+                          p: 0.5,
+                          gap: 0.5,
+                          width: 140,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          [`& .${menuItemClasses.root}`]: {
+                            px: 1,
+                            gap: 2,
+                            borderRadius: 0.75,
+                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                          },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => onClickEditProduct(products[index].name, item?.id)}
+                        >
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => onClickDeleteProduct(item?.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" />
+                          Delete
+                        </MenuItem>
+                      </MenuList>
                       {formState?.errors?.product && (
                         <FormHelperText sx={{ color: 'error.main' }}>
                           {String(formState?.errors?.product?.message)}
@@ -277,8 +468,29 @@ export function EditInternalCompanyView() {
                       )}
                     </Stack>
                   ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <TextField
+                      error={Boolean(formState?.errors?.product)}
+                      sx={{
+                        width: '100%',
+                      }}
+                      label="Product"
+                      value={product}
+                      onChange={onChangeProductNew}
+                    />
+                    {formState?.errors?.product && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.product?.message)}
+                      </FormHelperText>
+                    )}
+                  </Stack>
                 </Box>
-                <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
+                <Button onClick={onAddProduct} sx={{ marginY: 2 }}>
                   Add More
                 </Button>
               </Grid>

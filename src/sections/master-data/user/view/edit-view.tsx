@@ -41,7 +41,6 @@ export function EditUserView() {
     });
   };
 
-  console.log(user, 'suer');
   const defaultValues = {
     name: user?.user_info?.name,
     email: user?.email,
@@ -188,7 +187,7 @@ export function EditUserView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={12}>
+              {/* <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.password)}
                   fullWidth
@@ -216,7 +215,7 @@ export function EditUserView() {
                     {String(formState?.errors?.password?.message)}
                   </FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
