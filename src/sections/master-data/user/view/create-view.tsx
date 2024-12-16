@@ -17,22 +17,53 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Iconify } from 'src/components/iconify';
 import { useAddUser } from 'src/services/master-data/user';
 import { UserDTO, userSchema } from 'src/services/master-data/user/schemas/user-schema';
 import { useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
+import {
+  fetchDivisionByCompanyId,
+  useCompanies,
+  useDivisionByCompanyId,
+} from 'src/services/master-data/company';
+import { API_URL } from 'src/constants';
+import { getSession } from 'src/sections/auth/session/session';
+import { Department } from 'src/services/master-data/company/types';
 
 export function CreateUserView() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
   const { mutate: addUser } = useAddUser();
   const { data: roles } = useRole();
+  const { data: companies } = useCompanies();
+
+  const fetchDivision = async (companyId: number) => {
+    const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        console.log(value?.data, 'value?.data');
+        setDivisions(value?.data);
+      })
+    );
+    return data;
+  };
+
   const handleSubmit = (formData: UserDTO) => {
-    addUser({
-      ...formData,
-    });
+    setIsLoading(true);
+    try {
+      addUser({
+        ...formData,
+      });
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+    }
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -47,7 +78,7 @@ export function CreateUserView() {
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit} schema={userSchema}>
-          {({ register, control, formState }) => (
+          {({ register, control, watch, formState }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <FieldDropzone
@@ -78,49 +109,56 @@ export function CreateUserView() {
                 )}
               </Grid>
 
-              {/* <Grid item xs={12} md={12}>
+              <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <InputLabel id="select-company">Company</InputLabel>
                   <Select
                     labelId="select-company"
-                    error={Boolean(formState?.errors?.company)}
-                    {...register('company', {
+                    error={Boolean(formState?.errors?.company_id)}
+                    {...register('company_id', {
                       required: 'Company must be filled out',
+                      onChange: async () => {
+                        await fetchDivision(watch('company_id'));
+                      },
                     })}
                     label="Company"
                   >
-                    <MenuItem value="company1">Company 1</MenuItem>
-                    <MenuItem value="company2">Company 2</MenuItem>
+                    {companies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
-                {formState?.errors?.company && (
+                {formState?.errors?.company_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.company?.message)}
+                    {String(formState?.errors?.company_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>
+              {watch('company_id') ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-division">Division</InputLabel>
+                    <Select
+                      labelId="select-division"
+                      error={Boolean(formState?.errors?.department_id)}
+                      {...register('department_id', {
+                        required: 'Division must be filled out',
+                      })}
+                      label="Division"
+                    >
+                      {divisions?.map((division) => (
+                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.department_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.department_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
 
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-division">Division</InputLabel>
-                  <Select
-                    labelId="select-division"
-                    error={Boolean(formState?.errors?.division)}
-                    {...register('division', {
-                      required: 'Division must be filled out',
-                    })}
-                    label="Division"
-                  >
-                    <MenuItem value="div1">Division 1</MenuItem>
-                    <MenuItem value="div2">Division 2</MenuItem>
-                  </Select>
-                </FormControl>
-                {formState?.errors?.division && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.division?.message)}
-                  </FormHelperText>
-                )}
-              </Grid> */}
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.email)}

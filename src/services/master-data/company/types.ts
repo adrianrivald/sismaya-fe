@@ -10,8 +10,9 @@ export interface Company {
 }
 
 export interface Status {
+    id: number;
     name: string;
-    step: "to_do" | "in_progress" | "done"
+    step: string;
     sort: number;
     company_id?: number
 }
@@ -35,4 +36,12 @@ export interface Products {
     id: number;
     name: string;
     company_id: number
+}
+
+export interface Statuses {
+    id: number;
+    name: string;
+    company_id: number;
+    step: string;
+    sort: number
 }

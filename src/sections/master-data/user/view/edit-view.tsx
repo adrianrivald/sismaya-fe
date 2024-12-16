@@ -17,23 +17,60 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Iconify } from 'src/components/iconify';
 import { Bounce, toast } from 'react-toastify';
 import { useUpdateUser, useUserById } from 'src/services/master-data/user';
 import { useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import { UserDTO, userSchema } from 'src/services/master-data/user/schemas/user-schema';
+import { useCompanies } from 'src/services/master-data/company';
+import { getSession } from 'src/sections/auth/session/session';
+import { API_URL } from 'src/constants';
+import { Department } from 'src/services/master-data/company/types';
 
 export function EditUserView() {
   const { id } = useParams();
-  const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
   const { mutate: updateUser } = useUpdateUser();
+  const { data: companies } = useCompanies();
 
-  const navigate = useNavigate();
+  const defaultValues = {
+    name: user?.user_info?.name,
+    email: user?.email,
+    phone: user?.phone,
+    role_id: user?.user_info?.role_id,
+    profile_picture: user?.user_info?.profile_picture ?? '',
+    company_id: user?.user_info?.company_id,
+    department: user?.user_info?.department_id,
+  };
+
+  console.log(defaultValues, 'defaultValues');
+
+  useEffect(() => {
+    if (defaultValues?.company_id) {
+      fetchDivision(defaultValues?.company_id);
+    }
+  }, [companies, defaultValues?.company_id]);
+
+  const fetchDivision = async (companyId: number) => {
+    const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        console.log(value?.data, 'value?.data');
+        setDivisions(value?.data);
+      })
+    );
+    return data;
+  };
+
   const handleSubmit = (formData: UserDTO) => {
     updateUser({
       ...formData,
@@ -41,12 +78,6 @@ export function EditUserView() {
     });
   };
 
-  const defaultValues = {
-    name: user?.user_info?.name,
-    email: user?.email,
-    phone: user?.phone,
-    role_id: user?.user_info?.role_id,
-  };
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -79,6 +110,7 @@ export function EditUserView() {
                     name: 'cover',
                     control,
                   }}
+                  defaultImage={defaultValues?.profile_picture}
                 />
               </Grid>
               <Grid item xs={12} md={12}>
@@ -100,51 +132,57 @@ export function EditUserView() {
                 )}
               </Grid>
 
-              {/* <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-company">Company</InputLabel>
-                  <Select
-                    value={watch('company')}
-                    labelId="select-company"
-                    error={Boolean(formState?.errors?.company)}
-                    {...register('company', {
-                      required: 'Company must be filled out',
-                    })}
-                    label="Company"
-                  >
-                    <MenuItem value="company1">Company 1</MenuItem>
-                    <MenuItem value="company2">Company 2</MenuItem>
-                  </Select>
-                </FormControl>
-                {formState?.errors?.company && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.company?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-division">Division</InputLabel>
-                  <Select
-                    value={watch('division')}
-                    labelId="select-division"
-                    error={Boolean(formState?.errors?.division)}
-                    {...register('division', {
-                      required: 'Division must be filled out',
-                    })}
-                    label="Division"
-                  >
-                    <MenuItem value="div1">Division 1</MenuItem>
-                    <MenuItem value="div2">Division 2</MenuItem>
-                  </Select>
-                </FormControl>
-                {formState?.errors?.division && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.division?.message)}
-                  </FormHelperText>
-                )}
-              </Grid> */}
+              {watch('company_id') ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-company">Company</InputLabel>
+                    <Select
+                      labelId="select-company"
+                      error={Boolean(formState?.errors?.company_id)}
+                      {...register('company_id', {
+                        required: 'Company must be filled out',
+                        onChange: async () => {
+                          await fetchDivision(watch('company_id'));
+                        },
+                      })}
+                      label="Company"
+                    >
+                      {companies?.map((company) => (
+                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.company_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.company_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
+              {watch('company_id') ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-division">Division</InputLabel>
+                    <Select
+                      labelId="select-division"
+                      error={Boolean(formState?.errors?.department_id)}
+                      {...register('department_id', {
+                        required: 'Division must be filled out',
+                      })}
+                      label="Division"
+                    >
+                      {divisions?.map((division) => (
+                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.department_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.department_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.email)}
