@@ -18,10 +18,12 @@ export const _name = (index: number) => [
   ][index]
 
 
-export const _clientComp = [...Array(1)].map((_, index) => ({
-    id: _id(index),
-    name: _name(index),
-    desc: _desc(index),
-    picture: _picture(index),
-    division: _division(index),
-  }));
+export const _clientComp = [
+  {
+    id: "abc1",
+    name: "Internal Comp1",
+    desc: "Contoh deskripsi",
+    picture:"https://postman.com/_aether-assets/illustrations/light/illustration-hit-send.svg",
+    division: "Div 1",
+  }
+];

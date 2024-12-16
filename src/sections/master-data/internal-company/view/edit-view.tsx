@@ -25,55 +25,30 @@ import React from 'react';
 import { API_URL } from 'src/constants';
 import { FieldDropzone } from 'src/components/form';
 import { Bounce, toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-
-const categories = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'];
-const products = ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5'];
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-function getStyles(name: string, selectedCat: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      selectedCat.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
-
-function getStylesProduct(name: string, selectedProduct: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      selectedProduct.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
+import { useNavigate, useParams } from 'react-router-dom';
+import { useCompanyById } from 'src/services/master-data/company';
 
 export function EditInternalCompanyView() {
-  console.log(API_URL, 'API URL');
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { data } = useCompanyById(Number(id));
+
   const [selectedStatuses, setSelectedStatuses] = React.useState([
     {
       status: null,
       type: null,
     },
   ]);
-  const theme = useTheme();
-  const defaultDummyData = {
-    name: 'Test Name',
-    description: 'Test desc',
-    // status: 'todo',
-    category: ['Cat 1', 'Cat 2'],
-    product: ['Product 2', 'Product 3'],
+
+  const [categories, setCategories] = React.useState(['']);
+  const [products, setProducts] = React.useState(['']);
+
+  const defaultValues = {
+    name: data?.name,
+    abbreviation: data?.abbreviation,
+    status: data?.progress_statuses ?? [],
+    category: data?.categories ?? [],
+    product: data?.products ?? [],
   };
 
   const onAddStatus = () => {
@@ -88,13 +63,20 @@ export function EditInternalCompanyView() {
     ] as any);
   };
 
+  const onAddCategory = () => {
+    setCategories([...categories, ''] as any);
+  };
+
+  const onAddProduct = () => {
+    setProducts([...products, ''] as any);
+  };
+
   const handleChangeStatus = (e: SelectChangeEvent<string>, index: number) => {
     const value = e?.target?.value;
     console.log(value, 'status');
   };
   const handleChangeType = (e: SelectChangeEvent<string>, index: number) => {
     const value = e?.target?.value;
-    console.log(value, 'tipetipe');
   };
 
   const handleSubmit = (formData: any) => {
@@ -128,7 +110,7 @@ export function EditInternalCompanyView() {
           onSubmit={handleSubmit}
           options={{
             defaultValues: {
-              ...defaultDummyData,
+              ...defaultValues,
             },
           }}
         >
@@ -153,20 +135,20 @@ export function EditInternalCompanyView() {
               </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
-                  error={Boolean(formState?.errors?.description)}
+                  error={Boolean(formState?.errors?.abbreviation)}
                   multiline
                   sx={{
                     width: '100%',
                   }}
-                  label="Deskripsi"
+                  label="Description"
                   rows={4}
-                  {...register('description', {
-                    required: 'Deskripsi must be filled out',
+                  {...register('abbreviation', {
+                    required: 'Description must be filled out',
                   })}
                 />
-                {formState?.errors?.description && (
+                {formState?.errors?.abbreviation && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.description?.message)}
+                    {String(formState?.errors?.abbreviation?.message)}
                   </FormHelperText>
                 )}
               </Grid>
@@ -192,23 +174,14 @@ export function EditInternalCompanyView() {
                       alignItems="center"
                     >
                       <Box width="50%">
-                        <FormControl fullWidth>
-                          <InputLabel id="status">Status</InputLabel>
-                          <Select
-                            error={Boolean(formState?.errors?.status)}
-                            {...register('status', {
-                              required: 'Status must be filled out',
-                            })}
-                            label="Status"
-                            onChange={(e: SelectChangeEvent<string>) =>
-                              handleChangeStatus(e, index)
-                            }
-                          >
-                            <MenuItem value="stat1">Backlog</MenuItem>
-                            <MenuItem value="stat2">In Review</MenuItem>
-                            <MenuItem value="stat3">Almost Done</MenuItem>
-                          </Select>
-                        </FormControl>
+                        <TextField
+                          error={Boolean(formState?.errors?.status)}
+                          sx={{
+                            width: '100%',
+                          }}
+                          label="Status"
+                          {...register('status')}
+                        />
                         {formState?.errors?.status && (
                           <FormHelperText sx={{ color: 'error.main' }}>
                             {String(formState?.errors?.status?.message)}
@@ -221,9 +194,7 @@ export function EditInternalCompanyView() {
                           <InputLabel id="type">Type</InputLabel>
                           <Select
                             error={Boolean(formState?.errors?.type)}
-                            {...register('type', {
-                              required: 'Type must be filled out',
-                            })}
+                            {...register('type')}
                             label="Type"
                             onChange={(e: SelectChangeEvent<string>) => handleChangeType(e, index)}
                           >
@@ -247,83 +218,69 @@ export function EditInternalCompanyView() {
               </Grid>
 
               <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-outlined-label-type">Kategori</InputLabel>
-                  <Select
-                    label="Kategori"
-                    labelId="demo-simple-select-outlined-label-type"
-                    id="category"
-                    {...register('category', {
-                      required: 'Kategori must be filled out',
-                    })}
-                    multiple
-                    value={watch('category')}
-                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {watch('category').map((value: any) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
-                  >
-                    {categories.map((name) => (
-                      <MenuItem
-                        key={name}
-                        value={name}
-                        style={getStyles(name, watch('category'), theme)}
-                      >
-                        {name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.category && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.category?.message)}
-                  </FormHelperText>
-                )}
+                <Typography variant="h4" color="primary" mb={4}>
+                  Category
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {categories?.map((item, index) => (
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                      alignItems="center"
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.category)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Category"
+                        {...register('category')}
+                      />
+                      {formState?.errors?.category && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.category?.message)}
+                        </FormHelperText>
+                      )}
+                    </Stack>
+                  ))}
+                </Box>
+                <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
+                  Add More
+                </Button>
               </Grid>
 
               <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-outlined-label-type">Produk</InputLabel>
-                  <Select
-                    label="Produk"
-                    labelId="demo-simple-select-outlined-label-type"
-                    id="product"
-                    {...register('product', {
-                      required: 'Produk must be filled out',
-                    })}
-                    multiple
-                    value={watch('product')}
-                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {watch('product').map((value: any) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
-                  >
-                    {products.map((name) => (
-                      <MenuItem
-                        key={name}
-                        value={name}
-                        style={getStyles(name, watch('product'), theme)}
-                      >
-                        {name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.product && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.product?.message)}
-                  </FormHelperText>
-                )}
+                <Typography variant="h4" color="primary" mb={4}>
+                  Product
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {products?.map((item, index) => (
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                      alignItems="center"
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.products)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Product"
+                        {...register('product')}
+                      />
+                      {formState?.errors?.product && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.product?.message)}
+                        </FormHelperText>
+                      )}
+                    </Stack>
+                  ))}
+                </Box>
+                <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
+                  Add More
+                </Button>
               </Grid>
 
               <Box

@@ -27,7 +27,7 @@ export function TableRow({ row, selected, onSelectRow }: TableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleEdit = () => {
-    navigate('test/edit');
+    navigate(`${row.id}/edit`);
   };
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -47,7 +47,7 @@ export function TableRow({ row, selected, onSelectRow }: TableRowProps) {
 
         <TableCell>{row.name}</TableCell>
 
-        <TableCell>{row.desc}</TableCell>
+        <TableCell>{row.description}</TableCell>
         <TableCell>
           <Box component="img" src={row.picture} />
         </TableCell>

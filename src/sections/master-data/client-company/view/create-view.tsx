@@ -28,19 +28,22 @@ import { UseFormSetValue } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useNavigate } from 'react-router-dom';
 import { FieldDropzone } from 'src/components/form';
+import { CompanyDTO } from 'src/services/master-data/schemas/company-schema';
+import { useAddCompany } from 'src/services/master-data/company';
 
 export function CreateClientCompanyView() {
+  const { mutate: addCompany } = useAddCompany();
+  const handleSubmit = (formData: CompanyDTO) => {
+    setIsLoading(true);
+    addCompany({
+      ...formData,
+      type: 'holding',
+    });
+  };
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (formData: any) => {
-    console.log(formData, 'test');
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/client-company/test/edit');
-    }, 1000);
-  };
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -79,20 +82,20 @@ export function CreateClientCompanyView() {
                 </Grid>
                 <Grid item xs={12} md={12}>
                   <TextField
-                    error={Boolean(formState?.errors?.description)}
+                    error={Boolean(formState?.errors?.abbreviation)}
                     multiline
                     sx={{
                       width: '100%',
                     }}
                     label="Client Description"
                     rows={4}
-                    {...register('description', {
+                    {...register('abbreviation', {
                       required: 'Client Description must be filled out',
                     })}
                   />
-                  {formState?.errors?.description && (
+                  {formState?.errors?.abbreviation && (
                     <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.description?.message)}
+                      {String(formState?.errors?.abbreviation?.message)}
                     </FormHelperText>
                   )}
                 </Grid>
@@ -104,12 +107,12 @@ export function CreateClientCompanyView() {
                     controller={{
                       name: 'cover',
                       control,
-                      rules: {
-                        required: {
-                          value: true,
-                          message: 'Picture must be uploaded',
-                        },
-                      },
+                      // rules: {
+                      //   required: {
+                      //     value: true,
+                      //     message: 'Picture must be uploaded',
+                      //   },
+                      // },
                     }}
                     error={formState.errors?.cover}
                   />

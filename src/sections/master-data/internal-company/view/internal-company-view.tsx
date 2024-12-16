@@ -1,63 +1,130 @@
+import React, { useId } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box, Button } from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  MenuItem,
+  menuItemClasses,
+  MenuList,
+  Popover,
+  TableCell,
+} from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
-import { createColumnHelper } from '@tanstack/react-table';
-import { useInternalCompanyList } from 'src/services/master-data/internal-company/use-internal-company';
-import { Table } from '../sample/table/table';
-import { _internalComp } from '../sample/data';
-
-export type ProjectProps = {
-  id: string;
-  requestId: string;
-  requester: string;
-  category: string;
-  deadline: string;
-  status: string;
-  priority: string;
-};
+import { CellContext, createColumnHelper } from '@tanstack/react-table';
+import { Iconify } from 'src/components/iconify';
+import { useCompanyList } from 'src/services/master-data/company/use-company-list';
+import { Companies } from './types';
 
 // ----------------------------------------------------------------------
 
-// const columnHelper = createColumnHelper<any>();
+interface PopoverProps {
+  handleClosePopover: () => void;
+  handleOpenPopover: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  handleEdit: (id: number) => void;
+}
 
-// const columns = [
-//   columnHelper.accessor('package_name', {
-//     header: 'Label',
-//   }),
+const columnHelper = createColumnHelper<Companies>();
 
-//   columnHelper.accessor('package_coin_value', {
-//     header: 'Nominal',
-//   }),
+const columns = (popoverProps: PopoverProps, openPopover: HTMLButtonElement | null) => [
+  columnHelper.accessor('name', {
+    header: 'Name',
+  }),
 
-//   columnHelper.accessor('bonus_coin', {
-//     header: 'Bonus',
-//   }),
-//   columnHelper.accessor('package_price', {
-//     header: 'Harga Normal',
-//   }),
-// ];
+  columnHelper.accessor('abbreviation', {
+    header: 'Abbreviation',
+  }),
 
-const columns = [
-  { id: 'name', label: 'Name' },
-  { id: 'desc', label: 'Description' },
-  { id: 'picture', label: 'Picture' },
-  { id: 'status', label: 'Status' },
-  { id: 'category', label: 'Category' },
-  { id: 'product', label: 'Product' },
-  { id: '', label: 'Action' },
+  columnHelper.accessor('type', {
+    header: 'Type',
+  }),
+
+  columnHelper.display({
+    id: 'actions',
+    cell: (info) => ButtonActions(info, popoverProps, openPopover),
+  }),
 ];
 
+function ButtonActions(
+  props: CellContext<Companies, unknown>,
+  popoverProps: PopoverProps,
+  openPopover: HTMLButtonElement | null
+) {
+  const { row } = props;
+  const companyId = row.original.id;
+  const { handleClosePopover, handleEdit, handleOpenPopover } = popoverProps;
+  const formId = useId();
+  // const { mutateAsync: deleteBanner } = useDeleteBanner();
+  return (
+    <MenuList
+      disablePadding
+      sx={{
+        p: 0.5,
+        gap: 0.5,
+        width: 140,
+        display: 'flex',
+        flexDirection: 'row',
+        [`& .${menuItemClasses.root}`]: {
+          px: 1,
+          gap: 2,
+          borderRadius: 0.75,
+          [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+        },
+      }}
+    >
+      <MenuItem onClick={() => handleEdit(companyId)}>
+        <Iconify icon="solar:pen-bold" />
+        Edit
+      </MenuItem>
+
+      <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
+        <Iconify icon="solar:trash-bin-trash-bold" />
+        Delete
+      </MenuItem>
+    </MenuList>
+  );
+}
+
+// const columns = [
+//   { id: 'name', label: 'Name' },
+//   { id: 'desc', label: 'Description' },
+//   { id: 'picture', label: 'Picture' },
+//   { id: 'status', label: 'Status' },
+//   { id: 'category', label: 'Category' },
+//   { id: 'product', label: 'Product' },
+//   { id: '', label: 'Action' },
+// ];
+
 export function InternalCompanyView() {
-  const { isEmpty, getDataTableProps } = useInternalCompanyList({}, false);
+  const { isEmpty, getDataTableProps } = useCompanyList({}, 'vendor');
+
+  const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
+
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('/internal-company/create');
+  };
+
+  const popoverFuncs = () => {
+    const handleEdit = (id: number) => {
+      navigate(`${id}/edit`);
+    };
+
+    const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setOpenPopover(event.currentTarget);
+    };
+
+    const handleClosePopover = () => {
+      setOpenPopover(null);
+    };
+
+    return { handleEdit, handleOpenPopover, handleClosePopover };
   };
 
   return (
@@ -82,8 +149,7 @@ export function InternalCompanyView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          {/* <DataTable columns={columns} {...getDataTableProps()} /> */}
-          <Table columns={columns} data={_internalComp} />
+          <DataTable columns={columns(popoverFuncs(), openPopover)} {...getDataTableProps()} />
         </Grid>
       </Grid>
     </DashboardContent>

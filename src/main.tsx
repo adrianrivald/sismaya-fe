@@ -11,6 +11,7 @@ import { withAuth } from './sections/auth/hocs/auth';
 import { AuthProvider } from './sections/auth/providers/auth';
 import { ThemeProvider } from './theme/theme-provider';
 import 'react-toastify/dist/ReactToastify.css';
+import { MasterDataProvider } from './sections/master-data/sample/providers/context-data';
 
 // ----------------------------------------------------------------------
 
@@ -25,7 +26,9 @@ root.render(
           <ThemeProvider>
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
-                <AppWithAuth />
+                <MasterDataProvider>
+                  <AppWithAuth />
+                </MasterDataProvider>
                 <ToastContainer />
               </AuthProvider>
             </QueryClientProvider>

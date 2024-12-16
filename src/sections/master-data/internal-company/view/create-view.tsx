@@ -7,17 +7,18 @@ import { Form } from 'src/components/form/form';
 import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React from 'react';
+import { CompanyDTO, companySchema } from 'src/services/master-data/schemas/company-schema';
+import { useAddCompany } from 'src/services/master-data/company';
 
 export function CreateInternalCompanyView() {
   const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = (formData: any) => {
+  const { mutate: addCompany } = useAddCompany();
+  const handleSubmit = (formData: CompanyDTO) => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/internal-company/test/edit');
-    }, 1000);
-    console.log(formData, 'test');
+    addCompany({
+      ...formData,
+      type: 'vendor',
+    });
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -31,7 +32,7 @@ export function CreateInternalCompanyView() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit}>
+        <Form width="100%" onSubmit={handleSubmit} schema={companySchema}>
           {({ register, control, formState }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
@@ -55,20 +56,20 @@ export function CreateInternalCompanyView() {
               <Grid item xs={12} md={12}>
                 <TextField
                   autoComplete="off"
-                  error={Boolean(formState?.errors?.description)}
+                  error={Boolean(formState?.errors?.abbreviation)}
                   multiline
                   sx={{
                     width: '100%',
                   }}
-                  label="Deskripsi"
+                  label="Description"
                   rows={4}
-                  {...register('description', {
-                    required: 'Deskripsi must be filled out',
+                  {...register('abbreviation', {
+                    required: 'Description must be filled out',
                   })}
                 />
-                {formState?.errors?.description && (
+                {formState?.errors?.abbreviation && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.description?.message)}
+                    {String(formState?.errors?.abbreviation?.message)}
                   </FormHelperText>
                 )}
               </Grid>

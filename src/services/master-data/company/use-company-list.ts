@@ -7,9 +7,14 @@ import { http, RequestInitClient } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-function fetchInternalCompanyList(params: Partial<any>, isEnglish: boolean) {
+function fetchCompanyList(params: Partial<any>, type: string) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/companies', baseUrl);
+
+  if (type) {
+    endpointUrl.searchParams.append('type', type);
+
+  }
 
   if (params.active) {
     endpointUrl.searchParams.append('active', params.active);
@@ -31,9 +36,9 @@ function fetchInternalCompanyList(params: Partial<any>, isEnglish: boolean) {
   );
 }
 
-export function useInternalCompanyList(params: Partial<any>, isEnglish: boolean) {
+export function useCompanyList(params: Partial<any>, type: string) {
   return usePaginationQuery(
-    ['internal-company', params.keyword, params.active, params.order, params.platform, isEnglish],
-    (paginationState) => fetchInternalCompanyList({ ...params, ...paginationState }, isEnglish)
+    ['company', params.keyword, params.active, params.order, params.platform, type],
+    (paginationState) => fetchCompanyList({ ...params, ...paginationState }, type)
   );
 }
