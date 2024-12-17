@@ -50,7 +50,6 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
       sx={{
         p: 0.5,
         gap: 0.5,
-        width: 140,
         display: 'flex',
         flexDirection: 'row',
         [`& .${menuItemClasses.root}`]: {

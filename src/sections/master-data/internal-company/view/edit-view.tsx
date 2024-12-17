@@ -42,7 +42,7 @@ import {
   useUpdateStatus,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
-import { companySchema } from 'src/services/master-data/company/schemas/company-schema';
+import { CompanyDTO, companySchema } from 'src/services/master-data/company/schemas/company-schema';
 import { Status } from 'src/services/master-data/company/types';
 
 export function EditInternalCompanyView() {
@@ -78,6 +78,7 @@ export function EditInternalCompanyView() {
     status: data?.progress_statuses ?? [],
     category: data?.categories ?? [],
     product: data?.products ?? [],
+    image: data?.image,
   };
   // Status
   const onAddStatus = () => {
@@ -213,34 +214,22 @@ export function EditInternalCompanyView() {
   React.useEffect(() => {
     setProducts(data?.products ?? []);
   }, [data]);
+
   React.useEffect(() => {
     setCategories(data?.categories ?? []);
   }, [data]);
+
   React.useEffect(() => {
     setStatuses(data?.progress_statuses ?? []);
   }, [data]);
 
-  const handleChangeStatus = (e: SelectChangeEvent<string>, index: number) => {
-    const value = e?.target?.value;
-    console.log(value, 'status');
-  };
-  const handleChangeType = (e: SelectChangeEvent<string>, index: number) => {
-    const value = e?.target?.value;
-  };
-
-  const handleSubmit = (formData: any) => {
-    toast.success('Data added successfully', {
-      position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
-      transition: Bounce,
+  const handleSubmit = (formData: CompanyDTO) => {
+    console.log(formData, 'formData');
+    updateCompany({
+      ...formData,
+      id: Number(id),
+      type: 'vendor',
     });
-    navigate('/internal-company');
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -311,6 +300,7 @@ export function EditInternalCompanyView() {
                     name: 'cover',
                     control,
                   }}
+                  defaultImage={defaultValues?.image}
                 />
               </Grid>
 
@@ -374,7 +364,6 @@ export function EditInternalCompanyView() {
                         sx={{
                           p: 0.5,
                           gap: 0.5,
-                          width: 140,
                           display: 'flex',
                           flexDirection: 'row',
                           [`& .${menuItemClasses.root}`]: {
@@ -453,7 +442,6 @@ export function EditInternalCompanyView() {
                       sx={{
                         p: 0.5,
                         gap: 0.5,
-                        width: 140,
                         display: 'flex',
                         flexDirection: 'row',
                         [`& .${menuItemClasses.root}`]: {
@@ -504,7 +492,6 @@ export function EditInternalCompanyView() {
                         sx={{
                           p: 0.5,
                           gap: 0.5,
-                          width: 140,
                           display: 'flex',
                           flexDirection: 'row',
                           [`& .${menuItemClasses.root}`]: {
@@ -595,7 +582,6 @@ export function EditInternalCompanyView() {
                         sx={{
                           p: 0.5,
                           gap: 0.5,
-                          width: 140,
                           display: 'flex',
                           flexDirection: 'row',
                           [`& .${menuItemClasses.root}`]: {

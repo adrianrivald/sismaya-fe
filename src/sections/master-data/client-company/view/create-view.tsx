@@ -34,7 +34,7 @@ import { useAddCompany } from 'src/services/master-data/company';
 export function CreateClientCompanyView() {
   const { mutate: addCompany } = useAddCompany();
   const handleSubmit = (formData: CompanyDTO) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     addCompany({
       ...formData,
       type: 'holding',

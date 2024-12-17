@@ -36,6 +36,7 @@ import {
   useUpdateDivision,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
+import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 
 export function EditClientCompanyView() {
   const { id } = useParams();
@@ -51,6 +52,7 @@ export function EditClientCompanyView() {
     name: data?.name,
     abbreviation: data?.abbreviation,
     department: data?.department ?? [],
+    image: data?.image,
   };
 
   const onAddDepartment = () => {
@@ -61,11 +63,11 @@ export function EditClientCompanyView() {
     setDepartment('');
   };
 
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = (formData: CompanyDTO) => {
     updateCompany({
       ...formData,
       type: 'holding',
-      id,
+      id: Number(id),
     });
   };
 
@@ -88,20 +90,16 @@ export function EditClientCompanyView() {
   };
 
   const onClickDelete = async (divisionId: number) => {
-    await deleteDivision(divisionId);
+    deleteDivision(divisionId);
   };
 
   const onClickEdit = async (value: string, divisionId: number) => {
-    await updateDivision({
+    updateDivision({
       name: value,
       id: divisionId,
       company_id: Number(id),
     });
   };
-
-  useEffect(() => {
-    console.log(departments, 'departments');
-  }, [departments]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -124,7 +122,7 @@ export function EditClientCompanyView() {
             },
           }}
         >
-          {({ register, control, watch, formState }) => (
+          {({ register, control, formState }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <TextField
@@ -171,6 +169,7 @@ export function EditClientCompanyView() {
                     name: 'cover',
                     control,
                   }}
+                  defaultImage={defaultValues?.image}
                 />
               </Grid>
 
@@ -206,7 +205,6 @@ export function EditClientCompanyView() {
                         sx={{
                           p: 0.5,
                           gap: 0.5,
-                          width: 140,
                           display: 'flex',
                           flexDirection: 'row',
                           [`& .${menuItemClasses.root}`]: {

@@ -7,6 +7,7 @@ export interface Company {
     type?: string;
     progress_statuses: Status[]
     department: Department[]
+    image: string
 }
 
 export interface Status {

@@ -60,6 +60,8 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     table.setPageIndex(0);
   };
 
+  console.log(table.getRowCount(), 'getRowCount()');
+
   const onChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     table.setPageSize(Number(event.target.value));
     // onResetPage();

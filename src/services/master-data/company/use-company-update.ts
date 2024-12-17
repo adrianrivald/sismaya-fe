@@ -1,26 +1,41 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
+import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { CompanyDTO } from "./schemas/company-schema";
 
-export type UpdateCompany = CompanyDTO & {id: number, type: string};
+export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any};
 
 export function useUpdateCompany() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateCompany) => {
-        const { name, abbreviation, type, id } = formData;
+        const { name, abbreviation, type, id, cover } = formData;
+        const payload = {
+          name,
+          abbreviation,
+          type
+      }
+
+        if (cover) {
+
+          const imageData = new FormData();
+          imageData.append('file', cover as unknown as File);
+          const { url } = await uploadImage(
+            imageData
+          );
   
+          Object.assign(payload, {
+            image: url,
+          });
+          
+        }
   
         return http(`companies/${id}`, {
             method: "PUT",
-            data: {
-                name,
-                abbreviation,
-                type
-            },
+            data: payload
         });
       },
       {
