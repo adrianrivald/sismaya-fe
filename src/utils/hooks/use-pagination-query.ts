@@ -27,8 +27,8 @@ export function usePaginationQuery<TData>(
   const queryData = {
     items: query.data?.data ?? [],
     meta: {
-      total: query.data?.meta?.total ?? 0,
-      page: query.data?.meta?.current_page ?? 1,
+      total: query.data?.meta?.total_data ?? 0,
+      page: query.data?.meta?.page ?? 1,
       pageCount: query.data?.meta?.last_page ?? 1,
       pageLinks: query?.data?.meta?.links ?? []
     },

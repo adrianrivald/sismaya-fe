@@ -12,6 +12,7 @@ export function setSession(newSession: string) {
 
 export function flushStorage() {
   window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem("clientList");
 }
 
 export async function flushSession() {

@@ -12,6 +12,7 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
@@ -22,7 +23,12 @@ type TableRowProps = {
 };
 
 export function TableRow({ row, selected, onSelectRow }: TableRowProps) {
+  const navigate = useNavigate();
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+
+  const handleEdit = () => {
+    navigate(`${row.id}/edit`);
+  };
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -41,7 +47,7 @@ export function TableRow({ row, selected, onSelectRow }: TableRowProps) {
 
         <TableCell>{row.name}</TableCell>
 
-        <TableCell>{row.desc}</TableCell>
+        <TableCell>{row.description}</TableCell>
         <TableCell>
           <Box component="img" src={row.picture} />
         </TableCell>
@@ -77,7 +83,7 @@ export function TableRow({ row, selected, onSelectRow }: TableRowProps) {
             },
           }}
         >
-          <MenuItem onClick={handleClosePopover}>
+          <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
             Edit
           </MenuItem>

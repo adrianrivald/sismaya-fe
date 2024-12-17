@@ -1,15 +1,14 @@
 
-import { PaginationState } from '@tanstack/react-table';
-import { useLocation } from 'react-router-dom';
 import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
-import { http, RequestInitClient } from 'src/utils/http';
+import { http } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-function fetchInternalCompanyList(params: Partial<any>, isEnglish: boolean) {
+export function fetchRequestList(params: Partial<any>) {
   const baseUrl = window.location.origin;
-  const endpointUrl = new URL('/companies', baseUrl);
+  const endpointUrl = new URL('/requests', baseUrl);
+
 
   if (params.active) {
     endpointUrl.searchParams.append('active', params.active);
@@ -31,9 +30,9 @@ function fetchInternalCompanyList(params: Partial<any>, isEnglish: boolean) {
   );
 }
 
-export function useInternalCompanyList(params: Partial<any>, isEnglish: boolean) {
+export function useRequestList(params: Partial<any>, ) {
   return usePaginationQuery(
-    ['internal-company', params.keyword, params.active, params.order, params.platform, isEnglish],
-    (paginationState) => fetchInternalCompanyList({ ...params, ...paginationState }, isEnglish)
+    ['request', params.keyword, params.active, params.order, params.platform],
+    (paginationState) => fetchRequestList({ ...params, ...paginationState })
   );
 }

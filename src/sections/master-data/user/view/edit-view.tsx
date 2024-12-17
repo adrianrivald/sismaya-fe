@@ -15,34 +15,78 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Iconify } from 'src/components/iconify';
+import { Bounce, toast } from 'react-toastify';
+import { useUpdateUser, useUserById } from 'src/services/master-data/user';
+import { useRole } from 'src/services/master-data/role';
+import { FieldDropzone } from 'src/components/form';
+import {
+  UserDTO,
+  userSchema,
+  UserUpdateDTO,
+  userUpdateSchema,
+} from 'src/services/master-data/user/schemas/user-schema';
+import { useCompanies } from 'src/services/master-data/company';
+import { getSession } from 'src/sections/auth/session/session';
+import { API_URL } from 'src/constants';
+import { Department } from 'src/services/master-data/company/types';
 
 export function EditUserView() {
-  const defaultDummyData = {
-    company: 'company2',
-    name: 'adrian',
-    phone: '0838131121',
-    role: 'admin',
-    division: 'div1',
-    email: 'adrian@gmail.com',
-    password: 'asdasd',
-  };
-  const [showPassword, setShowPassword] = React.useState(false);
+  const { id } = useParams();
   const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = (formData: any) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/user/test/edit');
-    }, 1000);
-    console.log(formData, 'test');
+  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+
+  const { data: user } = useUserById(Number(id));
+  const { data: roles } = useRole();
+  const { mutate: updateUser } = useUpdateUser();
+  const { data: companies } = useCompanies();
+
+  const defaultValues = {
+    name: user?.user_info?.name,
+    email: user?.email,
+    phone: user?.phone,
+    role_id: user?.user_info?.role_id,
+    profile_picture: user?.user_info?.profile_picture ?? '',
+    company_id: user?.user_info?.company_id,
+    department_id: user?.user_info?.department_id,
   };
 
-  React.useEffect(() => {});
+  console.log(defaultValues, 'defaultValues');
+
+  useEffect(() => {
+    if (defaultValues?.company_id) {
+      fetchDivision(defaultValues?.company_id);
+    }
+  }, []);
+
+  const fetchDivision = async (companyId: number) => {
+    const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        setDivisions(value?.data);
+      })
+    );
+    return data;
+  };
+
+  const handleSubmit = (formData: UserUpdateDTO) => {
+    const payload = {
+      ...formData,
+      id: Number(id),
+    };
+    if (defaultValues?.profile_picture) {
+      Object.assign(payload, {
+        profile_picture: defaultValues?.profile_picture,
+      });
+    }
+    updateUser(payload);
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -61,12 +105,24 @@ export function EditUserView() {
           onSubmit={handleSubmit}
           options={{
             defaultValues: {
-              ...defaultDummyData,
+              ...defaultValues,
             },
           }}
+          schema={userUpdateSchema}
         >
-          {({ register, watch, formState }) => (
+          {({ register, watch, control, formState }) => (
             <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                  }}
+                  defaultImage={defaultValues?.profile_picture}
+                />
+              </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.name)}
@@ -90,47 +146,53 @@ export function EditUserView() {
                 <FormControl fullWidth>
                   <InputLabel id="select-company">Company</InputLabel>
                   <Select
-                    value={watch('company')}
                     labelId="select-company"
-                    error={Boolean(formState?.errors?.company)}
-                    {...register('company', {
+                    error={Boolean(formState?.errors?.company_id)}
+                    {...register('company_id', {
                       required: 'Company must be filled out',
+                      onChange: async () => {
+                        await fetchDivision(watch('company_id'));
+                      },
                     })}
                     label="Company"
+                    value={watch('company_id')}
                   >
-                    <MenuItem value="company1">Company 1</MenuItem>
-                    <MenuItem value="company2">Company 2</MenuItem>
+                    {companies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
-                {formState?.errors?.company && (
+                {formState?.errors?.company_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.company?.message)}
+                    {String(formState?.errors?.company_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>
-
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-division">Division</InputLabel>
-                  <Select
-                    value={watch('division')}
-                    labelId="select-division"
-                    error={Boolean(formState?.errors?.division)}
-                    {...register('division', {
-                      required: 'Division must be filled out',
-                    })}
-                    label="Division"
-                  >
-                    <MenuItem value="div1">Division 1</MenuItem>
-                    <MenuItem value="div2">Division 2</MenuItem>
-                  </Select>
-                </FormControl>
-                {formState?.errors?.division && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.division?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
+              {watch('company_id') ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-division">Division</InputLabel>
+                    <Select
+                      labelId="select-division"
+                      error={Boolean(formState?.errors?.department_id)}
+                      {...register('department_id', {
+                        required: 'Division must be filled out',
+                      })}
+                      label="Division"
+                      value={watch('department_id')}
+                    >
+                      {divisions?.map((division) => (
+                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.department_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.department_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.email)}
@@ -173,7 +235,7 @@ export function EditUserView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={12}>
+              {/* <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.password)}
                   fullWidth
@@ -201,27 +263,26 @@ export function EditUserView() {
                     {String(formState?.errors?.password?.message)}
                   </FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <InputLabel id="select-role">Role</InputLabel>
                   <Select
-                    value={watch('role')}
+                    value={watch('role_id')}
                     labelId="select-role"
-                    error={Boolean(formState?.errors?.role)}
-                    {...register('role', {
+                    error={Boolean(formState?.errors?.role_id)}
+                    {...register('role_id', {
                       required: 'Role must be filled out',
                     })}
                     label="Role"
                   >
-                    <MenuItem value="admin">Admin</MenuItem>
-                    <MenuItem value="staff">Staff</MenuItem>
+                    {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
                   </Select>
                 </FormControl>
-                {formState?.errors?.role && (
+                {formState?.errors?.role_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.role?.message)}
+                    {String(formState?.errors?.role_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>

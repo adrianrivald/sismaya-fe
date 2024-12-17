@@ -7,7 +7,6 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
-  Input,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -17,64 +16,91 @@ import {
   TextField,
   useTheme,
   Theme,
+  MenuList,
+  menuItemClasses,
 } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { API_URL } from 'src/constants';
-import { UseFormSetValue } from 'react-hook-form';
 import { FieldDropzone } from 'src/components/form';
-
-const divisions = ['Div 1', 'Div 2', 'Div 3', 'Div 4', 'Div 5'];
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-function getStyles(name: string, selectedDiv: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      selectedDiv.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
+import { Bounce, toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  useAddDivision,
+  useCompanyById,
+  useDeleteDivisionItem,
+  useUpdateCompany,
+  useUpdateDivision,
+} from 'src/services/master-data/company';
+import { Iconify } from 'src/components/iconify';
+import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 
 export function EditClientCompanyView() {
-  console.log(API_URL, 'API URL');
-  const theme = useTheme();
-  const defaultDummyData = {
-    name: 'Test Name',
-    description: 'Test desc',
-    division: [],
-  };
-  const [selectedDiv, setSelectedDiv] = React.useState<string[]>(defaultDummyData?.division ?? []);
+  const { id } = useParams();
+  const { data } = useCompanyById(Number(id));
+  const { mutate: updateCompany } = useUpdateCompany();
+  const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
+  const { mutate: addDivision } = useAddDivision();
+  const { mutate: updateDivision } = useUpdateDivision();
+  const [departments, setDepartments] = React.useState(data?.department ?? []);
+  const [department, setDepartment] = React.useState('');
 
-  const handleChange = (
-    event: SelectChangeEvent<typeof selectedDiv>,
-    setValue: UseFormSetValue<any>
-  ) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedDiv(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value
-    );
-    setValue('division', typeof value === 'string' ? value.split(',') : value);
+  const defaultValues = {
+    name: data?.name,
+    abbreviation: data?.abbreviation,
+    department: data?.department ?? [],
+    image: data?.image,
   };
 
-  const handleSubmit = (formData: any) => {
-    console.log(formData, 'test');
+  const onAddDepartment = () => {
+    addDivision({
+      name: department,
+      company_id: data?.id,
+    });
+    setDepartment('');
   };
+
+  const handleSubmit = (formData: CompanyDTO) => {
+    updateCompany({
+      ...formData,
+      type: 'holding',
+      id: Number(id),
+    });
+  };
+
+  React.useEffect(() => {
+    setDepartments(data?.department ?? []);
+  }, [data]);
+
+  const onChangeDivision = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setDepartments((prevDepartments) => {
+      const updatedDeparments = [...prevDepartments];
+      // Update the string at the specified index
+      const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
+      updatedDeparments[index].name = e.target.value;
+      return updatedDeparments;
+    });
+  };
+
+  const onChangeDivisionNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDepartment(e.target.value);
+  };
+
+  const onClickDelete = async (divisionId: number) => {
+    deleteDivision(divisionId);
+  };
+
+  const onClickEdit = async (value: string, divisionId: number) => {
+    updateDivision({
+      name: value,
+      id: divisionId,
+      company_id: Number(id),
+    });
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -92,128 +118,163 @@ export function EditClientCompanyView() {
           onSubmit={handleSubmit}
           options={{
             defaultValues: {
-              ...defaultDummyData,
+              ...defaultValues,
             },
           }}
         >
-          {({ register, watch, control, formState, setValue }) => {
-            console.log(formState.errors, 'formstate');
-            console.log(watch(), 'watch');
-            return (
-              <Grid container spacing={3} xs={12}>
-                <Grid item xs={12} md={12}>
-                  <TextField
-                    error={Boolean(formState?.errors?.name)}
-                    sx={{
-                      width: '100%',
-                    }}
-                    label="Client Name"
-                    {...register('name', {
-                      required: 'Client Name must be filled out',
-                    })}
-                    autoComplete="off"
-                  />
-                  {formState?.errors?.name && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.name?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid item xs={12} md={12}>
-                  <TextField
-                    error={Boolean(formState?.errors?.description)}
-                    multiline
-                    sx={{
-                      width: '100%',
-                    }}
-                    label="Client Description"
-                    rows={4}
-                    {...register('description', {
-                      required: 'Client Description must be filled out',
-                    })}
-                  />
-                  {formState?.errors?.description && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.description?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
+          {({ register, control, formState }) => (
+            <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.name)}
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Name"
+                  {...register('name', {
+                    required: 'Name must be filled out',
+                  })}
+                />
+                {formState?.errors?.name && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.name?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.abbreviation)}
+                  multiline
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Description"
+                  rows={4}
+                  {...register('abbreviation', {
+                    required: 'Description must be filled out',
+                  })}
+                />
+                {formState?.errors?.abbreviation && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.abbreviation?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <FieldDropzone
-                    label="Upload Picture"
-                    helperText="Picture maximum 5mb size"
-                    controller={{
-                      name: 'cover',
-                      control,
-                      rules: {
-                        required: {
-                          value: true,
-                          message: 'Picture must be uploaded',
-                        },
-                      },
-                    }}
-                    error={formState.errors?.cover}
-                  />
-                </Grid>
+              <Grid item xs={12} md={6}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                  }}
+                  defaultImage={defaultValues?.image}
+                />
+              </Grid>
 
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="client-division-select">Client Division</InputLabel>
-                    <Select
-                      error={Boolean(formState?.errors?.division)}
-                      label="Client Division"
-                      labelId="client-division-select"
-                      id="division"
-                      {...register('division', {
-                        required: 'Division must be filled out',
-                      })}
-                      multiple
-                      value={selectedDiv}
-                      onChange={(e) => handleChange(e, setValue)}
-                      input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {selected.map((value) => (
-                            <Chip key={value} label={value} />
-                          ))}
-                        </Box>
-                      )}
-                      MenuProps={MenuProps}
+              <Grid item xs={12} md={12}>
+                <Typography variant="h4" color="primary" mb={4}>
+                  Division
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {data?.department?.map((item, index) => (
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                      alignItems="center"
                     >
-                      {divisions.map((name) => (
-                        <MenuItem
-                          key={name}
-                          value={name}
-                          style={getStyles(name, selectedDiv, theme)}
-                        >
-                          {name}
+                      <TextField
+                        error={Boolean(formState?.errors?.division)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Division"
+                        value={item.name}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          onChangeDivision(e, item?.id)
+                        }
+                        // InputProps={{
+                        //   readOnly: true,
+                        // }}
+                      />
+
+                      <MenuList
+                        disablePadding
+                        sx={{
+                          p: 0.5,
+                          gap: 0.5,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          [`& .${menuItemClasses.root}`]: {
+                            px: 1,
+                            gap: 2,
+                            borderRadius: 0.75,
+                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                          },
+                        }}
+                      >
+                        <MenuItem onClick={() => onClickEdit(departments[index].name, item?.id)}>
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
                         </MenuItem>
-                      ))}
-                    </Select>
+                        <MenuItem
+                          onClick={() => onClickDelete(item?.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" />
+                          Delete
+                        </MenuItem>
+                      </MenuList>
+                      {formState?.errors?.division && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.division?.message)}
+                        </FormHelperText>
+                      )}
+                    </Stack>
+                  ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <TextField
+                      error={Boolean(formState?.errors?.division)}
+                      sx={{
+                        width: '100%',
+                      }}
+                      label="Division"
+                      value={department}
+                      onChange={onChangeDivisionNew}
+                    />
                     {formState?.errors?.division && (
                       <FormHelperText sx={{ color: 'error.main' }}>
                         {String(formState?.errors?.division?.message)}
                       </FormHelperText>
                     )}
-                  </FormControl>
-                </Grid>
-
-                <Box
-                  display="flex"
-                  justifyContent="end"
-                  width="100%"
-                  sx={{
-                    mt: 8,
-                  }}
-                >
-                  <Button type="submit" variant="contained" color="primary">
-                    Submit
-                  </Button>
+                  </Stack>
                 </Box>
+                <Button onClick={onAddDepartment} sx={{ marginY: 2 }}>
+                  Add More
+                </Button>
               </Grid>
-            );
-          }}
+
+              <Box
+                display="flex"
+                justifyContent="end"
+                width="100%"
+                sx={{
+                  mt: 8,
+                }}
+              >
+                <Button type="submit" variant="contained" color="primary">
+                  Submit
+                </Button>
+              </Box>
+            </Grid>
+          )}
         </Form>
       </Grid>
     </DashboardContent>

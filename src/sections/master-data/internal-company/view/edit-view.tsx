@@ -16,6 +16,8 @@ import {
   TextField,
   useTheme,
   Theme,
+  MenuList,
+  menuItemClasses,
 } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
@@ -24,78 +26,210 @@ import { Form } from 'src/components/form/form';
 import React from 'react';
 import { API_URL } from 'src/constants';
 import { FieldDropzone } from 'src/components/form';
-
-const categories = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'];
-const products = ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5'];
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-function getStyles(name: string, selectedCat: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      selectedCat.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
-
-function getStylesProduct(name: string, selectedProduct: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      selectedProduct.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
+import { Bounce, toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  useAddCategory,
+  useAddProduct,
+  useAddStatus,
+  useCompanyById,
+  useDeleteCategoryItem,
+  useDeleteProductItem,
+  useDeleteStatusItem,
+  useUpdateCategory,
+  useUpdateCompany,
+  useUpdateProduct,
+  useUpdateStatus,
+} from 'src/services/master-data/company';
+import { Iconify } from 'src/components/iconify';
+import { CompanyDTO, companySchema } from 'src/services/master-data/company/schemas/company-schema';
+import { Status } from 'src/services/master-data/company/types';
 
 export function EditInternalCompanyView() {
-  console.log(API_URL, 'API URL');
-  const [selectedStatuses, setSelectedStatuses] = React.useState([
-    {
-      status: null,
-      type: null,
-    },
-  ]);
-  const theme = useTheme();
-  const defaultDummyData = {
-    name: 'Test Name',
-    description: 'Test desc',
-    // status: 'todo',
-    category: ['Cat 1', 'Cat 2'],
-    product: ['Product 2', 'Product 3'],
-  };
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { data } = useCompanyById(Number(id));
+  const { mutate: updateCompany } = useUpdateCompany();
 
+  // Category CRUD
+  const { mutate: deleteCategory } = useDeleteCategoryItem(Number(id));
+  const { mutate: addCategory } = useAddCategory();
+  const { mutate: updateCategory } = useUpdateCategory();
+  const [categories, setCategories] = React.useState(data?.categories ?? []);
+  const [category, setCategory] = React.useState('');
+
+  // Product CRUD
+  const { mutate: deleteProduct } = useDeleteProductItem(Number(id));
+  const { mutate: addProduct } = useAddProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
+  const [products, setProducts] = React.useState(data?.products ?? []);
+  const [product, setProduct] = React.useState('');
+
+  // Product CRUD
+  const { mutate: deleteStatus } = useDeleteStatusItem(Number(id));
+  const { mutate: addStatus } = useAddStatus();
+  const { mutate: updateStatus } = useUpdateStatus();
+  const [statuses, setStatuses] = React.useState(data?.progress_statuses ?? []);
+  const [status, setStatus] = React.useState<Partial<Status>>({});
+
+  const defaultValues = {
+    name: data?.name,
+    abbreviation: data?.abbreviation,
+    status: data?.progress_statuses ?? [],
+    category: data?.categories ?? [],
+    product: data?.products ?? [],
+    image: data?.image,
+  };
+  // Status
   const onAddStatus = () => {
-    setSelectedStatuses([
-      ...selectedStatuses,
-      [
-        {
-          status: null,
-          type: null,
-        },
-      ],
-    ] as any);
+    console.log(status, 'status sekarang');
+    addStatus({
+      name: status?.name,
+      company_id: data?.id,
+      step: status?.step,
+      sort: statuses.length + 1,
+    });
+    setStatus({});
   };
 
-  const handleChangeStatus = (e: SelectChangeEvent<string>, index: number) => {
-    const value = e?.target?.value;
-    console.log(value, 'status');
-  };
-  const handleChangeType = (e: SelectChangeEvent<string>, index: number) => {
-    const value = e?.target?.value;
-    console.log(value, 'tipetipe');
+  const onChangeStatus = (e: SelectChangeEvent<string>, itemId: number, type: string) => {
+    if (type === 'status') {
+      setStatuses((prevStatuses) => {
+        const updatedStatuses = [...prevStatuses];
+        // Update the string at the specified index
+        const index = updatedStatuses?.findIndex((item) => item?.id === itemId);
+        updatedStatuses[index].name = e.target.value;
+        return updatedStatuses;
+      });
+    } else {
+      setStatuses((prevStatuses) => {
+        const updatedStatuses = [...prevStatuses];
+        // Update the string at the specified index
+        const index = updatedStatuses?.findIndex((item) => item?.id === itemId);
+        updatedStatuses[index].step = e.target.value;
+        return updatedStatuses;
+      });
+    }
   };
 
-  const handleSubmit = (formData: any) => {
-    console.log(formData, 'test');
+  const onChangeStatusNew = (e: SelectChangeEvent<string>, type: string) => {
+    if (type === 'status') {
+      setStatus({
+        ...status,
+        name: e.target.value,
+      });
+    } else {
+      setStatus({
+        ...status,
+        step: e.target.value,
+      });
+    }
+  };
+
+  const onClickDeleteStatus = async (statusId: number) => {
+    deleteStatus(statusId);
+  };
+
+  const onClickEditStatus = async (value: string, step: string, statusId: number) => {
+    updateStatus({
+      name: value,
+      id: statusId,
+      company_id: Number(id),
+      step,
+      sort: statuses.length + 1,
+    });
+  };
+
+  // Category
+  const onAddCategory = () => {
+    addCategory({
+      name: category,
+      company_id: data?.id,
+    });
+    setCategory('');
+  };
+
+  const onChangeCategory = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setCategories((prevCategories) => {
+      const updatedCategories = [...prevCategories];
+      // Update the string at the specified index
+      const index = updatedCategories?.findIndex((item) => item?.id === itemId);
+      updatedCategories[index].name = e.target.value;
+      return updatedCategories;
+    });
+  };
+
+  const onChangeCategoryNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCategory(e.target.value);
+  };
+
+  const onClickDeleteCategory = async (categoryId: number) => {
+    deleteCategory(categoryId);
+  };
+
+  const onClickEditCategory = async (value: string, categoryId: number) => {
+    updateCategory({
+      name: value,
+      id: categoryId,
+      company_id: Number(id),
+    });
+  };
+
+  // Product
+  const onAddProduct = () => {
+    addProduct({
+      name: product,
+      company_id: data?.id,
+    });
+    setProduct('');
+  };
+
+  const onChangeProduct = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setProducts((prevProducts) => {
+      const updatedProducts = [...prevProducts];
+      // Update the string at the specified index
+      const index = updatedProducts?.findIndex((item) => item?.id === itemId);
+      updatedProducts[index].name = e.target.value;
+      return updatedProducts;
+    });
+  };
+
+  const onChangeProductNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value, 'value product');
+    setProduct(e.target.value);
+  };
+
+  const onClickDeleteProduct = async (productId: number) => {
+    deleteProduct(productId);
+  };
+
+  const onClickEditProduct = async (value: string, productId: number) => {
+    updateProduct({
+      name: value,
+      id: productId,
+      company_id: Number(id),
+    });
+  };
+
+  React.useEffect(() => {
+    setProducts(data?.products ?? []);
+  }, [data]);
+
+  React.useEffect(() => {
+    setCategories(data?.categories ?? []);
+  }, [data]);
+
+  React.useEffect(() => {
+    setStatuses(data?.progress_statuses ?? []);
+  }, [data]);
+
+  const handleSubmit = (formData: CompanyDTO) => {
+    console.log(formData, 'formData');
+    updateCompany({
+      ...formData,
+      id: Number(id),
+      type: 'vendor',
+    });
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -114,9 +248,10 @@ export function EditInternalCompanyView() {
           onSubmit={handleSubmit}
           options={{
             defaultValues: {
-              ...defaultDummyData,
+              ...defaultValues,
             },
           }}
+          schema={companySchema}
         >
           {({ register, control, watch, formState }) => (
             <Grid container spacing={3} xs={12}>
@@ -139,20 +274,20 @@ export function EditInternalCompanyView() {
               </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
-                  error={Boolean(formState?.errors?.description)}
+                  error={Boolean(formState?.errors?.abbreviation)}
                   multiline
                   sx={{
                     width: '100%',
                   }}
-                  label="Deskripsi"
+                  label="Description"
                   rows={4}
-                  {...register('description', {
-                    required: 'Deskripsi must be filled out',
+                  {...register('abbreviation', {
+                    required: 'Description must be filled out',
                   })}
                 />
-                {formState?.errors?.description && (
+                {formState?.errors?.abbreviation && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.description?.message)}
+                    {String(formState?.errors?.abbreviation?.message)}
                   </FormHelperText>
                 )}
               </Grid>
@@ -165,12 +300,16 @@ export function EditInternalCompanyView() {
                     name: 'cover',
                     control,
                   }}
+                  defaultImage={defaultValues?.image}
                 />
               </Grid>
 
               <Grid item xs={12} md={12}>
+                <Typography variant="h4" color="primary" mb={4}>
+                  Progress Status
+                </Typography>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  {selectedStatuses?.map((item, index) => (
+                  {data?.progress_statuses?.map((item, index) => (
                     <Stack
                       direction="row"
                       justifyContent="space-between"
@@ -178,23 +317,18 @@ export function EditInternalCompanyView() {
                       alignItems="center"
                     >
                       <Box width="50%">
-                        <FormControl fullWidth>
-                          <InputLabel id="status">Status</InputLabel>
-                          <Select
-                            error={Boolean(formState?.errors?.status)}
-                            {...register('status', {
-                              required: 'Status must be filled out',
-                            })}
-                            label="Status"
-                            onChange={(e: SelectChangeEvent<string>) =>
-                              handleChangeStatus(e, index)
-                            }
-                          >
-                            <MenuItem value="stat1">Backlog</MenuItem>
-                            <MenuItem value="stat2">In Review</MenuItem>
-                            <MenuItem value="stat3">Almost Done</MenuItem>
-                          </Select>
-                        </FormControl>
+                        <TextField
+                          error={Boolean(formState?.errors?.status)}
+                          sx={{
+                            width: '100%',
+                          }}
+                          label="Status"
+                          value={item?.name}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChangeStatus(e, item?.id, 'status')
+                          }
+                        />
+
                         {formState?.errors?.status && (
                           <FormHelperText sx={{ color: 'error.main' }}>
                             {String(formState?.errors?.status?.message)}
@@ -207,14 +341,14 @@ export function EditInternalCompanyView() {
                           <InputLabel id="type">Type</InputLabel>
                           <Select
                             error={Boolean(formState?.errors?.type)}
-                            {...register('type', {
-                              required: 'Type must be filled out',
-                            })}
                             label="Type"
-                            onChange={(e: SelectChangeEvent<string>) => handleChangeType(e, index)}
+                            value={item?.step}
+                            onChange={(e: SelectChangeEvent<string>) =>
+                              onChangeStatus(e, item?.id, 'step')
+                            }
                           >
-                            <MenuItem value="todo">Todo</MenuItem>
-                            <MenuItem value="inprogress">In Progress</MenuItem>
+                            <MenuItem value="to_do">Todo</MenuItem>
+                            <MenuItem value="in_progress">In Progress</MenuItem>
                             <MenuItem value="done">Done</MenuItem>
                           </Select>
                         </FormControl>
@@ -224,92 +358,286 @@ export function EditInternalCompanyView() {
                           </FormHelperText>
                         )}
                       </Box>
+
+                      <MenuList
+                        disablePadding
+                        sx={{
+                          p: 0.5,
+                          gap: 0.5,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          [`& .${menuItemClasses.root}`]: {
+                            px: 1,
+                            gap: 2,
+                            borderRadius: 0.75,
+                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                          },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() =>
+                            onClickEditStatus(statuses[index].name, statuses[index].step, item?.id)
+                          }
+                        >
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => onClickDeleteStatus(item?.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" />
+                          Delete
+                        </MenuItem>
+                      </MenuList>
                     </Stack>
                   ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <Box width="50%">
+                      <TextField
+                        error={Boolean(formState?.errors?.status)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Status"
+                        value={status?.name}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          onChangeStatusNew(e, 'status')
+                        }
+                      />
+
+                      {formState?.errors?.status && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.status?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+
+                    <Box width="50%">
+                      <FormControl fullWidth>
+                        <InputLabel id="type">Type</InputLabel>
+                        <Select
+                          error={Boolean(formState?.errors?.type)}
+                          label="Type"
+                          value={status?.step}
+                          onChange={(e: SelectChangeEvent<string>) => onChangeStatusNew(e, 'step')}
+                        >
+                          <MenuItem value="to_do">Todo</MenuItem>
+                          <MenuItem value="in_progress">In Progress</MenuItem>
+                          <MenuItem value="done">Done</MenuItem>
+                        </Select>
+                      </FormControl>
+                      {formState?.errors?.type && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.type?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        p: 0.5,
+                        gap: 0.5,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        [`& .${menuItemClasses.root}`]: {
+                          px: 1,
+                          gap: 2,
+                          borderRadius: 0.75,
+                          [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                        },
+                      }}
+                    >
+                      <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
+                        Add More
+                      </Button>
+                    </Box>
+                  </Stack>
                 </Box>
-                <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Typography variant="h4" color="primary" mb={4}>
+                  Category
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {data?.categories?.map((item, index) => (
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                      alignItems="center"
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.category)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Category"
+                        value={item.name}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          onChangeCategory(e, item?.id)
+                        }
+                        // InputProps={{
+                        //   readOnly: true,
+                        // }}
+                      />
+
+                      <MenuList
+                        disablePadding
+                        sx={{
+                          p: 0.5,
+                          gap: 0.5,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          [`& .${menuItemClasses.root}`]: {
+                            px: 1,
+                            gap: 2,
+                            borderRadius: 0.75,
+                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                          },
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => onClickEditCategory(categories[index].name, item?.id)}
+                        >
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => onClickDeleteCategory(item?.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" />
+                          Delete
+                        </MenuItem>
+                      </MenuList>
+                      {formState?.errors?.category && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.category?.message)}
+                        </FormHelperText>
+                      )}
+                    </Stack>
+                  ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <TextField
+                      error={Boolean(formState?.errors?.category)}
+                      sx={{
+                        width: '100%',
+                      }}
+                      label="Category"
+                      value={category}
+                      onChange={onChangeCategoryNew}
+                    />
+                    {formState?.errors?.category && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.category?.message)}
+                      </FormHelperText>
+                    )}
+                  </Stack>
+                </Box>
+                <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
                   Add More
                 </Button>
               </Grid>
 
               <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-outlined-label-type">Kategori</InputLabel>
-                  <Select
-                    label="Kategori"
-                    labelId="demo-simple-select-outlined-label-type"
-                    id="category"
-                    {...register('category', {
-                      required: 'Kategori must be filled out',
-                    })}
-                    multiple
-                    value={watch('category')}
-                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {watch('category').map((value: any) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
-                  >
-                    {categories.map((name) => (
-                      <MenuItem
-                        key={name}
-                        value={name}
-                        style={getStyles(name, watch('category'), theme)}
-                      >
-                        {name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.category && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.category?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
+                <Typography variant="h4" color="primary" mb={4}>
+                  Product
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {data?.products?.map((item, index) => (
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={3}
+                      alignItems="center"
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.product)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Product"
+                        value={item.name}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          onChangeProduct(e, item?.id)
+                        }
+                        // InputProps={{
+                        //   readOnly: true,
+                        // }}
+                      />
 
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-outlined-label-type">Produk</InputLabel>
-                  <Select
-                    label="Produk"
-                    labelId="demo-simple-select-outlined-label-type"
-                    id="product"
-                    {...register('product', {
-                      required: 'Produk must be filled out',
-                    })}
-                    multiple
-                    value={watch('product')}
-                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {watch('product').map((value: any) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
-                  >
-                    {products.map((name) => (
-                      <MenuItem
-                        key={name}
-                        value={name}
-                        style={getStyles(name, watch('product'), theme)}
+                      <MenuList
+                        disablePadding
+                        sx={{
+                          p: 0.5,
+                          gap: 0.5,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          [`& .${menuItemClasses.root}`]: {
+                            px: 1,
+                            gap: 2,
+                            borderRadius: 0.75,
+                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                          },
+                        }}
                       >
-                        {name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.product && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.product?.message)}
-                  </FormHelperText>
-                )}
+                        <MenuItem
+                          onClick={() => onClickEditProduct(products[index].name, item?.id)}
+                        >
+                          <Iconify icon="solar:pen-bold" />
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => onClickDeleteProduct(item?.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" />
+                          Delete
+                        </MenuItem>
+                      </MenuList>
+                      {formState?.errors?.product && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.product?.message)}
+                        </FormHelperText>
+                      )}
+                    </Stack>
+                  ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <TextField
+                      error={Boolean(formState?.errors?.product)}
+                      sx={{
+                        width: '100%',
+                      }}
+                      label="Product"
+                      value={product}
+                      onChange={onChangeProductNew}
+                    />
+                    {formState?.errors?.product && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.product?.message)}
+                      </FormHelperText>
+                    )}
+                  </Stack>
+                </Box>
+                <Button onClick={onAddProduct} sx={{ marginY: 2 }}>
+                  Add More
+                </Button>
               </Grid>
 
               <Box
