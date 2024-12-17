@@ -60,6 +60,7 @@ export function EditUserView() {
     if (defaultValues?.company_id) {
       fetchDivision(defaultValues?.company_id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDivision = async (companyId: number) => {
