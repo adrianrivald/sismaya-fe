@@ -17,8 +17,9 @@ export interface Meta {
   from: number;
   to: number;
   path: string;
-  per_page: number;
-  total: number;
+  page: number;
+  page_size: number;
+  total_data: number;
   links: MetaLink[];
 }
 
