@@ -23,7 +23,12 @@ import { Bounce, toast } from 'react-toastify';
 import { useUpdateUser, useUserById } from 'src/services/master-data/user';
 import { useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
-import { UserDTO, userSchema } from 'src/services/master-data/user/schemas/user-schema';
+import {
+  UserDTO,
+  userSchema,
+  UserUpdateDTO,
+  userUpdateSchema,
+} from 'src/services/master-data/user/schemas/user-schema';
 import { useCompanies } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
 import { API_URL } from 'src/constants';
@@ -46,7 +51,7 @@ export function EditUserView() {
     role_id: user?.user_info?.role_id,
     profile_picture: user?.user_info?.profile_picture ?? '',
     company_id: user?.user_info?.company_id,
-    department: user?.user_info?.department_id,
+    department_id: user?.user_info?.department_id,
   };
 
   console.log(defaultValues, 'defaultValues');
@@ -55,7 +60,7 @@ export function EditUserView() {
     if (defaultValues?.company_id) {
       fetchDivision(defaultValues?.company_id);
     }
-  }, [companies, defaultValues?.company_id]);
+  }, []);
 
   const fetchDivision = async (companyId: number) => {
     const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
@@ -64,18 +69,23 @@ export function EditUserView() {
       },
     }).then((res) =>
       res.json().then((value) => {
-        console.log(value?.data, 'value?.data');
         setDivisions(value?.data);
       })
     );
     return data;
   };
 
-  const handleSubmit = (formData: UserDTO) => {
-    updateUser({
+  const handleSubmit = (formData: UserUpdateDTO) => {
+    const payload = {
       ...formData,
       id: Number(id),
-    });
+    };
+    if (defaultValues?.profile_picture) {
+      Object.assign(payload, {
+        profile_picture: defaultValues?.profile_picture,
+      });
+    }
+    updateUser(payload);
   };
 
   return (
@@ -98,7 +108,7 @@ export function EditUserView() {
               ...defaultValues,
             },
           }}
-          schema={userSchema}
+          schema={userUpdateSchema}
         >
           {({ register, watch, control, formState }) => (
             <Grid container spacing={3} xs={12}>
@@ -132,33 +142,32 @@ export function EditUserView() {
                 )}
               </Grid>
 
-              {watch('company_id') ? (
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="select-company">Company</InputLabel>
-                    <Select
-                      labelId="select-company"
-                      error={Boolean(formState?.errors?.company_id)}
-                      {...register('company_id', {
-                        required: 'Company must be filled out',
-                        onChange: async () => {
-                          await fetchDivision(watch('company_id'));
-                        },
-                      })}
-                      label="Company"
-                    >
-                      {companies?.map((company) => (
-                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {formState?.errors?.company_id && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.company_id?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-              ) : null}
+              <Grid item xs={12} md={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="select-company">Company</InputLabel>
+                  <Select
+                    labelId="select-company"
+                    error={Boolean(formState?.errors?.company_id)}
+                    {...register('company_id', {
+                      required: 'Company must be filled out',
+                      onChange: async () => {
+                        await fetchDivision(watch('company_id'));
+                      },
+                    })}
+                    label="Company"
+                    value={watch('company_id')}
+                  >
+                    {companies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {formState?.errors?.company_id && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.company_id?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
               {watch('company_id') ? (
                 <Grid item xs={12} md={12}>
                   <FormControl fullWidth>
@@ -170,6 +179,7 @@ export function EditUserView() {
                         required: 'Division must be filled out',
                       })}
                       label="Division"
+                      value={watch('department_id')}
                     >
                       {divisions?.map((division) => (
                         <MenuItem value={division?.id}>{division?.name}</MenuItem>
@@ -261,7 +271,7 @@ export function EditUserView() {
                   <Select
                     value={watch('role_id')}
                     labelId="select-role"
-                    error={Boolean(formState?.errors?.role)}
+                    error={Boolean(formState?.errors?.role_id)}
                     {...register('role_id', {
                       required: 'Role must be filled out',
                     })}
