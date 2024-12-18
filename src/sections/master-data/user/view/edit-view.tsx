@@ -21,18 +21,267 @@ import React, { useEffect } from 'react';
 import { Iconify } from 'src/components/iconify';
 import { Bounce, toast } from 'react-toastify';
 import { useUpdateUser, useUserById } from 'src/services/master-data/user';
-import { useRole } from 'src/services/master-data/role';
+import { Role, useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
-import {
-  UserDTO,
-  userSchema,
-  UserUpdateDTO,
-  userUpdateSchema,
-} from 'src/services/master-data/user/schemas/user-schema';
+import { UserUpdateDTO, userUpdateSchema } from 'src/services/master-data/user/schemas/user-schema';
 import { useCompanies } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
 import { API_URL } from 'src/constants';
-import { Department } from 'src/services/master-data/company/types';
+import { Company, Department } from 'src/services/master-data/company/types';
+import {
+  Control,
+  FormState,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from 'react-hook-form';
+import { User } from 'src/services/master-data/user/types';
+
+interface UserValues {
+  name: string | undefined;
+  email: string | undefined;
+  phone: string | undefined;
+  role_id: number | undefined;
+  profile_picture: string;
+  company_id: number | undefined;
+  department_id: number | undefined;
+}
+interface EditFormProps {
+  formState: FormState<UserUpdateDTO>;
+  register: UseFormRegister<UserUpdateDTO>;
+  control: Control<UserUpdateDTO>;
+  setValue: UseFormSetValue<UserUpdateDTO>;
+  watch: UseFormWatch<UserUpdateDTO>;
+  defaultValues: UserValues;
+  fetchDivision: (companyId: number) => void;
+  companies: Company[] | undefined;
+  divisions: Department[] | [];
+  roles: Role[] | undefined;
+  isLoading: boolean;
+}
+
+function EditForm({
+  formState,
+  register,
+  control,
+  setValue,
+  watch,
+  defaultValues,
+  fetchDivision,
+  companies,
+  divisions,
+  roles,
+  isLoading,
+}: EditFormProps) {
+  useEffect(() => {
+    setValue('name', defaultValues?.name);
+    setValue('email', defaultValues?.email);
+    setValue('phone', defaultValues?.phone);
+    setValue('role_id', defaultValues?.role_id);
+    setValue('company_id', defaultValues?.company_id);
+    setValue('department_id', defaultValues?.department_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValues]);
+
+  return (
+    <Grid container spacing={3} xs={12}>
+      <Grid item xs={12} md={12}>
+        <FieldDropzone
+          label="Upload Picture"
+          helperText="Picture maximum 5mb size"
+          controller={{
+            name: 'cover',
+            control,
+          }}
+          defaultImage={defaultValues?.profile_picture}
+        />
+      </Grid>
+      <Grid item xs={12} md={12}>
+        <TextField
+          error={Boolean(formState?.errors?.name)}
+          sx={{
+            width: '100%',
+          }}
+          label="Name"
+          {...register('name', {
+            required: 'Name must be filled out',
+          })}
+          autoComplete="off"
+        />
+        {formState?.errors?.name && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.name?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+
+      <Grid item xs={12} md={12}>
+        <FormControl fullWidth>
+          <InputLabel id="select-company">Company</InputLabel>
+          <Select
+            labelId="select-company"
+            error={Boolean(formState?.errors?.company_id)}
+            {...register('company_id', {
+              required: 'Company must be filled out',
+              onChange: () => {
+                fetchDivision(watch('company_id') as number);
+              },
+            })}
+            label="Company"
+            value={watch('company_id')}
+          >
+            {companies?.map((company) => <MenuItem value={company?.id}>{company?.name}</MenuItem>)}
+          </Select>
+        </FormControl>
+        {formState?.errors?.company_id && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.company_id?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+      {watch('company_id') ? (
+        <Grid item xs={12} md={12}>
+          <FormControl fullWidth>
+            <InputLabel id="select-division">Division</InputLabel>
+            <Select
+              labelId="select-division"
+              error={Boolean(formState?.errors?.department_id)}
+              {...register('department_id', {
+                required: 'Division must be filled out',
+              })}
+              label="Division"
+              value={watch('department_id')}
+            >
+              {divisions?.map((division) => (
+                <MenuItem value={division?.id}>{division?.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {formState?.errors?.department_id && (
+            <FormHelperText sx={{ color: 'error.main' }}>
+              {String(formState?.errors?.department_id?.message)}
+            </FormHelperText>
+          )}
+        </Grid>
+      ) : null}
+      <Grid item xs={12} md={12}>
+        <TextField
+          error={Boolean(formState?.errors?.email)}
+          sx={{
+            width: '100%',
+          }}
+          type="email"
+          label="Email"
+          {...register('email', {
+            required: 'Email must be filled out',
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: 'Invalid email address',
+            },
+          })}
+          autoComplete="off"
+        />
+        {formState?.errors?.email && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.email?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+      <Grid item xs={12} md={12}>
+        <TextField
+          error={Boolean(formState?.errors?.phone)}
+          sx={{
+            width: '100%',
+          }}
+          label="Phone No."
+          {...register('phone', {
+            required: 'Phone Number must be filled out',
+          })}
+          autoComplete="off"
+        />
+        {formState?.errors?.phone && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.phone?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+
+      {/* <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.password)}
+                  fullWidth
+                  label="Password"
+                  {...register('password', {
+                    required: 'Password must be filled out',
+                  })}
+                  InputLabelProps={{ shrink: true }}
+                  type={showPassword ? 'text' : 'password'}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          <Iconify
+                            icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                          />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                {formState?.errors?.password && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.password?.message)}
+                  </FormHelperText>
+                )}
+              </Grid> */}
+
+      <Grid item xs={12} md={12}>
+        <FormControl fullWidth>
+          <InputLabel id="select-role">Role</InputLabel>
+          <Select
+            value={watch('role_id')}
+            labelId="select-role"
+            error={Boolean(formState?.errors?.role_id)}
+            {...register('role_id', {
+              required: 'Role must be filled out',
+            })}
+            label="Role"
+          >
+            {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
+          </Select>
+        </FormControl>
+        {formState?.errors?.role_id && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.role_id?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+      <Box
+        display="flex"
+        justifyContent="end"
+        width="100%"
+        sx={{
+          mt: 4,
+        }}
+      >
+        <LoadingButton
+          size="small"
+          loading={isLoading}
+          loadingIndicator="Submitting..."
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{
+            width: 120,
+          }}
+        >
+          Submit
+        </LoadingButton>
+      </Box>
+    </Grid>
+  );
+}
 
 export function EditUserView() {
   const { id } = useParams();
@@ -111,205 +360,20 @@ export function EditUserView() {
           }}
           schema={userUpdateSchema}
         >
-          {({ register, watch, control, formState }) => (
-            <Grid container spacing={3} xs={12}>
-              <Grid item xs={12} md={12}>
-                <FieldDropzone
-                  label="Upload Picture"
-                  helperText="Picture maximum 5mb size"
-                  controller={{
-                    name: 'cover',
-                    control,
-                  }}
-                  defaultImage={defaultValues?.profile_picture}
-                />
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.name)}
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Name"
-                  {...register('name', {
-                    required: 'Name must be filled out',
-                  })}
-                  autoComplete="off"
-                />
-                {formState?.errors?.name && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.name?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-company">Company</InputLabel>
-                  <Select
-                    labelId="select-company"
-                    error={Boolean(formState?.errors?.company_id)}
-                    {...register('company_id', {
-                      required: 'Company must be filled out',
-                      onChange: async () => {
-                        await fetchDivision(watch('company_id'));
-                      },
-                    })}
-                    label="Company"
-                    value={watch('company_id')}
-                  >
-                    {companies?.map((company) => (
-                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.company_id && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.company_id?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              {watch('company_id') ? (
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="select-division">Division</InputLabel>
-                    <Select
-                      labelId="select-division"
-                      error={Boolean(formState?.errors?.department_id)}
-                      {...register('department_id', {
-                        required: 'Division must be filled out',
-                      })}
-                      label="Division"
-                      value={watch('department_id')}
-                    >
-                      {divisions?.map((division) => (
-                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {formState?.errors?.department_id && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.department_id?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-              ) : null}
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.email)}
-                  sx={{
-                    width: '100%',
-                  }}
-                  type="email"
-                  label="Email"
-                  {...register('email', {
-                    required: 'Email must be filled out',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                  autoComplete="off"
-                />
-                {formState?.errors?.email && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.email?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.phone)}
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Phone No."
-                  {...register('phone', {
-                    required: 'Phone Number must be filled out',
-                  })}
-                  autoComplete="off"
-                />
-                {formState?.errors?.phone && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.phone?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-
-              {/* <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.password)}
-                  fullWidth
-                  label="Password"
-                  {...register('password', {
-                    required: 'Password must be filled out',
-                  })}
-                  InputLabelProps={{ shrink: true }}
-                  type={showPassword ? 'text' : 'password'}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          <Iconify
-                            icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                          />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {formState?.errors?.password && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.password?.message)}
-                  </FormHelperText>
-                )}
-              </Grid> */}
-
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-role">Role</InputLabel>
-                  <Select
-                    value={watch('role_id')}
-                    labelId="select-role"
-                    error={Boolean(formState?.errors?.role_id)}
-                    {...register('role_id', {
-                      required: 'Role must be filled out',
-                    })}
-                    label="Role"
-                  >
-                    {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.role_id && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.role_id?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Box
-                display="flex"
-                justifyContent="end"
-                width="100%"
-                sx={{
-                  mt: 4,
-                }}
-              >
-                <LoadingButton
-                  size="small"
-                  loading={isLoading}
-                  loadingIndicator="Submitting..."
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    width: 120,
-                  }}
-                >
-                  Submit
-                </LoadingButton>
-              </Box>
-            </Grid>
+          {({ register, watch, control, formState, setValue }) => (
+            <EditForm
+              formState={formState}
+              register={register}
+              control={control}
+              setValue={setValue}
+              watch={watch}
+              defaultValues={defaultValues}
+              fetchDivision={fetchDivision}
+              companies={companies}
+              divisions={divisions}
+              roles={roles}
+              isLoading={isLoading}
+            />
           )}
         </Form>
       </Grid>
