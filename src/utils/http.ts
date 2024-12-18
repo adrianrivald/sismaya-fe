@@ -100,6 +100,7 @@ export function http<TData = unknown>(
 
     if (response.status === 401 && !response.url.includes('auth/login')) {
       sessionService.flushStorage();
+      window.location.href= "/"
       // window.location.reload();
     }
 

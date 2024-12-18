@@ -7,13 +7,15 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
 
-export const HomePage = lazy(() => import('src/pages/home'));
+export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 
 // Request
-export const RequestDetailPage = lazy(() => import('src/pages/request/request-detail'));
+export const RequestListPage = lazy(() => import('src/pages/request/list'));
+export const RequestDetailPage = lazy(() => import('src/pages/request/detail'));
 export const RequestCreatePage = lazy(() => import('src/pages/request/create'));
 
 // Master Data
@@ -65,7 +67,55 @@ const renderFallback = (
   </Box>
 );
 
+const superAdminRoutes = {
+  children: [
+    { element: <DashboardPage />, index: true },
+
+    // Master Data
+    // Internal Company
+    { path: 'internal-company', element: <InternalCompanyListPage /> },
+    { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
+    { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
+    // Client Company
+    { path: 'client-company', element: <ClientCompanyListPage /> },
+    { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
+    { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
+    // User
+    { path: 'user', element: <UserListPage /> },
+    { path: 'user/create', element: <UserCreatePage /> },
+    { path: 'user/:id/edit', element: <UserEditPage /> },
+  ],
+};
+
+const clientRoutes = {
+  children: [
+    { element: <DashboardPage />, index: true },
+
+    // Request
+    { path: '/:vendor/request', element: <RequestListPage /> },
+    { path: '/:vendor/request/:id', element: <RequestDetailPage /> },
+    { path: '/:vendor/request/create', element: <RequestCreatePage /> },
+  ],
+};
+
 export function Router() {
+  const { user } = useAuth();
+  const role = user?.user_info?.role_id;
+  const isSuperAdmin = role === 1;
+  const isClient = role === 6;
+
+  const routingCondition = () => {
+    switch (role) {
+      case 1:
+        return superAdminRoutes;
+      case 6:
+        return clientRoutes;
+
+      default:
+        return superAdminRoutes;
+    }
+  };
+
   return useRoutes([
     {
       element: (
@@ -75,29 +125,7 @@ export function Router() {
           </Suspense>
         </DashboardLayout>
       ),
-      children: [
-        { element: <HomePage />, index: true },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
-
-        // Request
-        { path: 'request/:id', element: <RequestDetailPage /> },
-        { path: 'request/create', element: <RequestCreatePage /> },
-
-        // Master Data
-        // Internal Company
-        { path: 'internal-company', element: <InternalCompanyListPage /> },
-        { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
-        { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
-        // Client Company
-        { path: 'client-company', element: <ClientCompanyListPage /> },
-        { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
-        { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
-        // User
-        { path: 'user', element: <UserListPage /> },
-        { path: 'user/create', element: <UserCreatePage /> },
-        { path: 'user/:id/edit', element: <UserEditPage /> },
-      ],
+      ...routingCondition(),
     },
     {
       path: 'sign-in',

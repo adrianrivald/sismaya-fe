@@ -1,4 +1,5 @@
 import { http } from "src/utils/http";
+import { User } from "../master-data/user/types";
 
 export interface LoginCredentialsDTO {
     email: string;
@@ -13,6 +14,7 @@ export interface LoginCredentialsDTO {
 
   interface Data {
     token: string
+    user: User
   }
   
   export async function loginUser(formData: LoginCredentialsDTO) {
