@@ -51,7 +51,8 @@ export function AuthProvider(props: React.PropsWithChildren) {
     if (!userInfo) {
       logout();
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo]);
 
   return (
     <AuthInternalProvider
