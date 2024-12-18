@@ -13,7 +13,7 @@ import { Iconify } from 'src/components/iconify';
 import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
-import { navDataTop, navDataBottom, navMasterData } from '../config-nav-dashboard';
+import { menus } from '../config-nav-dashboard';
 import { Searchbar } from '../components/searchbar';
 import { _workspaces } from '../config-nav-workspace';
 import { MenuButton } from '../components/menu-button';
@@ -71,9 +71,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  dataTop={navDataTop}
-                  dataBottom={navDataBottom}
-                  dataMaster={navMasterData}
+                  menus={menus}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   workspaces={_workspaces}
@@ -113,13 +111,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        * Sidebar
        *************************************** */
       sidebarSection={
-        <NavDesktop
-          dataTop={navDataTop}
-          dataBottom={navDataBottom}
-          dataMaster={navMasterData}
-          layoutQuery={layoutQuery}
-          workspaces={_workspaces}
-        />
+        <NavDesktop menus={menus} layoutQuery={layoutQuery} workspaces={_workspaces} />
       }
       /** **************************************
        * Footer

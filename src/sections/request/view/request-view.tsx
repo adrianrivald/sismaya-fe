@@ -72,7 +72,7 @@ function ButtonActions(props: CellContext<any, unknown>, popoverProps: PopoverPr
   );
 }
 
-export function OverviewAnalyticsView() {
+export function RequestView() {
   const { isEmpty, getDataTableProps } = useRequestList({});
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
@@ -80,7 +80,7 @@ export function OverviewAnalyticsView() {
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/request/create');
+    navigate('/sim/request/create');
   };
 
   const popoverFuncs = () => {
