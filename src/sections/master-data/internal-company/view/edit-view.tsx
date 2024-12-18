@@ -23,7 +23,7 @@ import {
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { API_URL } from 'src/constants';
 import { FieldDropzone } from 'src/components/form';
 import { Bounce, toast } from 'react-toastify';
@@ -65,12 +65,15 @@ export function EditInternalCompanyView() {
   const [products, setProducts] = React.useState(data?.products ?? []);
   const [product, setProduct] = React.useState('');
 
-  // Product CRUD
+  // Status CRUD
   const { mutate: deleteStatus } = useDeleteStatusItem(Number(id));
   const { mutate: addStatus } = useAddStatus();
   const { mutate: updateStatus } = useUpdateStatus();
   const [statuses, setStatuses] = React.useState(data?.progress_statuses ?? []);
-  const [status, setStatus] = React.useState<Partial<Status>>({});
+  const [status, setStatus] = React.useState<Partial<Status>>({
+    name: '',
+    step: '',
+  });
 
   const defaultValues = {
     name: data?.name,
@@ -89,8 +92,15 @@ export function EditInternalCompanyView() {
       step: status?.step,
       sort: statuses.length + 1,
     });
-    setStatus({});
+    setStatus({
+      name: '',
+      step: '',
+    });
   };
+
+  useEffect(() => {
+    console.log(status, 'status now');
+  }, [status]);
 
   const onChangeStatus = (e: SelectChangeEvent<string>, itemId: number, type: string) => {
     if (type === 'status') {
@@ -224,12 +234,17 @@ export function EditInternalCompanyView() {
   }, [data]);
 
   const handleSubmit = (formData: CompanyDTO) => {
-    console.log(formData, 'formData');
-    updateCompany({
+    const payload = {
       ...formData,
       id: Number(id),
       type: 'vendor',
-    });
+    };
+    if (defaultValues?.image) {
+      Object.assign(payload, {
+        image: defaultValues?.image,
+      });
+    }
+    updateCompany(payload);
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -426,6 +441,7 @@ export function EditInternalCompanyView() {
                           label="Type"
                           value={status?.step}
                           onChange={(e: SelectChangeEvent<string>) => onChangeStatusNew(e, 'step')}
+                          defaultValue=""
                         >
                           <MenuItem value="to_do">Todo</MenuItem>
                           <MenuItem value="in_progress">In Progress</MenuItem>

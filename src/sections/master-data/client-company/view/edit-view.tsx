@@ -64,11 +64,17 @@ export function EditClientCompanyView() {
   };
 
   const handleSubmit = (formData: CompanyDTO) => {
-    updateCompany({
+    const payload = {
       ...formData,
-      type: 'holding',
       id: Number(id),
-    });
+      type: 'holding',
+    };
+    if (defaultValues?.image) {
+      Object.assign(payload, {
+        image: defaultValues?.image,
+      });
+    }
+    updateCompany(payload);
   };
 
   React.useEffect(() => {

@@ -5,19 +5,17 @@ import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { CompanyDTO } from "./schemas/company-schema";
 
-export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any};
+export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any, image?:string};
 
 export function useUpdateCompany() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateCompany) => {
-        const { name, abbreviation, type, id, cover } = formData;
+        const { id, cover, ...form } = formData;
         const payload = {
-          name,
-          abbreviation,
-          type
-      }
+          ...form
+        }
 
         if (cover) {
 
