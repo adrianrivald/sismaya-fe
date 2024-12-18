@@ -47,11 +47,17 @@ export function AuthProvider(props: React.PropsWithChildren) {
     navigate('/');
   }
 
+  React.useEffect(() => {
+    if (!userInfo) {
+      logout();
+    }
+  }, []);
+
   return (
     <AuthInternalProvider
       value={{
         isAuth: !!accessToken,
-        user: accessToken ? JSON.parse(userInfo ?? '') : {},
+        user: accessToken ? (userInfo ? JSON.parse(userInfo ?? '') : {}) : {},
         login,
         logout,
       }}
