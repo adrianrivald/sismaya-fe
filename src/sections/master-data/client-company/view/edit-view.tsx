@@ -80,6 +80,7 @@ function EditForm({
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('abbreviation', defaultValues?.abbreviation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   return (

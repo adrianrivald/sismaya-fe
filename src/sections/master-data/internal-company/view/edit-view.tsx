@@ -43,7 +43,395 @@ import {
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
 import { CompanyDTO, companySchema } from 'src/services/master-data/company/schemas/company-schema';
-import { Status } from 'src/services/master-data/company/types';
+import { Categories, Company, Products, Status } from 'src/services/master-data/company/types';
+import { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
+
+interface InternalCompanyValues {
+  name: string | undefined;
+  abbreviation: string | undefined;
+  status: Status[];
+  category: Categories[];
+  product: Products[];
+  image: string | undefined;
+}
+interface EditFormProps {
+  formState: FormState<CompanyDTO>;
+  register: UseFormRegister<CompanyDTO>;
+  control: Control<CompanyDTO>;
+  setValue: UseFormSetValue<CompanyDTO>;
+  defaultValues: InternalCompanyValues;
+  data: Company | undefined;
+  onChangeStatus: (e: SelectChangeEvent<string>, itemId: number, type: string) => void;
+  onClickEditStatus: (value: string, step: string, statusId: number) => void;
+  statuses: Status[];
+  onClickDeleteStatus: (statusId: number) => void;
+  status: Partial<Status>;
+  onChangeStatusNew: (e: SelectChangeEvent<string>, type: string) => void;
+  onAddStatus: () => void;
+  onChangeCategory: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
+  onClickEditCategory: (value: string, categoryId: number) => void;
+  categories: Categories[];
+  onClickDeleteCategory: (categoryId: number) => void;
+  category: string;
+  onChangeCategoryNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAddCategory: () => void;
+  onClickEditProduct: (value: string, productId: number) => void;
+  onChangeProduct: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
+  products: Products[];
+  onClickDeleteProduct: (productId: number) => void;
+  product: string;
+  onChangeProductNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAddProduct: () => void;
+}
+
+function EditForm({
+  formState,
+  register,
+  control,
+  setValue,
+  defaultValues,
+  data,
+  onChangeStatus,
+  onClickEditStatus,
+  statuses,
+  onClickDeleteStatus,
+  status,
+  onChangeStatusNew,
+  onAddStatus,
+  onChangeCategory,
+  onClickEditCategory,
+  categories,
+  onClickDeleteCategory,
+  category,
+  onChangeCategoryNew,
+  onAddCategory,
+  onClickEditProduct,
+  onChangeProduct,
+  products,
+  onClickDeleteProduct,
+  product,
+  onChangeProductNew,
+  onAddProduct,
+}: EditFormProps) {
+  useEffect(() => {
+    setValue('name', defaultValues?.name);
+    setValue('abbreviation', defaultValues?.abbreviation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValues]);
+
+  return (
+    <Grid container spacing={3} xs={12}>
+      <Grid item xs={12} md={12}>
+        <TextField
+          error={Boolean(formState?.errors?.name)}
+          sx={{
+            width: '100%',
+          }}
+          label="Name"
+          {...register('name', {
+            required: 'Name must be filled out',
+          })}
+        />
+        {formState?.errors?.name && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.name?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+      <Grid item xs={12} md={12}>
+        <TextField
+          error={Boolean(formState?.errors?.abbreviation)}
+          multiline
+          sx={{
+            width: '100%',
+          }}
+          label="Description"
+          rows={4}
+          {...register('abbreviation', {
+            required: 'Description must be filled out',
+          })}
+        />
+        {formState?.errors?.abbreviation && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.abbreviation?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <FieldDropzone
+          label="Upload Picture"
+          helperText="Picture maximum 5mb size"
+          controller={{
+            name: 'cover',
+            control,
+          }}
+          defaultImage={defaultValues?.image}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={4}>
+          Progress Status
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {data?.progress_statuses?.map((item, index) => (
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <Box width="50%">
+                <TextField
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Status"
+                  value={item?.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChangeStatus(e, item?.id, 'status')
+                  }
+                />
+              </Box>
+
+              <Box width="50%">
+                <FormControl fullWidth>
+                  <InputLabel id="type">Type</InputLabel>
+                  <Select
+                    label="Type"
+                    value={item?.step}
+                    onChange={(e: SelectChangeEvent<string>) => onChangeStatus(e, item?.id, 'step')}
+                  >
+                    <MenuItem value="to_do">Todo</MenuItem>
+                    <MenuItem value="in_progress">In Progress</MenuItem>
+                    <MenuItem value="done">Done</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <MenuList
+                disablePadding
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={() =>
+                    onClickEditStatus(statuses[index].name, statuses[index].step, item?.id)
+                  }
+                >
+                  <Iconify icon="solar:pen-bold" />
+                  Edit
+                </MenuItem>
+                <MenuItem
+                  onClick={() => onClickDeleteStatus(item?.id)}
+                  sx={{ color: 'error.main' }}
+                >
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                  Delete
+                </MenuItem>
+              </MenuList>
+            </Stack>
+          ))}
+          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+            <Box width="50%">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Status"
+                value={status?.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChangeStatusNew(e, 'status')
+                }
+              />
+            </Box>
+
+            <Box width="50%">
+              <FormControl fullWidth>
+                <InputLabel id="type">Type</InputLabel>
+                <Select
+                  label="Type"
+                  value={status?.step}
+                  onChange={(e: SelectChangeEvent<string>) => onChangeStatusNew(e, 'step')}
+                  defaultValue=""
+                >
+                  <MenuItem value="to_do">Todo</MenuItem>
+                  <MenuItem value="in_progress">In Progress</MenuItem>
+                  <MenuItem value="done">Done</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                p: 0.5,
+                gap: 0.5,
+                display: 'flex',
+                flexDirection: 'row',
+                [`& .${menuItemClasses.root}`]: {
+                  px: 1,
+                  gap: 2,
+                  borderRadius: 0.75,
+                  [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                },
+              }}
+            >
+              <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
+                Add More
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+      </Grid>
+
+      <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={4}>
+          Category
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {data?.categories?.map((item, index) => (
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Category"
+                value={item.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeCategory(e, item?.id)}
+                // InputProps={{
+                //   readOnly: true,
+                // }}
+              />
+
+              <MenuList
+                disablePadding
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <MenuItem onClick={() => onClickEditCategory(categories[index].name, item?.id)}>
+                  <Iconify icon="solar:pen-bold" />
+                  Edit
+                </MenuItem>
+                <MenuItem
+                  onClick={() => onClickDeleteCategory(item?.id)}
+                  sx={{ color: 'error.main' }}
+                >
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                  Delete
+                </MenuItem>
+              </MenuList>
+            </Stack>
+          ))}
+          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+            <TextField
+              sx={{
+                width: '100%',
+              }}
+              label="Category"
+              value={category}
+              onChange={onChangeCategoryNew}
+            />
+          </Stack>
+        </Box>
+        <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
+          Add More
+        </Button>
+      </Grid>
+
+      <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={4}>
+          Product
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {data?.products?.map((item, index) => (
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Product"
+                value={item.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeProduct(e, item?.id)}
+                // InputProps={{
+                //   readOnly: true,
+                // }}
+              />
+
+              <MenuList
+                disablePadding
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <MenuItem onClick={() => onClickEditProduct(products[index].name, item?.id)}>
+                  <Iconify icon="solar:pen-bold" />
+                  Edit
+                </MenuItem>
+                <MenuItem
+                  onClick={() => onClickDeleteProduct(item?.id)}
+                  sx={{ color: 'error.main' }}
+                >
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                  Delete
+                </MenuItem>
+              </MenuList>
+            </Stack>
+          ))}
+          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+            <TextField
+              sx={{
+                width: '100%',
+              }}
+              label="Product"
+              value={product}
+              onChange={onChangeProductNew}
+            />
+          </Stack>
+        </Box>
+        <Button onClick={onAddProduct} sx={{ marginY: 2 }}>
+          Add More
+        </Button>
+      </Grid>
+
+      <Box
+        display="flex"
+        justifyContent="end"
+        width="100%"
+        sx={{
+          mt: 8,
+        }}
+      >
+        <Button type="submit" variant="contained" color="primary">
+          Submit
+        </Button>
+      </Box>
+    </Grid>
+  );
+}
 
 export function EditInternalCompanyView() {
   const { id } = useParams();
@@ -268,407 +656,36 @@ export function EditInternalCompanyView() {
           }}
           schema={companySchema}
         >
-          {({ register, control, watch, formState }) => (
-            <Grid container spacing={3} xs={12}>
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.name)}
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Name"
-                  {...register('name', {
-                    required: 'Name must be filled out',
-                  })}
-                />
-                {formState?.errors?.name && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.name?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.abbreviation)}
-                  multiline
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Description"
-                  rows={4}
-                  {...register('abbreviation', {
-                    required: 'Description must be filled out',
-                  })}
-                />
-                {formState?.errors?.abbreviation && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.abbreviation?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FieldDropzone
-                  label="Upload Picture"
-                  helperText="Picture maximum 5mb size"
-                  controller={{
-                    name: 'cover',
-                    control,
-                  }}
-                  defaultImage={defaultValues?.image}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <Typography variant="h4" color="primary" mb={4}>
-                  Progress Status
-                </Typography>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  {data?.progress_statuses?.map((item, index) => (
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      spacing={3}
-                      alignItems="center"
-                    >
-                      <Box width="50%">
-                        <TextField
-                          error={Boolean(formState?.errors?.status)}
-                          sx={{
-                            width: '100%',
-                          }}
-                          label="Status"
-                          value={item?.name}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            onChangeStatus(e, item?.id, 'status')
-                          }
-                        />
-
-                        {formState?.errors?.status && (
-                          <FormHelperText sx={{ color: 'error.main' }}>
-                            {String(formState?.errors?.status?.message)}
-                          </FormHelperText>
-                        )}
-                      </Box>
-
-                      <Box width="50%">
-                        <FormControl fullWidth>
-                          <InputLabel id="type">Type</InputLabel>
-                          <Select
-                            error={Boolean(formState?.errors?.type)}
-                            label="Type"
-                            value={item?.step}
-                            onChange={(e: SelectChangeEvent<string>) =>
-                              onChangeStatus(e, item?.id, 'step')
-                            }
-                          >
-                            <MenuItem value="to_do">Todo</MenuItem>
-                            <MenuItem value="in_progress">In Progress</MenuItem>
-                            <MenuItem value="done">Done</MenuItem>
-                          </Select>
-                        </FormControl>
-                        {formState?.errors?.type && (
-                          <FormHelperText sx={{ color: 'error.main' }}>
-                            {String(formState?.errors?.type?.message)}
-                          </FormHelperText>
-                        )}
-                      </Box>
-
-                      <MenuList
-                        disablePadding
-                        sx={{
-                          p: 0.5,
-                          gap: 0.5,
-                          display: 'flex',
-                          flexDirection: 'row',
-                          [`& .${menuItemClasses.root}`]: {
-                            px: 1,
-                            gap: 2,
-                            borderRadius: 0.75,
-                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                          },
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() =>
-                            onClickEditStatus(statuses[index].name, statuses[index].step, item?.id)
-                          }
-                        >
-                          <Iconify icon="solar:pen-bold" />
-                          Edit
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => onClickDeleteStatus(item?.id)}
-                          sx={{ color: 'error.main' }}
-                        >
-                          <Iconify icon="solar:trash-bin-trash-bold" />
-                          Delete
-                        </MenuItem>
-                      </MenuList>
-                    </Stack>
-                  ))}
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    spacing={3}
-                    alignItems="center"
-                  >
-                    <Box width="50%">
-                      <TextField
-                        error={Boolean(formState?.errors?.status)}
-                        sx={{
-                          width: '100%',
-                        }}
-                        label="Status"
-                        value={status?.name}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onChangeStatusNew(e, 'status')
-                        }
-                      />
-
-                      {formState?.errors?.status && (
-                        <FormHelperText sx={{ color: 'error.main' }}>
-                          {String(formState?.errors?.status?.message)}
-                        </FormHelperText>
-                      )}
-                    </Box>
-
-                    <Box width="50%">
-                      <FormControl fullWidth>
-                        <InputLabel id="type">Type</InputLabel>
-                        <Select
-                          error={Boolean(formState?.errors?.type)}
-                          label="Type"
-                          value={status?.step}
-                          onChange={(e: SelectChangeEvent<string>) => onChangeStatusNew(e, 'step')}
-                          defaultValue=""
-                        >
-                          <MenuItem value="to_do">Todo</MenuItem>
-                          <MenuItem value="in_progress">In Progress</MenuItem>
-                          <MenuItem value="done">Done</MenuItem>
-                        </Select>
-                      </FormControl>
-                      {formState?.errors?.type && (
-                        <FormHelperText sx={{ color: 'error.main' }}>
-                          {String(formState?.errors?.type?.message)}
-                        </FormHelperText>
-                      )}
-                    </Box>
-                    <Box
-                      sx={{
-                        p: 0.5,
-                        gap: 0.5,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        [`& .${menuItemClasses.root}`]: {
-                          px: 1,
-                          gap: 2,
-                          borderRadius: 0.75,
-                          [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                        },
-                      }}
-                    >
-                      <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
-                        Add More
-                      </Button>
-                    </Box>
-                  </Stack>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <Typography variant="h4" color="primary" mb={4}>
-                  Category
-                </Typography>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  {data?.categories?.map((item, index) => (
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      spacing={3}
-                      alignItems="center"
-                    >
-                      <TextField
-                        error={Boolean(formState?.errors?.category)}
-                        sx={{
-                          width: '100%',
-                        }}
-                        label="Category"
-                        value={item.name}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onChangeCategory(e, item?.id)
-                        }
-                        // InputProps={{
-                        //   readOnly: true,
-                        // }}
-                      />
-
-                      <MenuList
-                        disablePadding
-                        sx={{
-                          p: 0.5,
-                          gap: 0.5,
-                          display: 'flex',
-                          flexDirection: 'row',
-                          [`& .${menuItemClasses.root}`]: {
-                            px: 1,
-                            gap: 2,
-                            borderRadius: 0.75,
-                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                          },
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() => onClickEditCategory(categories[index].name, item?.id)}
-                        >
-                          <Iconify icon="solar:pen-bold" />
-                          Edit
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => onClickDeleteCategory(item?.id)}
-                          sx={{ color: 'error.main' }}
-                        >
-                          <Iconify icon="solar:trash-bin-trash-bold" />
-                          Delete
-                        </MenuItem>
-                      </MenuList>
-                      {formState?.errors?.category && (
-                        <FormHelperText sx={{ color: 'error.main' }}>
-                          {String(formState?.errors?.category?.message)}
-                        </FormHelperText>
-                      )}
-                    </Stack>
-                  ))}
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    spacing={3}
-                    alignItems="center"
-                  >
-                    <TextField
-                      error={Boolean(formState?.errors?.category)}
-                      sx={{
-                        width: '100%',
-                      }}
-                      label="Category"
-                      value={category}
-                      onChange={onChangeCategoryNew}
-                    />
-                    {formState?.errors?.category && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.category?.message)}
-                      </FormHelperText>
-                    )}
-                  </Stack>
-                </Box>
-                <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
-                  Add More
-                </Button>
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <Typography variant="h4" color="primary" mb={4}>
-                  Product
-                </Typography>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  {data?.products?.map((item, index) => (
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      spacing={3}
-                      alignItems="center"
-                    >
-                      <TextField
-                        error={Boolean(formState?.errors?.product)}
-                        sx={{
-                          width: '100%',
-                        }}
-                        label="Product"
-                        value={item.name}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onChangeProduct(e, item?.id)
-                        }
-                        // InputProps={{
-                        //   readOnly: true,
-                        // }}
-                      />
-
-                      <MenuList
-                        disablePadding
-                        sx={{
-                          p: 0.5,
-                          gap: 0.5,
-                          display: 'flex',
-                          flexDirection: 'row',
-                          [`& .${menuItemClasses.root}`]: {
-                            px: 1,
-                            gap: 2,
-                            borderRadius: 0.75,
-                            [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                          },
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() => onClickEditProduct(products[index].name, item?.id)}
-                        >
-                          <Iconify icon="solar:pen-bold" />
-                          Edit
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => onClickDeleteProduct(item?.id)}
-                          sx={{ color: 'error.main' }}
-                        >
-                          <Iconify icon="solar:trash-bin-trash-bold" />
-                          Delete
-                        </MenuItem>
-                      </MenuList>
-                      {formState?.errors?.product && (
-                        <FormHelperText sx={{ color: 'error.main' }}>
-                          {String(formState?.errors?.product?.message)}
-                        </FormHelperText>
-                      )}
-                    </Stack>
-                  ))}
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    spacing={3}
-                    alignItems="center"
-                  >
-                    <TextField
-                      error={Boolean(formState?.errors?.product)}
-                      sx={{
-                        width: '100%',
-                      }}
-                      label="Product"
-                      value={product}
-                      onChange={onChangeProductNew}
-                    />
-                    {formState?.errors?.product && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.product?.message)}
-                      </FormHelperText>
-                    )}
-                  </Stack>
-                </Box>
-                <Button onClick={onAddProduct} sx={{ marginY: 2 }}>
-                  Add More
-                </Button>
-              </Grid>
-
-              <Box
-                display="flex"
-                justifyContent="end"
-                width="100%"
-                sx={{
-                  mt: 8,
-                }}
-              >
-                <Button type="submit" variant="contained" color="primary">
-                  Submit
-                </Button>
-              </Box>
-            </Grid>
+          {({ register, control, watch, formState, setValue }) => (
+            <EditForm
+              formState={formState}
+              register={register}
+              control={control}
+              setValue={setValue}
+              defaultValues={defaultValues}
+              data={data}
+              onChangeStatus={onChangeStatus}
+              onClickEditStatus={onClickEditStatus}
+              statuses={statuses}
+              onClickDeleteStatus={onClickDeleteStatus}
+              status={status}
+              onChangeStatusNew={onChangeStatusNew}
+              onAddStatus={onAddStatus}
+              onChangeCategory={onChangeCategory}
+              onClickEditCategory={onClickEditCategory}
+              categories={categories}
+              onClickDeleteCategory={onClickDeleteCategory}
+              category={category}
+              onChangeCategoryNew={onChangeCategoryNew}
+              onAddCategory={onAddCategory}
+              onClickEditProduct={onClickEditProduct}
+              onChangeProduct={onChangeProduct}
+              products={products}
+              onClickDeleteProduct={onClickDeleteProduct}
+              product={product}
+              onChangeProductNew={onChangeProductNew}
+              onAddProduct={onAddProduct}
+            />
           )}
         </Form>
       </Grid>
