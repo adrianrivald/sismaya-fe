@@ -97,15 +97,22 @@ function EditForm({
   onAddVendor,
   onChangeVendor,
 }: EditFormProps) {
+  console.log(watch(), 'formwatch');
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('email', defaultValues?.email);
     setValue('phone', defaultValues?.phone);
     setValue('role_id', defaultValues?.role_id);
     setValue('company_id', defaultValues?.company_id);
-    setValue('department_id', defaultValues?.department_id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues]);
+  }, [user]);
+
+  useEffect(() => {
+    if (divisions?.length) {
+      setValue('department_id', defaultValues?.department_id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [divisions]);
 
   const selectedCompanyType = companies?.find((item) => item?.id === watch('company_id'))?.type;
 
@@ -408,7 +415,7 @@ export function EditUserView() {
       fetchDivision(defaultValues?.company_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultValues?.company_id]);
 
   const fetchDivision = async (companyId: number) => {
     const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
