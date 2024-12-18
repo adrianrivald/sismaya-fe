@@ -2,20 +2,11 @@ import Typography from '@mui/material/Typography';
 import {
   Box,
   Button,
-  Chip,
-  FormControl,
   FormHelperText,
-  FormLabel,
   Grid,
-  InputLabel,
   MenuItem,
-  OutlinedInput,
-  Select,
-  SelectChangeEvent,
   Stack,
   TextField,
-  useTheme,
-  Theme,
   MenuList,
   menuItemClasses,
 } from '@mui/material';
@@ -24,10 +15,8 @@ import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import React, { useEffect } from 'react';
-import { API_URL } from 'src/constants';
 import { FieldDropzone } from 'src/components/form';
-import { Bounce, toast } from 'react-toastify';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   useAddDivision,
   useCompanyById,

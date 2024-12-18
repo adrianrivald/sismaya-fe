@@ -2,7 +2,8 @@ export interface User {
     id: number;
     email: string;
     phone: string;
-    user_info: UserInfo
+    user_info: UserInfo;
+    vendor?: any[]
 }
 
 interface UserInfo {

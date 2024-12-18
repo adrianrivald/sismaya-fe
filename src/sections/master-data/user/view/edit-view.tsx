@@ -9,7 +9,10 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
+  menuItemClasses,
+  MenuList,
   Select,
+  Stack,
   TextField,
 } from '@mui/material';
 
@@ -24,7 +27,12 @@ import { useUpdateUser, useUserById } from 'src/services/master-data/user';
 import { Role, useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import { UserUpdateDTO, userUpdateSchema } from 'src/services/master-data/user/schemas/user-schema';
-import { useCompanies } from 'src/services/master-data/company';
+import {
+  useAddDivision,
+  useCompanies,
+  useDeleteDivisionItem,
+  useUpdateDivision,
+} from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
 import { API_URL } from 'src/constants';
 import { Company, Department } from 'src/services/master-data/company/types';
@@ -58,6 +66,14 @@ interface EditFormProps {
   divisions: Department[] | [];
   roles: Role[] | undefined;
   isLoading: boolean;
+  user: User | undefined;
+  onClickDeleteVendor: (vendorId: number) => void;
+  vendor: string;
+  vendors: any[];
+  onClickEditVendor: (value: string, vendorId: number) => void;
+  onChangeVendorNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAddVendor: () => void;
+  onChangeVendor: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
 }
 
 function EditForm({
@@ -72,6 +88,14 @@ function EditForm({
   divisions,
   roles,
   isLoading,
+  user,
+  vendor,
+  onChangeVendorNew,
+  onClickDeleteVendor,
+  onClickEditVendor,
+  vendors,
+  onAddVendor,
+  onChangeVendor,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -82,6 +106,8 @@ function EditForm({
     setValue('department_id', defaultValues?.department_id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
+
+  const selectedCompanyType = companies?.find((item) => item?.id === watch('company_id'))?.type;
 
   return (
     <Grid container spacing={3} xs={12}>
@@ -164,6 +190,70 @@ function EditForm({
           )}
         </Grid>
       ) : null}
+
+      {/* {selectedCompanyType === 'holding' ? (
+        <Grid item xs={12} md={12}>
+          <Typography variant="h4" color="primary" mb={4}>
+            Division
+          </Typography>
+          <Box display="flex" flexDirection="column" gap={2}>
+            {user?.vendor?.map((item, index) => (
+              <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+                <TextField
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Vendor"
+                  value={item.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeVendor(e, item?.id)}
+                />
+
+                <MenuList
+                  disablePadding
+                  sx={{
+                    p: 0.5,
+                    gap: 0.5,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    [`& .${menuItemClasses.root}`]: {
+                      px: 1,
+                      gap: 2,
+                      borderRadius: 0.75,
+                      [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                    },
+                  }}
+                >
+                  <MenuItem onClick={() => onClickEditVendor(vendors[index].name, item?.id)}>
+                    <Iconify icon="solar:pen-bold" />
+                    Edit
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => onClickDeleteVendor(item?.id)}
+                    sx={{ color: 'error.main' }}
+                  >
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                    Delete
+                  </MenuItem>
+                </MenuList>
+              </Stack>
+            ))}
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Vendor"
+                value={vendor}
+                onChange={onChangeVendorNew}
+              />
+            </Stack>
+          </Box>
+          <Button onClick={onAddVendor} sx={{ marginY: 2 }}>
+            Add More
+          </Button>
+        </Grid>
+      ) : null} */}
+
       <Grid item xs={12} md={12}>
         <TextField
           error={Boolean(formState?.errors?.email)}
@@ -293,6 +383,13 @@ export function EditUserView() {
   const { mutate: updateUser } = useUpdateUser();
   const { data: companies } = useCompanies();
 
+  const { mutate: deleteVendor } = useDeleteDivisionItem(Number(id));
+  const { mutate: addVendor } = useAddDivision();
+  const { mutate: updateVendor } = useUpdateDivision();
+
+  const [vendors, setVendors] = React.useState(user?.vendor ?? []);
+  const [vendor, setVendor] = React.useState('');
+
   const defaultValues = {
     name: user?.user_info?.name,
     email: user?.email,
@@ -301,6 +398,7 @@ export function EditUserView() {
     profile_picture: user?.user_info?.profile_picture ?? '',
     company_id: user?.user_info?.company_id,
     department_id: user?.user_info?.department_id,
+    vendor: user?.vendor,
   };
 
   console.log(defaultValues, 'defaultValues');
@@ -338,6 +436,44 @@ export function EditUserView() {
     updateUser(payload);
   };
 
+  const onAddVendor = () => {
+    addVendor({
+      name: vendor,
+      company_id: user?.id,
+    });
+    setVendor('');
+  };
+
+  React.useEffect(() => {
+    setVendors(user?.vendor ?? []);
+  }, [user]);
+
+  const onChangeVendor = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setVendors((prevVendors) => {
+      const updatedVendors = [...prevVendors];
+      // Update the string at the specified index
+      const index = updatedVendors?.findIndex((item) => item?.id === itemId);
+      updatedVendors[index].name = e.target.value;
+      return updatedVendors;
+    });
+  };
+
+  const onChangeVendorNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVendor(e.target.value);
+  };
+
+  const onClickDeleteVendor = async (vendorId: number) => {
+    deleteVendor(vendorId);
+  };
+
+  const onClickEditVendor = async (value: string, vendorId: number) => {
+    updateVendor({
+      name: value,
+      id: vendorId,
+      company_id: Number(id),
+    });
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -373,6 +509,14 @@ export function EditUserView() {
               divisions={divisions}
               roles={roles}
               isLoading={isLoading}
+              user={user}
+              vendor={vendor}
+              onChangeVendorNew={onChangeVendorNew}
+              onClickDeleteVendor={onClickDeleteVendor}
+              onClickEditVendor={onClickEditVendor}
+              vendors={vendors}
+              onAddVendor={onAddVendor}
+              onChangeVendor={onChangeVendor}
             />
           )}
         </Form>
