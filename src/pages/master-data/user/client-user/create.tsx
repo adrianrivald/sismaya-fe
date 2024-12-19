@@ -5,11 +5,11 @@ import { CreateUserView } from 'src/sections/master-data/user/view';
 
 // ----------------------------------------------------------------------
 
-export default function UserCreatePage() {
+export default function UserClientCreatePage() {
   return (
     <>
       <Helmet>
-        <title> {`Create User - ${CONFIG.appName}`}</title>
+        <title> {`Create Client User - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -17,7 +17,7 @@ export default function UserCreatePage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <CreateUserView />
+      <CreateUserView type="client" />
     </>
   );
 }

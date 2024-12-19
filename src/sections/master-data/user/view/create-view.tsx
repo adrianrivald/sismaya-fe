@@ -2,6 +2,7 @@ import Typography from '@mui/material/Typography';
 import {
   Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -9,8 +10,11 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   TextField,
+  Theme,
+  useTheme,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -20,7 +24,6 @@ import { LoadingButton } from '@mui/lab';
 import React, { useEffect } from 'react';
 import { Iconify } from 'src/components/iconify';
 import { useAddUser } from 'src/services/master-data/user';
-import { UserDTO, userSchema } from 'src/services/master-data/user/schemas/user-schema';
 import { useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import {
@@ -31,14 +34,49 @@ import {
 import { API_URL } from 'src/constants';
 import { getSession } from 'src/sections/auth/session/session';
 import { Department } from 'src/services/master-data/company/types';
+import {
+  UserInternalDTO,
+  UserClientDTO,
+  userClientSchema,
+  userInternalSchema,
+} from 'src/services/master-data/user/schemas/user-schema';
 
-export function CreateUserView() {
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
+  console.log(selectedInternalCompanies, 'selectedComp');
+  return {
+    fontWeight:
+      selectedInternalCompanies.indexOf(id) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
+interface CreateUserProps {
+  type: 'client' | 'internal';
+}
+
+export function CreateUserView({ type }: CreateUserProps) {
+  const theme = useTheme();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
   const { mutate: addUser } = useAddUser();
   const { data: roles } = useRole();
-  const { data: companies } = useCompanies();
+  const { data: companies } = useCompanies(type);
+
+  const defaultValues = {
+    internal_id: [],
+  };
 
   const fetchDivision = async (companyId: number) => {
     const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
@@ -54,7 +92,7 @@ export function CreateUserView() {
     return data;
   };
 
-  const handleSubmit = (formData: UserDTO) => {
+  const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
     setIsLoading(true);
     try {
       addUser({
@@ -77,7 +115,16 @@ export function CreateUserView() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit} schema={userSchema}>
+        <Form
+          width="100%"
+          onSubmit={handleSubmit}
+          schema={type === 'client' ? userClientSchema : userInternalSchema}
+          options={{
+            defaultValues: {
+              ...defaultValues,
+            },
+          }}
+        >
           {({ register, control, watch, formState }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
@@ -109,54 +156,106 @@ export function CreateUserView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-company">Company</InputLabel>
-                  <Select
-                    labelId="select-company"
-                    error={Boolean(formState?.errors?.company_id)}
-                    {...register('company_id', {
-                      required: 'Company must be filled out',
-                      onChange: async () => {
-                        await fetchDivision(watch('company_id'));
-                      },
-                    })}
-                    label="Company"
-                  >
-                    {companies?.map((company) => (
-                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.company_id && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.company_id?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              {watch('company_id') ? (
+              {type === 'internal' ? (
                 <Grid item xs={12} md={12}>
                   <FormControl fullWidth>
-                    <InputLabel id="select-division">Division</InputLabel>
+                    <InputLabel id="demo-simple-select-outlined-label-type">
+                      Internal Company
+                    </InputLabel>
                     <Select
-                      labelId="select-division"
-                      error={Boolean(formState?.errors?.department_id)}
-                      {...register('department_id', {
-                        required: 'Division must be filled out',
+                      label="Internal Company"
+                      labelId="demo-simple-select-outlined-label-type"
+                      id="internal_id"
+                      {...register('internal_id', {
+                        required: 'Internal Company must be filled out',
                       })}
-                      label="Division"
+                      multiple
+                      value={watch('internal_id')}
+                      input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {watch('internal_id').map((value: any) => (
+                            <Chip
+                              key={value}
+                              label={companies?.find((item) => item?.id === value)?.name}
+                            />
+                          ))}
+                        </Box>
+                      )}
+                      MenuProps={MenuProps}
                     >
-                      {divisions?.map((division) => (
-                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
-                      ))}
+                      {companies &&
+                        companies?.map((company) => (
+                          <MenuItem
+                            key={company?.id}
+                            value={company?.id}
+                            style={getStyles(company?.id, watch('internal_id'), theme)}
+                          >
+                            {company?.name}
+                          </MenuItem>
+                        ))}
                     </Select>
                   </FormControl>
-                  {formState?.errors?.department_id && (
+                  {formState?.errors?.internal_id && (
                     <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.department_id?.message)}
+                      {String(formState?.errors?.internal_id?.message)}
                     </FormHelperText>
                   )}
                 </Grid>
+              ) : null}
+
+              {type === 'client' ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-company">Company</InputLabel>
+                    <Select
+                      labelId="select-company"
+                      error={Boolean(formState?.errors?.company_id)}
+                      {...register('company_id', {
+                        required: 'Company must be filled out',
+                        onChange: async () => {
+                          await fetchDivision(watch('company_id'));
+                        },
+                      })}
+                      label="Company"
+                    >
+                      {companies?.map((company) => (
+                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.company_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.company_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
+              {type === 'client' ? (
+                watch('company_id') ? (
+                  <Grid item xs={12} md={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="select-division">Division</InputLabel>
+                      <Select
+                        labelId="select-division"
+                        error={Boolean(formState?.errors?.department_id)}
+                        {...register('department_id', {
+                          required: 'Division must be filled out',
+                        })}
+                        label="Division"
+                      >
+                        {divisions?.map((division) => (
+                          <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.department_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.department_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                ) : null
               ) : null}
 
               <Grid item xs={12} md={12}>
@@ -242,7 +341,9 @@ export function CreateUserView() {
                     })}
                     label="Role"
                   >
-                    {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
+                    {roles
+                      ?.filter((role) => (type === 'client' ? role?.id === 6 : role?.id !== 6))
+                      .map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
                   </Select>
                 </FormControl>
                 {formState?.errors?.role_id && (

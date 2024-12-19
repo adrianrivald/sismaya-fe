@@ -72,14 +72,21 @@ function ButtonActions(props: CellContext<Users, unknown>, popoverProps: Popover
   );
 }
 
-export function UserView() {
-  const { isEmpty, getDataTableProps } = useUserList({});
+interface UserViewProps {
+  type: 'internal' | 'client';
+}
+
+export function UserView({ type }: UserViewProps) {
+  const { isEmpty, data, getDataTableProps } = useUserList({ type });
+  console.log(data, 'datanya');
+  const clientData = data?.items?.filter((item) => item?.user_info?.company_id !== null);
+  const internalData = data?.items?.filter((item) => item?.user_info?.company_id === null);
   const { mutate: deleteUserById } = useDeleteUserById();
 
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/user/create');
+    navigate('create');
   };
 
   const popoverFuncs = () => {
@@ -116,7 +123,11 @@ export function UserView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
+          <DataTable
+            columns={columns(popoverFuncs())}
+            {...getDataTableProps()}
+            data={type === 'client' ? clientData : internalData}
+          />
         </Grid>
       </Grid>
     </DashboardContent>

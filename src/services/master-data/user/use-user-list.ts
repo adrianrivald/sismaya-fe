@@ -7,9 +7,14 @@ import { http, RequestInitClient } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-function fetchUserList(params: Partial<any>, ) {
+function fetchUserList(params: Partial<any> ) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/users', baseUrl);
+
+  if (params.type) {
+    endpointUrl.searchParams.append('type', params.type);
+
+  }
 
 
   if (params.active) {

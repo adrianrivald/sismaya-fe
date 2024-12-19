@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { UserDTO } from "./schemas/user-schema";
+import { UserClientUpdateDTO } from "./schemas/user-schema";
 
-export type UpdateUser = UserDTO & {id: number, cover?: any};
+export type UpdateUser = UserClientUpdateDTO & {id: number, cover?: any, internal_id?: number[]};
 
 export function useUpdateUser() {
     const navigate = useNavigate()
@@ -36,8 +36,8 @@ export function useUpdateUser() {
         });
       },
       {
-          onSuccess: () => {
-    
+          onSuccess: (res : any) => {
+            const isClient = res?.data?.user_info?.company_id !== null
           toast.success('Data updated successfully', {
             position: 'top-right',
             autoClose: 5000,
@@ -49,7 +49,7 @@ export function useUpdateUser() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/user`)
+          navigate(`${isClient ? "/client-user" : "/internal-user"}`)
 
         },
         onError: (error) => {

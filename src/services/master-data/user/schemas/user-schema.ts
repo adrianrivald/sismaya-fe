@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-export const userSchema = z
+export const userInternalSchema = z
   .object({
     email: z.string().min(1, 'Required'),
     phone: z.string().min(1, 'Required'),
@@ -9,14 +9,14 @@ export const userSchema = z
     company_id: z.number().nullable(),
     department_id: z.number().nullable(),
     role_id: z.number().min(1, 'Required'),
-    cover: z.any()
+    cover: z.any(),
+    internal_id: z.number().array()
   })
   .partial();
 
-export type UserDTO = z.infer<typeof userSchema>;
+export type UserInternalDTO = z.infer<typeof userInternalSchema>;
 
-
-export const userUpdateSchema = z
+export const userClientSchema = z
   .object({
     email: z.string().min(1, 'Required'),
     phone: z.string().min(1, 'Required'),
@@ -24,10 +24,43 @@ export const userUpdateSchema = z
     name: z.string().min(1, 'Required'),
     company_id: z.number().nullable(),
     department_id: z.number().nullable(),
+    role_id: z.number().min(1, 'Required'),
+    cover: z.any(),
+  })
+  .partial();
+
+export type UserClientDTO = z.infer<typeof userClientSchema>;
+
+
+export const userInternalUpdateSchema = z
+  .object({
+    email: z.string().min(1, 'Required'),
+    phone: z.string().min(1, 'Required'),
+    password: z.string().min(1, 'Required'),
+    name: z.string().min(1, 'Required'),
     role_id: z.number().min(1, 'Required'),
     cover: z.any().optional(),
-    profile_picture: z.string().optional()
+    profile_picture: z.string().optional(),
+    internal_id: z.number().array().optional()
   })
   .partial();
 
-export type UserUpdateDTO = z.infer<typeof userUpdateSchema>;
+export type UserInternalUpdateDTO = z.infer<typeof userInternalUpdateSchema>;
+
+
+
+export const userClientUpdateSchema = z
+  .object({
+    email: z.string().min(1, 'Required'),
+    phone: z.string().min(1, 'Required'),
+    password: z.string().min(1, 'Required'),
+    name: z.string().min(1, 'Required'),
+    role_id: z.number().min(1, 'Required'),
+    cover: z.any().optional(),
+    profile_picture: z.string().optional(),
+    company_id: z.number().nullable(),
+    department_id: z.number().nullable(),
+  })
+  .partial();
+
+export type UserClientUpdateDTO = z.infer<typeof userClientUpdateSchema>;

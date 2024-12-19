@@ -20,4 +20,5 @@ interface UserInfo {
     updated_at: string;
     user: string;
     user_id: number
+    internal_id: number[]
 }

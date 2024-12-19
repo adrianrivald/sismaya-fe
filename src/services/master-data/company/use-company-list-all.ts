@@ -2,18 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { http } from "src/utils/http";
 import { Company } from "./types";
 
-async function fetchCompanies() {
+async function fetchCompanies(type : string) {
     const { data } = await http<{data : Company[]}>(
-      `companies`,
+      !type ? `companies` :  type === "internal" ? `companies?type=vendor` : `companies?type=holding`,
     );
   
     return data;
   }
   
-  export function useCompanies() {
+  export function useCompanies(type: string) {
     const data = useQuery(
       ['company-items-all'],
-      () => fetchCompanies()
+      () => fetchCompanies(type)
     );
   
     return data;

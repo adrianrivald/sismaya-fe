@@ -1,32 +1,34 @@
 import Typography from '@mui/material/Typography';
 import {
   Box,
-  Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
-  IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
-  menuItemClasses,
-  MenuList,
+  OutlinedInput,
   Select,
   Stack,
   TextField,
+  useTheme,
+  Theme,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect } from 'react';
-import { Iconify } from 'src/components/iconify';
-import { Bounce, toast } from 'react-toastify';
 import { useUpdateUser, useUserById } from 'src/services/master-data/user';
 import { Role, useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
-import { UserUpdateDTO, userUpdateSchema } from 'src/services/master-data/user/schemas/user-schema';
+import {
+  UserClientUpdateDTO,
+  UserInternalUpdateDTO,
+  userClientSchema,
+  userInternalUpdateSchema,
+} from 'src/services/master-data/user/schemas/user-schema';
 import {
   useAddDivision,
   useCompanies,
@@ -45,6 +47,26 @@ import {
 } from 'react-hook-form';
 import { User } from 'src/services/master-data/user/types';
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
+  console.log(selectedInternalCompanies, 'selectedComp');
+  return {
+    fontWeight:
+      selectedInternalCompanies.indexOf(id) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
 interface UserValues {
   name: string | undefined;
   email: string | undefined;
@@ -55,11 +77,11 @@ interface UserValues {
   department_id: number | undefined;
 }
 interface EditFormProps {
-  formState: FormState<UserUpdateDTO>;
-  register: UseFormRegister<UserUpdateDTO>;
-  control: Control<UserUpdateDTO>;
-  setValue: UseFormSetValue<UserUpdateDTO>;
-  watch: UseFormWatch<UserUpdateDTO>;
+  formState: FormState<UserClientUpdateDTO & { internal_id?: number[] }>;
+  register: UseFormRegister<UserClientUpdateDTO & { internal_id?: number[] }>;
+  control: Control<UserClientUpdateDTO & { internal_id?: number[] }>;
+  setValue: UseFormSetValue<UserClientUpdateDTO & { internal_id?: number[] }>;
+  watch: UseFormWatch<UserClientUpdateDTO & { internal_id?: number[] }>;
   defaultValues: UserValues;
   fetchDivision: (companyId: number) => void;
   companies: Company[] | undefined;
@@ -74,6 +96,8 @@ interface EditFormProps {
   onChangeVendorNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddVendor: () => void;
   onChangeVendor: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
+  type: 'client' | 'internal';
+  theme: Theme;
 }
 
 function EditForm({
@@ -89,13 +113,8 @@ function EditForm({
   roles,
   isLoading,
   user,
-  vendor,
-  onChangeVendorNew,
-  onClickDeleteVendor,
-  onClickEditVendor,
-  vendors,
-  onAddVendor,
-  onChangeVendor,
+  type,
+  theme,
 }: EditFormProps) {
   console.log(watch(), 'formwatch');
   useEffect(() => {
@@ -113,8 +132,6 @@ function EditForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divisions]);
-
-  const selectedCompanyType = companies?.find((item) => item?.id === watch('company_id'))?.type;
 
   return (
     <Grid container spacing={3} xs={12}>
@@ -148,118 +165,104 @@ function EditForm({
         )}
       </Grid>
 
-      <Grid item xs={12} md={12}>
-        <FormControl fullWidth>
-          <InputLabel id="select-company">Company</InputLabel>
-          <Select
-            labelId="select-company"
-            error={Boolean(formState?.errors?.company_id)}
-            {...register('company_id', {
-              required: 'Company must be filled out',
-              onChange: () => {
-                fetchDivision(watch('company_id') as number);
-              },
-            })}
-            label="Company"
-            value={watch('company_id')}
-          >
-            {companies?.map((company) => <MenuItem value={company?.id}>{company?.name}</MenuItem>)}
-          </Select>
-        </FormControl>
-        {formState?.errors?.company_id && (
-          <FormHelperText sx={{ color: 'error.main' }}>
-            {String(formState?.errors?.company_id?.message)}
-          </FormHelperText>
-        )}
-      </Grid>
-      {watch('company_id') ? (
+      {type === 'client' ? (
         <Grid item xs={12} md={12}>
           <FormControl fullWidth>
-            <InputLabel id="select-division">Division</InputLabel>
+            <InputLabel id="select-company">Company</InputLabel>
             <Select
-              labelId="select-division"
-              error={Boolean(formState?.errors?.department_id)}
-              {...register('department_id', {
-                required: 'Division must be filled out',
+              labelId="select-company"
+              error={Boolean(formState?.errors?.company_id)}
+              {...register('company_id', {
+                required: 'Company must be filled out',
+                onChange: () => {
+                  fetchDivision(watch('company_id') as number);
+                },
               })}
-              label="Division"
-              value={watch('department_id')}
+              label="Company"
+              value={watch('company_id')}
             >
-              {divisions?.map((division) => (
-                <MenuItem value={division?.id}>{division?.name}</MenuItem>
+              {companies?.map((company) => (
+                <MenuItem value={company?.id}>{company?.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
-          {formState?.errors?.department_id && (
+          {formState?.errors?.company_id && (
             <FormHelperText sx={{ color: 'error.main' }}>
-              {String(formState?.errors?.department_id?.message)}
+              {String(formState?.errors?.company_id?.message)}
             </FormHelperText>
           )}
         </Grid>
       ) : null}
+      {type === 'client' ? (
+        watch('company_id') ? (
+          <Grid item xs={12} md={12}>
+            <FormControl fullWidth>
+              <InputLabel id="select-division">Division</InputLabel>
+              <Select
+                labelId="select-division"
+                error={Boolean(formState?.errors?.department_id)}
+                {...register('department_id', {
+                  required: 'Division must be filled out',
+                })}
+                label="Division"
+                value={watch('department_id')}
+              >
+                {divisions?.map((division) => (
+                  <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {formState?.errors?.department_id && (
+              <FormHelperText sx={{ color: 'error.main' }}>
+                {String(formState?.errors?.department_id?.message)}
+              </FormHelperText>
+            )}
+          </Grid>
+        ) : null
+      ) : null}
 
-      {/* {selectedCompanyType === 'holding' ? (
+      {type === 'internal' ? (
         <Grid item xs={12} md={12}>
-          <Typography variant="h4" color="primary" mb={4}>
-            Division
-          </Typography>
-          <Box display="flex" flexDirection="column" gap={2}>
-            {user?.vendor?.map((item, index) => (
-              <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-                <TextField
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Vendor"
-                  value={item.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeVendor(e, item?.id)}
-                />
-
-                <MenuList
-                  disablePadding
-                  sx={{
-                    p: 0.5,
-                    gap: 0.5,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    [`& .${menuItemClasses.root}`]: {
-                      px: 1,
-                      gap: 2,
-                      borderRadius: 0.75,
-                      [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                    },
-                  }}
-                >
-                  <MenuItem onClick={() => onClickEditVendor(vendors[index].name, item?.id)}>
-                    <Iconify icon="solar:pen-bold" />
-                    Edit
-                  </MenuItem>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel>
+            <Select
+              label="Internal Company"
+              labelId="demo-simple-select-outlined-label-type"
+              id="internal_id"
+              {...register('internal_id', {
+                required: 'Internal Company must be filled out',
+              })}
+              multiple
+              value={watch('internal_id')}
+              input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {(watch('internal_id') ?? []).map((value: any) => (
+                    <Chip key={value} label={companies?.find((item) => item?.id === value)?.name} />
+                  ))}
+                </Box>
+              )}
+              MenuProps={MenuProps}
+            >
+              {companies &&
+                companies?.map((company) => (
                   <MenuItem
-                    onClick={() => onClickDeleteVendor(item?.id)}
-                    sx={{ color: 'error.main' }}
+                    key={company?.id}
+                    value={company?.id}
+                    style={getStyles(company?.id, watch('internal_id') ?? [], theme)}
                   >
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                    Delete
+                    {company?.name}
                   </MenuItem>
-                </MenuList>
-              </Stack>
-            ))}
-            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-              <TextField
-                sx={{
-                  width: '100%',
-                }}
-                label="Vendor"
-                value={vendor}
-                onChange={onChangeVendorNew}
-              />
-            </Stack>
-          </Box>
-          <Button onClick={onAddVendor} sx={{ marginY: 2 }}>
-            Add More
-          </Button>
+                ))}
+            </Select>
+          </FormControl>
+          {formState?.errors?.internal_id && (
+            <FormHelperText sx={{ color: 'error.main' }}>
+              {String(formState?.errors?.internal_id?.message)}
+            </FormHelperText>
+          )}
         </Grid>
-      ) : null} */}
+      ) : null}
 
       <Grid item xs={12} md={12}>
         <TextField
@@ -380,7 +383,12 @@ function EditForm({
   );
 }
 
-export function EditUserView() {
+interface EditUserProps {
+  type: 'client' | 'internal';
+}
+
+export function EditUserView({ type }: EditUserProps) {
+  const theme = useTheme();
   const { id } = useParams();
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
@@ -388,7 +396,7 @@ export function EditUserView() {
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
   const { mutate: updateUser } = useUpdateUser();
-  const { data: companies } = useCompanies();
+  const { data: companies } = useCompanies(type);
 
   const { mutate: deleteVendor } = useDeleteDivisionItem(Number(id));
   const { mutate: addVendor } = useAddDivision();
@@ -406,6 +414,7 @@ export function EditUserView() {
     company_id: user?.user_info?.company_id,
     department_id: user?.user_info?.department_id,
     vendor: user?.vendor,
+    internal_id: user?.user_info?.internal_id ?? [],
   };
 
   console.log(defaultValues, 'defaultValues');
@@ -430,7 +439,7 @@ export function EditUserView() {
     return data;
   };
 
-  const handleSubmit = (formData: UserUpdateDTO) => {
+  const handleSubmit = (formData: UserClientUpdateDTO & { internal_id?: number[] }) => {
     const payload = {
       ...formData,
       id: Number(id),
@@ -501,7 +510,7 @@ export function EditUserView() {
               ...defaultValues,
             },
           }}
-          schema={userUpdateSchema}
+          schema={type === 'client' ? userClientSchema : userInternalUpdateSchema}
         >
           {({ register, watch, control, formState, setValue }) => (
             <EditForm
@@ -517,6 +526,7 @@ export function EditUserView() {
               roles={roles}
               isLoading={isLoading}
               user={user}
+              type={type}
               vendor={vendor}
               onChangeVendorNew={onChangeVendorNew}
               onClickDeleteVendor={onClickDeleteVendor}
@@ -524,6 +534,7 @@ export function EditUserView() {
               vendors={vendors}
               onAddVendor={onAddVendor}
               onChangeVendor={onChangeVendor}
+              theme={theme}
             />
           )}
         </Form>
