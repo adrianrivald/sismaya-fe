@@ -10,7 +10,7 @@ export const userInternalSchema = z
     department_id: z.number().nullable(),
     role_id: z.number().min(1, 'Required'),
     cover: z.any(),
-    internal_id: z.number().array()
+    internal_companies: z.number().array()
   })
   .partial();
 
@@ -26,6 +26,7 @@ export const userClientSchema = z
     department_id: z.number().nullable(),
     role_id: z.number().min(1, 'Required'),
     cover: z.any(),
+    internal_companies: z.number().array().optional()
   })
   .partial();
 
@@ -41,7 +42,7 @@ export const userInternalUpdateSchema = z
     role_id: z.number().min(1, 'Required'),
     cover: z.any().optional(),
     profile_picture: z.string().optional(),
-    internal_id: z.number().array().optional()
+    internal_companies: z.number().array().optional()
   })
   .partial();
 
@@ -60,6 +61,8 @@ export const userClientUpdateSchema = z
     profile_picture: z.string().optional(),
     company_id: z.number().nullable(),
     department_id: z.number().nullable(),
+    internal_companies: z.number().array().optional()
+
   })
   .partial();
 

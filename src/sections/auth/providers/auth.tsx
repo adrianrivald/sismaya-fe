@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from 'src/services/auth/login';
+import { useUserById } from 'src/services/master-data/user';
 import { User } from 'src/services/master-data/user/types';
 import { createContext } from 'src/utils/create.context';
 import * as sessionService from '../session/session';
