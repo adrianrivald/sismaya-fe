@@ -83,7 +83,7 @@ export function UserView({ type }: UserViewProps) {
   const internalData = data?.items?.filter((item) => item?.user_info?.company_id === null);
   const { mutate: deleteUserById } = useDeleteUserById();
 
-  // console.log(getDataTableProps(), 'get data table props');
+  console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('create');
