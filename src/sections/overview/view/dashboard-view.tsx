@@ -11,88 +11,13 @@ import { Iconify } from 'src/components/iconify';
 import { useDeleteRequestById, useRequestList } from 'src/services/request';
 import { AnalyticsProjectSummary } from '../analytics-project-summary';
 
-// ----------------------------------------------------------------------
-
-interface PopoverProps {
-  handleEdit: (id: number) => void;
-  handleDelete: (id: number) => void;
-}
-
-const columnHelper = createColumnHelper<any>();
-
-const columns = (popoverProps: PopoverProps) => [
-  columnHelper.accessor('name', {
-    header: 'Name',
-  }),
-
-  columnHelper.accessor('abbreviation', {
-    header: 'Abbreviation',
-  }),
-
-  columnHelper.accessor('type', {
-    header: 'Type',
-  }),
-
-  columnHelper.display({
-    id: 'actions',
-    cell: (info) => ButtonActions(info, popoverProps),
-  }),
-];
-
-function ButtonActions(props: CellContext<any, unknown>, popoverProps: PopoverProps) {
-  const { row } = props;
-  const requestId = row.original.id;
-  const { handleEdit, handleDelete } = popoverProps;
-  return (
-    <MenuList
-      disablePadding
-      sx={{
-        p: 0.5,
-        gap: 0.5,
-        display: 'flex',
-        flexDirection: 'row',
-        [`& .${menuItemClasses.root}`]: {
-          px: 1,
-          gap: 2,
-          borderRadius: 0.75,
-          [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-        },
-      }}
-    >
-      <MenuItem onClick={() => handleEdit(requestId)}>
-        <Iconify icon="solar:pen-bold" />
-        Edit
-      </MenuItem>
-
-      <MenuItem onClick={() => handleDelete(requestId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
-      </MenuItem>
-    </MenuList>
-  );
-}
-
 export function DashboardView() {
-  const { isEmpty, getDataTableProps } = useRequestList({});
-  const { mutate: deleteRequestById } = useDeleteRequestById();
   const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
 
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('/request/create');
-  };
-
-  const popoverFuncs = () => {
-    const handleEdit = (id: number) => {
-      navigate(`${id}/edit`);
-    };
-
-    const handleDelete = (id: number) => {
-      deleteRequestById(id);
-    };
-
-    return { handleEdit, handleDelete };
   };
 
   return (

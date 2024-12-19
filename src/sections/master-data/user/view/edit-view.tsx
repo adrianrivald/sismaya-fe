@@ -21,7 +21,7 @@ import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect } from 'react';
 import { useUpdateUser, useUserById } from 'src/services/master-data/user';
-import { Role, useRole } from 'src/services/master-data/role';
+import { type Role, useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import {
   UserClientUpdateDTO,
@@ -31,8 +31,10 @@ import {
 } from 'src/services/master-data/user/schemas/user-schema';
 import {
   useAddDivision,
+  useClientCompanies,
   useCompanies,
   useDeleteDivisionItem,
+  useInternalCompanies,
   useUpdateDivision,
 } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
@@ -75,16 +77,18 @@ interface UserValues {
   profile_picture: string;
   company_id: number | undefined;
   department_id: number | undefined;
+  internal_companies: number[];
 }
 interface EditFormProps {
-  formState: FormState<UserClientUpdateDTO & { internal_id?: number[] }>;
-  register: UseFormRegister<UserClientUpdateDTO & { internal_id?: number[] }>;
-  control: Control<UserClientUpdateDTO & { internal_id?: number[] }>;
-  setValue: UseFormSetValue<UserClientUpdateDTO & { internal_id?: number[] }>;
-  watch: UseFormWatch<UserClientUpdateDTO & { internal_id?: number[] }>;
+  formState: FormState<UserClientUpdateDTO>;
+  register: UseFormRegister<UserClientUpdateDTO>;
+  control: Control<UserClientUpdateDTO>;
+  setValue: UseFormSetValue<UserClientUpdateDTO>;
+  watch: UseFormWatch<UserClientUpdateDTO>;
   defaultValues: UserValues;
   fetchDivision: (companyId: number) => void;
-  companies: Company[] | undefined;
+  clientCompanies: Company[] | undefined;
+  internalCompanies: Company[] | undefined;
   divisions: Department[] | [];
   roles: Role[] | undefined;
   isLoading: boolean;
@@ -108,13 +112,14 @@ function EditForm({
   watch,
   defaultValues,
   fetchDivision,
-  companies,
+  clientCompanies,
   divisions,
   roles,
   isLoading,
   user,
   type,
   theme,
+  internalCompanies,
 }: EditFormProps) {
   console.log(watch(), 'formwatch');
   useEffect(() => {
@@ -123,8 +128,11 @@ function EditForm({
     setValue('phone', defaultValues?.phone);
     setValue('role_id', defaultValues?.role_id);
     setValue('company_id', defaultValues?.company_id);
+    setValue('internal_companies', defaultValues?.internal_companies);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  console.log(watch(), 'watchform');
 
   useEffect(() => {
     if (divisions?.length) {
@@ -181,7 +189,7 @@ function EditForm({
               label="Company"
               value={watch('company_id')}
             >
-              {companies?.map((company) => (
+              {clientCompanies?.map((company) => (
                 <MenuItem value={company?.id}>{company?.name}</MenuItem>
               ))}
             </Select>
@@ -221,48 +229,51 @@ function EditForm({
         ) : null
       ) : null}
 
-      {type === 'internal' ? (
-        <Grid item xs={12} md={12}>
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel>
-            <Select
-              label="Internal Company"
-              labelId="demo-simple-select-outlined-label-type"
-              id="internal_id"
-              {...register('internal_id', {
-                required: 'Internal Company must be filled out',
-              })}
-              multiple
-              value={watch('internal_id')}
-              input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {(watch('internal_id') ?? []).map((value: any) => (
-                    <Chip key={value} label={companies?.find((item) => item?.id === value)?.name} />
-                  ))}
-                </Box>
-              )}
-              MenuProps={MenuProps}
-            >
-              {companies &&
-                companies?.map((company) => (
-                  <MenuItem
-                    key={company?.id}
-                    value={company?.id}
-                    style={getStyles(company?.id, watch('internal_id') ?? [], theme)}
-                  >
-                    {company?.name}
-                  </MenuItem>
+      {/* {type === 'internal' ? ( */}
+      <Grid item xs={12} md={12}>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel>
+          <Select
+            label="Internal Company"
+            labelId="demo-simple-select-outlined-label-type"
+            id="internal_companies"
+            {...register('internal_companies', {
+              required: 'Internal Company must be filled out',
+            })}
+            multiple
+            value={watch('internal_companies')}
+            input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {(watch('internal_companies') ?? []).map((value: any) => (
+                  <Chip
+                    key={value}
+                    label={internalCompanies?.find((item) => item?.id === value)?.name}
+                  />
                 ))}
-            </Select>
-          </FormControl>
-          {formState?.errors?.internal_id && (
-            <FormHelperText sx={{ color: 'error.main' }}>
-              {String(formState?.errors?.internal_id?.message)}
-            </FormHelperText>
-          )}
-        </Grid>
-      ) : null}
+              </Box>
+            )}
+            MenuProps={MenuProps}
+          >
+            {internalCompanies &&
+              internalCompanies?.map((company) => (
+                <MenuItem
+                  key={company?.id}
+                  value={company?.id}
+                  style={getStyles(company?.id, watch('internal_companies') ?? [], theme)}
+                >
+                  {company?.name}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+        {formState?.errors?.internal_companies && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.internal_companies?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+      {/* ) : null} */}
 
       <Grid item xs={12} md={12}>
         <TextField
@@ -396,13 +407,14 @@ export function EditUserView({ type }: EditUserProps) {
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
   const { mutate: updateUser } = useUpdateUser();
-  const { data: companies } = useCompanies(type);
+  const { data: clientCompanies } = useClientCompanies();
+  const { data: internalCompanies } = useInternalCompanies();
 
   const { mutate: deleteVendor } = useDeleteDivisionItem(Number(id));
   const { mutate: addVendor } = useAddDivision();
   const { mutate: updateVendor } = useUpdateDivision();
 
-  const [vendors, setVendors] = React.useState(user?.vendor ?? []);
+  const [vendors, setVendors] = React.useState(user?.internal_companies ?? []);
   const [vendor, setVendor] = React.useState('');
 
   const defaultValues = {
@@ -413,8 +425,7 @@ export function EditUserView({ type }: EditUserProps) {
     profile_picture: user?.user_info?.profile_picture ?? '',
     company_id: user?.user_info?.company_id,
     department_id: user?.user_info?.department_id,
-    vendor: user?.vendor,
-    internal_id: user?.user_info?.internal_id ?? [],
+    internal_companies: user?.internal_companies ?? [],
   };
 
   console.log(defaultValues, 'defaultValues');
@@ -439,11 +450,12 @@ export function EditUserView({ type }: EditUserProps) {
     return data;
   };
 
-  const handleSubmit = (formData: UserClientUpdateDTO & { internal_id?: number[] }) => {
+  const handleSubmit = (formData: UserClientUpdateDTO) => {
     const payload = {
       ...formData,
       id: Number(id),
     };
+    console.log(payload, 'payload');
     if (defaultValues?.profile_picture) {
       Object.assign(payload, {
         profile_picture: defaultValues?.profile_picture,
@@ -461,7 +473,7 @@ export function EditUserView({ type }: EditUserProps) {
   };
 
   React.useEffect(() => {
-    setVendors(user?.vendor ?? []);
+    setVendors(user?.internal_companies ?? []);
   }, [user]);
 
   const onChangeVendor = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
@@ -521,7 +533,8 @@ export function EditUserView({ type }: EditUserProps) {
               watch={watch}
               defaultValues={defaultValues}
               fetchDivision={fetchDivision}
-              companies={companies}
+              clientCompanies={clientCompanies}
+              internalCompanies={internalCompanies}
               divisions={divisions}
               roles={roles}
               isLoading={isLoading}

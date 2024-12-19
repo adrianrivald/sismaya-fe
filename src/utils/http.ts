@@ -1,6 +1,6 @@
 import { API_URL } from 'src/constants';
 import { joinURL, withQuery, type QueryObject } from 'ufo';
-import * as sessionService from '../sections/auth/session/session';
+import {getSession, flushStorage} from '../sections/auth/session/session';
 
 
 export interface RequestInitClient extends Omit<RequestInit, 'body'> {
@@ -75,7 +75,7 @@ export function http<TData = unknown>(
     data,
     params = {},
     headers: customHeaders,
-    accessToken = sessionService.getSession(),
+    accessToken = getSession(),
     ...customConfig
   } = requestInit ?? {};
 
@@ -99,7 +99,7 @@ export function http<TData = unknown>(
     }
 
     if (response.status === 401 && !response.url.includes('auth/login')) {
-      sessionService.flushStorage();
+      flushStorage();
       window.location.href= "/"
       // window.location.reload();
     }

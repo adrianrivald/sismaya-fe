@@ -5,13 +5,14 @@ import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { UserClientUpdateDTO } from "./schemas/user-schema";
 
-export type UpdateUser = UserClientUpdateDTO & {id: number, cover?: any, internal_id?: number[]};
+export type UpdateUser = UserClientUpdateDTO & {id: number, cover?: any};
 
 export function useUpdateUser() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateUser) => {
         const {cover,id, ...form} = formData;
+        console.log(formData,'formDataformData')
         const payload = {
           ...form
         }

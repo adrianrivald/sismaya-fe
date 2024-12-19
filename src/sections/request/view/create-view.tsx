@@ -21,23 +21,26 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, ChangeEventHandler } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { RequestDTO } from 'src/services/request/schemas/request-schema';
+import { useUserById } from 'src/services/master-data/user';
 
 export function CreateRequestView() {
   const { user } = useAuth();
+  const { data } = useUserById(user?.id);
   const [files, setFiles] = React.useState<File[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
-  const handleSubmit = (formData: any) => {
-    setIsLoading(true);
+  const handleSubmit = (formData: RequestDTO) => {
+    // setIsLoading(true);
     const payload = {
       ...formData,
       files,
     };
     console.log(payload, 'test');
-    setTimeout(() => {
-      navigate('/request/test');
-      setIsLoading(false);
-    }, 1000);
+    // setTimeout(() => {
+    //   navigate('/request/test');
+    //   setIsLoading(false);
+    // }, 1000);
     // await createRequest(payload) //Todo: soon
   };
 
@@ -94,7 +97,7 @@ export function CreateRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Company</Typography>
-                    <Typography>{user?.user_info?.company}</Typography>
+                    <Typography>{user?.user_info?.company?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -106,7 +109,7 @@ export function CreateRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Division</Typography>
-                    <Typography>{user?.user_info?.department}</Typography>
+                    <Typography>{user?.user_info?.department?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -118,13 +121,38 @@ export function CreateRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Role</Typography>
-                    <Typography>{user?.user_info?.role}</Typography>
+                    <Typography>{user?.user_info?.role?.name}</Typography>
                   </Stack>
                 </Stack>
               </Grid>
 
               <Grid item xs={12} md={12}>
                 <Stack direction="row" gap={3} alignItems="center">
+                  <Box
+                    sx={{
+                      width: { xs: '100%', md: '25%' },
+                    }}
+                  >
+                    <FormControl fullWidth>
+                      <InputLabel id="select-category">Product</InputLabel>
+                      <Select
+                        labelId="select-category"
+                        error={Boolean(formState?.errors?.product_id)}
+                        {...register('product_id', {
+                          required: 'Product must be filled out',
+                        })}
+                        label="Product"
+                      >
+                        <MenuItem value="product_id1">Product</MenuItem>
+                        <MenuItem value="product_id2">Product 2</MenuItem>
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.product_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.product_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Box>
                   <Box
                     sx={{
                       width: { xs: '100%', md: '25%' },
