@@ -103,9 +103,7 @@ export function DashboardView() {
             Dashboard
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
-            <Typography>Request</Typography>
-            <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">KMI Request Management</Typography>
+            <Typography>Dashboard</Typography>
           </Box>
         </Box>
         {/* <Box>
@@ -116,16 +114,8 @@ export function DashboardView() {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={4}>
-          <AnalyticsProjectSummary title="Total Active Projects" total={714000} />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4}>
-          <AnalyticsProjectSummary title="Projects in Progress" total={714000} />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4}>
-          <AnalyticsProjectSummary title="Pending Approvals" total={714000} />
+        <Grid xs={12}>
+          <Typography variant="h3">Welcome to Dashboard</Typography>
         </Grid>
 
         {/* Default overview items */}

@@ -2,7 +2,8 @@ export interface User {
     id: number;
     email: string;
     phone: string;
-    user_info: UserInfo
+    user_info: UserInfo;
+    vendor?: any[]
 }
 
 interface UserInfo {
@@ -19,4 +20,5 @@ interface UserInfo {
     updated_at: string;
     user: string;
     user_id: number
+    internal_id: number[]
 }

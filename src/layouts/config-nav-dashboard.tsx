@@ -93,8 +93,12 @@ export const menus: Menus[] = [
             path: '/client-company',
           },
           {
-            heading: 'User',
-            path: '/user',
+            heading: 'Internal User',
+            path: '/internal-user',
+          },
+          {
+            heading: 'Client User',
+            path: '/client-user',
           },
         ],
       },

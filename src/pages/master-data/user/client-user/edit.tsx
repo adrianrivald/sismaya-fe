@@ -5,11 +5,11 @@ import { EditUserView } from 'src/sections/master-data/user/view';
 
 // ----------------------------------------------------------------------
 
-export default function UserEditPage() {
+export default function UserClientEditPage() {
   return (
     <>
       <Helmet>
-        <title> {`Edit User - ${CONFIG.appName}`}</title>
+        <title> {`Edit Client User - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -17,7 +17,7 @@ export default function UserEditPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <EditUserView />
+      <EditUserView type="client" />
     </>
   );
 }

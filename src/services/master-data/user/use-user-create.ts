@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { UserDTO } from "./schemas/user-schema";
+import { UserClientDTO } from "./schemas/user-schema";
 
-export type StoreUser = UserDTO & {cover?: any};
+export type StoreUser = UserClientDTO & {cover?: any};
 
 export function useAddUser() {
     const navigate = useNavigate()
@@ -27,9 +27,8 @@ export function useAddUser() {
         });
       },
       {
-          onSuccess: () => {
-      
-  
+          onSuccess: (res : any) => {
+            const isClient = res?.data?.user_info?.company_id !== null
           toast.success('Data added successfully', {
             position: 'top-right',
             autoClose: 5000,
@@ -41,7 +40,7 @@ export function useAddUser() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/user`)
+          navigate(`${isClient ? "/client-user" : "/internal-user"}`)
 
         },
         onError: (error) => {

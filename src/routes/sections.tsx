@@ -42,10 +42,23 @@ export const ClientCompanyEditPage = lazy(
   () => import('src/pages/master-data/client-company/edit')
 );
 
-// User
-export const UserListPage = lazy(() => import('src/pages/master-data/user/list'));
-export const UserCreatePage = lazy(() => import('src/pages/master-data/user/create'));
-export const UserEditPage = lazy(() => import('src/pages/master-data/user/edit'));
+// Internal User
+export const UserInternalListPage = lazy(
+  () => import('src/pages/master-data/user/internal-user/list')
+);
+export const UserInternalCreatePage = lazy(
+  () => import('src/pages/master-data/user/internal-user/create')
+);
+export const UserInternalEditPage = lazy(
+  () => import('src/pages/master-data/user/internal-user/edit')
+);
+
+// Client
+export const UserClientListPage = lazy(() => import('src/pages/master-data/user/client-user/list'));
+export const UserClientCreatePage = lazy(
+  () => import('src/pages/master-data/user/client-user/create')
+);
+export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/client-user/edit'));
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -80,10 +93,15 @@ const superAdminRoutes = {
     { path: 'client-company', element: <ClientCompanyListPage /> },
     { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
     { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
-    // User
-    { path: 'user', element: <UserListPage /> },
-    { path: 'user/create', element: <UserCreatePage /> },
-    { path: 'user/:id/edit', element: <UserEditPage /> },
+    // Internal User
+    { path: 'internal-user', element: <UserInternalListPage /> },
+    { path: 'internal-user/create', element: <UserInternalCreatePage /> },
+    { path: 'internal-user/:id/edit', element: <UserInternalEditPage /> },
+
+    // Internal User
+    { path: 'client-user', element: <UserClientListPage /> },
+    { path: 'client-user/create', element: <UserClientCreatePage /> },
+    { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
   ],
 };
 

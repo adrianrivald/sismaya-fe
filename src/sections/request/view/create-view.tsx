@@ -20,8 +20,10 @@ import { Form } from 'src/components/form/form';
 import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, ChangeEventHandler } from 'react';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 export function CreateRequestView() {
+  const { user } = useAuth();
   const [files, setFiles] = React.useState<File[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
@@ -67,104 +69,57 @@ export function CreateRequestView() {
                   gap={3}
                   alignItems="center"
                   direction={{ xs: 'column', md: 'row' }}
+                  bgcolor="blue.50"
+                  p={2}
+                  borderRadius={2}
                 >
-                  <Box
+                  <Stack
                     sx={{
                       width: { xs: '100%', md: '25%' },
                     }}
+                    display="flex"
+                    flexDirection="column"
+                    gap={0.5}
                   >
-                    <TextField
-                      error={Boolean(formState?.errors?.name)}
-                      sx={{
-                        width: '100%',
-                      }}
-                      label="Request Name"
-                      {...register('name', {
-                        required: 'Request Name must be filled out',
-                      })}
-                      autoComplete="off"
-                    />
-                    {formState?.errors?.name && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.name?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                  <Box
+                    <Typography color="grey.600">Requester Name</Typography>
+                    <Typography>{user?.user_info?.name}</Typography>
+                  </Stack>
+
+                  <Stack
                     sx={{
                       width: { xs: '100%', md: '25%' },
                     }}
+                    display="flex"
+                    flexDirection="column"
+                    gap={0.5}
                   >
-                    <FormControl fullWidth>
-                      <InputLabel id="select-source">Source</InputLabel>
-                      <Select
-                        labelId="select-source"
-                        error={Boolean(formState?.errors?.source)}
-                        {...register('source', {
-                          required: 'Source must be filled out',
-                        })}
-                        label="Source"
-                      >
-                        <MenuItem value="source1">PHTA</MenuItem>
-                        <MenuItem value="source2">Source 2</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.source && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.source?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                  <Box
+                    <Typography color="grey.600">Company</Typography>
+                    <Typography>{user?.user_info?.company}</Typography>
+                  </Stack>
+
+                  <Stack
                     sx={{
                       width: { xs: '100%', md: '25%' },
                     }}
+                    display="flex"
+                    flexDirection="column"
+                    gap={0.5}
                   >
-                    <FormControl fullWidth>
-                      <InputLabel id="select-division">Division</InputLabel>
-                      <Select
-                        labelId="select-division"
-                        error={Boolean(formState?.errors?.division)}
-                        {...register('division', {
-                          required: 'Division must be filled out',
-                        })}
-                        label="Divison"
-                      >
-                        <MenuItem value="division1">Pengadaan</MenuItem>
-                        <MenuItem value="division2">Division 2</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.division && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.division?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                  <Box
+                    <Typography color="grey.600">Division</Typography>
+                    <Typography>{user?.user_info?.department}</Typography>
+                  </Stack>
+
+                  <Stack
                     sx={{
                       width: { xs: '100%', md: '25%' },
                     }}
+                    display="flex"
+                    flexDirection="column"
+                    gap={0.5}
                   >
-                    <FormControl fullWidth>
-                      <InputLabel id="select-role">Role</InputLabel>
-                      <Select
-                        labelId="select-role"
-                        error={Boolean(formState?.errors?.role)}
-                        {...register('role', {
-                          required: 'Role must be filled out',
-                        })}
-                        label="Role"
-                      >
-                        <MenuItem value="role1">Asset Manager</MenuItem>
-                        <MenuItem value="role2">Admin</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.role && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.role?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
+                    <Typography color="grey.600">Role</Typography>
+                    <Typography>{user?.user_info?.role}</Typography>
+                  </Stack>
                 </Stack>
               </Grid>
 
