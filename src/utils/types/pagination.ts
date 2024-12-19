@@ -12,15 +12,9 @@ export interface PaginationLinks {
 }
 
 export interface Meta {
-  current_page: number;
-  last_page: number;
-  from: number;
-  to: number;
-  path: string;
   page: number;
   page_size: number;
-  total_data: number;
-  links: MetaLink[];
+  total_data: number
 }
 
 export interface MetaLink {

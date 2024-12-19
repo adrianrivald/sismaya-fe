@@ -66,9 +66,9 @@ export function dataTableParamsBuilder(options: DataTableBuilderOptions) {
     searchParams.append('page', String(pageIndex + 1));
   }
 
-  if (pageSize) {
-    searchParams.append('limit', String(pageSize));
-  }
+  // if (pageSize) {
+  //   searchParams.append('limit', String(pageSize));
+  // }
 
   if (keyword) {
     searchParams.append(searchKey, keyword);

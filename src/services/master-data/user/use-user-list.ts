@@ -10,6 +10,7 @@ import { WithPagination } from 'src/utils/types';
 function fetchUserList(params: Partial<any> ) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/users', baseUrl);
+  console.log(params,'paramsparams')
 
   if (params.type) {
     endpointUrl.searchParams.append('type', params.type);
@@ -30,6 +31,7 @@ function fetchUserList(params: Partial<any> ) {
     filterValues: [params.order],
     ...params,
   });
+
 
 
   return http<WithPagination<any>>(

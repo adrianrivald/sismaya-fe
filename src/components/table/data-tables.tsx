@@ -24,7 +24,7 @@ import { MetaLink } from 'src/utils/types';
 import React from 'react';
 
 interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'columns'> {
-  pageCount: number;
+  // pageCount: number;
   pagination: PaginationState;
   onPaginationChange: (nextState: PaginationState) => void;
   total: number;
@@ -32,11 +32,11 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
-  const { data, columns, pageCount, pagination, onPaginationChange, total } = props;
+  const { data, columns, pagination, onPaginationChange, total } = props;
   const table = useReactTable({
     data,
     columns,
-    pageCount,
+    // pageCount, TODO: pagecount will be added if be provided it
     state: {
       pagination,
     },
@@ -52,7 +52,10 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     manualPagination: true,
   });
 
+  console.log(table.getState().pagination.pageIndex, 'table.getState().pagination.pageIndex');
+
   const onChangePage = (event: unknown, newPage: number) => {
+    console.log(newPage, 'newPage');
     table.setPageIndex(newPage);
   };
 
