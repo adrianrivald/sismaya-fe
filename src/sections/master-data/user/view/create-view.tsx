@@ -28,8 +28,10 @@ import { useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import {
   fetchDivisionByCompanyId,
+  useClientCompanies,
   useCompanies,
   useDivisionByCompanyId,
+  useInternalCompanies,
 } from 'src/services/master-data/company';
 import { API_URL } from 'src/constants';
 import { getSession } from 'src/sections/auth/session/session';
@@ -72,7 +74,8 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
   const { mutate: addUser } = useAddUser();
   const { data: roles } = useRole();
-  const { data: companies } = useCompanies(type);
+  const { data: companies } = useClientCompanies();
+  const { data: internalCompanies } = useInternalCompanies();
 
   const defaultValues = {
     internal_id: [],
@@ -94,6 +97,7 @@ export function CreateUserView({ type }: CreateUserProps) {
 
   const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
     setIsLoading(true);
+    // const { internal_id, ...restForm } = formData;
     try {
       addUser({
         ...formData,
@@ -156,54 +160,6 @@ export function CreateUserView({ type }: CreateUserProps) {
                 )}
               </Grid>
 
-              {type === 'internal' ? (
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-outlined-label-type">
-                      Internal Company
-                    </InputLabel>
-                    <Select
-                      label="Internal Company"
-                      labelId="demo-simple-select-outlined-label-type"
-                      id="internal_id"
-                      {...register('internal_id', {
-                        required: 'Internal Company must be filled out',
-                      })}
-                      multiple
-                      value={watch('internal_id')}
-                      input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {watch('internal_id').map((value: any) => (
-                            <Chip
-                              key={value}
-                              label={companies?.find((item) => item?.id === value)?.name}
-                            />
-                          ))}
-                        </Box>
-                      )}
-                      MenuProps={MenuProps}
-                    >
-                      {companies &&
-                        companies?.map((company) => (
-                          <MenuItem
-                            key={company?.id}
-                            value={company?.id}
-                            style={getStyles(company?.id, watch('internal_id'), theme)}
-                          >
-                            {company?.name}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl>
-                  {formState?.errors?.internal_id && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.internal_id?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-              ) : null}
-
               {type === 'client' ? (
                 <Grid item xs={12} md={12}>
                   <FormControl fullWidth>
@@ -257,6 +213,54 @@ export function CreateUserView({ type }: CreateUserProps) {
                   </Grid>
                 ) : null
               ) : null}
+
+              {/* {type === 'internal' ? ( */}
+              <Grid item xs={12} md={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-outlined-label-type">
+                    Internal Company
+                  </InputLabel>
+                  <Select
+                    label="Internal Company"
+                    labelId="demo-simple-select-outlined-label-type"
+                    id="internal_id"
+                    {...register('internal_id', {
+                      required: 'Internal Company must be filled out',
+                    })}
+                    multiple
+                    value={watch('internal_id')}
+                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {watch('internal_id').map((value: any) => (
+                          <Chip
+                            key={value}
+                            label={internalCompanies?.find((item) => item?.id === value)?.name}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                    MenuProps={MenuProps}
+                  >
+                    {internalCompanies &&
+                      internalCompanies?.map((company) => (
+                        <MenuItem
+                          key={company?.id}
+                          value={company?.id}
+                          style={getStyles(company?.id, watch('internal_id'), theme)}
+                        >
+                          {company?.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+                {formState?.errors?.internal_id && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.internal_id?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+              {/* ) : null} */}
 
               <Grid item xs={12} md={12}>
                 <TextField

@@ -46,3 +46,23 @@ export interface Statuses {
     step: string;
     sort: number
 }
+
+export interface InternalCompany {
+    abbreviation: string
+    categories: Categories[]
+    cito_quota: number
+    cito_reset_at: string
+    cito_used: string
+    company_cito_uselogs: string
+    company_product_uses: string
+    created_at: string
+    deleted_at: string
+    departments: Department[]
+    id: number
+    image: string
+    name: string
+    products: Products[]
+    progress_statuses: string
+    type: string
+    updated_at: string
+}

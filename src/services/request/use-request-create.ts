@@ -1,47 +1,48 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
-import { uploadImage } from "src/services/utils/upload-image";
+import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
+import { RequestDTO } from "./schemas/request-schema";
 
-export type StoreCompany = any & {type: string, cover?: any};
+export type StoreRequest = RequestDTO & {files?: any};
 
-export function useAddCompany() {
+export function useAddRequest() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
-      async (formData: StoreCompany) => {
-        const { name, abbreviation, type, cover } = formData;
+      async (formData: StoreRequest) => {
+        const { files, ...form } = formData;
         const payload =  {
-          name,
-          abbreviation,
-          type
+          ...form
         }
-
-        if (type ===  "holding") {
-          if(cover) {
+        
+          if(files) {
             
-          const imageData = new FormData();
-          imageData.append('file', cover as unknown as File);
-          const { url } = await uploadImage(
-            imageData
+          const filesData = new FormData();
+          Array.from(files).forEach((file, index) => {
+          filesData.append(`files`, file as unknown as File);
+          });
+          const {data} = await uploadFilesBulk(
+            filesData
           );
-  
+            console.log(data,'datan')
           Object.assign(payload, {
-            image: url,
+            attachments: data?.map(item => ({
+                file_path: item?.path,
+                file_name: item?.filename
+            }))
           });
           }
-        }
-  
-        return http(`companies`, {
+        
+        return http(`requests`, {
           data: payload
         });
       },
       {
-        // onSuccess: (res: {data: StoreCompany}) => {
+        // onSuccess: (res: {data: StoreRequest}) => {
           onSuccess: (res: any) => {
-          console.log(res,'res')
-          queryClient.invalidateQueries(['company']);
+          queryClient.invalidateQueries(['request']);
   
           toast.success('Data added successfully', {
             position: 'top-right',
@@ -54,12 +55,8 @@ export function useAddCompany() {
             theme: 'light',
             transition: Bounce,
           });
-          if (res?.data?.type === "holding") {
-            navigate(`/client-company/${res?.data?.id}/edit`)
-          } else {
-            navigate(`/internal-company/${res?.data?.id}/edit`)
+          navigate(`/sim/request`)
 
-          }
         },
         onError: (error) => {
           const reason =

@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import { _langs, _notifications } from 'src/_mock';
 
 import { Iconify } from 'src/components/iconify';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 import { Main } from './main';
 import { layoutClasses } from '../classes';
@@ -35,7 +36,11 @@ export type DashboardLayoutProps = {
 
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
   const theme = useTheme();
-
+  const { user } = useAuth();
+  const internalCompanies = user?.internal_companies?.map((item) => ({
+    heading: item?.name,
+    path: `/${item?.name.toLowerCase()}/request`,
+  }));
   const [navOpen, setNavOpen] = useState(false);
 
   const layoutQuery: Breakpoint = 'lg';
@@ -71,7 +76,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  menus={menus}
+                  menus={menus(internalCompanies)}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   workspaces={_workspaces}
@@ -111,7 +116,11 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        * Sidebar
        *************************************** */
       sidebarSection={
-        <NavDesktop menus={menus} layoutQuery={layoutQuery} workspaces={_workspaces} />
+        <NavDesktop
+          menus={menus(internalCompanies)}
+          layoutQuery={layoutQuery}
+          workspaces={_workspaces}
+        />
       }
       /** **************************************
        * Footer

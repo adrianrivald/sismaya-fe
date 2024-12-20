@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { loginUser } from 'src/services/auth/login';
+import { InternalCompany } from 'src/services/master-data/company/types';
 import { useUserById } from 'src/services/master-data/user';
 import { User } from 'src/services/master-data/user/types';
 import { createContext } from 'src/utils/create.context';
@@ -12,6 +13,7 @@ interface AuthContextValue {
   user: User;
   logout: () => Promise<void>;
   login: (formField: LoginCredentialsDTO) => Promise<void>;
+  currentInternalCompany?: number | null;
 }
 
 const [useAuth, AuthInternalProvider] = createContext<AuthContextValue>({
@@ -27,10 +29,12 @@ interface LoginCredentialsDTO {
 
 export function AuthProvider(props: React.PropsWithChildren) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [accessToken, setAccessToken] = React.useState<string | null>(() =>
     sessionService.getSession()
   );
   const [userInfo, setUserInfo] = React.useState<string | null>(() => sessionService.getUser());
+  // const [currentInternalCompany, setCurrentInternalCompany] = React.useState<number | null>(null);
 
   async function login(formField: LoginCredentialsDTO) {
     const { data } = await loginUser(formField);
@@ -38,7 +42,14 @@ export function AuthProvider(props: React.PropsWithChildren) {
     sessionService.setSession(token, user);
     setAccessToken(token);
     setUserInfo(JSON.stringify(user));
-    navigate('/');
+    // setCurrentInternalCompany((user?.internal_companies ?? [])[0].id ?? null);
+
+    // Redirect as client user who has internal companies
+    if (user?.user_info?.role_id === 6 && (user?.internal_companies ?? [])?.length > 0) {
+      navigate(`/${(user?.internal_companies ?? [])[0]?.name.toLowerCase()}/request`);
+    } else {
+      navigate('/');
+    }
   }
 
   async function logout() {
@@ -60,6 +71,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
       value={{
         isAuth: !!accessToken,
         user: accessToken ? (userInfo ? JSON.parse(userInfo ?? '') : {}) : {},
+
         login,
         logout,
       }}

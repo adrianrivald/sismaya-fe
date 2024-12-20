@@ -17,25 +17,40 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, ChangeEventHandler } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
 import { useUserById } from 'src/services/master-data/user';
+import { useAddRequest } from 'src/services/request';
+import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 
 export function CreateRequestView() {
   const { user } = useAuth();
   const { data } = useUserById(user?.id);
-  const [files, setFiles] = React.useState<File[]>([]);
+  const location = useLocation();
+  const { vendor } = useParams();
+  const idCurrentCompany = user?.internal_companies?.find(
+    (item) => item?.name?.toLowerCase() === vendor
+  )?.id;
+  const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
+  const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
+  const [files, setFiles] = React.useState<FileList | any>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  const { mutate: addRequest } = useAddRequest();
   const handleSubmit = (formData: RequestDTO) => {
     // setIsLoading(true);
     const payload = {
       ...formData,
+      creator_id: user?.id,
+      user_id: user?.id,
+      company_id: user?.user_info?.company?.id,
+      department_id: user?.user_info?.department?.id,
       files,
     };
+    addRequest(payload);
     console.log(payload, 'test');
     // setTimeout(() => {
     //   navigate('/request/test');
@@ -46,9 +61,12 @@ export function CreateRequestView() {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Convert FileList to an array and update state
+    console.log(e.target.files, 'e.target.files');
     const selectedFiles = Array.from(e.target.files as ArrayLike<File>);
     const mergedFiles = [...files, ...selectedFiles];
-    setFiles(mergedFiles);
+    if (e.target.files) {
+      setFiles(e.target.files);
+    }
   };
 
   return (
@@ -143,8 +161,9 @@ export function CreateRequestView() {
                         })}
                         label="Product"
                       >
-                        <MenuItem value="product_id1">Product</MenuItem>
-                        <MenuItem value="product_id2">Product 2</MenuItem>
+                        {products?.map((product) => (
+                          <MenuItem value={product?.id}>{product?.name}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                     {formState?.errors?.product_id && (
@@ -162,19 +181,20 @@ export function CreateRequestView() {
                       <InputLabel id="select-category">Category</InputLabel>
                       <Select
                         labelId="select-category"
-                        error={Boolean(formState?.errors?.category)}
-                        {...register('category', {
+                        error={Boolean(formState?.errors?.category_id)}
+                        {...register('category_id', {
                           required: 'Category must be filled out',
                         })}
                         label="Category"
                       >
-                        <MenuItem value="category1">Kalibrasi</MenuItem>
-                        <MenuItem value="category2">Category 2</MenuItem>
+                        {categories?.map((category) => (
+                          <MenuItem value={category?.id}>{category?.name}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
-                    {formState?.errors?.category && (
+                    {formState?.errors?.category_id && (
                       <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.category?.message)}
+                        {String(formState?.errors?.category_id?.message)}
                       </FormHelperText>
                     )}
                   </Box>
@@ -229,7 +249,7 @@ export function CreateRequestView() {
                       mb={3}
                       sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
                     >
-                      {files?.map((file) => (
+                      {Array.from(files)?.map((file: any) => (
                         <Box display="flex" gap={1} alignItems="center">
                           <Box component="img" src="/assets/icons/file.png" />
                           <Box>

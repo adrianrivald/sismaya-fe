@@ -77,7 +77,7 @@ interface UserValues {
   profile_picture: string;
   company_id: number | undefined;
   department_id: number | undefined;
-  internal_companies: number[];
+  internal_id: number[];
 }
 interface EditFormProps {
   formState: FormState<UserClientUpdateDTO>;
@@ -128,7 +128,7 @@ function EditForm({
     setValue('phone', defaultValues?.phone);
     setValue('role_id', defaultValues?.role_id);
     setValue('company_id', defaultValues?.company_id);
-    setValue('internal_companies', defaultValues?.internal_companies);
+    setValue('internal_id', defaultValues?.internal_id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -230,7 +230,7 @@ function EditForm({
       ) : null}
 
       {/* {type === 'internal' ? ( */}
-      <Grid item xs={12} md={12}>
+      {/* <Grid item xs={12} md={12}>
         <FormControl fullWidth>
           <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel>
           <Select
@@ -272,7 +272,7 @@ function EditForm({
             {String(formState?.errors?.internal_companies?.message)}
           </FormHelperText>
         )}
-      </Grid>
+      </Grid> */}
       {/* ) : null} */}
 
       <Grid item xs={12} md={12}>
@@ -425,7 +425,7 @@ export function EditUserView({ type }: EditUserProps) {
     profile_picture: user?.user_info?.profile_picture ?? '',
     company_id: user?.user_info?.company_id,
     department_id: user?.user_info?.department_id,
-    internal_companies: user?.internal_companies ?? [],
+    internal_id: user?.internal_companies?.map((item) => item?.id) ?? [],
   };
 
   console.log(defaultValues, 'defaultValues');

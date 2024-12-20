@@ -9,25 +9,17 @@ import {
   TableBody,
   Input,
 } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { useRequestById } from 'src/services/request';
 
-import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { StatusBadge } from '../status-badge';
 
-export type ProjectProps = {
-  id: string;
-  requestId: string;
-  requester: string;
-  category: string;
-  deadline: string;
-  status: string;
-  priority: string;
-};
-
-// ----------------------------------------------------------------------
-
 export function RequestDetailView() {
+  const { id, vendor } = useParams();
+  const { data: requestDetail } = useRequestById(id ?? '');
+  console.log(requestDetail, 'datanya');
   const chats = [];
   return (
     <DashboardContent maxWidth="xl">
@@ -35,11 +27,13 @@ export function RequestDetailView() {
         <Grid item xs={12} md={8}>
           <Box>
             <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-              Request #1234
+              Request {requestDetail?.id} {/* TODO: Change it to number request */}
             </Typography>
             <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
               <Typography variant="h5">Request</Typography>
-              <Typography variant="h5">KMI Request Management</Typography>
+              <Typography variant="h5">
+                {(vendor ?? '').toUpperCase()} Request Management
+              </Typography>
             </Box>
             <Box>
               <Box
@@ -69,7 +63,7 @@ export function RequestDetailView() {
               <Box display="flex" gap={1} alignItems="center">
                 <StatusBadge type="danger" label="CITO" />
                 <Typography fontWeight="bold" color="primary">
-                  REQUEST #1234
+                  REQUEST {requestDetail?.id}
                 </Typography>
               </Box>
               <TableContainer>
@@ -79,57 +73,60 @@ export function RequestDetailView() {
                       <TableCell size="small" width={200}>
                         Requester Name
                       </TableCell>
-                      <TableCell size="small">Alice</TableCell>
+                      <TableCell size="small">
+                        {requestDetail?.creator?.name ?? 'Pending'}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell size="small" width={200}>
-                        Source
+                        Company
                       </TableCell>
-                      <TableCell size="small">PHTA</TableCell>
+                      <TableCell size="small">
+                        {requestDetail?.creator?.company?.name ?? 'Pending'}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell size="small" width={200}>
                         Division
                       </TableCell>
-                      <TableCell size="small">Pengadaan</TableCell>
+                      <TableCell size="small">
+                        {requestDetail?.creator?.department?.name ?? 'Pending'}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell size="small" width={200}>
                         Category
                       </TableCell>
-                      <TableCell size="small">Kalibrasi</TableCell>
+                      <TableCell size="small">{requestDetail?.category?.name}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell size="small" width={200}>
                         Request Description
                       </TableCell>
-                      <TableCell size="small">
-                        Saya ingin mengajukan permintaan kalibrasi untuk 25 alat kesehatan.
-                      </TableCell>
+                      <TableCell size="small">{requestDetail?.description ?? 'Pending'}</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell size="small" width={200}>
+                      <TableCell valign="top" size="small" width={200}>
                         Attachments
                       </TableCell>
                       <TableCell size="small">
-                        <Box
-                          width="max-content"
-                          display="flex"
-                          gap={3}
-                          px={2}
-                          py={1}
-                          sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
-                        >
-                          {/* {files?.map((file) => ( */}
-                          <Box display="flex" gap={3} alignItems="center">
-                            <Box component="img" src="/assets/icons/file.png" />
-                            <Box>
-                              <Typography fontWeight="bold">Daftar alat kalibrasi.xls</Typography>2
-                              Mb
+                        <Box width="max-content" display="flex" flexDirection="column" gap={3}>
+                          {requestDetail?.attachments?.map((file) => (
+                            <Box
+                              display="flex"
+                              gap={3}
+                              alignItems="center"
+                              px={2}
+                              py={1}
+                              sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
+                            >
+                              <Box component="img" src="/assets/icons/file.png" />
+                              <Box>
+                                <Typography fontWeight="bold">{file?.file_name}</Typography>2 Mb
+                              </Box>
+                              <SvgColor src="/assets/icons/ic-download.svg" />
                             </Box>
-                            <SvgColor src="/assets/icons/ic-download.svg" />
-                          </Box>
-                          {/* ))} */}
+                          ))}
                         </Box>
                       </TableCell>
                     </TableRow>
