@@ -32,6 +32,9 @@ export const menuByRole: any = {
   6: {
     menus: ['request'],
   },
+  3: {
+    menus: ['request'],
+  },
 };
 
 interface InternalCompanyMenus {

@@ -42,7 +42,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     path: `/${item?.name.toLowerCase()}/request`,
   }));
   const [navOpen, setNavOpen] = useState(false);
-
+  console.log(internalCompanies, 'internalCompanies');
   const layoutQuery: Breakpoint = 'lg';
 
   return (
