@@ -78,7 +78,7 @@ export function CreateUserView({ type }: CreateUserProps) {
   const { data: internalCompanies } = useInternalCompanies();
 
   const defaultValues = {
-    internal_companies: [],
+    internal_id: [],
   };
 
   const fetchDivision = async (companyId: number) => {
@@ -97,6 +97,7 @@ export function CreateUserView({ type }: CreateUserProps) {
 
   const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
     setIsLoading(true);
+    // const { internal_id, ...restForm } = formData;
     try {
       addUser({
         ...formData,
@@ -222,16 +223,16 @@ export function CreateUserView({ type }: CreateUserProps) {
                   <Select
                     label="Internal Company"
                     labelId="demo-simple-select-outlined-label-type"
-                    id="internal_companies"
-                    {...register('internal_companies', {
+                    id="internal_id"
+                    {...register('internal_id', {
                       required: 'Internal Company must be filled out',
                     })}
                     multiple
-                    value={watch('internal_companies')}
+                    value={watch('internal_id')}
                     input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {watch('internal_companies').map((value: any) => (
+                        {watch('internal_id').map((value: any) => (
                           <Chip
                             key={value}
                             label={internalCompanies?.find((item) => item?.id === value)?.name}
@@ -246,16 +247,16 @@ export function CreateUserView({ type }: CreateUserProps) {
                         <MenuItem
                           key={company?.id}
                           value={company?.id}
-                          style={getStyles(company?.id, watch('internal_companies'), theme)}
+                          style={getStyles(company?.id, watch('internal_id'), theme)}
                         >
                           {company?.name}
                         </MenuItem>
                       ))}
                   </Select>
                 </FormControl>
-                {formState?.errors?.internal_companies && (
+                {formState?.errors?.internal_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.internal_companies?.message)}
+                    {String(formState?.errors?.internal_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>

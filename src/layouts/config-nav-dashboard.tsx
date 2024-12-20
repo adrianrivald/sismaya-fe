@@ -1,5 +1,6 @@
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
+import { InternalCompany } from 'src/services/master-data/company/types';
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +34,12 @@ export const menuByRole: any = {
   },
 };
 
-export const menus: Menus[] = [
+interface InternalCompanyMenus {
+  heading: string;
+  path: string;
+}
+
+export const menus = (internalCompanies?: InternalCompanyMenus[]) => [
   {
     // isShownInRole: [6],
     heading: 'GENERAL',
@@ -60,24 +66,7 @@ export const menus: Menus[] = [
         heading: 'Request',
         id: 'request',
         icon: icon('ic-chat'),
-        list: [
-          {
-            heading: 'SIM',
-            path: '/sim/request',
-          },
-          {
-            heading: 'SAS',
-            path: '/sas/request',
-          },
-          {
-            heading: 'KMI',
-            path: '/kmi/request',
-          },
-          {
-            heading: 'FPA',
-            path: '/fpa/request',
-          },
-        ],
+        list: internalCompanies,
       },
       {
         heading: 'Master Data',

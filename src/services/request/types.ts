@@ -1,3 +1,5 @@
+import { UserInfo } from "../master-data/user/types";
+
 export interface Company {
     id: number;
     name: string;
@@ -45,4 +47,44 @@ export interface Statuses {
     company_id: number;
     step: string;
     sort: number
+}
+
+export interface Category {
+    company: string
+    company_id: number
+    created_at: string
+    deleted_at: string
+    id: number
+    name: string
+    updated_at: string
+}
+export interface Request {
+    category: Category
+    creator: UserInfo;
+    id: number;
+    number: string;
+    priority: string;
+    product: Products;
+    progress_status: string;
+}
+
+export interface RequestDetail {
+    category: Category;
+    creator: UserInfo;
+    attachments: Attachment[];
+    id: number;
+    priority: string;
+    progress_status: string;
+    description: string;
+}
+
+export interface Attachment {
+    attachable_id: number;
+    attachable_type: string;
+    created_at: string;
+    deleted_at: string;
+    file_name: string;
+    file_path: string;
+    id: number;
+    updated_at: string;
 }

@@ -2,12 +2,12 @@ import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
+import { Request } from 'src/services/request/types';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
-import { Iconify } from 'src/components/iconify';
 import { useDeleteRequestById, useRequestList } from 'src/services/request';
 import { AnalyticsProjectSummary } from '../analytics-project-summary';
 
@@ -18,69 +18,96 @@ interface PopoverProps {
   handleDelete: (id: number) => void;
 }
 
-const columnHelper = createColumnHelper<any>();
+const columnHelper = createColumnHelper<Request>();
 
 const columns = (popoverProps: PopoverProps) => [
-  columnHelper.accessor('name', {
-    header: 'Name',
+  columnHelper.accessor('number', {
+    header: 'Request ID',
   }),
 
-  columnHelper.accessor('abbreviation', {
-    header: 'Abbreviation',
+  columnHelper.accessor((row) => row, {
+    header: 'Requester',
+    cell: (info) => {
+      const creator = info.getValue()?.creator;
+      return <Typography>{creator?.name}</Typography>;
+    },
   }),
 
-  columnHelper.accessor('type', {
-    header: 'Type',
+  columnHelper.accessor('category', {
+    header: 'Category',
+    cell: (info) => {
+      const categoryName = info.getValue().name;
+      return categoryName;
+    },
+  }),
+
+  columnHelper.accessor((row) => row, {
+    header: 'Project Deadline',
+    cell: (info) => {
+      const value = info.getValue();
+      return '-';
+    },
+  }),
+
+  columnHelper.accessor((row) => row, {
+    header: 'Status',
+    cell: (info) => {
+      const value = info.getValue()?.progress_status;
+      return <Typography>{value ?? '-'}</Typography>;
+    },
+  }),
+
+  columnHelper.accessor((row) => row, {
+    header: 'Priority',
+    cell: (info) => {
+      const value = info.getValue()?.priority;
+      return <Typography>{value ?? '-'}</Typography>;
+    },
   }),
 
   columnHelper.display({
+    header: 'Action',
     id: 'actions',
     cell: (info) => ButtonActions(info, popoverProps),
   }),
 ];
 
-function ButtonActions(props: CellContext<any, unknown>, popoverProps: PopoverProps) {
+function ButtonActions(props: CellContext<Request, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
+  const navigate = useNavigate();
   const requestId = row.original.id;
+  console.log(requestId, 'requestId');
+  const onClickDetail = () => {
+    console.log('clicked');
+    navigate(`${requestId}`);
+  };
   const { handleEdit, handleDelete } = popoverProps;
   return (
-    <MenuList
-      disablePadding
+    <Button
+      onClick={onClickDetail}
+      type="button"
       sx={{
-        p: 0.5,
-        gap: 0.5,
-        display: 'flex',
-        flexDirection: 'row',
-        [`& .${menuItemClasses.root}`]: {
-          px: 1,
-          gap: 2,
-          borderRadius: 0.75,
-          [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-        },
+        paddingY: 0.5,
+        border: 1,
+        borderColor: 'primary.main',
+        borderRadius: 1.5,
       }}
     >
-      <MenuItem onClick={() => handleEdit(requestId)}>
-        <Iconify icon="solar:pen-bold" />
-        Edit
-      </MenuItem>
-
-      <MenuItem onClick={() => handleDelete(requestId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
-      </MenuItem>
-    </MenuList>
+      View Detail
+    </Button>
   );
 }
 
 export function RequestView() {
   const { isEmpty, getDataTableProps } = useRequestList({});
   const { mutate: deleteRequestById } = useDeleteRequestById();
-  const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
+  const location = useLocation();
+  const currentCompany = location?.pathname?.split('/request')[0].replace('/', '');
 
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/sim/request/create');
+    navigate('create');
   };
 
   const popoverFuncs = () => {
@@ -100,12 +127,14 @@ export function RequestView() {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            KMI Request Management
+            {currentCompany?.toUpperCase()} Request Management
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Request</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">KMI Request Management</Typography>
+            <Typography color="grey.500">
+              {currentCompany?.toUpperCase()} Request Management
+            </Typography>
           </Box>
         </Box>
         <Box>
@@ -128,11 +157,11 @@ export function RequestView() {
           <AnalyticsProjectSummary title="Pending Approvals" total={714000} />
         </Grid>
 
-        <Grid container spacing={3}>
-          <Grid xs={12}>
-            <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
-          </Grid>
+        {/* <Grid container spacing={3}> */}
+        <Grid xs={12}>
+          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
         </Grid>
+        {/* </Grid> */}
         {/* Default overview items */}
         {/* <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
