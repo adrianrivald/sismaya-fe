@@ -120,18 +120,22 @@ export function Router() {
   const { user } = useAuth();
   const role = user?.user_info?.role_id;
   const isSuperAdmin = role === 1;
-  const isClient = role === 6;
+  const isClient = role === 6 || role === 3;
 
   const routingCondition = () => {
-    switch (role) {
-      case 1:
-        return superAdminRoutes;
-      case 6:
-        return clientRoutes;
+    if (isSuperAdmin) return superAdminRoutes;
+    if (isClient) return clientRoutes;
 
-      default:
-        return superAdminRoutes;
-    }
+    return superAdminRoutes;
+    // switch (role) {
+    //   case 1:
+    //     return superAdminRoutes;
+    //   case 6:
+    //     return clientRoutes;
+
+    //   default:
+    //     return superAdminRoutes;
+    // }
   };
 
   return useRoutes([

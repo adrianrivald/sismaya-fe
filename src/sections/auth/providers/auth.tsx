@@ -45,7 +45,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
     // setCurrentInternalCompany((user?.internal_companies ?? [])[0].id ?? null);
 
     // Redirect as client user who has internal companies
-    if (user?.user_info?.role_id === 6 && (user?.internal_companies ?? [])?.length > 0) {
+    if ((user?.internal_companies ?? [])?.length > 0) {
       navigate(`/${(user?.internal_companies ?? [])[0]?.name.toLowerCase()}/request`);
     } else {
       navigate('/');
