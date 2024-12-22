@@ -4,22 +4,21 @@ import { Bounce, toast } from "react-toastify";
 import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
+import { Attachment } from "./types";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: []};
+export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
 
 export function useUpdateRequest() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateRequest) => {
-        const { files,id, ...form } = formData;
+        const { files, id, ...form } = formData;
         const payload =  {
           ...form
         }
-        console.log(form?.attachments,'form?.attachments')
 
         if ((form?.attachments ?? [])?.length > 0) {
-          console.log('mauk')
           Object.assign(payload, {
             attachments: form?.attachments?.map(item => ({
                 file_path: item?.file_path,
@@ -28,8 +27,6 @@ export function useUpdateRequest() {
           });
         } 
         
-        console.log(payload,'payload form')
-
         if(files?.length > 0) {
           const filesData = new FormData();
           Array.from(files).forEach((file, index) => {
