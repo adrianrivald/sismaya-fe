@@ -20,7 +20,7 @@ import { Form } from 'src/components/form/form';
 import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect } from 'react';
-import { useUpdateUser, useUserById } from 'src/services/master-data/user';
+import { useCompanyByUserId, useUpdateUser, useUserById } from 'src/services/master-data/user';
 import { type Role, useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import {
@@ -102,6 +102,7 @@ interface EditFormProps {
   onChangeVendor: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
   type: 'client' | 'internal';
   theme: Theme;
+  companyUser?: any;
 }
 
 function EditForm({
@@ -118,8 +119,7 @@ function EditForm({
   isLoading,
   user,
   type,
-  theme,
-  internalCompanies,
+  companyUser,
 }: EditFormProps) {
   console.log(watch(), 'formwatch');
   useEffect(() => {
@@ -172,6 +172,112 @@ function EditForm({
           </FormHelperText>
         )}
       </Grid>
+
+      {/* <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={4}>
+          Progress Status
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {companyUser?.map((item, index) => (
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              test
+              <Box>
+                <FormControl fullWidth>
+                  <InputLabel id="type">Company User</InputLabel>
+                  <Select
+                    label="Type"
+                    value={item?.step}
+                    onChange={(e: SelectChangeEvent<string>) => onChangeStatus(e, item?.id, 'step')}
+                  >
+                    <MenuItem value="to_do">Todo</MenuItem>
+                    <MenuItem value="in_progress">In Progress</MenuItem>
+                    <MenuItem value="done">Done</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <MenuList
+                disablePadding
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={() =>
+                    onClickEditStatus(statuses[index].name, statuses[index].step, item?.id)
+                  }
+                >
+                  <Iconify icon="solar:pen-bold" />
+                  Edit
+                </MenuItem>
+                <MenuItem
+                  onClick={() => onClickDeleteStatus(item?.id)}
+                  sx={{ color: 'error.main' }}
+                >
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                  Delete
+                </MenuItem>
+              </MenuList>
+            </Stack>
+          ))}
+          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+            <Box width="50%">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Status"
+                value={status?.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChangeStatusNew(e, 'status')
+                }
+              />
+            </Box>
+
+            <Box width="50%">
+              <FormControl fullWidth>
+                <InputLabel id="type">Type</InputLabel>
+                <Select
+                  label="Type"
+                  value={status?.step}
+                  onChange={(e: SelectChangeEvent<string>) => onChangeStatusNew(e, 'step')}
+                  defaultValue=""
+                >
+                  <MenuItem value="to_do">Todo</MenuItem>
+                  <MenuItem value="in_progress">In Progress</MenuItem>
+                  <MenuItem value="done">Done</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                p: 0.5,
+                gap: 0.5,
+                display: 'flex',
+                flexDirection: 'row',
+                [`& .${menuItemClasses.root}`]: {
+                  px: 1,
+                  gap: 2,
+                  borderRadius: 0.75,
+                  [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                },
+              }}
+            >
+              <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
+                Add More
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+      </Grid> */}
 
       {type === 'client' ? (
         <Grid item xs={12} md={12}>
@@ -409,6 +515,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { mutate: updateUser } = useUpdateUser();
   const { data: clientCompanies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
+  // const { data: companyUser } = useCompanyByUserId(Number(id));
 
   const { mutate: deleteVendor } = useDeleteDivisionItem(Number(id));
   const { mutate: addVendor } = useAddDivision();
@@ -548,6 +655,7 @@ export function EditUserView({ type }: EditUserProps) {
               onAddVendor={onAddVendor}
               onChangeVendor={onChangeVendor}
               theme={theme}
+              // companyUser={companyUser}
             />
           )}
         </Form>

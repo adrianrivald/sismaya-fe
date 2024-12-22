@@ -45,7 +45,7 @@ export function EditRequestView() {
     user_id: user?.id,
     company_id: requestDetail?.company?.id,
     department_id: requestDetail?.department?.id,
-    files: requestDetail?.attachments?.map((attachment) => ({
+    attachments: requestDetail?.attachments?.map((attachment) => ({
       file_path: attachment?.file_path,
       file_name: attachment?.file_name,
     })),
@@ -53,7 +53,7 @@ export function EditRequestView() {
     description: requestDetail?.description,
   };
 
-  console.log(files, 'filesfiles');
+  console.log(defaultValues, 'defaultValuesdefaultValues');
 
   const handleSubmit = (formData: RequestDTO) => {
     // setIsLoading(true);

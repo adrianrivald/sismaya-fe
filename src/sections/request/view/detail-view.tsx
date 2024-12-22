@@ -144,7 +144,8 @@ export function RequestDetailView() {
                             >
                               <Box component="img" src="/assets/icons/file.png" />
                               <Box>
-                                <Typography fontWeight="bold">{file?.file_name}</Typography>2 Mb
+                                <Typography fontWeight="bold">{file?.file_name}</Typography>
+                                {/* 2 Mb */}
                               </Box>
                               <SvgColor src="/assets/icons/ic-download.svg" />
                             </Box>

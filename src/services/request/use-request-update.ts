@@ -5,21 +5,32 @@ import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: []};
+export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments: []};
 
 export function useUpdateRequest() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateRequest) => {
-        console.log(formData,'formDataformData')
         const { files,id, ...form } = formData;
         const payload =  {
           ...form
         }
+        console.log(form?.attachments,'form?.attachments')
+
+        if (form?.attachments?.length > 0) {
+          console.log('mauk')
+          Object.assign(payload, {
+            attachments: form?.attachments?.map(item => ({
+                file_path: item?.file_path,
+                file_name: item?.file_name
+            }))
+          });
+        } 
         
-          if(files) {
-            
+        console.log(payload,'payload form')
+
+        if(files?.length > 0) {
           const filesData = new FormData();
           Array.from(files).forEach((file, index) => {
           filesData.append(`files`, file as unknown as File);
@@ -33,7 +44,7 @@ export function useUpdateRequest() {
                 file_name: item?.filename
             }))
           });
-          }
+        }
         
         return http(`requests/${id}`, {
           data: payload,
