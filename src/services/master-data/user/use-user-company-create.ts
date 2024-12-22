@@ -5,7 +5,7 @@ import { http } from "src/utils/http";
 
 export type StoreUserCompany = {
   user_id: number;
-  company_id?: number
+  company_id?: number | null
 };
 
 export function useAddUserCompany() {

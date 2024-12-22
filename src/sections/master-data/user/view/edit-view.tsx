@@ -1,18 +1,15 @@
 import Typography from '@mui/material/Typography';
 import {
   Box,
-  Chip,
   FormControl,
   FormHelperText,
   Grid,
   InputLabel,
   MenuItem,
-  OutlinedInput,
   Select,
   Stack,
   TextField,
   useTheme,
-  Theme,
   MenuList,
   menuItemClasses,
   Button,
@@ -37,14 +34,7 @@ import {
   userClientSchema,
   userInternalUpdateSchema,
 } from 'src/services/master-data/user/schemas/user-schema';
-import {
-  useAddDivision,
-  useClientCompanies,
-  useCompanies,
-  useDeleteDivisionItem,
-  useInternalCompanies,
-  useUpdateDivision,
-} from 'src/services/master-data/company';
+import { useClientCompanies, useInternalCompanies } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
 import { API_URL } from 'src/constants';
 import { Company, Department } from 'src/services/master-data/company/types';
@@ -83,13 +73,13 @@ interface EditFormProps {
   isLoading: boolean;
   user: User | undefined;
   type: 'client' | 'internal';
-  userCompany: number;
+  userCompany: number | null;
   userCompanies: Company[];
   onClickDeleteUserCompany: (userCompanyId: number) => void;
   onChangeUserCompanyNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onaddUserCompany: () => void;
   onChangeUserCompany: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
-  internalCompanies: Company[];
+  internalCompanies: Company[] | undefined;
 }
 
 function EditForm({
@@ -177,7 +167,7 @@ function EditForm({
                   <Select
                     label="User Company"
                     value={item?.id}
-                    onChange={(e: React.SelectChangeEvent<string>) =>
+                    onChange={(e: React.SelectChangeEvent<number>) =>
                       onChangeUserCompany(e, item?.id)
                     }
                   >
@@ -219,8 +209,7 @@ function EditForm({
                 <Select
                   label="User Company"
                   value={userCompany}
-                  onChange={(e: React.SelectChangeEvent<string>) => onChangeUserCompanyNew(e)}
-                  defaultValue=""
+                  onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
                 >
                   {internalCompanies?.map((company) => (
                     <MenuItem value={company?.id}>{company?.name}</MenuItem>
@@ -414,7 +403,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { mutate: addUserCompany } = useAddUserCompany();
   const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
   const [userCompany, setUserCompany] = React.useState<number | null>(null);
-  const [userCompanies, setUserCompanies] = React.useState([]);
+  const [userCompanies, setUserCompanies] = React.useState<Company[]>([]);
 
   const defaultValues = {
     name: user?.user_info?.name,
@@ -483,7 +472,7 @@ export function EditUserView({ type }: EditUserProps) {
   };
 
   const onChangeUserCompanyNew = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserCompany(e.target.value);
+    setUserCompany(Number(e.target.value));
   };
 
   const onClickDeleteUserCompany = async (userCompanyId: number) => {
@@ -492,6 +481,7 @@ export function EditUserView({ type }: EditUserProps) {
 
   React.useEffect(() => {
     setUserCompanies(user?.internal_companies ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userCompaniesData]);
 
   return (
@@ -531,7 +521,6 @@ export function EditUserView({ type }: EditUserProps) {
               isLoading={isLoading}
               user={user}
               type={type}
-              theme={theme}
               userCompany={userCompany}
               userCompanies={userCompanies}
               onChangeUserCompanyNew={onChangeUserCompanyNew}
