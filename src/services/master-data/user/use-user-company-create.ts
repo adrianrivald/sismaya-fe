@@ -25,9 +25,8 @@ export function useAddUserCompany() {
       },
       {
           onSuccess: (res: any) => {
-            console.log(res,'res')
-          const companyId = res?.data?.company_id
-          queryClient.invalidateQueries({queryKey: ['user-company', companyId]});
+          const user_id = res?.data?.user_id
+          queryClient.invalidateQueries({queryKey: ['user-items', user_id]});
           toast.success('Data added successfully', {
             position: 'top-right',
             autoClose: 5000,

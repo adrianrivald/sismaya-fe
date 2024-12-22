@@ -13,6 +13,7 @@ import {
   MenuList,
   menuItemClasses,
   Button,
+  SelectChangeEvent,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -73,12 +74,12 @@ interface EditFormProps {
   isLoading: boolean;
   user: User | undefined;
   type: 'client' | 'internal';
-  userCompany: number | null;
+  userCompany: any;
   userCompanies: Company[];
   onClickDeleteUserCompany: (userCompanyId: number) => void;
-  onChangeUserCompanyNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeUserCompanyNew: (e: SelectChangeEvent<number>) => void;
   onaddUserCompany: () => void;
-  onChangeUserCompany: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
+  onChangeUserCompany: (e: SelectChangeEvent<number>, itemId: number) => void;
   internalCompanies: Company[] | undefined;
 }
 
@@ -167,9 +168,7 @@ function EditForm({
                   <Select
                     label="User Company"
                     value={item?.id}
-                    onChange={(e: React.SelectChangeEvent<number>) =>
-                      onChangeUserCompany(e, item?.id)
-                    }
+                    onChange={(e: SelectChangeEvent<number>) => onChangeUserCompany(e, item?.id)}
                   >
                     {internalCompanies?.map((company) => (
                       <MenuItem value={company?.id}>{company?.name}</MenuItem>
@@ -399,7 +398,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { mutate: updateUser } = useUpdateUser();
   const { data: clientCompanies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
-  const { data: userCompaniesData } = useUserCompanyById(Number(id));
+  // const { data: userCompaniesData } = useUserCompanyById(Number(id));
   const { mutate: addUserCompany } = useAddUserCompany();
   const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
   const [userCompany, setUserCompany] = React.useState<number | null>(null);
@@ -461,17 +460,17 @@ export function EditUserView({ type }: EditUserProps) {
     setUserCompany(null);
   };
 
-  const onChangeUserCompany = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+  const onChangeUserCompany = (e: SelectChangeEvent<number>, itemId: number) => {
     setUserCompanies((prevUserCompanies) => {
       const updatedUserCompanies = [...prevUserCompanies];
       // Update the string at the specified index
       const index = updatedUserCompanies?.findIndex((item) => item?.id === itemId);
-      updatedUserCompanies[index].name = e.target.value;
+      updatedUserCompanies[index].id = Number(e.target.value);
       return updatedUserCompanies;
     });
   };
 
-  const onChangeUserCompanyNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeUserCompanyNew = (e: SelectChangeEvent<number>) => {
     setUserCompany(Number(e.target.value));
   };
 
@@ -482,7 +481,7 @@ export function EditUserView({ type }: EditUserProps) {
   React.useEffect(() => {
     setUserCompanies(user?.internal_companies ?? []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userCompaniesData]);
+  }, [user]);
 
   return (
     <DashboardContent maxWidth="xl">
