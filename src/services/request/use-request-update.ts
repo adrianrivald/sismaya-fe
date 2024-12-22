@@ -1,47 +1,49 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
-import { uploadImage } from "src/services/utils/upload-image";
+import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
+import { RequestDTO } from "./schemas/request-schema";
 
-export type UpdateCompany = any & {id: number, type: string, cover?: any};
+export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: []};
 
-export function useUpdateCompany() {
+export function useUpdateRequest() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
-      async (formData: UpdateCompany) => {
-        const { name, abbreviation, type, id, cover } = formData;
-        const payload = {
-          name,
-          abbreviation,
-          type
-      }
-
-        if (cover) {
-
-          const imageData = new FormData();
-          imageData.append('file', cover as unknown as File);
-          const { url } = await uploadImage(
-            imageData
-          );
-  
-          Object.assign(payload, {
-            image: url,
-          });
-          
+      async (formData: UpdateRequest) => {
+        console.log(formData,'formDataformData')
+        const { files,id, ...form } = formData;
+        const payload =  {
+          ...form
         }
-  
-        return http(`companies/${id}`, {
-            method: "PUT",
-            data: payload
+        
+          if(files) {
+            
+          const filesData = new FormData();
+          Array.from(files).forEach((file, index) => {
+          filesData.append(`files`, file as unknown as File);
+          });
+          const {data} = await uploadFilesBulk(
+            filesData
+          );
+          Object.assign(payload, {
+            attachments: data?.map(item => ({
+                file_path: item?.path,
+                file_name: item?.filename
+            }))
+          });
+          }
+        
+        return http(`requests/${id}`, {
+          data: payload,
+          method: "PUT"
         });
       },
       {
-        // onSuccess: (res: {data: UpdateCompany}) => {
           onSuccess: (res: any) => {
           console.log(res,'res')
-          queryClient.invalidateQueries(['company']);
+          queryClient.invalidateQueries(['request']);
   
           toast.success('Data updated successfully', {
             position: 'top-right',
@@ -54,12 +56,7 @@ export function useUpdateCompany() {
             theme: 'light',
             transition: Bounce,
           });
-          if (res?.data?.type === "holding") {
-            navigate(`/client-company/`)
-          } else {
-            navigate(`/internal-company/`)
-
-          }
+          navigate(`/sim/request`)
         },
         onError: (error) => {
           const reason =

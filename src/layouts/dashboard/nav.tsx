@@ -143,8 +143,8 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                 <Box component="ul" gap={0.5} display="flex" flexDirection="column">
                   {menu?.list
                     ?.filter((item: any) => accessibleMenus?.includes(item?.id))
-                    .map((childMenu: any) => (
-                      <Accordion defaultExpanded={childMenu?.path === currentMenu}>
+                    .map((childMenu: any, index: number) => (
+                      <Accordion key={index} defaultExpanded={childMenu?.path === currentMenu}>
                         <AccordionSummary
                           // expandIcon={<ExpandMoreIcon />}
                           sx={{
@@ -190,10 +190,10 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                         </AccordionSummary>
 
                         <AccordionDetails>
-                          {childMenu?.list.map((item: any) => {
+                          {childMenu?.list.map((item: any, childIndex: number) => {
                             const isActived = pathname.includes(item.path);
                             return (
-                              <ListItem disableGutters disablePadding key={item.title}>
+                              <ListItem disableGutters disablePadding key={childIndex}>
                                 <ListItemButton
                                   disableGutters
                                   component={RouterLink}
@@ -250,11 +250,11 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                     {menu?.heading}
                   </Box>
                   <Box component="ul" gap={0.5} display="flex" flexDirection="column">
-                    {menu?.list.map((item: any) => {
+                    {menu?.list.map((item: any, index: number) => {
                       const isActived = item.path === pathname;
 
                       return (
-                        <ListItem disableGutters disablePadding key={item.heading}>
+                        <ListItem disableGutters disablePadding key={index}>
                           <ListItemButton
                             disableGutters
                             component={RouterLink}

@@ -19,38 +19,50 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React, { ChangeEvent, ChangeEventHandler } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
 import { useUserById } from 'src/services/master-data/user';
-import { useAddRequest } from 'src/services/request';
+import { useAddRequest, useRequestById, useUpdateRequest } from 'src/services/request';
 import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 
-export function CreateRequestView() {
+export function EditRequestView() {
   const { user } = useAuth();
   const { data } = useUserById(user?.id);
   const location = useLocation();
-  const { vendor } = useParams();
+  const { vendor, id } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.name?.toLowerCase() === vendor
   )?.id;
+  const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
-  const [files, setFiles] = React.useState<FileList | any>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
-  const { mutate: addRequest } = useAddRequest();
+  const [files, setFiles] = React.useState<FileList | any>([]);
+  const { mutate: updateRequest } = useUpdateRequest();
+  const defaultValues = {
+    creator_id: requestDetail?.creator?.id,
+    user_id: user?.id,
+    company_id: requestDetail?.company?.id,
+    department_id: requestDetail?.department?.id,
+    files: requestDetail?.attachments?.map((attachment) => ({
+      file_path: attachment?.file_path,
+      file_name: attachment?.file_name,
+    })),
+    category_id: requestDetail?.category?.id,
+    description: requestDetail?.description,
+  };
+
+  console.log(files, 'filesfiles');
+
   const handleSubmit = (formData: RequestDTO) => {
     // setIsLoading(true);
     const payload = {
       ...formData,
-      creator_id: user?.id,
-      user_id: user?.id,
-      company_id: user?.user_info?.company?.id,
-      department_id: user?.user_info?.department?.id,
+      id: Number(id),
       files,
     };
-    addRequest(payload);
+    updateRequest(payload);
     console.log(payload, 'test');
     // setTimeout(() => {
     //   navigate('/request/test');
@@ -81,8 +93,16 @@ export function CreateRequestView() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, control, formState }) => (
+        <Form
+          width="100%"
+          onSubmit={handleSubmit}
+          options={{
+            defaultValues: {
+              ...defaultValues,
+            },
+          }}
+        >
+          {({ register, control, formState, watch }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <Stack
@@ -160,6 +180,7 @@ export function CreateRequestView() {
                           required: 'Product must be filled out',
                         })}
                         label="Product"
+                        value={watch('product_id')}
                       >
                         {products?.map((product) => (
                           <MenuItem value={product?.id}>{product?.name}</MenuItem>
@@ -186,6 +207,7 @@ export function CreateRequestView() {
                           required: 'Category must be filled out',
                         })}
                         label="Category"
+                        value={watch('category_id')}
                       >
                         {categories?.map((category) => (
                           <MenuItem value={category?.id}>{category?.name}</MenuItem>
@@ -244,7 +266,7 @@ export function CreateRequestView() {
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
-                  {files?.length > 0 ? (
+                  {(requestDetail?.attachments ?? [])?.length > 0 || files?.length > 0 ? (
                     <Box
                       display="flex"
                       gap={3}
@@ -252,6 +274,15 @@ export function CreateRequestView() {
                       mb={3}
                       sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
                     >
+                      {requestDetail?.attachments?.map((attachment) => (
+                        <Box display="flex" gap={1} alignItems="center">
+                          <Box component="img" src="/assets/icons/file.png" />
+                          <Box>
+                            <Typography fontWeight="bold">{attachment?.file_name}</Typography>
+                            {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
+                          </Box>
+                        </Box>
+                      ))}
                       {Array.from(files)?.map((file: any) => (
                         <Box display="flex" gap={1} alignItems="center">
                           <Box component="img" src="/assets/icons/file.png" />
