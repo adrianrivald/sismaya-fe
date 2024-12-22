@@ -72,9 +72,12 @@ export interface RequestDetail {
     category: Category;
     creator: UserInfo;
     attachments: Attachment[];
+    company: Company;
+    department: Department;
     id: number;
     priority: string;
     progress_status: string;
+    number: string;
     description: string;
 }
 

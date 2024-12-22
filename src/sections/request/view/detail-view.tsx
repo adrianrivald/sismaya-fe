@@ -8,8 +8,9 @@ import {
   TableCell,
   TableBody,
   Input,
+  Button,
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useRequestById } from 'src/services/request';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -21,6 +22,11 @@ export function RequestDetailView() {
   const { data: requestDetail } = useRequestById(id ?? '');
   console.log(requestDetail, 'datanya');
   const chats = [];
+  const navigate = useNavigate();
+  const onClickEdit = () => {
+    navigate(`/${vendor}/request/${id}/edit`);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3} xs={12}>
@@ -60,53 +66,69 @@ export function RequestDetailView() {
                 marginTop: 2,
               }}
             >
-              <Box display="flex" gap={1} alignItems="center">
-                <StatusBadge type="danger" label="CITO" />
-                <Typography fontWeight="bold" color="primary">
-                  REQUEST {requestDetail?.id}
-                </Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Box display="flex" gap={1} alignItems="center">
+                  <Typography fontWeight="bold" color="primary">
+                    REQUEST {requestDetail?.number}
+                  </Typography>
+                  <StatusBadge type="danger" label="CITO" />
+                </Box>
+                <Button
+                  onClick={onClickEdit}
+                  type="button"
+                  sx={{
+                    paddingY: 0.5,
+                    border: 1,
+                    borderColor: 'primary.main',
+                    borderRadius: 1.5,
+                  }}
+                >
+                  Edit Detail
+                </Button>
               </Box>
               <TableContainer>
                 <Table sx={{ marginTop: 2 }}>
                   <TableBody>
                     <TableRow>
-                      <TableCell size="small" width={200}>
+                      <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                         Requester Name
                       </TableCell>
-                      <TableCell size="small">
+                      <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
                         {requestDetail?.creator?.name ?? 'Pending'}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell size="small" width={200}>
+                      <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                         Company
                       </TableCell>
-                      <TableCell size="small">
-                        {requestDetail?.creator?.company?.name ?? 'Pending'}
+                      <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
+                        {requestDetail?.company?.name ?? 'Pending'}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell size="small" width={200}>
+                      <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                         Division
                       </TableCell>
-                      <TableCell size="small">
-                        {requestDetail?.creator?.department?.name ?? 'Pending'}
+                      <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
+                        {requestDetail?.department?.name ?? 'Pending'}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell size="small" width={200}>
+                      <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                         Category
                       </TableCell>
                       <TableCell size="small">{requestDetail?.category?.name}</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell size="small" width={200}>
+                      <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                         Request Description
                       </TableCell>
-                      <TableCell size="small">{requestDetail?.description ?? 'Pending'}</TableCell>
+                      <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
+                        {requestDetail?.description ?? 'Pending'}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell valign="top" size="small" width={200}>
+                      <TableCell valign="top" size="small" width={200} sx={{ color: 'grey.600' }}>
                         Attachments
                       </TableCell>
                       <TableCell size="small">
@@ -122,7 +144,8 @@ export function RequestDetailView() {
                             >
                               <Box component="img" src="/assets/icons/file.png" />
                               <Box>
-                                <Typography fontWeight="bold">{file?.file_name}</Typography>2 Mb
+                                <Typography fontWeight="bold">{file?.file_name}</Typography>
+                                {/* 2 Mb */}
                               </Box>
                               <SvgColor src="/assets/icons/ic-download.svg" />
                             </Box>

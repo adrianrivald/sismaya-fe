@@ -24,4 +24,11 @@ export interface UserInfo {
     user: string;
     user_id: number
     internal_id: number[]
+    internal_companies?: Company[]
+}
+
+export interface UserCompany {
+    company: Company;
+    id: number;
+    user: UserInfo;
 }

@@ -17,6 +17,7 @@ export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 export const RequestListPage = lazy(() => import('src/pages/request/list'));
 export const RequestDetailPage = lazy(() => import('src/pages/request/detail'));
 export const RequestCreatePage = lazy(() => import('src/pages/request/create'));
+export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 
 // Master Data
 
@@ -113,6 +114,7 @@ const clientRoutes = {
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/:vendor/request/:id', element: <RequestDetailPage /> },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
+    { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
   ],
 };
 

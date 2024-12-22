@@ -13,6 +13,9 @@ import {
   TextField,
   useTheme,
   Theme,
+  MenuList,
+  menuItemClasses,
+  Button,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -20,7 +23,12 @@ import { Form } from 'src/components/form/form';
 import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect } from 'react';
-import { useUpdateUser, useUserById } from 'src/services/master-data/user';
+import {
+  useAddUserCompany,
+  useUpdateUser,
+  useUserById,
+  useUserCompanyById,
+} from 'src/services/master-data/user';
 import { type Role, useRole } from 'src/services/master-data/role';
 import { FieldDropzone } from 'src/components/form';
 import {
@@ -48,27 +56,9 @@ import {
   UseFormWatch,
 } from 'react-hook-form';
 import { User } from 'src/services/master-data/user/types';
+import { Iconify } from 'src/components/iconify';
+import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
-  console.log(selectedInternalCompanies, 'selectedComp');
-  return {
-    fontWeight:
-      selectedInternalCompanies.indexOf(id) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
 interface UserValues {
   name: string | undefined;
   email: string | undefined;
@@ -88,20 +78,18 @@ interface EditFormProps {
   defaultValues: UserValues;
   fetchDivision: (companyId: number) => void;
   clientCompanies: Company[] | undefined;
-  internalCompanies: Company[] | undefined;
   divisions: Department[] | [];
   roles: Role[] | undefined;
   isLoading: boolean;
   user: User | undefined;
-  onClickDeleteVendor: (vendorId: number) => void;
-  vendor: string;
-  vendors: any[];
-  onClickEditVendor: (value: string, vendorId: number) => void;
-  onChangeVendorNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAddVendor: () => void;
-  onChangeVendor: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
   type: 'client' | 'internal';
-  theme: Theme;
+  userCompany: number;
+  userCompanies: Company[];
+  onClickDeleteUserCompany: (userCompanyId: number) => void;
+  onChangeUserCompanyNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onaddUserCompany: () => void;
+  onChangeUserCompany: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
+  internalCompanies: Company[];
 }
 
 function EditForm({
@@ -118,7 +106,12 @@ function EditForm({
   isLoading,
   user,
   type,
-  theme,
+  userCompany,
+  userCompanies,
+  onChangeUserCompanyNew,
+  onaddUserCompany,
+  onChangeUserCompany,
+  onClickDeleteUserCompany,
   internalCompanies,
 }: EditFormProps) {
   console.log(watch(), 'formwatch');
@@ -131,8 +124,6 @@ function EditForm({
     setValue('internal_id', defaultValues?.internal_id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-  console.log(watch(), 'watchform');
 
   useEffect(() => {
     if (divisions?.length) {
@@ -171,6 +162,92 @@ function EditForm({
             {String(formState?.errors?.name?.message)}
           </FormHelperText>
         )}
+      </Grid>
+
+      <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={2}>
+          User Company
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {userCompanies?.map((item, index) => (
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <Box width="100%">
+                <FormControl fullWidth>
+                  <InputLabel id="type">User Company</InputLabel>
+                  <Select
+                    label="User Company"
+                    value={item?.id}
+                    onChange={(e: React.SelectChangeEvent<string>) =>
+                      onChangeUserCompany(e, item?.id)
+                    }
+                  >
+                    {internalCompanies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <MenuList
+                disablePadding
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={() => onClickDeleteUserCompany(item?.id)}
+                  sx={{ color: 'error.main' }}
+                >
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                  Delete
+                </MenuItem>
+              </MenuList>
+            </Stack>
+          ))}
+          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+            <Box width="100%">
+              <FormControl fullWidth>
+                <InputLabel id="userCompany">User Company</InputLabel>
+                <Select
+                  label="User Company"
+                  value={userCompany}
+                  onChange={(e: React.SelectChangeEvent<string>) => onChangeUserCompanyNew(e)}
+                  defaultValue=""
+                >
+                  {internalCompanies?.map((company) => (
+                    <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                p: 0.5,
+                gap: 0.5,
+                display: 'flex',
+                flexDirection: 'row',
+                [`& .${menuItemClasses.root}`]: {
+                  px: 1,
+                  gap: 2,
+                  borderRadius: 0.75,
+                  [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                },
+              }}
+            >
+              <Button onClick={onaddUserCompany} sx={{ marginY: 2 }}>
+                Add More
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
       </Grid>
 
       {type === 'client' ? (
@@ -229,52 +306,6 @@ function EditForm({
         ) : null
       ) : null}
 
-      {/* {type === 'internal' ? ( */}
-      {/* <Grid item xs={12} md={12}>
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel>
-          <Select
-            label="Internal Company"
-            labelId="demo-simple-select-outlined-label-type"
-            id="internal_companies"
-            {...register('internal_companies', {
-              required: 'Internal Company must be filled out',
-            })}
-            multiple
-            value={watch('internal_companies')}
-            input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {(watch('internal_companies') ?? []).map((value: any) => (
-                  <Chip
-                    key={value}
-                    label={internalCompanies?.find((item) => item?.id === value)?.name}
-                  />
-                ))}
-              </Box>
-            )}
-            MenuProps={MenuProps}
-          >
-            {internalCompanies &&
-              internalCompanies?.map((company) => (
-                <MenuItem
-                  key={company?.id}
-                  value={company?.id}
-                  style={getStyles(company?.id, watch('internal_companies') ?? [], theme)}
-                >
-                  {company?.name}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
-        {formState?.errors?.internal_companies && (
-          <FormHelperText sx={{ color: 'error.main' }}>
-            {String(formState?.errors?.internal_companies?.message)}
-          </FormHelperText>
-        )}
-      </Grid> */}
-      {/* ) : null} */}
-
       <Grid item xs={12} md={12}>
         <TextField
           error={Boolean(formState?.errors?.email)}
@@ -316,36 +347,6 @@ function EditForm({
           </FormHelperText>
         )}
       </Grid>
-
-      {/* <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.password)}
-                  fullWidth
-                  label="Password"
-                  {...register('password', {
-                    required: 'Password must be filled out',
-                  })}
-                  InputLabelProps={{ shrink: true }}
-                  type={showPassword ? 'text' : 'password'}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          <Iconify
-                            icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                          />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {formState?.errors?.password && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.password?.message)}
-                  </FormHelperText>
-                )}
-              </Grid> */}
 
       <Grid item xs={12} md={12}>
         <FormControl fullWidth>
@@ -409,13 +410,11 @@ export function EditUserView({ type }: EditUserProps) {
   const { mutate: updateUser } = useUpdateUser();
   const { data: clientCompanies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
-
-  const { mutate: deleteVendor } = useDeleteDivisionItem(Number(id));
-  const { mutate: addVendor } = useAddDivision();
-  const { mutate: updateVendor } = useUpdateDivision();
-
-  const [vendors, setVendors] = React.useState(user?.internal_companies ?? []);
-  const [vendor, setVendor] = React.useState('');
+  const { data: userCompaniesData } = useUserCompanyById(Number(id));
+  const { mutate: addUserCompany } = useAddUserCompany();
+  const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
+  const [userCompany, setUserCompany] = React.useState<number | null>(null);
+  const [userCompanies, setUserCompanies] = React.useState([]);
 
   const defaultValues = {
     name: user?.user_info?.name,
@@ -464,43 +463,36 @@ export function EditUserView({ type }: EditUserProps) {
     updateUser(payload);
   };
 
-  const onAddVendor = () => {
-    addVendor({
-      name: vendor,
-      company_id: user?.id,
+  // User Company
+  const onaddUserCompany = () => {
+    addUserCompany({
+      user_id: Number(id),
+      company_id: userCompany,
     });
-    setVendor('');
+    setUserCompany(null);
+  };
+
+  const onChangeUserCompany = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setUserCompanies((prevUserCompanies) => {
+      const updatedUserCompanies = [...prevUserCompanies];
+      // Update the string at the specified index
+      const index = updatedUserCompanies?.findIndex((item) => item?.id === itemId);
+      updatedUserCompanies[index].name = e.target.value;
+      return updatedUserCompanies;
+    });
+  };
+
+  const onChangeUserCompanyNew = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserCompany(e.target.value);
+  };
+
+  const onClickDeleteUserCompany = async (userCompanyId: number) => {
+    deleteUserCompany(userCompanyId);
   };
 
   React.useEffect(() => {
-    setVendors(user?.internal_companies ?? []);
-  }, [user]);
-
-  const onChangeVendor = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
-    setVendors((prevVendors) => {
-      const updatedVendors = [...prevVendors];
-      // Update the string at the specified index
-      const index = updatedVendors?.findIndex((item) => item?.id === itemId);
-      updatedVendors[index].name = e.target.value;
-      return updatedVendors;
-    });
-  };
-
-  const onChangeVendorNew = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVendor(e.target.value);
-  };
-
-  const onClickDeleteVendor = async (vendorId: number) => {
-    deleteVendor(vendorId);
-  };
-
-  const onClickEditVendor = async (value: string, vendorId: number) => {
-    updateVendor({
-      name: value,
-      id: vendorId,
-      company_id: Number(id),
-    });
-  };
+    setUserCompanies(user?.internal_companies ?? []);
+  }, [userCompaniesData]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -534,20 +526,19 @@ export function EditUserView({ type }: EditUserProps) {
               defaultValues={defaultValues}
               fetchDivision={fetchDivision}
               clientCompanies={clientCompanies}
-              internalCompanies={internalCompanies}
               divisions={divisions}
               roles={roles}
               isLoading={isLoading}
               user={user}
               type={type}
-              vendor={vendor}
-              onChangeVendorNew={onChangeVendorNew}
-              onClickDeleteVendor={onClickDeleteVendor}
-              onClickEditVendor={onClickEditVendor}
-              vendors={vendors}
-              onAddVendor={onAddVendor}
-              onChangeVendor={onChangeVendor}
               theme={theme}
+              userCompany={userCompany}
+              userCompanies={userCompanies}
+              onChangeUserCompanyNew={onChangeUserCompanyNew}
+              onaddUserCompany={onaddUserCompany}
+              onChangeUserCompany={onChangeUserCompany}
+              internalCompanies={internalCompanies}
+              onClickDeleteUserCompany={onClickDeleteUserCompany}
             />
           )}
         </Form>
