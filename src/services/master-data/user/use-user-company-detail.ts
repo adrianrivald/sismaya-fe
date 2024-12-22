@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { http } from "src/utils/http";
-import {  User } from "./types";
+import {   UserCompany } from "./types";
 
-async function fetchCompanyByUserId(userId: number) {
-    const { data } = await http<{data : User}>(
+async function fetchUserCompanyById(userId: number) {
+    const { data } = await http<{data : UserCompany}>(
       `user-company/${userId}`,
     );
   
     return data;
   }
   
-  export function useCompanyByUserId(userId: number) {
+  export function useUserCompanyById(userId: number) {
     const data = useQuery(
       ['user-company', userId],
-      () => fetchCompanyByUserId(userId),
+      () => fetchUserCompanyById(userId),
       {
         enabled: userId !== undefined,
       }

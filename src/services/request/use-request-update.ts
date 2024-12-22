@@ -5,7 +5,7 @@ import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments: []};
+export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: []};
 
 export function useUpdateRequest() {
     const queryClient = useQueryClient();
@@ -18,7 +18,7 @@ export function useUpdateRequest() {
         }
         console.log(form?.attachments,'form?.attachments')
 
-        if (form?.attachments?.length > 0) {
+        if ((form?.attachments ?? [])?.length > 0) {
           console.log('mauk')
           Object.assign(payload, {
             attachments: form?.attachments?.map(item => ({
