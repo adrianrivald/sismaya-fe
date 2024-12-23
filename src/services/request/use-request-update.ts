@@ -8,7 +8,7 @@ import { Attachment } from "./types";
 
 export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
 
-export function useUpdateRequest() {
+export function useUpdateRequest(internalCompany: string) {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
@@ -67,7 +67,7 @@ export function useUpdateRequest() {
             theme: 'light',
             transition: Bounce,
           });
-          // navigate(`/sim/request`)
+          navigate(`/${internalCompany}/request`)
         },
         onError: (error) => {
           const reason =
