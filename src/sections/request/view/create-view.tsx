@@ -32,7 +32,7 @@ export function CreateRequestView() {
   const location = useLocation();
   const { vendor } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
-    (item) => item?.name?.toLowerCase() === vendor
+    (item) => item?.company?.name?.toLowerCase() === vendor
   )?.id;
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);

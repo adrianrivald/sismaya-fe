@@ -32,7 +32,7 @@ export function EditRequestView() {
   const location = useLocation();
   const { vendor, id } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
-    (item) => item?.name?.toLowerCase() === vendor
+    (item) => item?.company?.name?.toLowerCase() === vendor
   )?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);

@@ -6,7 +6,7 @@ export interface User {
     email: string;
     phone: string;
     user_info: UserInfo;
-    internal_companies?: Company[]
+    internal_companies?: InternalCompany[]
 }
 
 export interface UserInfo {
