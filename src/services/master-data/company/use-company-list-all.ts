@@ -4,7 +4,7 @@ import { Company } from "./types";
 
 async function fetchCompanies(type : string) {
     const { data } = await http<{data : Company[]}>(
-      !type ? `companies` :  type === "internal" ? `companies?type=vendor` : `companies?type=holding`,
+      !type ? `companies` :  type === "internal" ? `companies?type=internal` : `companies?type=holding`,
     );
   
     return data;
@@ -12,7 +12,7 @@ async function fetchCompanies(type : string) {
   
   
 async function fetchInternalCompanies() {
-  const { data } = await http<{data : Company[]}>('companies?type=vendor');
+  const { data } = await http<{data : Company[]}>('companies?type=internal');
 
   return data;
 }

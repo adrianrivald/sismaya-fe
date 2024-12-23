@@ -84,7 +84,7 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
 // ];
 
 export function InternalCompanyView() {
-  const { isEmpty, getDataTableProps } = useCompanyList({}, 'vendor');
+  const { isEmpty, getDataTableProps } = useCompanyList({}, 'internal');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
   const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
 

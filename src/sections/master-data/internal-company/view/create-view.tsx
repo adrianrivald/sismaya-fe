@@ -14,10 +14,10 @@ export function CreateInternalCompanyView() {
   const [isLoading, setIsLoading] = React.useState(false);
   const { mutate: addCompany } = useAddCompany();
   const handleSubmit = (formData: CompanyDTO) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     addCompany({
       ...formData,
-      type: 'vendor',
+      type: 'internal',
     });
   };
   return (
