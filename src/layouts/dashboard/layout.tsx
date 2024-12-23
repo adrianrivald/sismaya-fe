@@ -38,8 +38,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const { user } = useAuth();
   const internalCompanies = user?.internal_companies?.map((item) => ({
-    heading: item?.name,
-    path: `/${item?.name.toLowerCase()}/request`,
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/request`,
   }));
   const [navOpen, setNavOpen] = useState(false);
   console.log(internalCompanies, 'internalCompanies');

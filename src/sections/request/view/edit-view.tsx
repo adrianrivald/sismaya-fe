@@ -32,14 +32,14 @@ export function EditRequestView() {
   const location = useLocation();
   const { vendor, id } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
-    (item) => item?.name?.toLowerCase() === vendor
+    (item) => item?.company?.name?.toLowerCase() === vendor
   )?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [isLoading, setIsLoading] = React.useState(false);
   const [files, setFiles] = React.useState<FileList | any>([]);
-  const { mutate: updateRequest } = useUpdateRequest();
+  const { mutate: updateRequest } = useUpdateRequest(vendor ?? '');
   const defaultValues = {
     creator_id: requestDetail?.creator?.id,
     user_id: user?.id,
@@ -271,6 +271,7 @@ export function EditRequestView() {
                   {(requestDetail?.attachments ?? [])?.length > 0 || files?.length > 0 ? (
                     <Box
                       display="flex"
+                      flexWrap="wrap"
                       gap={3}
                       p={4}
                       mb={3}

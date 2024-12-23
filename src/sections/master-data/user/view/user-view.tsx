@@ -77,10 +77,9 @@ interface UserViewProps {
 }
 
 export function UserView({ type }: UserViewProps) {
-  const { isEmpty, data, getDataTableProps } = useUserList({ type });
-  console.log(data, 'datanya');
-  const clientData = data?.items?.filter((item) => item?.user_info?.company_id !== null);
-  const internalData = data?.items?.filter((item) => item?.user_info?.company_id === null);
+  const { isEmpty, getDataTableProps } = useUserList({ type });
+  // const clientData = data?.items?.filter((item) => item?.user_info?.company_id !== null);
+  // const internalData = data?.items?.filter((item) => item?.user_info?.company_id === null);
   const { mutate: deleteUserById } = useDeleteUserById();
 
   console.log(getDataTableProps(), 'get data table props');
@@ -106,7 +105,7 @@ export function UserView({ type }: UserViewProps) {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            User
+            {type === 'client' ? 'Client' : 'Internal'} User
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Master Data</Typography>
@@ -123,11 +122,7 @@ export function UserView({ type }: UserViewProps) {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable
-            columns={columns(popoverFuncs())}
-            {...getDataTableProps()}
-            data={type === 'client' ? clientData : internalData}
-          />
+          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
         </Grid>
       </Grid>
     </DashboardContent>

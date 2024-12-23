@@ -38,7 +38,7 @@ import {
 import { useClientCompanies, useInternalCompanies } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
 import { API_URL } from 'src/constants';
-import { Company, Department } from 'src/services/master-data/company/types';
+import { Company, Department, InternalCompany } from 'src/services/master-data/company/types';
 import {
   Control,
   FormState,
@@ -75,7 +75,7 @@ interface EditFormProps {
   user: User | undefined;
   type: 'client' | 'internal';
   userCompany: any;
-  userCompanies: Company[];
+  userCompanies: InternalCompany[];
   onClickDeleteUserCompany: (userCompanyId: number) => void;
   onChangeUserCompanyNew: (e: SelectChangeEvent<number>) => void;
   onaddUserCompany: () => void;
@@ -167,7 +167,7 @@ function EditForm({
                   <InputLabel id="type">User Company</InputLabel>
                   <Select
                     label="User Company"
-                    value={item?.id}
+                    value={item?.company?.id}
                     onChange={(e: SelectChangeEvent<number>) => onChangeUserCompany(e, item?.id)}
                   >
                     {internalCompanies?.map((company) => (
@@ -402,7 +402,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { mutate: addUserCompany } = useAddUserCompany();
   const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
   const [userCompany, setUserCompany] = React.useState<number | null>(null);
-  const [userCompanies, setUserCompanies] = React.useState<Company[]>([]);
+  const [userCompanies, setUserCompanies] = React.useState<InternalCompany[]>([]);
 
   const defaultValues = {
     name: user?.user_info?.name,

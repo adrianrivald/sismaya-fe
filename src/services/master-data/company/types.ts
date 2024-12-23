@@ -1,3 +1,5 @@
+// import { UserInfo } from "../user/types";
+
 export interface Company {
     id: number;
     name: string;
@@ -48,6 +50,16 @@ export interface Statuses {
 }
 
 export interface InternalCompany {
+    company: CompanyInInternal;
+    company_id: number;
+    created_at: string;
+    id: number;
+    updated_at: string;
+    // user: UserInfo;
+    user_id: number;
+}
+
+interface CompanyInInternal {
     abbreviation: string
     categories: Categories[]
     cito_quota: number
