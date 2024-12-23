@@ -39,6 +39,8 @@ export interface Products {
     id: number;
     name: string;
     company_id: number
+    company: string;
+    company_product_uses: number;
 }
 
 export interface Statuses {
@@ -79,6 +81,8 @@ export interface RequestDetail {
     progress_status: string;
     number: string;
     description: string;
+    is_cito: boolean;
+    product: Products
 }
 
 export interface Attachment {

@@ -625,7 +625,7 @@ export function EditInternalCompanyView() {
     const payload = {
       ...formData,
       id: Number(id),
-      type: 'vendor',
+      type: 'internal',
     };
     if (defaultValues?.image) {
       Object.assign(payload, {

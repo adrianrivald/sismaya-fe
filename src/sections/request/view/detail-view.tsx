@@ -71,7 +71,7 @@ export function RequestDetailView() {
                   <Typography fontWeight="bold" color="primary">
                     REQUEST {requestDetail?.number}
                   </Typography>
-                  <StatusBadge type="danger" label="CITO" />
+                  {requestDetail?.is_cito && <StatusBadge type="danger" label="CITO" />}
                 </Box>
                 <Button
                   onClick={onClickEdit}

@@ -35,11 +35,14 @@ export function useUpdateRequest() {
           const {data} = await uploadFilesBulk(
             filesData
           );
+          const newArr = data?.map(item => ({
+            file_path: item?.path,
+            file_name: item?.filename
+        }))
+          const newAttachments = [...(payload?.attachments ?? []), ...newArr]
+          // payload?.attachments?.concat(newArr)
           Object.assign(payload, {
-            attachments: data?.map(item => ({
-                file_path: item?.path,
-                file_name: item?.filename
-            }))
+            attachments: newAttachments
           });
         }
         
@@ -64,7 +67,7 @@ export function useUpdateRequest() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/sim/request`)
+          // navigate(`/sim/request`)
         },
         onError: (error) => {
           const reason =

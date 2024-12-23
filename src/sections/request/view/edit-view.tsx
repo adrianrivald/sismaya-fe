@@ -51,6 +51,8 @@ export function EditRequestView() {
     })),
     category_id: requestDetail?.category?.id,
     description: requestDetail?.description,
+    product_id: requestDetail?.product?.id,
+    is_cito: requestDetail?.is_cito,
   };
 
   console.log(defaultValues, 'defaultValuesdefaultValues');
@@ -227,7 +229,7 @@ export function EditRequestView() {
                   >
                     <Typography fontWeight="bold">CITO Status</Typography>
                     <FormControlLabel
-                      control={<Checkbox {...register('is_cito')} />}
+                      control={<Checkbox {...register('is_cito')} value={watch('is_cito')} />}
                       label="Request CITO"
                     />
                   </Box>
