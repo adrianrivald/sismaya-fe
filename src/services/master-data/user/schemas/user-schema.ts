@@ -62,7 +62,6 @@ export const userClientUpdateSchema = z
     company_id: z.number().nullable(),
     department_id: z.number().nullable(),
     internal_id: z.number().array().optional()
-
   })
   .partial();
 
