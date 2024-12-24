@@ -5,7 +5,7 @@ import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { UserClientUpdateDTO } from "./schemas/user-schema";
 
-export type UpdateUser = UserClientUpdateDTO & {id: number, cover?: any};
+export type UpdateUser = UserClientUpdateDTO & {id: number, cover?: any, user_type: string};
 
 export function useUpdateUser() {
     const navigate = useNavigate()
