@@ -5,7 +5,7 @@ import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { UserClientDTO } from "./schemas/user-schema";
 
-export type StoreUser = UserClientDTO & {cover?: any};
+export type StoreUser = UserClientDTO & {cover?: any, user_type: string};
 
 export function useAddUser() {
     const navigate = useNavigate()
