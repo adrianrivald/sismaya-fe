@@ -48,6 +48,7 @@
     "contrastText": "#FFFFFF"
   },
   "grey": {
+    "25": "#F7F8F9",
     "50": "#FCFDFD",
     "100": "#F9FAFB",
     "150": "#EFF0F3",
