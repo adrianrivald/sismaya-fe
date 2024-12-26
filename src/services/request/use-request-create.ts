@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
@@ -9,6 +9,7 @@ export type StoreRequest = RequestDTO & {files?: any};
 
 export function useAddRequest() {
     const queryClient = useQueryClient();
+    const { vendor } = useParams()
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreRequest) => {
@@ -55,7 +56,7 @@ export function useAddRequest() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/sim/request`)
+          navigate(`/${vendor}/request`)
 
         },
         onError: (error) => {

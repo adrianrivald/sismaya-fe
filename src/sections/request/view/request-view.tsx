@@ -30,8 +30,14 @@ const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor((row) => row, {
     header: 'Requester',
     cell: (info) => {
-      const creator = info.getValue()?.creator;
-      return <Typography>{creator?.name}</Typography>;
+      const requester = info.getValue()?.requester;
+      const product = info.getValue()?.product;
+      return (
+        <Box>
+          <Typography>{requester?.name}</Typography>
+          <Typography color="grey.600">{product?.name}</Typography>
+        </Box>
+      );
     },
   }),
 
