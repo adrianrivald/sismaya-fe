@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 
 interface StatusProps {
   label: string; // "Requested" | "more" | "and more"
-  type: 'info' | 'danger';
+  type: 'info' | 'danger' | 'error' | 'warning';
 }
 
 export function StatusBadge({ label, type, ...restProps }: StatusProps) {

@@ -33,7 +33,7 @@ export function CreateRequestView() {
   const { vendor } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
-  )?.id;
+  )?.company?.id;
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
@@ -48,6 +48,7 @@ export function CreateRequestView() {
       user_id: user?.id,
       company_id: user?.user_info?.company?.id,
       department_id: user?.user_info?.department?.id,
+      assignee_company_id: idCurrentCompany,
       files,
     };
     addRequest(payload);
