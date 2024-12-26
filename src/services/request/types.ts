@@ -69,6 +69,7 @@ export interface Request {
     product: Products;
     progress_status: string;
     is_cito: boolean;
+    requester: UserInfo;
 }
 
 export interface RequestDetail {
