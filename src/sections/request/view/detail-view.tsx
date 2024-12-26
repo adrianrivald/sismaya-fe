@@ -9,18 +9,22 @@ import {
   TableBody,
   Input,
   Button,
+  TextField,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from 'src/sections/auth/providers/auth';
 import { useRequestById } from 'src/services/request';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
+import ModalDialog from 'src/components/modal/modal';
 import { StatusBadge } from '../status-badge';
 
 export function RequestDetailView() {
+  const { user } = useAuth();
+  const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
   const { data: requestDetail } = useRequestById(id ?? '');
-  console.log(requestDetail, 'datanya');
   const chats = [];
   const navigate = useNavigate();
   const onClickEdit = () => {
@@ -156,6 +160,91 @@ export function RequestDetailView() {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {userType === 'internal' && (
+                <Box mt={4} display="flex" justifyContent="flex-end" gap={2} alignItems="center">
+                  <ModalDialog
+                    minWidth={600}
+                    title="Reject Request?"
+                    content={
+                      (
+                        <Box mt={2}>
+                          <Typography>Please fill in rejection reason.</Typography>
+                          <TextField
+                            autoComplete="off"
+                            multiline
+                            sx={{
+                              marginTop: 2,
+                              width: '100%',
+                            }}
+                            label="Rejection Reason"
+                            rows={4}
+                          />
+                          <Box
+                            mt={2}
+                            display="flex"
+                            justifyContent="flex-end"
+                            alignItems="center"
+                            gap={2}
+                          >
+                            <Button
+                              type="button"
+                              sx={{
+                                paddingY: 0.5,
+                                border: 1,
+                                borderColor: 'primary.main',
+                                borderRadius: 1.5,
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="button"
+                              sx={{
+                                paddingY: 1,
+                                paddingX: 2.5,
+                                backgroundColor: 'error.light',
+                                borderRadius: 1.5,
+                                color: 'white',
+                                fontWeight: 'normal',
+                              }}
+                            >
+                              Reject Request
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) as any
+                    }
+                  >
+                    {/* Button Open Modal */}
+                    <Button
+                      type="button"
+                      sx={{
+                        paddingY: 1,
+                        paddingX: 2.5,
+                        backgroundColor: 'error.light',
+                        borderRadius: 1.5,
+                        color: 'white',
+                        fontWeight: 'normal',
+                      }}
+                    >
+                      Reject Request
+                    </Button>
+                  </ModalDialog>
+                  <Button
+                    type="button"
+                    sx={{
+                      paddingY: 1,
+                      paddingX: 2.5,
+                      backgroundColor: 'primary.main',
+                      borderRadius: 1.5,
+                      color: 'white',
+                      fontWeight: 'normal',
+                    }}
+                  >
+                    Accept Request
+                  </Button>
+                </Box>
+              )}
             </Box>
           </Box>
         </Grid>

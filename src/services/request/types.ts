@@ -68,6 +68,7 @@ export interface Request {
     priority: string;
     product: Products;
     progress_status: string;
+    is_cito: boolean;
 }
 
 export interface RequestDetail {

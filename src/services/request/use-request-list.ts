@@ -5,10 +5,13 @@ import { http } from 'src/utils/http';
 import { WithPagination } from 'src/utils/types';
 
 
-export function fetchRequestList(params: Partial<any>) {
+export function fetchRequestList(params: Partial<any>, assignee_company_id: string) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/requests', baseUrl);
 
+  if (assignee_company_id) {
+    endpointUrl.searchParams.append('assignee_company_id', assignee_company_id);
+  }
 
   if (params.active) {
     endpointUrl.searchParams.append('active', params.active);
@@ -30,9 +33,10 @@ export function fetchRequestList(params: Partial<any>) {
   );
 }
 
-export function useRequestList(params: Partial<any>, ) {
+export function useRequestList(params: Partial<any>, assignee_company_id: string
+  ) {
   return usePaginationQuery(
-    ['request', params.keyword, params.active, params.order, params.platform],
-    (paginationState) => fetchRequestList({ ...params, ...paginationState })
+    ['request', params.keyword, params.active, params.order, params.platform, assignee_company_id],
+    (paginationState) => fetchRequestList({ ...params, ...paginationState }, assignee_company_id)
   );
 }

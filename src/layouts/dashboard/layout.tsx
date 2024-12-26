@@ -11,6 +11,7 @@ import { _langs, _notifications } from 'src/_mock';
 import { Iconify } from 'src/components/iconify';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
+import { Avatar, IconButton, Typography } from '@mui/material';
 import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
@@ -120,6 +121,40 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           menus={menus(internalCompanies)}
           layoutQuery={layoutQuery}
           workspaces={_workspaces}
+          slots={{
+            topArea: (
+              <Box
+                display="flex"
+                gap={2}
+                mt={2}
+                sx={{
+                  backgroundColor: 'grey.25',
+                  p: 2,
+                  borderRadius: 2,
+                }}
+              >
+                <IconButton
+                  sx={{
+                    p: '2px',
+                    width: 40,
+                    height: 40,
+                  }}
+                >
+                  <Avatar
+                    src={user?.user_info?.profile_picture}
+                    alt={user?.user_info?.name}
+                    sx={{ width: 1, height: 1 }}
+                  >
+                    {user?.user_info?.name.charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+                <Box>
+                  <Typography fontWeight="bold">{user?.user_info?.name}</Typography>
+                  <Typography>{user?.user_info?.role?.name}</Typography>
+                </Box>
+              </Box>
+            ),
+          }}
         />
       }
       /** **************************************

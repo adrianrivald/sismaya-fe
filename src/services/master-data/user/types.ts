@@ -23,6 +23,7 @@ export interface UserInfo {
     updated_at: string;
     user: string;
     user_id: number
+    user_type: string;
     internal_id: number[]
     internal_companies?: Company[]
 }
