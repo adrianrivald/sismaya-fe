@@ -441,6 +441,7 @@ export function EditUserView({ type }: EditUserProps) {
     const payload = {
       ...formData,
       id: Number(id),
+      user_type: type,
     };
     console.log(payload, 'payload');
     if (defaultValues?.profile_picture) {

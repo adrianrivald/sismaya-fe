@@ -5,11 +5,13 @@ import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material'
 import { Request } from 'src/services/request/types';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from 'src/sections/auth/providers/auth';
 import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { useDeleteRequestById, useRequestList } from 'src/services/request';
 import { AnalyticsProjectSummary } from '../analytics-project-summary';
+import { StatusBadge } from '../status-badge';
 
 // ----------------------------------------------------------------------
 
@@ -53,7 +55,7 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Status',
     cell: (info) => {
       const value = info.getValue()?.progress_status;
-      return <Typography>{value ?? '-'}</Typography>;
+      return <Typography>{value ?? 'Requested'}</Typography>;
     },
   }),
 
@@ -61,7 +63,16 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Priority',
     cell: (info) => {
       const value = info.getValue()?.priority;
-      return <Typography>{value ?? '-'}</Typography>;
+      const isCito = info.getValue()?.is_cito;
+      return !isCito ? (
+        value !== null ? (
+          <StatusBadge label={value} type="info" />
+        ) : (
+          '-'
+        )
+      ) : (
+        <StatusBadge label="CITO" type="danger" />
+      );
     },
   }),
 
@@ -73,16 +84,36 @@ const columns = (popoverProps: PopoverProps) => [
 ];
 
 function ButtonActions(props: CellContext<Request, unknown>, popoverProps: PopoverProps) {
+  const { user } = useAuth();
+  const userType = user?.user_info?.user_type;
   const { row } = props;
   const navigate = useNavigate();
   const requestId = row.original.id;
+  const status = row?.original?.progress_status;
   console.log(requestId, 'requestId');
   const onClickDetail = () => {
     console.log('clicked');
     navigate(`${requestId}`);
   };
   const { handleEdit, handleDelete } = popoverProps;
-  return (
+  return userType === 'internal' ? (
+    <>
+      {status === null ? (
+        <Button
+          onClick={onClickDetail}
+          sx={{
+            paddingY: 0.5,
+            backgroundColor: '#FFC107',
+            fontWeight: 'normal',
+            color: 'black',
+            borderRadius: 1.5,
+          }}
+        >
+          Review Request
+        </Button>
+      ) : null}
+    </>
+  ) : (
     <Button
       onClick={onClickDetail}
       type="button"
@@ -99,7 +130,13 @@ function ButtonActions(props: CellContext<Request, unknown>, popoverProps: Popov
 }
 
 export function RequestView() {
-  const { isEmpty, getDataTableProps } = useRequestList({});
+  const { user } = useAuth();
+  const { vendor } = useParams();
+  const assigneeCompanyId = user?.internal_companies?.find(
+    (item) => item?.company?.name?.toLowerCase() === vendor
+  )?.company?.id;
+  console.log(assigneeCompanyId, 'assigneeCompanyId');
+  const { isEmpty, getDataTableProps } = useRequestList({}, String(assigneeCompanyId));
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
   const currentCompany = location?.pathname?.split('/request')[0].replace('/', '');

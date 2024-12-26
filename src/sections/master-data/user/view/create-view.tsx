@@ -101,6 +101,7 @@ export function CreateUserView({ type }: CreateUserProps) {
     try {
       addUser({
         ...formData,
+        user_type: type,
       });
       setIsLoading(false);
     } catch (error) {
