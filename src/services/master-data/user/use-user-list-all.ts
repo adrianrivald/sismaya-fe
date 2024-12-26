@@ -2,18 +2,31 @@ import { useQuery } from "@tanstack/react-query";
 import { http } from "src/utils/http";
 import {  User } from "./types";
 
-async function fetchUsers(type : string) {
-    const { data } = await http<{data : User[]}>(
-      type === "internal" ? `users?type=internal` : `users?type=client`,
-    );
+async function fetchUsers(type : string, internalId?: string) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL('/users', baseUrl);
+
   
-    return data;
+  if (type) {
+    endpointUrl.searchParams.append('type', type);
   }
 
-  export function useUsers(type: string) {
+  if(internalId) {
+    endpointUrl.searchParams.append('internal_company', internalId);
+
+  }
+
+  const { data } = await http<{data: User[]}>(
+    endpointUrl.toString().replace(baseUrl, '')
+  )
+
+  return data
+  }
+
+  export function useUsers(type: string, internalId?: string) {
     const data = useQuery(
       ['user-items-all'],
-      () => fetchUsers(type)
+      () => fetchUsers(type, internalId)
     );
   
     return data;
