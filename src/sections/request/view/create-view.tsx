@@ -34,6 +34,7 @@ import { Department } from 'src/services/master-data/company/types';
 import { API_URL } from 'src/constants';
 import { getSession } from 'src/sections/auth/session/session';
 import { useRole } from 'src/services/master-data/role';
+import { User } from 'src/services/master-data/user/types';
 
 export function CreateRequestView() {
   const { user } = useAuth();
@@ -48,8 +49,12 @@ export function CreateRequestView() {
   const [files, setFiles] = React.useState<FileList | any>([]);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
   const { data: companies } = useClientCompanies();
-  const { data: clientUsers } = useUsers('client');
+  const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
   const { mutate: addRequest } = useAddRequest();
+
+  const [selectedCompany, setSelectedCompany] = React.useState('');
+  const [selectedDepartment, setSelectedDepartment] = React.useState('');
+
   const handleSubmit = (formData: RequestDTO) => {
     let payload = {};
     if (user?.user_info?.user_type === 'client') {
@@ -100,10 +105,14 @@ export function CreateRequestView() {
 
   const requesterList =
     clientUsers &&
-    (clientUsers?.map((clientUser) => ({
+    clientUsers?.map((clientUser) => ({
       label: clientUser?.user_info?.name,
       id: clientUser?.id,
-    })) as readonly any[]);
+      company_id: clientUser?.user_info?.company_id,
+      company_name: clientUser?.user_info?.company?.name,
+      department_id: clientUser?.user_info?.department_id,
+      department_name: clientUser?.user_info?.department?.name,
+    }));
 
   return (
     <DashboardContent maxWidth="xl">
@@ -198,8 +207,13 @@ export function CreateRequestView() {
                         sx={{
                           width: '100%',
                         }}
-                        onChange={(event: any, newValue: { id: number; label: string }) => {
+                        onChange={(_event: any, newValue: any) => {
+                          console.log(newValue, 'newValue');
                           setValue('user_id', newValue?.id);
+                          setValue('company_id', newValue?.company_id);
+                          setValue('department_id', newValue?.department_id);
+                          setSelectedCompany(newValue?.company_name);
+                          setSelectedDepartment(newValue?.department_name);
                         }}
                         value={watch('user_id')}
                         renderInput={(params) => (
@@ -221,24 +235,16 @@ export function CreateRequestView() {
                         width: { xs: '100%', md: '25%' },
                       }}
                     >
-                      <FormControl fullWidth>
-                        <InputLabel id="select-company">Company</InputLabel>
-                        <Select
-                          labelId="select-company"
-                          error={Boolean(formState?.errors?.company_id)}
-                          {...register('company_id', {
-                            required: 'Company must be filled out',
-                            onChange: async () => {
-                              await fetchDivision(watch('company_id'));
-                            },
-                          })}
-                          label="Company"
-                        >
-                          {companies?.map((company) => (
-                            <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        error={Boolean(formState?.errors?.company_id)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Company"
+                        autoComplete="off"
+                        value={watch('user_id') !== undefined ? selectedCompany : ''}
+                        disabled
+                      />
                       {formState?.errors?.company_id && (
                         <FormHelperText sx={{ color: 'error.main' }}>
                           {String(formState?.errors?.company_id?.message)}
@@ -250,21 +256,16 @@ export function CreateRequestView() {
                         width: { xs: '100%', md: '25%' },
                       }}
                     >
-                      <FormControl fullWidth>
-                        <InputLabel id="select-division">Division</InputLabel>
-                        <Select
-                          labelId="select-division"
-                          error={Boolean(formState?.errors?.department_id)}
-                          {...register('department_id', {
-                            required: 'Division must be filled out',
-                          })}
-                          label="Division"
-                        >
-                          {divisions?.map((division) => (
-                            <MenuItem value={division?.id}>{division?.name}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        error={Boolean(formState?.errors?.department_id)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Division"
+                        autoComplete="off"
+                        value={watch('user_id') !== undefined ? selectedDepartment : ''}
+                        disabled
+                      />
                       {formState?.errors?.department_id && (
                         <FormHelperText sx={{ color: 'error.main' }}>
                           {String(formState?.errors?.department_id?.message)}
