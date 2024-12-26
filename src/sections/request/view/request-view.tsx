@@ -65,7 +65,11 @@ const columns = (popoverProps: PopoverProps) => [
       const value = info.getValue()?.priority;
       const isCito = info.getValue()?.is_cito;
       return !isCito ? (
-        <StatusBadge label={value ?? 'Low'} type="info" />
+        value !== null ? (
+          <StatusBadge label={value} type="info" />
+        ) : (
+          '-'
+        )
       ) : (
         <StatusBadge label="CITO" type="danger" />
       );
