@@ -26,6 +26,7 @@ export interface UserInfo {
     user_type: string;
     internal_id: number[]
     internal_companies?: Company[]
+    title: string;
 }
 
 export interface UserCompany {

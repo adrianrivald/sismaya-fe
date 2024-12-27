@@ -85,6 +85,7 @@ export interface RequestDetail {
     description: string;
     is_cito: boolean;
     product: Products
+    requester: UserInfo
 }
 
 export interface Attachment {

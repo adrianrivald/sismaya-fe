@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Typography from '@mui/material/Typography';
 import {
   Box,
@@ -10,25 +11,77 @@ import {
   Input,
   Button,
   TextField,
+  FormHelperText,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useRequestById } from 'src/services/request';
+import { useRejectRequest, useRequestById } from 'src/services/request';
+import { Form } from 'src/components/form/form';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
 import { StatusBadge } from '../status-badge';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 export function RequestDetailView() {
   const { user } = useAuth();
   const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
   const { data: requestDetail } = useRequestById(id ?? '');
+  const { mutate: rejectRequest } = useRejectRequest();
+  const [open, setOpen] = useState(false);
+  const [openApprove, setOpenApprove] = useState(false);
   const chats = [];
   const navigate = useNavigate();
+  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs('2014-08-18T21:11:54'));
+
+  const handleChangeDate = (newValue: Dayjs | null) => {
+    setDateValue(newValue);
+  };
+  const priorities = [
+    {
+      name: 'High',
+      id: 'high',
+    },
+    {
+      name: 'Low',
+      id: 'low',
+    },
+    {
+      name: 'Medium',
+      id: 'medium',
+    },
+  ];
+
   const onClickEdit = () => {
     navigate(`/${vendor}/request/${id}/edit`);
+  };
+
+  const handleSubmit = (formData: { reason: string }) => {
+    // setIsLoading(true);
+    const payload = {
+      ...formData,
+      id: Number(id),
+    };
+    rejectRequest(payload);
+    setOpen(false);
+  };
+
+  const handleApprove = (formData: any) => {
+    // setIsLoading(true);
+    const payload = {
+      ...formData,
+      id: Number(id),
+    };
+    rejectRequest(payload);
+    setOpen(false);
   };
 
   return (
@@ -163,54 +216,66 @@ export function RequestDetailView() {
               {userType === 'internal' && (
                 <Box mt={4} display="flex" justifyContent="flex-end" gap={2} alignItems="center">
                   <ModalDialog
+                    open={open}
+                    setOpen={setOpen}
                     minWidth={600}
                     title="Reject Request?"
                     content={
                       (
                         <Box mt={2}>
                           <Typography>Please fill in rejection reason.</Typography>
-                          <TextField
-                            autoComplete="off"
-                            multiline
-                            sx={{
-                              marginTop: 2,
-                              width: '100%',
-                            }}
-                            label="Rejection Reason"
-                            rows={4}
-                          />
-                          <Box
-                            mt={2}
-                            display="flex"
-                            justifyContent="flex-end"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Button
-                              type="button"
-                              sx={{
-                                paddingY: 0.5,
-                                border: 1,
-                                borderColor: 'primary.main',
-                                borderRadius: 1.5,
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="button"
-                              sx={{
-                                paddingY: 1,
-                                paddingX: 2.5,
-                                backgroundColor: 'error.light',
-                                borderRadius: 1.5,
-                                color: 'white',
-                                fontWeight: 'normal',
-                              }}
-                            >
-                              Reject Request
-                            </Button>
-                          </Box>
+                          <Form width="100%" onSubmit={handleSubmit}>
+                            {({ register, control, formState, watch }) => (
+                              <>
+                                <TextField
+                                  autoComplete="off"
+                                  multiline
+                                  sx={{
+                                    marginTop: 2,
+                                    width: '100%',
+                                  }}
+                                  label="Rejection Reason"
+                                  rows={4}
+                                  {...register('reason', {
+                                    required: 'Reason must be filled out',
+                                  })}
+                                />
+                                <Box
+                                  mt={2}
+                                  display="flex"
+                                  justifyContent="flex-end"
+                                  alignItems="center"
+                                  gap={2}
+                                >
+                                  <Button
+                                    onClick={() => setOpen(false)}
+                                    type="button"
+                                    sx={{
+                                      paddingY: 0.5,
+                                      border: 1,
+                                      borderColor: 'primary.main',
+                                      borderRadius: 1.5,
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    type="submit"
+                                    sx={{
+                                      paddingY: 1,
+                                      paddingX: 2.5,
+                                      backgroundColor: 'error.light',
+                                      borderRadius: 1.5,
+                                      color: 'white',
+                                      fontWeight: 'normal',
+                                    }}
+                                  >
+                                    Reject Request
+                                  </Button>
+                                </Box>
+                              </>
+                            )}
+                          </Form>
                         </Box>
                       ) as any
                     }
@@ -230,19 +295,172 @@ export function RequestDetailView() {
                       Reject Request
                     </Button>
                   </ModalDialog>
-                  <Button
-                    type="button"
-                    sx={{
-                      paddingY: 1,
-                      paddingX: 2.5,
-                      backgroundColor: 'primary.main',
-                      borderRadius: 1.5,
-                      color: 'white',
-                      fontWeight: 'normal',
-                    }}
+                  <ModalDialog
+                    open={openApprove}
+                    setOpen={setOpenApprove}
+                    minWidth={600}
+                    title="Approve Request?"
+                    content={
+                      (
+                        <Box mt={2}>
+                          <Typography>
+                            Please select the priority category to approve this request.
+                          </Typography>
+                          <Form width="100%" onSubmit={handleApprove} mt={4}>
+                            {({ register, control, formState, watch }) => (
+                              <>
+                                <Box>
+                                  <FormControl fullWidth>
+                                    <InputLabel id="select-priority">Priority*</InputLabel>
+                                    <Select
+                                      labelId="select-priority"
+                                      error={Boolean(formState?.errors?.priority)}
+                                      {...register('priority', {
+                                        required: 'Priority must be filled out',
+                                      })}
+                                      label="Priority*"
+                                      value={watch('priority')}
+                                    >
+                                      {priorities?.map((priority) => (
+                                        <MenuItem value={priority?.id}>{priority?.name}</MenuItem>
+                                      ))}
+                                    </Select>
+                                  </FormControl>
+                                  {formState?.errors?.priority && (
+                                    <FormHelperText sx={{ color: 'error.main' }}>
+                                      {String(formState?.errors?.priority?.message)}
+                                    </FormHelperText>
+                                  )}
+                                </Box>
+                                <Box
+                                  mt={4}
+                                  display="flex"
+                                  alignItems="center"
+                                  justifyContent="space-between"
+                                  gap={2}
+                                >
+                                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                      sx={{
+                                        width: '50%',
+                                      }}
+                                      label="Start Date"
+                                      value={dateValue}
+                                      onChange={handleChangeDate}
+                                      // renderInput={(params: any) => <TextField {...params} />}
+                                    />
+                                  </LocalizationProvider>
+                                  <TextField
+                                    error={Boolean(formState?.errors?.estimated_duration)}
+                                    sx={{
+                                      width: '50%',
+                                    }}
+                                    type="number"
+                                    label="Estimated Duration"
+                                    {...register('estimated_duration', {
+                                      valueAsNumber: true,
+
+                                      required: 'Estimated Duration must be filled out',
+                                    })}
+                                  />
+                                  {formState?.errors?.estimated_duration && (
+                                    <FormHelperText sx={{ color: 'error.main' }}>
+                                      {String(formState?.errors?.estimated_duration?.message)}
+                                    </FormHelperText>
+                                  )}
+                                </Box>
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  gap={4}
+                                  mt={4}
+                                  sx={{
+                                    backgroundColor: 'blue.50',
+                                    paddingY: 4,
+                                    paddingX: 2,
+                                    borderRadius: 1.5,
+                                  }}
+                                >
+                                  <Typography color="grey.600">PIC</Typography>
+                                  <Box display="flex">
+                                    <Box
+                                      display="flex"
+                                      justifyContent="center"
+                                      alignItems="center"
+                                      sx={{
+                                        cursor: 'pointer',
+                                        paddingX: 1.5,
+                                        paddingY: 1.5,
+                                        border: 1,
+                                        borderStyle: 'dashed',
+                                        borderColor: 'grey.500',
+                                        borderRadius: 100,
+                                      }}
+                                    >
+                                      <SvgColor
+                                        color="#637381"
+                                        width={20}
+                                        height={20}
+                                        src="/assets/icons/ic-plus.svg"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </Box>
+                                <Box
+                                  mt={2}
+                                  display="flex"
+                                  justifyContent="flex-end"
+                                  alignItems="center"
+                                  gap={2}
+                                >
+                                  <Button
+                                    onClick={() => setOpenApprove(false)}
+                                    type="button"
+                                    sx={{
+                                      paddingY: 0.5,
+                                      border: 1,
+                                      borderColor: 'primary.main',
+                                      borderRadius: 1.5,
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    type="submit"
+                                    sx={{
+                                      paddingY: 0.5,
+                                      border: 1,
+                                      borderRadius: 1.5,
+                                      backgroundColor: 'primary.main',
+                                      borderColor: 'primary.main',
+                                      color: 'white',
+                                    }}
+                                  >
+                                    Approve Request
+                                  </Button>
+                                </Box>
+                              </>
+                            )}
+                          </Form>
+                        </Box>
+                      ) as any
+                    }
                   >
-                    Accept Request
-                  </Button>
+                    {/* Button Open Modal */}
+                    <Button
+                      type="button"
+                      sx={{
+                        paddingY: 1,
+                        paddingX: 2.5,
+                        backgroundColor: 'primary.main',
+                        borderRadius: 1.5,
+                        color: 'white',
+                        fontWeight: 'normal',
+                      }}
+                    >
+                      Accept Request
+                    </Button>
+                  </ModalDialog>
                 </Box>
               )}
             </Box>

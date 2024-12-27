@@ -1,11 +1,13 @@
 import { Box, Button, Typography, Modal, ModalProps } from '@mui/material';
-import React, { ReactNode } from 'react';
+import React, { createContext, Dispatch, ReactNode, SetStateAction } from 'react';
 // /*React.ReactElement<any, string>;*/
 interface DialogProps {
   children: ReactNode;
   content: any;
   title: string;
   minWidth: number;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function ModalDialog({
@@ -13,9 +15,10 @@ export default function ModalDialog({
   content,
   title,
   minWidth = 500,
+  open,
+  setOpen,
   ...restProps
 }: DialogProps & Omit<ModalProps, 'open'>) {
-  const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 

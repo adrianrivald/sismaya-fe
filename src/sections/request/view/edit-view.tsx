@@ -125,7 +125,7 @@ export function EditRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Requester Name</Typography>
-                    <Typography>{user?.user_info?.name}</Typography>
+                    <Typography>{requestDetail?.requester?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -137,7 +137,7 @@ export function EditRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Company</Typography>
-                    <Typography>{user?.user_info?.company?.name}</Typography>
+                    <Typography>{requestDetail?.company?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -149,7 +149,7 @@ export function EditRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Division</Typography>
-                    <Typography>{user?.user_info?.department?.name}</Typography>
+                    <Typography>{requestDetail?.department?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -160,8 +160,8 @@ export function EditRequestView() {
                     flexDirection="column"
                     gap={0.5}
                   >
-                    <Typography color="grey.600">Role</Typography>
-                    <Typography>{user?.user_info?.role?.name}</Typography>
+                    <Typography color="grey.600">Job Title</Typography>
+                    <Typography>{requestDetail?.requester?.title ?? '-'}</Typography>
                   </Stack>
                 </Stack>
               </Grid>
