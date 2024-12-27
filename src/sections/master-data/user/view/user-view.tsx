@@ -9,7 +9,7 @@ import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
-import { Users } from './types';
+import { User } from 'src/services/master-data/user/types';
 
 // ----------------------------------------------------------------------
 
@@ -18,10 +18,10 @@ interface PopoverProps {
   handleDelete: (id: number) => void;
 }
 
-const columnHelper = createColumnHelper<Users>();
+const columnHelper = createColumnHelper<User>();
 
 const columns = (popoverProps: PopoverProps) => [
-  columnHelper.accessor('name', {
+  columnHelper.accessor('user_info.name', {
     header: 'Name',
   }),
 
@@ -39,7 +39,7 @@ const columns = (popoverProps: PopoverProps) => [
   }),
 ];
 
-function ButtonActions(props: CellContext<Users, unknown>, popoverProps: PopoverProps) {
+function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
   const { handleEdit, handleDelete } = popoverProps;
