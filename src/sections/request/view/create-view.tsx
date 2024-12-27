@@ -1,5 +1,6 @@
 import Typography from '@mui/material/Typography';
 import {
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -22,9 +23,18 @@ import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, ChangeEventHandler } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useUserById } from 'src/services/master-data/user';
+import { useUserById, useUsers } from 'src/services/master-data/user';
 import { useAddRequest } from 'src/services/request';
-import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
+import {
+  useCategoryByCompanyId,
+  useClientCompanies,
+  useProductByCompanyId,
+} from 'src/services/master-data/company';
+import { Department } from 'src/services/master-data/company/types';
+import { API_URL } from 'src/constants';
+import { getSession } from 'src/sections/auth/session/session';
+import { useRole } from 'src/services/master-data/role';
+import { User } from 'src/services/master-data/user/types';
 
 export function CreateRequestView() {
   const { user } = useAuth();
@@ -37,27 +47,50 @@ export function CreateRequestView() {
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
+  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const { data: companies } = useClientCompanies();
+  const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
   const { mutate: addRequest } = useAddRequest();
+
+  const [selectedCompany, setSelectedCompany] = React.useState('');
+  const [selectedDepartment, setSelectedDepartment] = React.useState('');
+
   const handleSubmit = (formData: RequestDTO) => {
-    // setIsLoading(true);
-    const payload = {
-      ...formData,
-      creator_id: user?.id,
-      user_id: user?.id,
-      company_id: user?.user_info?.company?.id,
-      department_id: user?.user_info?.department?.id,
-      assignee_company_id: idCurrentCompany,
-      files,
-    };
+    let payload = {};
+    if (user?.user_info?.user_type === 'client') {
+      payload = {
+        ...formData,
+        creator_id: user?.id,
+        user_id: user?.id,
+        company_id: user?.user_info?.company?.id,
+        department_id: user?.user_info?.department?.id,
+        assignee_company_id: idCurrentCompany,
+        files,
+      };
+    } else {
+      payload = {
+        ...formData,
+        creator_id: user?.id,
+        assignee_company_id: idCurrentCompany,
+        files,
+      };
+    }
     addRequest(payload);
     console.log(payload, 'test');
-    // setTimeout(() => {
-    //   navigate('/request/test');
-    //   setIsLoading(false);
-    // }, 1000);
-    // await createRequest(payload) //Todo: soon
+  };
+
+  const fetchDivision = async (companyId: number) => {
+    const departmentData = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        console.log(value?.data, 'value?.data');
+        setDivisions(value?.data);
+      })
+    );
+    return departmentData;
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +102,17 @@ export function CreateRequestView() {
       setFiles(e.target.files);
     }
   };
+
+  const requesterList =
+    clientUsers &&
+    clientUsers?.map((clientUser) => ({
+      label: clientUser?.user_info?.name,
+      id: clientUser?.id,
+      company_id: clientUser?.user_info?.company_id,
+      company_name: clientUser?.user_info?.company?.name,
+      department_id: clientUser?.user_info?.department_id,
+      department_name: clientUser?.user_info?.department?.name,
+    }));
 
   return (
     <DashboardContent maxWidth="xl">
@@ -83,66 +127,175 @@ export function CreateRequestView() {
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, control, formState }) => (
+          {({ register, formState, watch, setValue }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
-                <Stack
-                  justifyContent="space-between"
-                  gap={3}
-                  alignItems="center"
-                  direction={{ xs: 'column', md: 'row' }}
-                  bgcolor="blue.50"
-                  p={2}
-                  borderRadius={2}
-                >
+                {user?.user_info?.user_type === 'client' ? (
                   <Stack
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
-                    display="flex"
-                    flexDirection="column"
-                    gap={0.5}
+                    justifyContent="space-between"
+                    gap={3}
+                    alignItems="center"
+                    direction={{ xs: 'column', md: 'row' }}
+                    bgcolor="blue.50"
+                    p={2}
+                    borderRadius={2}
                   >
-                    <Typography color="grey.600">Requester Name</Typography>
-                    <Typography>{user?.user_info?.name}</Typography>
-                  </Stack>
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Requester Name</Typography>
+                      <Typography>{user?.user_info?.name}</Typography>
+                    </Stack>
 
-                  <Stack
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
-                    display="flex"
-                    flexDirection="column"
-                    gap={0.5}
-                  >
-                    <Typography color="grey.600">Company</Typography>
-                    <Typography>{user?.user_info?.company?.name}</Typography>
-                  </Stack>
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Company</Typography>
+                      <Typography>{user?.user_info?.company?.name}</Typography>
+                    </Stack>
 
-                  <Stack
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
-                    display="flex"
-                    flexDirection="column"
-                    gap={0.5}
-                  >
-                    <Typography color="grey.600">Division</Typography>
-                    <Typography>{user?.user_info?.department?.name}</Typography>
-                  </Stack>
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Division</Typography>
+                      <Typography>{user?.user_info?.department?.name}</Typography>
+                    </Stack>
 
-                  <Stack
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
-                    display="flex"
-                    flexDirection="column"
-                    gap={0.5}
-                  >
-                    <Typography color="grey.600">Role</Typography>
-                    <Typography>{user?.user_info?.role?.name}</Typography>
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Role</Typography>
+                      <Typography>{user?.user_info?.role?.name}</Typography>
+                    </Stack>
                   </Stack>
-                </Stack>
+                ) : (
+                  <Stack
+                    justifyContent="space-between"
+                    gap={3}
+                    alignItems="center"
+                    direction={{ xs: 'column', md: 'row' }}
+                  >
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <Autocomplete
+                        disablePortal
+                        id="combo-box-requester"
+                        options={requesterList ?? []}
+                        sx={{
+                          width: '100%',
+                        }}
+                        onChange={(_event: any, newValue: any) => {
+                          console.log(newValue, 'newValue');
+                          setValue('user_id', newValue?.id);
+                          setValue('company_id', newValue?.company_id);
+                          setValue('department_id', newValue?.department_id);
+                          setSelectedCompany(newValue?.company_name);
+                          setSelectedDepartment(newValue?.department_name);
+                        }}
+                        value={watch('user_id')}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            error={Boolean(formState?.errors?.user_id)}
+                            label="Requester"
+                          />
+                        )}
+                      />
+                      {formState?.errors?.user_id && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.user_id?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.company_id)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Company"
+                        autoComplete="off"
+                        value={watch('user_id') !== undefined ? selectedCompany : ''}
+                        disabled
+                      />
+                      {formState?.errors?.company_id && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.company_id?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.department_id)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Division"
+                        autoComplete="off"
+                        value={watch('user_id') !== undefined ? selectedDepartment : ''}
+                        disabled
+                      />
+                      {formState?.errors?.department_id && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.department_id?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.title)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Title"
+                        {...register('title', {
+                          required: 'Title must be filled out',
+                        })}
+                        autoComplete="off"
+                      />
+                      {formState?.errors?.title && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.title?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                  </Stack>
+                )}
               </Grid>
 
               <Grid item xs={12} md={12}>
@@ -315,7 +468,6 @@ export function CreateRequestView() {
                 </Button>
                 <LoadingButton
                   size="small"
-                  loading={isLoading}
                   loadingIndicator="Submitting..."
                   type="submit"
                   variant="contained"

@@ -10,20 +10,9 @@ import { WithPagination } from 'src/utils/types';
 function fetchUserList(params: Partial<any> ) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/users', baseUrl);
-  console.log(params,'paramsparams')
 
   if (params.type) {
     endpointUrl.searchParams.append('type', params.type);
-
-  }
-
-
-  if (params.active) {
-    endpointUrl.searchParams.append('active', params.active);
-  }
-
-  if (params.platform) {
-    endpointUrl.searchParams.append('platform', params.platform);
   }
 
   dataTableParamsBuilder({
@@ -41,7 +30,7 @@ function fetchUserList(params: Partial<any> ) {
 
 export function useUserList(params: Partial<any>) {
   return usePaginationQuery(
-    ['user', params.keyword, params.active, params.order, params.platform],
+    ['user', params.type,params.keyword],
     (paginationState) => fetchUserList({ ...params, ...paginationState })
   );
 }

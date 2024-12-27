@@ -122,7 +122,7 @@ export function Router() {
   const { user } = useAuth();
   const role = user?.user_info?.role_id;
   const isSuperAdmin = role === 1;
-  const isClient = role === 6 || role === 3;
+  const isClient = role !== 1;
 
   const routingCondition = () => {
     if (isSuperAdmin) return superAdminRoutes;
