@@ -19,19 +19,19 @@ import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
 import { useCompanyList } from 'src/services/master-data/company/use-company-list';
+import { useDeleteCompanyById } from 'src/services/master-data/company';
 import { Companies } from './types';
 
 // ----------------------------------------------------------------------
 
 interface PopoverProps {
-  handleClosePopover: () => void;
-  handleOpenPopover: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   handleEdit: (id: number) => void;
+  handleDelete: (id: number) => void;
 }
 
 const columnHelper = createColumnHelper<Companies>();
 
-const columns = (popoverProps: PopoverProps, openPopover: HTMLButtonElement | null) => [
+const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
     header: 'Name',
   }),
@@ -46,18 +46,14 @@ const columns = (popoverProps: PopoverProps, openPopover: HTMLButtonElement | nu
 
   columnHelper.display({
     id: 'actions',
-    cell: (info) => ButtonActions(info, popoverProps, openPopover),
+    cell: (info) => ButtonActions(info, popoverProps),
   }),
 ];
 
-function ButtonActions(
-  props: CellContext<Companies, unknown>,
-  popoverProps: PopoverProps,
-  openPopover: HTMLButtonElement | null
-) {
+function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleClosePopover, handleEdit, handleOpenPopover } = popoverProps;
+  const { handleEdit, handleDelete } = popoverProps;
   const formId = useId();
   // const { mutateAsync: deleteBanner } = useDeleteBanner();
   return (
@@ -81,7 +77,7 @@ function ButtonActions(
         Edit
       </MenuItem>
 
-      <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
+      <MenuItem onClick={() => handleDelete(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
       </MenuItem>
@@ -101,10 +97,8 @@ function ButtonActions(
 
 export function ClientCompanyView() {
   const { isEmpty, getDataTableProps } = useCompanyList({}, 'holding');
+  const { mutate: deleteCompanyById } = useDeleteCompanyById();
 
-  const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
-
-  // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('/client-company/create');
@@ -115,15 +109,11 @@ export function ClientCompanyView() {
       navigate(`${id}/edit`);
     };
 
-    const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
-      setOpenPopover(event.currentTarget);
+    const handleDelete = (id: number) => {
+      deleteCompanyById(id);
     };
 
-    const handleClosePopover = () => {
-      setOpenPopover(null);
-    };
-
-    return { handleEdit, handleOpenPopover, handleClosePopover };
+    return { handleEdit, handleDelete };
   };
 
   return (
@@ -148,7 +138,7 @@ export function ClientCompanyView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs(), openPopover)} {...getDataTableProps()} />
+          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
         </Grid>
       </Grid>
     </DashboardContent>
