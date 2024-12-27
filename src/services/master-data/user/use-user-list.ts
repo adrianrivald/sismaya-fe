@@ -30,7 +30,7 @@ function fetchUserList(params: Partial<any> ) {
 
 export function useUserList(params: Partial<any>) {
   return usePaginationQuery(
-    ['user', params.keyword],
+    ['user', params.type,params.keyword],
     (paginationState) => fetchUserList({ ...params, ...paginationState })
   );
 }
