@@ -114,7 +114,7 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
   const { user } = useAuth();
   const role = user?.user_info?.role_id;
   const currentMenu = window.location.href.split('/')[3];
-  const accessibleMenus = menuByRole[role]?.menus as string[];
+  const accessibleMenus = role === 1 ? ['master-data'] : ['request'];
 
   return (
     <>
