@@ -67,7 +67,7 @@ export interface Request {
     number: string;
     priority: string;
     product: Products;
-    progress_status: string;
+    progress_status: Statuses;
     is_cito: boolean;
     requester: UserInfo;
 }
@@ -85,6 +85,7 @@ export interface RequestDetail {
     description: string;
     is_cito: boolean;
     product: Products
+    requester: UserInfo
 }
 
 export interface Attachment {
