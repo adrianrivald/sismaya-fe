@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Typography from '@mui/material/Typography';
 import {
   Box,
@@ -16,11 +16,13 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Popover,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useRejectRequest, useRequestById } from 'src/services/request';
+import { useApproveRequest, useRejectRequest, useRequestById } from 'src/services/request';
 import { Form } from 'src/components/form/form';
+import { useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -30,42 +32,58 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { StatusBadge } from '../status-badge';
 
+const priorities = [
+  {
+    name: 'High',
+    id: 'high',
+  },
+  {
+    name: 'Low',
+    id: 'low',
+  },
+  {
+    name: 'Medium',
+    id: 'medium',
+  },
+];
+
 export function RequestDetailView() {
   const { user } = useAuth();
   const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
+  const idCurrentCompany = user?.internal_companies?.find(
+    (item) => item?.company?.name?.toLowerCase() === vendor
+  )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
+  const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
+  const { mutate: approveRequest } = useApproveRequest();
   const [open, setOpen] = useState(false);
   const [openApprove, setOpenApprove] = useState(false);
   const chats = [];
   const navigate = useNavigate();
-  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs('2014-08-18T21:11:54'));
+  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [selectedPic, setSelectedPic] = React.useState<
+    { id: number; picture: string }[] | undefined
+  >([]);
+  const openAnchor = Boolean(anchorEl);
+  const idAnchor = open ? 'simple-popover' : undefined;
+  const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
+
+  const handleClosePic = () => {
+    setAnchorEl(null);
+  };
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
   };
-  const priorities = [
-    {
-      name: 'High',
-      id: 'high',
-    },
-    {
-      name: 'Low',
-      id: 'low',
-    },
-    {
-      name: 'Medium',
-      id: 'medium',
-    },
-  ];
 
   const onClickEdit = () => {
     navigate(`/${vendor}/request/${id}/edit`);
   };
 
   const handleSubmit = (formData: { reason: string }) => {
-    // setIsLoading(true);
     const payload = {
       ...formData,
       id: Number(id),
@@ -74,14 +92,37 @@ export function RequestDetailView() {
     setOpen(false);
   };
 
+  const handleAddPic = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleAddPicItem = (userId: number, userPicture: string) => {
+    setSelectedPic((prev: { id: number; picture: string }[] | undefined) => [
+      ...(prev as []),
+      {
+        id: userId,
+        picture: userPicture,
+      },
+    ]);
+    setSelectedPicWarning(false);
+  };
+
   const handleApprove = (formData: any) => {
-    // setIsLoading(true);
+    const startDate = dayjs(dateValue).format('YYYY-MM-DD');
     const payload = {
       ...formData,
+      start_date: startDate,
       id: Number(id),
+      assignees: selectedPic?.map((item) => ({
+        assignee_id: item?.id,
+      })),
     };
-    rejectRequest(payload);
-    setOpen(false);
+    if ((selectedPic ?? [])?.length > 0) {
+      approveRequest(payload);
+      setOpen(false);
+    } else {
+      setSelectedPicWarning(true);
+    }
   };
 
   return (
@@ -202,7 +243,6 @@ export function RequestDetailView() {
                               <Box component="img" src="/assets/icons/file.png" />
                               <Box>
                                 <Typography fontWeight="bold">{file?.file_name}</Typography>
-                                {/* 2 Mb */}
                               </Box>
                               <SvgColor src="/assets/icons/ic-download.svg" />
                             </Box>
@@ -300,6 +340,7 @@ export function RequestDetailView() {
                     setOpen={setOpenApprove}
                     minWidth={600}
                     title="Approve Request?"
+                    onClose={() => setSelectedPic([])}
                     content={
                       (
                         <Box mt={2}>
@@ -360,7 +401,7 @@ export function RequestDetailView() {
                                     {...register('estimated_duration', {
                                       valueAsNumber: true,
 
-                                      required: 'Estimated Duration must be filled out',
+                                      // required: 'Estimated Duration must be filled out',
                                     })}
                                   />
                                   {formState?.errors?.estimated_duration && (
@@ -382,30 +423,110 @@ export function RequestDetailView() {
                                   }}
                                 >
                                   <Typography color="grey.600">PIC</Typography>
-                                  <Box display="flex">
-                                    <Box
-                                      display="flex"
-                                      justifyContent="center"
-                                      alignItems="center"
-                                      sx={{
-                                        cursor: 'pointer',
-                                        paddingX: 1.5,
-                                        paddingY: 1.5,
-                                        border: 1,
-                                        borderStyle: 'dashed',
-                                        borderColor: 'grey.500',
-                                        borderRadius: 100,
-                                      }}
-                                    >
-                                      <SvgColor
-                                        color="#637381"
-                                        width={20}
-                                        height={20}
-                                        src="/assets/icons/ic-plus.svg"
-                                      />
-                                    </Box>
+                                  <Box display="flex" alignItems="center">
+                                    {selectedPic?.map((item) => (
+                                      <Box
+                                        width={36}
+                                        height={36}
+                                        sx={{
+                                          marginRight: '-10px',
+                                        }}
+                                      >
+                                        <Box
+                                          component="img"
+                                          src={item?.picture}
+                                          sx={{
+                                            cursor: 'pointer',
+                                            borderRadius: 100,
+                                            width: 36,
+                                            height: 36,
+                                            borderColor: 'white',
+                                            borderWidth: 2,
+                                            borderStyle: 'solid',
+                                          }}
+                                        />
+                                      </Box>
+                                    ))}
                                   </Box>
+                                  <Box
+                                    component="button"
+                                    type="button"
+                                    aria-describedby={idAnchor}
+                                    onClick={handleAddPic}
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    sx={{
+                                      width: 36,
+                                      height: 36,
+                                      cursor: 'pointer',
+                                      paddingX: 1.5,
+                                      paddingY: 1.5,
+                                      border: 1,
+                                      borderStyle: 'dashed',
+                                      borderColor: 'grey.500',
+                                      borderRadius: 100,
+                                    }}
+                                  >
+                                    <SvgColor
+                                      color="#637381"
+                                      width={12}
+                                      height={12}
+                                      src="/assets/icons/ic-plus.svg"
+                                    />
+                                  </Box>
+                                  <Popover
+                                    id={idAnchor}
+                                    open={openAnchor}
+                                    anchorEl={anchorEl}
+                                    onClose={handleClosePic}
+                                    anchorOrigin={{
+                                      vertical: 'bottom',
+                                      horizontal: 'left',
+                                    }}
+                                  >
+                                    {clientUsers?.map((clientUser) => (
+                                      <Box
+                                        display="flex"
+                                        gap={2}
+                                        alignItems="center"
+                                        p={2}
+                                        sx={{
+                                          cursor: 'pointer',
+                                          '&:hover': {
+                                            backgroundColor: 'grey.100',
+                                          },
+                                        }}
+                                        onClick={() =>
+                                          handleAddPicItem(
+                                            clientUser?.id,
+                                            clientUser?.user_info?.profile_picture
+                                          )
+                                        }
+                                      >
+                                        <Box
+                                          component="img"
+                                          src={clientUser?.user_info?.profile_picture}
+                                          sx={{
+                                            borderRadius: 100,
+                                            width: 36,
+                                            height: 36,
+                                            borderColor: 'white',
+                                            borderWidth: 2,
+                                            borderStyle: 'solid',
+                                          }}
+                                        />
+
+                                        <Typography>{clientUser?.user_info?.name}</Typography>
+                                      </Box>
+                                    ))}
+                                  </Popover>
                                 </Box>
+                                {selectedPicWarning ? (
+                                  <FormHelperText sx={{ color: 'error.main' }}>
+                                    PIC must be selected, minimum 1 PIC
+                                  </FormHelperText>
+                                ) : null}
                                 <Box
                                   mt={2}
                                   display="flex"

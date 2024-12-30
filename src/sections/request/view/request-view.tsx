@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
+import { Box, Button, capitalize, MenuItem, menuItemClasses, MenuList } from '@mui/material';
 import { Request } from 'src/services/request/types';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -60,8 +60,8 @@ const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor((row) => row, {
     header: 'Status',
     cell: (info) => {
-      const value = info.getValue()?.progress_status;
-      return <Typography>{value ?? 'Requested'}</Typography>;
+      const value = info.getValue()?.progress_status?.name;
+      return <Typography>{value ? capitalize(`${value}`) : 'Requested'}</Typography>;
     },
   }),
 
@@ -72,7 +72,7 @@ const columns = (popoverProps: PopoverProps) => [
       const isCito = info.getValue()?.is_cito;
       return !isCito ? (
         value !== null ? (
-          <StatusBadge label={value} type="info" />
+          <StatusBadge label={capitalize(`${value}`)} type="info" />
         ) : (
           '-'
         )

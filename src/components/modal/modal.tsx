@@ -8,6 +8,7 @@ interface DialogProps {
   minWidth: number;
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  onClose?: () => void;
 }
 
 export default function ModalDialog({
@@ -17,10 +18,16 @@ export default function ModalDialog({
   minWidth = 500,
   open,
   setOpen,
+  onClose,
   ...restProps
 }: DialogProps & Omit<ModalProps, 'open'>) {
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) {
+      onClose();
+    }
+  };
 
   return (
     <div>

@@ -64,8 +64,6 @@ export function EditRequestView() {
     is_cito: requestDetail?.is_cito,
   };
 
-  console.log(defaultValues, 'defaultValuesdefaultValues');
-
   const handleSubmit = (formData: RequestDTO) => {
     // setIsLoading(true);
     const payload = {
@@ -120,7 +118,7 @@ export function EditRequestView() {
             },
           }}
         >
-          {({ register, control, formState, watch }) => (
+          {({ register, formState, watch }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <Stack
