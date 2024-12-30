@@ -1,45 +1,35 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
-import { Attachment } from "./types";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
+export type RejectRequest = {id: number, reason: string };
 
-export function useUpdateRequest(internalCompany: string) {
+export function useRejectRequest() {
     const queryClient = useQueryClient();
+    const { vendor } = useParams()
     const navigate = useNavigate()
     return useMutation(
-      async (formData: UpdateRequest) => {
-        const { files, id, ...form } = formData;
+      async (formData: RejectRequest) => {
+        const { id, ...form} = formData
         const payload =  {
           ...form
         }
-        console.log(payload,'payloadnyea')
-
-        // if ((form?.attachments ?? [])?.length > 0) {
-        //   Object.assign(payload, {
-        //     attachments: form?.attachments?.map(item => ({
-        //         file_path: item?.file_path,
-        //         file_name: item?.file_name
-        //     }))
-        //   });
-        // } 
         
         
-        return http(`requests/${id}`, {
-          data: payload,
-          method: "PUT"
+        return http(`requests/${id}/reject`, {
+          data: payload
         });
       },
       {
+        // onSuccess: (res: {data: RejectRequest}) => {
           onSuccess: (res: any) => {
-          console.log(res,'res')
-          queryClient.invalidateQueries(['request']);
+            const requestId = res?.data?.request?.id
+          queryClient.invalidateQueries(['request-items']);
   
-          toast.success('Data updated successfully', {
+          toast.success('Project Rejected', {
             position: 'top-right',
             autoClose: 5000,
             hideProgressBar: true,
@@ -50,7 +40,8 @@ export function useUpdateRequest(internalCompany: string) {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/${internalCompany}/request`)
+          navigate(`/${vendor}/request/${requestId}`)
+
         },
         onError: (error) => {
           const reason =
