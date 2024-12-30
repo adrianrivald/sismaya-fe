@@ -12,8 +12,6 @@ export type ApproveRequest = {id: number; priority: string; start_date: string; 
 
 export function useApproveRequest() {
     const queryClient = useQueryClient();
-    const { vendor } = useParams()
-    const navigate = useNavigate()
     return useMutation(
       async (formData: ApproveRequest) => {
         const { id, ...form} = formData
@@ -27,10 +25,8 @@ export function useApproveRequest() {
         });
       },
       {
-        // onSuccess: (res: {data: ApproveRequest}) => {
-          onSuccess: (res: any) => {
-            const requestId = res?.data?.id
-          queryClient.invalidateQueries(['request-items', requestId]);
+          onSuccess: () => {
+          queryClient.invalidateQueries(['request-items']);
   
           toast.success('Project Approved', {
             position: 'top-right',
@@ -43,7 +39,7 @@ export function useApproveRequest() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/${vendor}/request/${requestId}`)
+          // navigate(`/${vendor}/request/${requestId}`)
 
         },
         onError: (error) => {
