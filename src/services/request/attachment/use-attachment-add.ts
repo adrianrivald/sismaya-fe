@@ -1,44 +1,50 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { RequestDTO } from "./schemas/request-schema";
-import { Attachment } from "./types";
+import { Attachment } from "../types";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
+export type StoreAttachment = {request_id: number, files: any};
 
-export function useUpdateRequest(internalCompany: string) {
+export function useAddAttachment() {
     const queryClient = useQueryClient();
+    const { vendor } = useParams()
     const navigate = useNavigate()
     return useMutation(
-      async (formData: UpdateRequest) => {
-        const { files, id, ...form } = formData;
+      async (formData: StoreAttachment) => {
+        const { files, ...form } = formData;
         const payload =  {
           ...form
         }
-
-        // if ((form?.attachments ?? [])?.length > 0) {
-        //   Object.assign(payload, {
-        //     attachments: form?.attachments?.map(item => ({
-        //         file_path: item?.file_path,
-        //         file_name: item?.file_name
-        //     }))
-        //   });
-        // } 
         
+          if(files) {
+            
+          const filesData = new FormData();
+          Array.from(files).forEach((file, index) => {
+          filesData.append(`files`, file as unknown as File);
+          });
+          const {data} = await uploadFilesBulk(
+            filesData
+          );
+          Object.assign(payload, {
+            attachments: data?.map(item => ({
+                file_path: item?.path,
+                file_name: item?.filename
+            }))
+          });
+          }
         
-        return http(`requests/${id}`, {
-          data: payload,
-          method: "PUT"
+        return http(`requests-attachment`, {
+          data: payload
         });
       },
       {
-          onSuccess: (res: any) => {
-          console.log(res,'res')
-          queryClient.invalidateQueries(['request']);
+        // onSuccess: (res: {data: StoreAttachment}) => {
+          onSuccess: () => {
+          queryClient.invalidateQueries(['request-items']);
   
-          toast.success('Data updated successfully', {
+          toast.success('Data added successfully', {
             position: 'top-right',
             autoClose: 5000,
             hideProgressBar: true,
@@ -49,7 +55,7 @@ export function useUpdateRequest(internalCompany: string) {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/${internalCompany}/request`)
+
         },
         onError: (error) => {
           const reason =

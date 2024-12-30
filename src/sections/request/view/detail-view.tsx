@@ -21,14 +21,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { useRejectRequest, useRequestById } from 'src/services/request';
 import { Form } from 'src/components/form/form';
+import dayjs, { Dayjs } from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
-import { StatusBadge } from '../status-badge';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
+import { StatusBadge } from '../status-badge';
 
 export function RequestDetailView() {
   const { user } = useAuth();
