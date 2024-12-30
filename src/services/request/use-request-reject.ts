@@ -24,9 +24,7 @@ export function useRejectRequest() {
         });
       },
       {
-        // onSuccess: (res: {data: RejectRequest}) => {
-          onSuccess: (res: any) => {
-            const requestId = res?.data?.request?.id
+          onSuccess: () => {
           queryClient.invalidateQueries(['request-items']);
   
           toast.success('Project Rejected', {
@@ -40,7 +38,7 @@ export function useRejectRequest() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/${vendor}/request/${requestId}`)
+          // navigate(`/${vendor}/request/${requestId}`)
 
         },
         onError: (error) => {
