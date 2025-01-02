@@ -20,7 +20,7 @@ interface PopoverProps {
   handleDelete: (id: number) => void;
 }
 
-const columnHelper = createColumnHelper<Request>();
+const columnHelper = createColumnHelper<Request & { isCenter?: boolean }>();
 
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('number', {
@@ -84,7 +84,7 @@ const columns = (popoverProps: PopoverProps) => [
 
   columnHelper.display({
     header: 'Action',
-    id: 'actions',
+    id: 'actions-[center]',
     cell: (info) => ButtonActions(info, popoverProps),
   }),
 ];
@@ -95,16 +95,14 @@ function ButtonActions(props: CellContext<Request, unknown>, popoverProps: Popov
   const { row } = props;
   const navigate = useNavigate();
   const requestId = row.original.id;
-  const status = row?.original?.progress_status;
+  const step = row?.original?.step;
   console.log(requestId, 'requestId');
   const onClickDetail = () => {
-    console.log('clicked');
     navigate(`${requestId}`);
   };
-  const { handleEdit, handleDelete } = popoverProps;
   return userType === 'internal' ? (
-    <>
-      {status === null ? (
+    <Box display="flex" justifyContent="center">
+      {step === 'pending' ? (
         <Button
           onClick={onClickDetail}
           sx={{
@@ -117,8 +115,21 @@ function ButtonActions(props: CellContext<Request, unknown>, popoverProps: Popov
         >
           Review Request
         </Button>
-      ) : null}
-    </>
+      ) : (
+        <Button
+          onClick={onClickDetail}
+          type="button"
+          sx={{
+            paddingY: 0.5,
+            border: 1,
+            borderColor: 'primary.main',
+            borderRadius: 1.5,
+          }}
+        >
+          {step !== 'rejected' ? 'Edit' : 'View Detail'}
+        </Button>
+      )}
+    </Box>
   ) : (
     <Button
       onClick={onClickDetail}
