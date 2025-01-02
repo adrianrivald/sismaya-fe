@@ -1,4 +1,5 @@
-import { Box, TextField, Typography } from '@mui/material';
+import { Box, InputAdornment, TextField, Typography } from '@mui/material';
+import { ChangeEvent } from 'react';
 import { SvgColor } from 'src/components/svg-color';
 import { User } from 'src/services/master-data/user/types';
 
@@ -8,6 +9,7 @@ interface AddAssigneeModalProps {
   handleAddPicItem: (userId: number, userPicture: string) => void;
   handleDeletePicItem: (userId: number, assigneeId?: number) => void;
   isDetail?: boolean;
+  onSearchUser: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface SelectedPic {
@@ -22,11 +24,23 @@ export function AddAssigneeModal({
   handleAddPicItem,
   handleDeletePicItem,
   isDetail = false,
+  onSearchUser,
 }: AddAssigneeModalProps) {
   return (
     <>
-      <Box sx={{ width: '100%', marginTop: 3 }}>
-        <TextField sx={{ width: '100%' }} />
+      <Box sx={{ width: '100%', my: 3 }}>
+        <TextField
+          sx={{ width: '100%' }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SvgColor width={18} height={24} src="/assets/icons/ic-search.svg" />
+              </InputAdornment>
+            ),
+          }}
+          placeholder="Search..."
+          onChange={onSearchUser}
+        />
       </Box>
       {clientUsers?.map((clientUser) => (
         <Box display="flex" alignItems="center" justifyContent="space-between">

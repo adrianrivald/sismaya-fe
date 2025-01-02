@@ -12,7 +12,7 @@ import {
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { Dispatch, SetStateAction } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import { Form } from 'src/components/form/form';
 import ModalDialog from 'src/components/modal/modal';
 import { SvgColor } from 'src/components/svg-color';
@@ -44,6 +44,7 @@ interface ApproveActionProps {
   clientUsers: User[] | undefined;
   handleAddPicItem: (userId: number, userPicture: string) => void;
   handleDeletePicItem: (userId: number) => void;
+  onSearchUser: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function ApproveAction({
@@ -61,6 +62,7 @@ export function ApproveAction({
   clientUsers,
   handleAddPicItem,
   handleDeletePicItem,
+  onSearchUser,
 }: ApproveActionProps) {
   return (
     <ModalDialog
@@ -74,7 +76,7 @@ export function ApproveAction({
           <Box mt={2}>
             <Typography>Please select the priority category to approve this request.</Typography>
             <Form width="100%" onSubmit={handleApprove} mt={4}>
-              {({ register, control, formState, watch }) => (
+              {({ register, formState, watch }) => (
                 <>
                   <Box>
                     <FormControl fullWidth>
@@ -186,6 +188,7 @@ export function ApproveAction({
                             handleAddPicItem={handleAddPicItem}
                             selectedPic={selectedPic}
                             handleDeletePicItem={handleDeletePicItem}
+                            onSearchUser={onSearchUser}
                           />
                         ) as JSX.Element & string
                       }

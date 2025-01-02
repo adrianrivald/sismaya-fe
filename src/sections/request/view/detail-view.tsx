@@ -33,6 +33,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
+import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 import { StatusBadge } from '../status-badge';
 import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
@@ -90,6 +91,11 @@ export function RequestDetailView() {
   const [currentPriority, setCurrentPriority] = React.useState(requestDetail?.priority ?? '-');
   const [currentStatus, setCurrentStatus] = React.useState(
     requestDetail?.progress_status?.step ?? 'requested'
+  );
+  const [searchTerm, setSearchTerm] = useSearchDebounce();
+
+  const filteredClientUsers = clientUsers?.filter((item) =>
+    item?.user_info?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const statusEnum = () => {
@@ -185,6 +191,10 @@ export function RequestDetailView() {
     } else {
       setSelectedPicWarning(true);
     }
+  };
+
+  const onSearchUser = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
   return (
@@ -451,11 +461,12 @@ export function RequestDetailView() {
                                 content={
                                   (
                                     <AddAssigneeModal
-                                      clientUsers={clientUsers}
+                                      clientUsers={filteredClientUsers}
                                       handleAddPicItem={handleAddPicItemFromDetail}
                                       selectedPic={selectedPic}
                                       handleDeletePicItem={handleDeletePicItemFromDetail}
                                       isDetail
+                                      onSearchUser={onSearchUser}
                                     />
                                   ) as JSX.Element & string
                                 }
@@ -543,7 +554,7 @@ export function RequestDetailView() {
                 <Box mt={4} display="flex" justifyContent="flex-end" gap={2} alignItems="center">
                   <RejectAction open={open} setOpen={setOpen} handleSubmit={handleSubmit} />
                   <ApproveAction
-                    clientUsers={clientUsers}
+                    clientUsers={filteredClientUsers}
                     dateValue={dateValue}
                     handleAddPicItem={handleAddPicItem}
                     handleApprove={handleApprove}
@@ -557,6 +568,7 @@ export function RequestDetailView() {
                     setOpenAssigneeModal={setOpenAssigneeModal}
                     setSelectedPic={setSelectedPic}
                     handleDeletePicItem={handleDeletePicItem}
+                    onSearchUser={onSearchUser}
                   />
                 </Box>
               )}
