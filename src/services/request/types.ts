@@ -72,19 +72,44 @@ export interface Request {
     requester: UserInfo;
 }
 
+export interface Assignees {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    request_id: number;
+    assignee_id: number;
+    creator_id: number;
+    request: null;
+    assignee: Assignee;
+    creator: null;
+}
+
+export interface Assignee {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    email: string;
+    phone: string;
+    user_info: UserInfo;
+    internal_companies: null;
+    deleted_at: null;
+}
+
 export interface RequestDetail {
+    assignees: Assignees[];
     category: Category;
     creator: UserInfo;
     attachments: Attachment[];
     company: Company;
     department: Department;
     id: number;
+    assignee_company_id: number;
     priority: string;
     progress_status: string;
     number: string;
     description: string;
     is_cito: boolean;
-    product: Products
+    product: Products;
 }
 
 export interface Attachment {
