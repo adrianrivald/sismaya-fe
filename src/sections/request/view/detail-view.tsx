@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import {
   Box,
@@ -10,27 +10,33 @@ import {
   TableBody,
   Input,
   Button,
-  TextField,
-  FormHelperText,
-  FormControl,
-  InputLabel,
   Select,
   MenuItem,
-  Popover,
+  capitalize,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useApproveRequest, useRejectRequest, useRequestById } from 'src/services/request';
-import { Form } from 'src/components/form/form';
+import {
+  useAddRequestAssignee,
+  useApproveRequest,
+  useCitoById,
+  useCompleteRequest,
+  useDeleteRequestAssigneeById,
+  useRejectRequest,
+  useRequestById,
+} from 'src/services/request';
 import { useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { StatusBadge } from '../status-badge';
+import { AddAssigneeModal } from '../add-assignee';
+import { ApproveAction } from '../approve-action';
+import { RejectAction } from '../reject-action';
 
 const priorities = [
   {
@@ -55,25 +61,70 @@ export function RequestDetailView() {
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
+  const { data: cito } = useCitoById(String(idCurrentCompany) ?? '');
   const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();
+  const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
+  const { mutate: completeRequest } = useCompleteRequest();
+  const { mutate: addRequestAssignee } = useAddRequestAssignee();
   const [open, setOpen] = useState(false);
   const [openApprove, setOpenApprove] = useState(false);
+  const [openAssigneeModal, setOpenAssigneeModal] = useState(false);
   const chats = [];
   const navigate = useNavigate();
   const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const [selectedPic, setSelectedPic] = React.useState<
-    { id: number; picture: string }[] | undefined
-  >([]);
-  const openAnchor = Boolean(anchorEl);
-  const idAnchor = open ? 'simple-popover' : undefined;
+    { id: number; picture: string; assignee_id?: number }[] | undefined
+  >(
+    requestDetail?.assignees?.map(
+      (item) =>
+        ({
+          assignee_id: item?.assignee_id,
+          picture: item?.assignee?.user_info?.profile_picture,
+          id: item?.id,
+        }) ?? []
+    )
+  );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
+  const [currentPriority, setCurrentPriority] = React.useState(requestDetail?.priority ?? '-');
+  const [currentStatus, setCurrentStatus] = React.useState(
+    requestDetail?.progress_status?.step ?? 'requested'
+  );
 
-  const handleClosePic = () => {
-    setAnchorEl(null);
+  const statusEnum = () => {
+    if (currentStatus === 'on_progress') return 'on_progress';
+    if (currentStatus === 'to_do') return 'to_do';
+    if (currentStatus === 'requested') return 'requested';
+    if (currentStatus === 'completed') return 'completed';
+    return 'requested';
   };
+  const priorityEnum = () => {
+    if (currentPriority === 'low') return 'low';
+    if (currentPriority === 'medium') return 'medium';
+    if (currentPriority === 'high') return 'high';
+    if (currentPriority === 'cito') return 'cito';
+    return 'low';
+  };
+
+  useEffect(() => {
+    setSelectedPic(
+      requestDetail?.assignees?.map(
+        (item) =>
+          ({
+            assignee_id: item?.assignee_id,
+            picture: item?.assignee?.user_info?.profile_picture,
+            id: item?.id,
+          }) ?? []
+      )
+    );
+    if (requestDetail?.priority) {
+      setCurrentPriority(requestDetail?.priority);
+    }
+    if (requestDetail?.progress_status) {
+      setCurrentStatus(requestDetail?.progress_status?.step);
+    }
+  }, [requestDetail]);
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
@@ -92,10 +143,6 @@ export function RequestDetailView() {
     setOpen(false);
   };
 
-  const handleAddPic = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
   const handleAddPicItem = (userId: number, userPicture: string) => {
     setSelectedPic((prev: { id: number; picture: string }[] | undefined) => [
       ...(prev as []),
@@ -107,6 +154,21 @@ export function RequestDetailView() {
     setSelectedPicWarning(false);
   };
 
+  const handleDeletePicItem = (userId: number) => {
+    const newArr = selectedPic?.filter((item) => item?.id !== userId);
+    setSelectedPic(newArr);
+  };
+
+  const handleDeletePicItemFromDetail = (_userId: number, assigneeId?: number) => {
+    if (assigneeId) deleteRequestAssignee(assigneeId);
+  };
+
+  const handleAddPicItemFromDetail = (userId: number) => {
+    addRequestAssignee({
+      assignee_id: userId,
+      request_id: Number(id),
+    });
+  };
   const handleApprove = (formData: any) => {
     const startDate = dayjs(dateValue).format('YYYY-MM-DD');
     const payload = {
@@ -130,16 +192,88 @@ export function RequestDetailView() {
       <Grid container spacing={3} xs={12}>
         <Grid item xs={12} md={8}>
           <Box>
-            <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-              Request {requestDetail?.id} {/* TODO: Change it to number request */}
-            </Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
+                Request {requestDetail?.number}
+              </Typography>
+              {requestDetail?.step === 'rejected' && (
+                <Box>
+                  <StatusBadge type="error" label="Request Rejected" />
+                </Box>
+              )}
+            </Box>
             <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
               <Typography variant="h5">Request</Typography>
               <Typography variant="h5">
                 {(vendor ?? '').toUpperCase()} Request Management
               </Typography>
             </Box>
-            <Box>
+            {requestDetail?.step === 'rejected' && (
+              <Box
+                display="flex"
+                alignItems="center"
+                p={2}
+                my={2}
+                sx={{
+                  width: '100%',
+                  backgroundColor: 'warning.lighter',
+                  borderRadius: 2,
+                  borderColor: 'warning.light',
+                  borderWidth: 1,
+                  borderStyle: 'solid',
+                  color: 'warning.darker',
+                }}
+              >
+                This request has been rejected with reason “{requestDetail?.reject_reason}”.
+              </Box>
+            )}
+            <Box display="flex" alignItems="center" gap={2}>
+              {requestDetail?.priority !== null && (
+                <Box
+                  width="max-content"
+                  py={1}
+                  px={3}
+                  sx={{
+                    border: 1,
+                    borderColor: 'grey.150',
+                    borderRadius: 2,
+                  }}
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                >
+                  Priority
+                  <Select
+                    value={currentPriority}
+                    sx={{
+                      fontWeight: 'bold',
+                      height: 40,
+                      bgcolor: currentPriority ? priorityColorMap[priorityEnum()]?.bgColor : '-',
+                      color: currentPriority ? priorityColorMap[priorityEnum()]?.color : '-',
+                      paddingY: 0.5,
+                      paddingX: 1,
+                      ml: 1,
+                      borderWidth: 0,
+                      borderRadius: 1.5,
+                      width: 'max-content',
+
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: 0,
+                      },
+                      '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                      },
+                    }}
+                    onChange={(e: SelectChangeEvent<string>) => {
+                      setCurrentPriority(e.target.value);
+                    }}
+                  >
+                    {['high', 'medium', 'low']?.map((value) => (
+                      <MenuItem value={value}>{capitalize(`${value}`)}</MenuItem>
+                    ))}
+                  </Select>
+                </Box>
+              )}
               <Box
                 width="max-content"
                 py={1}
@@ -153,7 +287,45 @@ export function RequestDetailView() {
                 alignItems="center"
                 gap={1}
               >
-                Status <StatusBadge type="info" label="Requested" />
+                Status
+                <Select
+                  value={currentStatus}
+                  sx={{
+                    fontWeight: 'bold',
+                    height: 40,
+                    bgcolor: currentStatus ? stepColorMap[statusEnum()].bgColor : '',
+                    color: currentStatus ? stepColorMap[statusEnum()].color : '',
+                    paddingY: 0.5,
+                    paddingX: 1,
+                    ml: 1,
+                    borderWidth: 0,
+                    borderRadius: 1.5,
+                    width: 'max-content',
+
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 0,
+                    },
+                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                  }}
+                  onChange={(e: SelectChangeEvent<string>) => {
+                    if (e.target.value === 'completed') {
+                      const res = completeRequest({
+                        id: Number(id),
+                      });
+                      if (res !== undefined) {
+                        setCurrentStatus(e.target.value);
+                      }
+                    } else {
+                      setCurrentStatus(e.target.value);
+                    }
+                  }}
+                >
+                  {['on_progress', 'completed', 'to_do', 'requested']?.map((value) => (
+                    <MenuItem value={value}>{capitalize(`${value.replace('_', ' ')}`)}</MenuItem>
+                  ))}
+                </Select>
               </Box>
             </Box>
             <Box
@@ -170,6 +342,11 @@ export function RequestDetailView() {
                     REQUEST {requestDetail?.number}
                   </Typography>
                   {requestDetail?.is_cito && <StatusBadge type="danger" label="CITO" />}
+                  {requestDetail?.is_cito && (
+                    <Typography color="grey.500">
+                      Cito Quote: {cito?.used}/{cito?.quota} this month
+                    </Typography>
+                  )}
                 </Box>
                 <Button
                   onClick={onClickEdit}
@@ -183,6 +360,22 @@ export function RequestDetailView() {
                 >
                   Edit Detail
                 </Button>
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{
+                  backgroundColor: 'blue.150',
+                  py: 1.5,
+                  px: 2,
+                  my: 3,
+                  color: 'grey.600',
+                  borderRadius: 2,
+                }}
+              >
+                <Typography>No tasks have been created</Typography>
+                <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
               </Box>
               <TableContainer>
                 <Table sx={{ marginTop: 2 }}>
@@ -217,6 +410,97 @@ export function RequestDetailView() {
                       </TableCell>
                       <TableCell size="small">{requestDetail?.category?.name}</TableCell>
                     </TableRow>
+                    {requestDetail?.step === 'to-do' && (
+                      <TableRow>
+                        <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
+                          PIC
+                        </TableCell>
+                        <TableCell size="small">
+                          <Box display="flex" gap={2} alignItems="center">
+                            <Box display="flex" alignItems="center">
+                              {selectedPic?.map((item) => (
+                                <Box
+                                  width={36}
+                                  height={36}
+                                  sx={{
+                                    marginRight: '-10px',
+                                  }}
+                                >
+                                  <Box
+                                    component="img"
+                                    src={item?.picture}
+                                    sx={{
+                                      cursor: 'pointer',
+                                      borderRadius: 100,
+                                      width: 36,
+                                      height: 36,
+                                      borderColor: 'white',
+                                      borderWidth: 2,
+                                      borderStyle: 'solid',
+                                    }}
+                                  />
+                                </Box>
+                              ))}
+                            </Box>
+                            {userType === 'internal' && (
+                              <ModalDialog
+                                open={openAssigneeModal}
+                                setOpen={setOpenAssigneeModal}
+                                minWidth={600}
+                                title="Assignee"
+                                content={
+                                  (
+                                    <AddAssigneeModal
+                                      clientUsers={clientUsers}
+                                      handleAddPicItem={handleAddPicItemFromDetail}
+                                      selectedPic={selectedPic}
+                                      handleDeletePicItem={handleDeletePicItemFromDetail}
+                                      isDetail
+                                    />
+                                  ) as JSX.Element & string
+                                }
+                              >
+                                <Box
+                                  component="button"
+                                  type="button"
+                                  display="flex"
+                                  justifyContent="center"
+                                  alignItems="center"
+                                  sx={{
+                                    width: 36,
+                                    height: 36,
+                                    cursor: 'pointer',
+                                    paddingX: 1.5,
+                                    paddingY: 1.5,
+                                    border: 1,
+                                    borderStyle: 'dashed',
+                                    borderColor: 'grey.500',
+                                    borderRadius: 100,
+                                  }}
+                                >
+                                  <SvgColor
+                                    color="#637381"
+                                    width={12}
+                                    height={12}
+                                    src="/assets/icons/ic-plus.svg"
+                                  />
+                                </Box>
+                              </ModalDialog>
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {requestDetail?.step === 'to-do' && (
+                      <TableRow>
+                        <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
+                          Start Date
+                        </TableCell>
+                        <TableCell size="small">
+                          {dayjs(requestDetail?.start_date).format('YYYY-MM-DD')}
+                        </TableCell>
+                      </TableRow>
+                    )}
                     <TableRow>
                       <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                         Request Description
@@ -231,357 +515,49 @@ export function RequestDetailView() {
                       </TableCell>
                       <TableCell size="small">
                         <Box width="max-content" display="flex" flexDirection="column" gap={3}>
-                          {requestDetail?.attachments?.map((file) => (
-                            <Box
-                              display="flex"
-                              gap={3}
-                              alignItems="center"
-                              px={2}
-                              py={1}
-                              sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
-                            >
-                              <Box component="img" src="/assets/icons/file.png" />
-                              <Box>
-                                <Typography fontWeight="bold">{file?.file_name}</Typography>
-                              </Box>
-                              <SvgColor src="/assets/icons/ic-download.svg" />
-                            </Box>
-                          ))}
+                          {(requestDetail?.attachments ?? []).length > 0
+                            ? requestDetail?.attachments?.map((file) => (
+                                <Box
+                                  display="flex"
+                                  gap={3}
+                                  alignItems="center"
+                                  px={2}
+                                  py={1}
+                                  sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
+                                >
+                                  <Box component="img" src="/assets/icons/file.png" />
+                                  <Box>
+                                    <Typography fontWeight="bold">{file?.file_name}</Typography>
+                                  </Box>
+                                  <SvgColor src="/assets/icons/ic-download.svg" />
+                                </Box>
+                              ))
+                            : '-'}
                         </Box>
                       </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
-              {userType === 'internal' && (
+              {userType === 'internal' && requestDetail?.step === 'pending' && (
                 <Box mt={4} display="flex" justifyContent="flex-end" gap={2} alignItems="center">
-                  <ModalDialog
-                    open={open}
-                    setOpen={setOpen}
-                    minWidth={600}
-                    title="Reject Request?"
-                    content={
-                      (
-                        <Box mt={2}>
-                          <Typography>Please fill in rejection reason.</Typography>
-                          <Form width="100%" onSubmit={handleSubmit}>
-                            {({ register, control, formState, watch }) => (
-                              <>
-                                <TextField
-                                  autoComplete="off"
-                                  multiline
-                                  sx={{
-                                    marginTop: 2,
-                                    width: '100%',
-                                  }}
-                                  label="Rejection Reason"
-                                  rows={4}
-                                  {...register('reason', {
-                                    required: 'Reason must be filled out',
-                                  })}
-                                />
-                                <Box
-                                  mt={2}
-                                  display="flex"
-                                  justifyContent="flex-end"
-                                  alignItems="center"
-                                  gap={2}
-                                >
-                                  <Button
-                                    onClick={() => setOpen(false)}
-                                    type="button"
-                                    sx={{
-                                      paddingY: 0.5,
-                                      border: 1,
-                                      borderColor: 'primary.main',
-                                      borderRadius: 1.5,
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    type="submit"
-                                    sx={{
-                                      paddingY: 1,
-                                      paddingX: 2.5,
-                                      backgroundColor: 'error.light',
-                                      borderRadius: 1.5,
-                                      color: 'white',
-                                      fontWeight: 'normal',
-                                    }}
-                                  >
-                                    Reject Request
-                                  </Button>
-                                </Box>
-                              </>
-                            )}
-                          </Form>
-                        </Box>
-                      ) as any
-                    }
-                  >
-                    {/* Button Open Modal */}
-                    <Button
-                      type="button"
-                      sx={{
-                        paddingY: 1,
-                        paddingX: 2.5,
-                        backgroundColor: 'error.light',
-                        borderRadius: 1.5,
-                        color: 'white',
-                        fontWeight: 'normal',
-                      }}
-                    >
-                      Reject Request
-                    </Button>
-                  </ModalDialog>
-                  <ModalDialog
-                    open={openApprove}
-                    setOpen={setOpenApprove}
-                    minWidth={600}
-                    title="Approve Request?"
-                    onClose={() => setSelectedPic([])}
-                    content={
-                      (
-                        <Box mt={2}>
-                          <Typography>
-                            Please select the priority category to approve this request.
-                          </Typography>
-                          <Form width="100%" onSubmit={handleApprove} mt={4}>
-                            {({ register, control, formState, watch }) => (
-                              <>
-                                <Box>
-                                  <FormControl fullWidth>
-                                    <InputLabel id="select-priority">Priority*</InputLabel>
-                                    <Select
-                                      labelId="select-priority"
-                                      error={Boolean(formState?.errors?.priority)}
-                                      {...register('priority', {
-                                        required: 'Priority must be filled out',
-                                      })}
-                                      label="Priority*"
-                                      value={watch('priority')}
-                                    >
-                                      {priorities?.map((priority) => (
-                                        <MenuItem value={priority?.id}>{priority?.name}</MenuItem>
-                                      ))}
-                                    </Select>
-                                  </FormControl>
-                                  {formState?.errors?.priority && (
-                                    <FormHelperText sx={{ color: 'error.main' }}>
-                                      {String(formState?.errors?.priority?.message)}
-                                    </FormHelperText>
-                                  )}
-                                </Box>
-                                <Box
-                                  mt={4}
-                                  display="flex"
-                                  alignItems="center"
-                                  justifyContent="space-between"
-                                  gap={2}
-                                >
-                                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                      sx={{
-                                        width: '50%',
-                                      }}
-                                      label="Start Date"
-                                      value={dateValue}
-                                      onChange={handleChangeDate}
-                                      // renderInput={(params: any) => <TextField {...params} />}
-                                    />
-                                  </LocalizationProvider>
-                                  <TextField
-                                    error={Boolean(formState?.errors?.estimated_duration)}
-                                    sx={{
-                                      width: '50%',
-                                    }}
-                                    type="number"
-                                    label="Estimated Duration"
-                                    {...register('estimated_duration', {
-                                      valueAsNumber: true,
-
-                                      // required: 'Estimated Duration must be filled out',
-                                    })}
-                                  />
-                                  {formState?.errors?.estimated_duration && (
-                                    <FormHelperText sx={{ color: 'error.main' }}>
-                                      {String(formState?.errors?.estimated_duration?.message)}
-                                    </FormHelperText>
-                                  )}
-                                </Box>
-                                <Box
-                                  display="flex"
-                                  alignItems="center"
-                                  gap={4}
-                                  mt={4}
-                                  sx={{
-                                    backgroundColor: 'blue.50',
-                                    paddingY: 4,
-                                    paddingX: 2,
-                                    borderRadius: 1.5,
-                                  }}
-                                >
-                                  <Typography color="grey.600">PIC</Typography>
-                                  <Box display="flex" alignItems="center">
-                                    {selectedPic?.map((item) => (
-                                      <Box
-                                        width={36}
-                                        height={36}
-                                        sx={{
-                                          marginRight: '-10px',
-                                        }}
-                                      >
-                                        <Box
-                                          component="img"
-                                          src={item?.picture}
-                                          sx={{
-                                            cursor: 'pointer',
-                                            borderRadius: 100,
-                                            width: 36,
-                                            height: 36,
-                                            borderColor: 'white',
-                                            borderWidth: 2,
-                                            borderStyle: 'solid',
-                                          }}
-                                        />
-                                      </Box>
-                                    ))}
-                                  </Box>
-                                  <Box
-                                    component="button"
-                                    type="button"
-                                    aria-describedby={idAnchor}
-                                    onClick={handleAddPic}
-                                    display="flex"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    sx={{
-                                      width: 36,
-                                      height: 36,
-                                      cursor: 'pointer',
-                                      paddingX: 1.5,
-                                      paddingY: 1.5,
-                                      border: 1,
-                                      borderStyle: 'dashed',
-                                      borderColor: 'grey.500',
-                                      borderRadius: 100,
-                                    }}
-                                  >
-                                    <SvgColor
-                                      color="#637381"
-                                      width={12}
-                                      height={12}
-                                      src="/assets/icons/ic-plus.svg"
-                                    />
-                                  </Box>
-                                  <Popover
-                                    id={idAnchor}
-                                    open={openAnchor}
-                                    anchorEl={anchorEl}
-                                    onClose={handleClosePic}
-                                    anchorOrigin={{
-                                      vertical: 'bottom',
-                                      horizontal: 'left',
-                                    }}
-                                  >
-                                    {clientUsers?.map((clientUser) => (
-                                      <Box
-                                        display="flex"
-                                        gap={2}
-                                        alignItems="center"
-                                        p={2}
-                                        sx={{
-                                          cursor: 'pointer',
-                                          '&:hover': {
-                                            backgroundColor: 'grey.100',
-                                          },
-                                        }}
-                                        onClick={() =>
-                                          handleAddPicItem(
-                                            clientUser?.id,
-                                            clientUser?.user_info?.profile_picture
-                                          )
-                                        }
-                                      >
-                                        <Box
-                                          component="img"
-                                          src={clientUser?.user_info?.profile_picture}
-                                          sx={{
-                                            borderRadius: 100,
-                                            width: 36,
-                                            height: 36,
-                                            borderColor: 'white',
-                                            borderWidth: 2,
-                                            borderStyle: 'solid',
-                                          }}
-                                        />
-
-                                        <Typography>{clientUser?.user_info?.name}</Typography>
-                                      </Box>
-                                    ))}
-                                  </Popover>
-                                </Box>
-                                {selectedPicWarning ? (
-                                  <FormHelperText sx={{ color: 'error.main' }}>
-                                    PIC must be selected, minimum 1 PIC
-                                  </FormHelperText>
-                                ) : null}
-                                <Box
-                                  mt={2}
-                                  display="flex"
-                                  justifyContent="flex-end"
-                                  alignItems="center"
-                                  gap={2}
-                                >
-                                  <Button
-                                    onClick={() => setOpenApprove(false)}
-                                    type="button"
-                                    sx={{
-                                      paddingY: 0.5,
-                                      border: 1,
-                                      borderColor: 'primary.main',
-                                      borderRadius: 1.5,
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    type="submit"
-                                    sx={{
-                                      paddingY: 0.5,
-                                      border: 1,
-                                      borderRadius: 1.5,
-                                      backgroundColor: 'primary.main',
-                                      borderColor: 'primary.main',
-                                      color: 'white',
-                                    }}
-                                  >
-                                    Approve Request
-                                  </Button>
-                                </Box>
-                              </>
-                            )}
-                          </Form>
-                        </Box>
-                      ) as any
-                    }
-                  >
-                    {/* Button Open Modal */}
-                    <Button
-                      type="button"
-                      sx={{
-                        paddingY: 1,
-                        paddingX: 2.5,
-                        backgroundColor: 'primary.main',
-                        borderRadius: 1.5,
-                        color: 'white',
-                        fontWeight: 'normal',
-                      }}
-                    >
-                      Accept Request
-                    </Button>
-                  </ModalDialog>
+                  <RejectAction open={open} setOpen={setOpen} handleSubmit={handleSubmit} />
+                  <ApproveAction
+                    clientUsers={clientUsers}
+                    dateValue={dateValue}
+                    handleAddPicItem={handleAddPicItem}
+                    handleApprove={handleApprove}
+                    handleChangeDate={handleChangeDate}
+                    openApprove={openApprove}
+                    openAssigneeModal={openAssigneeModal}
+                    priorities={priorities}
+                    selectedPic={selectedPic}
+                    selectedPicWarning={selectedPicWarning}
+                    setOpenApprove={setOpenApprove}
+                    setOpenAssigneeModal={setOpenAssigneeModal}
+                    setSelectedPic={setSelectedPic}
+                    handleDeletePicItem={handleDeletePicItem}
+                  />
                 </Box>
               )}
             </Box>
