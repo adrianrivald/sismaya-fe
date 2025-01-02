@@ -1,9 +1,9 @@
-import { Box, Button, Typography, Modal, ModalProps } from '@mui/material';
-import React, { createContext, Dispatch, ReactNode, SetStateAction } from 'react';
+import { Box, Typography, Modal, ModalProps } from '@mui/material';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 // /*React.ReactElement<any, string>;*/
 interface DialogProps {
   children: ReactNode;
-  content: any;
+  content: JSX.Element;
   title: string;
   minWidth: number;
   open: boolean;
@@ -56,7 +56,7 @@ export default function ModalDialog({
           <Typography id="modal-modal-title" variant="h6" component="h2">
             {title}
           </Typography>
-          {content}
+          {content as JSX.Element}
         </Box>
       </Modal>
     </div>
