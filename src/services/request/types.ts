@@ -78,14 +78,38 @@ export interface Request {
     step: string;
 }
 
+export interface Assignees {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    request_id: number;
+    assignee_id: number;
+    creator_id: number;
+    request: null;
+    assignee: Assignee;
+    creator: null;
+}
+
+export interface Assignee {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    email: string;
+    phone: string;
+    user_info: UserInfo;
+    internal_companies: null;
+    deleted_at: null;
+}
+
 export interface RequestDetail {
-    assignees: Assignee[];
+    assignees: Assignees[];
     category: Category;
     creator: UserInfo;
     attachments: Attachment[];
     company: Company;
     department: Department;
     id: number;
+    assignee_company_id: number;
     priority: string;
     progress_status: Status;
     number: string;
@@ -98,28 +122,6 @@ export interface RequestDetail {
     reject_reason: string
 }
 
-interface AssigneeData {
-    created_at: string;
-    deleted_at: string;
-    email: string;
-    id: number;
-    internal_companies: InternalCompany[];
-    phone: string;
-    updated_at: string;
-    user_info: UserInfo;
-}
-
-export interface Assignee {
-    assignee: AssigneeData;
-    assignee_id: number;
-    created_at: string;
-    creator: string;
-    creator_id: number;
-    id: number;
-    request: string;
-    request_id: number;
-    updated_at: string;
-}
 
 export interface Attachment {
     attachable_id: number;
