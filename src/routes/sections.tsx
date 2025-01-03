@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Navigate, useRoutes } from 'react-router-dom';
+import { Outlet, Navigate, useRoutes, type NonIndexRouteObject } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
@@ -7,6 +7,7 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
+
 import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
@@ -15,7 +16,9 @@ export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 
 // Request
 export const RequestListPage = lazy(() => import('src/pages/request/list'));
+export const RequestDetailLayout = lazy(() => import('src/sections/request/view/detail-layout'));
 export const RequestDetailPage = lazy(() => import('src/pages/request/detail'));
+export const RequestTaskPage = lazy(() => import('src/pages/request/task'));
 export const RequestCreatePage = lazy(() => import('src/pages/request/create'));
 export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 
@@ -81,7 +84,7 @@ const renderFallback = (
   </Box>
 );
 
-const superAdminRoutes = {
+const superAdminRoutes: NonIndexRouteObject = {
   children: [
     { element: <DashboardPage />, index: true },
 
@@ -106,13 +109,20 @@ const superAdminRoutes = {
   ],
 };
 
-const clientRoutes = {
+const clientRoutes: NonIndexRouteObject = {
   children: [
     { element: <DashboardPage />, index: true },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
-    { path: '/:vendor/request/:id', element: <RequestDetailPage /> },
+    {
+      path: '/:vendor/request/:id',
+      element: <RequestDetailLayout />,
+      children: [
+        { index: true, element: <RequestDetailPage /> },
+        { path: 'task', element: <RequestTaskPage /> },
+      ],
+    },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
   ],

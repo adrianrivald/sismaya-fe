@@ -41,7 +41,7 @@ interface ApproveActionProps {
   selectedPicWarning: boolean;
   openAssigneeModal: boolean;
   setOpenAssigneeModal: Dispatch<SetStateAction<boolean>>;
-  clientUsers: User[] | undefined;
+  internalUsers: User[] | undefined;
   handleAddPicItem: (userId: number, userPicture: string) => void;
   handleDeletePicItem: (userId: number) => void;
   onSearchUser: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -59,7 +59,7 @@ export function ApproveAction({
   selectedPicWarning,
   openAssigneeModal,
   setOpenAssigneeModal,
-  clientUsers,
+  internalUsers,
   handleAddPicItem,
   handleDeletePicItem,
   onSearchUser,
@@ -184,7 +184,7 @@ export function ApproveAction({
                       content={
                         (
                           <AddAssigneeModal
-                            clientUsers={clientUsers}
+                            internalUsers={internalUsers}
                             handleAddPicItem={handleAddPicItem}
                             selectedPic={selectedPic}
                             handleDeletePicItem={handleDeletePicItem}

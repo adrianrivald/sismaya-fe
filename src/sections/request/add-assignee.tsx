@@ -4,7 +4,7 @@ import { SvgColor } from 'src/components/svg-color';
 import { User } from 'src/services/master-data/user/types';
 
 interface AddAssigneeModalProps {
-  clientUsers: User[] | undefined;
+  internalUsers: User[] | undefined;
   selectedPic?: SelectedPic[] | undefined;
   handleAddPicItem: (userId: number, userPicture: string) => void;
   handleDeletePicItem: (userId: number, assigneeId?: number) => void;
@@ -19,7 +19,7 @@ interface SelectedPic {
 }
 
 export function AddAssigneeModal({
-  clientUsers,
+  internalUsers,
   selectedPic,
   handleAddPicItem,
   handleDeletePicItem,
@@ -42,12 +42,12 @@ export function AddAssigneeModal({
           onChange={onSearchUser}
         />
       </Box>
-      {clientUsers?.map((clientUser) => (
+      {internalUsers?.map((internalUser) => (
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" gap={2} alignItems="center" p={2}>
             <Box
               component="img"
-              src={clientUser?.user_info?.profile_picture}
+              src={internalUser?.user_info?.profile_picture}
               sx={{
                 borderRadius: 100,
                 width: 36,
@@ -58,12 +58,12 @@ export function AddAssigneeModal({
               }}
             />
             <Box>
-              <Typography>{clientUser?.user_info?.name}</Typography>
-              <Typography color="grey.600">{clientUser?.email}</Typography>
+              <Typography>{internalUser?.user_info?.name}</Typography>
+              <Typography color="grey.600">{internalUser?.email}</Typography>
             </Box>
           </Box>
           {selectedPic?.some((el) =>
-            isDetail ? el?.assignee_id === clientUser?.id : el?.id === clientUser?.id
+            isDetail ? el?.assignee_id === internalUser?.id : el?.id === internalUser?.id
           ) ? (
             <Box
               display="flex"
@@ -76,8 +76,8 @@ export function AddAssigneeModal({
               }}
               onClick={() =>
                 handleDeletePicItem(
-                  clientUser?.id,
-                  selectedPic?.find((item) => item?.assignee_id === clientUser?.id)?.id
+                  internalUser?.id,
+                  selectedPic?.find((item) => item?.assignee_id === internalUser?.id)?.id
                 )
               }
             >
@@ -94,7 +94,7 @@ export function AddAssigneeModal({
                 fontWeight: 'bold',
               }}
               onClick={() =>
-                handleAddPicItem(clientUser?.id, clientUser?.user_info?.profile_picture)
+                handleAddPicItem(internalUser?.id, internalUser?.user_info?.profile_picture)
               }
             >
               <SvgColor width={24} height={24} src="/assets/icons/ic-add.svg" />
