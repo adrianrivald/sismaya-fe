@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import ListItem from '@mui/material/ListItem';
@@ -124,7 +124,7 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
 
       <Scrollbar fillContent>
         {menus?.map((menu) => (
-          <>
+          <Fragment key={menu?.id}>
             {menu?.isAccordion ? (
               <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
                 <Box
@@ -297,7 +297,7 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                 {/* ) : null} */}
               </>
             )}
-          </>
+          </Fragment>
         ))}
       </Scrollbar>
 

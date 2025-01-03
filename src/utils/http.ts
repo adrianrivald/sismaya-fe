@@ -17,7 +17,7 @@ interface HttpResponseError {
 
 export class HttpError extends Error {
   public status: number;
-  
+
   public info: unknown;
 
   constructor(status: number, message?: string, info?: unknown) {
@@ -65,7 +65,7 @@ function getBody(data: RequestInitClient['data']) {
 /**
  * HTTP request with several thing already configured
  */
-export function http<TData = unknown>(
+export function http<TData = any>(
   endpoint: string,
   requestInit: RequestInitClient = {}
 ) {
