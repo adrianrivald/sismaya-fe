@@ -1,5 +1,5 @@
-import { Box, InputAdornment, TextField, Typography } from '@mui/material';
-import { ChangeEvent } from 'react';
+import { Box, Button, InputAdornment, TextField, Typography } from '@mui/material';
+import { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import { SvgColor } from 'src/components/svg-color';
 import { User } from 'src/services/master-data/user/types';
 
@@ -10,6 +10,7 @@ interface AddAssigneeModalProps {
   handleDeletePicItem: (userId: number, assigneeId?: number) => void;
   isDetail?: boolean;
   onSearchUser: (e: ChangeEvent<HTMLInputElement>) => void;
+  setOpenAssigneeModal: Dispatch<SetStateAction<boolean>>;
 }
 
 interface SelectedPic {
@@ -25,6 +26,7 @@ export function AddAssigneeModal({
   handleDeletePicItem,
   isDetail = false,
   onSearchUser,
+  setOpenAssigneeModal,
 }: AddAssigneeModalProps) {
   return (
     <>
@@ -103,6 +105,21 @@ export function AddAssigneeModal({
           )}
         </Box>
       ))}
+      <Box mt={3} display="flex" justifyContent="flex-end">
+        <Button
+          onClick={() => setOpenAssigneeModal(false)}
+          type="button"
+          sx={{
+            paddingY: 1,
+            border: 1,
+            borderColor: 'grey.250',
+            borderRadius: 1.5,
+            color: 'grey.800',
+          }}
+        >
+          Close{' '}
+        </Button>
+      </Box>
     </>
   );
 }

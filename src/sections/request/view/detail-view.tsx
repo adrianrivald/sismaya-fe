@@ -306,6 +306,7 @@ export function RequestDetailView() {
                               handleDeletePicItem={handleDeletePicItemFromDetail}
                               isDetail
                               onSearchUser={onSearchUser}
+                              setOpenAssigneeModal={setOpenAssigneeModal}
                             />
                           ) as JSX.Element & string
                         }
