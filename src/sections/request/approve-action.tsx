@@ -189,6 +189,7 @@ export function ApproveAction({
                             selectedPic={selectedPic}
                             handleDeletePicItem={handleDeletePicItem}
                             onSearchUser={onSearchUser}
+                            setOpenAssigneeModal={setOpenAssigneeModal}
                           />
                         ) as JSX.Element & string
                       }
