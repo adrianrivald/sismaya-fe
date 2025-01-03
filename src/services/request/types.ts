@@ -1,3 +1,5 @@
+import { StringValidation } from "zod";
+import { InternalCompany } from "../master-data/company/types";
 import { UserInfo } from "../master-data/user/types";
 
 export interface Company {
@@ -18,6 +20,9 @@ export interface Status {
     step: string;
     sort: number;
     company_id?: number
+    created_at: string;
+    deleted_at: string;
+    updated_at: string
 }
 
 export interface Department {
@@ -67,9 +72,10 @@ export interface Request {
     number: string;
     priority: string;
     product: Products;
-    progress_status: string;
+    progress_status: Statuses;
     is_cito: boolean;
     requester: UserInfo;
+    step: string;
 }
 
 export interface Assignees {
@@ -105,12 +111,17 @@ export interface RequestDetail {
     id: number;
     assignee_company_id: number;
     priority: string;
-    progress_status: string;
+    progress_status: Status;
     number: string;
     description: string;
     is_cito: boolean;
-    product: Products;
+    product: Products
+    requester: UserInfo
+    step: string;
+    start_date: string;
+    reject_reason: string
 }
+
 
 export interface Attachment {
     attachable_id: number;

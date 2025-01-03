@@ -95,7 +95,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
                     // </Th>
                     <TableCell
                       key={header.id}
-                      // align={headCell.align || 'left'}
+                      align={header.id.includes('[center]') ? 'center' : 'left'}
                       // sortDirection={orderBy === headCell.id ? order : false}
                       // sx={{ width: headCell.width, minWidth: headCell.minWidth }}
                     >

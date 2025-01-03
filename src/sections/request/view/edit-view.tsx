@@ -23,8 +23,15 @@ import React, { ChangeEvent, useEffect } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
 import { useUserById } from 'src/services/master-data/user';
-import { useAddRequest, useRequestById, useUpdateRequest } from 'src/services/request';
+import {
+  useAddAttachment,
+  useAddRequest,
+  useDeleteAttachmentById,
+  useRequestById,
+  useUpdateRequest,
+} from 'src/services/request';
 import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
+import { SvgColor } from 'src/components/svg-color';
 
 export function EditRequestView() {
   const { user } = useAuth();
@@ -40,6 +47,8 @@ export function EditRequestView() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [files, setFiles] = React.useState<FileList | any>([]);
   const { mutate: updateRequest } = useUpdateRequest(vendor ?? '');
+  const { mutate: addAttachment } = useAddAttachment();
+  const { mutate: deleteAttachmentById } = useDeleteAttachmentById();
   const defaultValues = {
     creator_id: requestDetail?.creator?.id,
     user_id: user?.id,
@@ -55,14 +64,11 @@ export function EditRequestView() {
     is_cito: requestDetail?.is_cito,
   };
 
-  console.log(defaultValues, 'defaultValuesdefaultValues');
-
   const handleSubmit = (formData: RequestDTO) => {
     // setIsLoading(true);
     const payload = {
       ...formData,
       id: Number(id),
-      files,
     };
     updateRequest(payload);
     console.log(payload, 'test');
@@ -81,6 +87,14 @@ export function EditRequestView() {
     if (e.target.files) {
       setFiles(e.target.files);
     }
+    addAttachment({
+      request_id: Number(id),
+      files: e.target.files,
+    });
+  };
+
+  const onDeleteAttachment = (attachmentId: number) => {
+    deleteAttachmentById(attachmentId);
   };
 
   return (
@@ -104,7 +118,7 @@ export function EditRequestView() {
             },
           }}
         >
-          {({ register, control, formState, watch }) => (
+          {({ register, formState, watch }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <Stack
@@ -125,7 +139,7 @@ export function EditRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Requester Name</Typography>
-                    <Typography>{user?.user_info?.name}</Typography>
+                    <Typography>{requestDetail?.requester?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -137,7 +151,7 @@ export function EditRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Company</Typography>
-                    <Typography>{user?.user_info?.company?.name}</Typography>
+                    <Typography>{requestDetail?.company?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -149,7 +163,7 @@ export function EditRequestView() {
                     gap={0.5}
                   >
                     <Typography color="grey.600">Division</Typography>
-                    <Typography>{user?.user_info?.department?.name}</Typography>
+                    <Typography>{requestDetail?.department?.name}</Typography>
                   </Stack>
 
                   <Stack
@@ -160,8 +174,8 @@ export function EditRequestView() {
                     flexDirection="column"
                     gap={0.5}
                   >
-                    <Typography color="grey.600">Role</Typography>
-                    <Typography>{user?.user_info?.role?.name}</Typography>
+                    <Typography color="grey.600">Job Title</Typography>
+                    <Typography>{requestDetail?.requester?.title ?? '-'}</Typography>
                   </Stack>
                 </Stack>
               </Grid>
@@ -269,24 +283,40 @@ export function EditRequestView() {
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
                   {(requestDetail?.attachments ?? [])?.length > 0 || files?.length > 0 ? (
-                    <Box
-                      display="flex"
-                      flexWrap="wrap"
-                      gap={3}
-                      p={4}
-                      mb={3}
-                      sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
-                    >
+                    <>
                       {requestDetail?.attachments?.map((attachment) => (
-                        <Box display="flex" gap={1} alignItems="center">
-                          <Box component="img" src="/assets/icons/file.png" />
-                          <Box>
-                            <Typography fontWeight="bold">{attachment?.file_name}</Typography>
-                            {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
+                        <Box
+                          display="flex"
+                          flexWrap="wrap"
+                          gap={3}
+                          p={4}
+                          mb={3}
+                          sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
+                        >
+                          <Box
+                            display="flex"
+                            width="100%"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Box display="flex" gap={1} alignItems="center">
+                              <Box component="img" src="/assets/icons/file.png" />
+                              <Box>
+                                <Typography fontWeight="bold">{attachment?.file_name}</Typography>
+                                {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
+                              </Box>
+                            </Box>
+                            <Box
+                              sx={{ cursor: 'pointer' }}
+                              onClick={() => onDeleteAttachment(attachment?.id)}
+                            >
+                              <SvgColor
+                                sx={{ width: 10, height: 10 }}
+                                src="/assets/icons/ic-cross.svg"
+                              />
+                            </Box>
                           </Box>
-                        </Box>
-                      ))}
-                      {Array.from(files)?.map((file: any) => (
+                          {/* {Array.from(files)?.map((file: any) => (
                         <Box display="flex" gap={1} alignItems="center">
                           <Box component="img" src="/assets/icons/file.png" />
                           <Box>
@@ -294,8 +324,10 @@ export function EditRequestView() {
                             {(file.size / (1024 * 1024)).toFixed(2)} Mb
                           </Box>
                         </Box>
+                      ))} */}
+                        </Box>
                       ))}
-                    </Box>
+                    </>
                   ) : null}
                   {/* <InputLabel id="attachment-files">Attachment</InputLabel> */}
                   <input

@@ -1,9 +1,21 @@
+import { useEffect, useState } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
-import { Box, Stack, Grid, Input, Button } from '@mui/material';
-import { useRequestById } from 'src/services/request';
+import {
+  Box,
+  Stack,
+  Grid,
+  Input,
+  Button,
+  SelectChangeEvent,
+  capitalize,
+  MenuItem,
+  Select,
+} from '@mui/material';
+import { useCompleteRequest, useRequestById } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
+import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 
@@ -11,22 +23,120 @@ export default function RequestDetailLayout() {
   const { id, vendor } = useParams();
   const { data: requestDetail } = useRequestById(id ?? '');
   const chats = [];
+  const { mutate: completeRequest } = useCompleteRequest();
+  const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
+  const [currentStatus, setCurrentStatus] = useState(
+    requestDetail?.progress_status?.step ?? 'requested'
+  );
+  const statusEnum = () => {
+    if (currentStatus === 'on_progress') return 'on_progress';
+    if (currentStatus === 'to_do') return 'to_do';
+    if (currentStatus === 'requested') return 'requested';
+    if (currentStatus === 'completed') return 'completed';
+    return 'requested';
+  };
+  const priorityEnum = () => {
+    if (currentPriority === 'low') return 'low';
+    if (currentPriority === 'medium') return 'medium';
+    if (currentPriority === 'high') return 'high';
+    if (currentPriority === 'cito') return 'cito';
+    return 'low';
+  };
+
+  useEffect(() => {
+    if (requestDetail?.priority) {
+      setCurrentPriority(requestDetail?.priority);
+    }
+    if (requestDetail?.progress_status) {
+      setCurrentStatus(requestDetail?.progress_status?.step);
+    }
+  }, [requestDetail]);
 
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3} xs={12}>
         <Grid item xs={12} md={8}>
-          <Box>
+          <Box display="flex" justifyContent="space-between">
             <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-              Request {requestDetail?.id} {/* TODO: Change it to number request */}
+              Request {requestDetail?.number}
             </Typography>
-            <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
-              <Typography variant="h5">Request</Typography>
-              <Typography variant="h5">
-                {(vendor ?? '').toUpperCase()} Request Management
-              </Typography>
+            {requestDetail?.step === 'rejected' && (
+              <Box>
+                <StatusBadge type="error" label="Request Rejected" />
+              </Box>
+            )}
+          </Box>
+          <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
+            <Typography variant="h5">Request</Typography>
+            <Typography variant="h5">{(vendor ?? '').toUpperCase()} Request Management</Typography>
+          </Box>
+          {requestDetail?.step === 'rejected' && (
+            <Box
+              display="flex"
+              alignItems="center"
+              p={2}
+              my={2}
+              sx={{
+                width: '100%',
+                backgroundColor: 'warning.lighter',
+                borderRadius: 2,
+                borderColor: 'warning.light',
+                borderWidth: 1,
+                borderStyle: 'solid',
+                color: 'warning.darker',
+              }}
+            >
+              This request has been rejected with reason “{requestDetail?.reject_reason}”.
             </Box>
-            <Stack spacing={2} direction="row" alignItems="center" justifyContent="space-between">
+          )}
+          <Stack spacing={2} direction="row" alignItems="center" justifyContent="space-between">
+            <Box display="flex" alignItems="center" gap={2}>
+              {requestDetail?.priority !== null && (
+                <Box
+                  width="max-content"
+                  py={1}
+                  px={3}
+                  sx={{
+                    border: 1,
+                    borderColor: 'grey.150',
+                    borderRadius: 2,
+                  }}
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                >
+                  Priority
+                  <Select
+                    value={currentPriority}
+                    sx={{
+                      fontWeight: 'bold',
+                      height: 40,
+                      bgcolor: currentPriority ? priorityColorMap[priorityEnum()]?.bgColor : '-',
+                      color: currentPriority ? priorityColorMap[priorityEnum()]?.color : '-',
+                      paddingY: 0.5,
+                      paddingX: 1,
+                      ml: 1,
+                      borderWidth: 0,
+                      borderRadius: 1.5,
+                      width: 'max-content',
+
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: 0,
+                      },
+                      '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                      },
+                    }}
+                    onChange={(e: SelectChangeEvent<string>) => {
+                      setCurrentPriority(e.target.value);
+                    }}
+                  >
+                    {['high', 'medium', 'low']?.map((value) => (
+                      <MenuItem value={value}>{capitalize(`${value}`)}</MenuItem>
+                    ))}
+                  </Select>
+                </Box>
+              )}
               <Box
                 width="max-content"
                 py={1}
@@ -40,13 +150,53 @@ export default function RequestDetailLayout() {
                 alignItems="center"
                 gap={1}
               >
-                Status <StatusBadge type="info" label="Requested" />
-              </Box>
+                Status
+                <Select
+                  value={currentStatus}
+                  sx={{
+                    fontWeight: 'bold',
+                    height: 40,
+                    bgcolor: currentStatus ? stepColorMap[statusEnum()].bgColor : '',
+                    color: currentStatus ? stepColorMap[statusEnum()].color : '',
+                    paddingY: 0.5,
+                    paddingX: 1,
+                    ml: 1,
+                    borderWidth: 0,
+                    borderRadius: 1.5,
+                    width: 'max-content',
 
-              <RequestTaskForm requestId={Number(id)}>
-                <Button variant="contained">Create Task</Button>
-              </RequestTaskForm>
-            </Stack>
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 0,
+                    },
+                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                  }}
+                  onChange={(e: SelectChangeEvent<string>) => {
+                    if (e.target.value === 'completed') {
+                      const res = completeRequest({
+                        id: Number(id),
+                      });
+                      if (res !== undefined) {
+                        setCurrentStatus(e.target.value);
+                      }
+                    } else {
+                      setCurrentStatus(e.target.value);
+                    }
+                  }}
+                >
+                  {['on_progress', 'completed', 'to_do', 'requested']?.map((value) => (
+                    <MenuItem value={value}>{capitalize(`${value.replace('_', ' ')}`)}</MenuItem>
+                  ))}
+                </Select>
+              </Box>
+            </Box>
+
+            <RequestTaskForm requestId={Number(id)}>
+              <Button variant="contained">Create Task</Button>
+            </RequestTaskForm>
+          </Stack>
+          <Box>
             <Outlet />
           </Box>
         </Grid>
