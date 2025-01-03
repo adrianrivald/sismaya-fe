@@ -16,7 +16,7 @@ import {
   SelectChangeEvent,
   Stack,
 } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import {
   useAddRequestAssignee,
@@ -389,7 +389,9 @@ export function RequestDetailView() {
           }}
         >
           <Typography>No tasks have been created</Typography>
-          <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
+          <Link to="task">
+            <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
+          </Link>
         </Box>
         <TableContainer>
           <Table sx={{ marginTop: 2 }}>
