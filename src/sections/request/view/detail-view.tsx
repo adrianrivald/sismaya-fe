@@ -40,6 +40,7 @@ import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
 import { RejectAction } from '../reject-action';
 import { RequestTaskForm } from '../task/view';
+import { downloadFile } from 'src/utils/download';
 
 const priorities = [
   {
@@ -221,7 +222,9 @@ export function RequestDetailView() {
           borderRadius: 2,
         }}
       >
-        <Typography>No tasks have been created</Typography>
+        <Typography>
+          {requestDetail?.task_count ? 'Tasks have been created' : 'No tasks have been created'}
+        </Typography>
         <Link to="task">
           <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
         </Link>
@@ -380,7 +383,14 @@ export function RequestDetailView() {
                           <Box>
                             <Typography fontWeight="bold">{file?.file_name}</Typography>
                           </Box>
-                          <SvgColor src="/assets/icons/ic-download.svg" />
+                          <SvgColor
+                            sx={{ cursor: 'pointer' }}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              downloadFile(file?.file_path.concat('/', file?.file_name));
+                            }}
+                            src="/assets/icons/ic-download.svg"
+                          />
                         </Box>
                       ))
                     : '-'}
