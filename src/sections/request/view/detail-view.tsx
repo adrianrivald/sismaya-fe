@@ -221,7 +221,9 @@ export function RequestDetailView() {
           borderRadius: 2,
         }}
       >
-        <Typography>No tasks have been created</Typography>
+        <Typography>
+          {requestDetail?.task_count ? 'Tasks have been created' : 'No tasks have been created'}
+        </Typography>
         <Link to="task">
           <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
         </Link>
