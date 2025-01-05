@@ -12,7 +12,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import { useCompleteRequest, useRequestById } from 'src/services/request';
+import { useCompleteRequest, useRequestById, useUpdateRequestPriority } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
@@ -24,6 +24,7 @@ export default function RequestDetailLayout() {
   const { data: requestDetail } = useRequestById(id ?? '');
   const chats = [];
   const { mutate: completeRequest } = useCompleteRequest();
+  const { mutate: updatePriority } = useUpdateRequestPriority();
   const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
   const [currentStatus, setCurrentStatus] = useState(
     requestDetail?.progress_status?.step ?? 'requested'
@@ -129,6 +130,10 @@ export default function RequestDetailLayout() {
                     }}
                     onChange={(e: SelectChangeEvent<string>) => {
                       setCurrentPriority(e.target.value);
+                      const res = updatePriority({
+                        id: Number(id),
+                        priority: e.target.value,
+                      });
                     }}
                   >
                     {['high', 'medium', 'low']?.map((value) => (
@@ -185,8 +190,10 @@ export default function RequestDetailLayout() {
                     }
                   }}
                 >
-                  {['on_progress', 'completed', 'to_do', 'requested']?.map((value) => (
-                    <MenuItem value={value}>{capitalize(`${value.replace('_', ' ')}`)}</MenuItem>
+                  {['on_progress', 'done', 'to_do', 'requested']?.map((value) => (
+                    <MenuItem value={value}>
+                      {capitalize(`${value === 'done' ? 'completed' : value.replace('_', ' ')}`)}
+                    </MenuItem>
                   ))}
                 </Select>
               </Box>

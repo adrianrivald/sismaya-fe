@@ -120,6 +120,7 @@ export interface RequestDetail {
     step: string;
     start_date: string;
     reject_reason: string
+    task_count: number;
 }
 
 

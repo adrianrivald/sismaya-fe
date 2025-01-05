@@ -36,7 +36,7 @@ import { SvgColor } from 'src/components/svg-color';
 export function EditRequestView() {
   const { user } = useAuth();
   const { data } = useUserById(user?.id);
-  const location = useLocation();
+  const navigate = useNavigate();
   const { vendor, id } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
@@ -62,6 +62,10 @@ export function EditRequestView() {
     description: requestDetail?.description,
     product_id: requestDetail?.product?.id,
     is_cito: requestDetail?.is_cito,
+  };
+
+  const onBackToDetail = () => {
+    navigate(`/${vendor}/request/${id}`);
   };
 
   const handleSubmit = (formData: RequestDTO) => {
@@ -243,7 +247,13 @@ export function EditRequestView() {
                   >
                     <Typography fontWeight="bold">CITO Status</Typography>
                     <FormControlLabel
-                      control={<Checkbox {...register('is_cito')} value={watch('is_cito')} />}
+                      control={
+                        <Checkbox
+                          {...register('is_cito')}
+                          defaultChecked={watch('is_cito')}
+                          value={watch('is_cito')}
+                        />
+                      }
                       label="Request CITO"
                     />
                   </Box>
@@ -371,6 +381,7 @@ export function EditRequestView() {
                 gap={3}
               >
                 <Button
+                  onClick={onBackToDetail}
                   sx={{
                     border: 1,
                     borderColor: 'primary',
