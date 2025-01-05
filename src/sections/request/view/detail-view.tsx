@@ -29,18 +29,14 @@ import {
 } from 'src/services/request';
 import { useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
-
-import { DashboardContent } from 'src/layouts/dashboard';
+import { downloadFile } from 'src/utils/download';
 import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
-import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 import { StatusBadge } from '../status-badge';
 import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
 import { RejectAction } from '../reject-action';
-import { RequestTaskForm } from '../task/view';
-import { downloadFile } from 'src/utils/download';
 
 const priorities = [
   {
