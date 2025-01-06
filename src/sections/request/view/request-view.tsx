@@ -61,7 +61,11 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Status',
     cell: (info) => {
       const value = info.getValue()?.progress_status?.name;
-      return <Typography>{value ? capitalize(`${value}`) : 'Requested'}</Typography>;
+      return (
+        <Typography>
+          {info.getValue()?.progress_status !== null ? capitalize(`${value}`) : 'Requested'}
+        </Typography>
+      );
     },
   }),
 
