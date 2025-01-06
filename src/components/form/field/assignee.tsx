@@ -6,21 +6,36 @@ import {
   TextField,
   Autocomplete,
   CircularProgress,
+  AvatarGroup,
   Avatar,
 } from '@mui/material';
 import { useController, type FieldValues, type UseControllerProps } from 'react-hook-form';
 import { useRequestAssignees } from 'src/services/request/use-request-detail';
 
-interface Assignees {
+interface Assignee {
   id: number;
   name: string;
   avatar: string;
 }
 
+export function AssigneeList({ assignees }: { assignees: Array<Assignee> }) {
+  if (!assignees || assignees.length < 1) {
+    return null;
+  }
+
+  return (
+    <AvatarGroup total={assignees.length}>
+      {assignees.map((assignee) => (
+        <Avatar key={assignee.id} title={assignee.name} alt={assignee.name} src={assignee.avatar} />
+      ))}
+    </AvatarGroup>
+  );
+}
+
 export interface AssigneeFieldProps<TFormFields extends FieldValues = FieldValues>
   extends UseControllerProps<TFormFields> {
   requestId: string | number;
-  defaultAssignees?: Array<Assignees>;
+  defaultAssignees?: Array<Assignee>;
 }
 
 export function AssigneeField({
@@ -30,7 +45,7 @@ export function AssigneeField({
 }: AssigneeFieldProps) {
   const { field, fieldState } = useController(controllerProps);
   const { data = [], isLoading } = useRequestAssignees(requestId.toString());
-  const assignees = data as unknown as Array<Assignees>;
+  const assignees = data as unknown as Array<Assignee>;
 
   return (
     <FormControl>

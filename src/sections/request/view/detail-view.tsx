@@ -76,14 +76,11 @@ export function RequestDetailView() {
   const [selectedPic, setSelectedPic] = React.useState<
     { id: number; picture: string; assignee_id?: number }[] | undefined
   >(
-    requestDetail?.assignees?.map(
-      (item) =>
-        ({
-          assignee_id: item?.assignee_id,
-          picture: item?.assignee?.user_info?.profile_picture,
-          id: item?.id,
-        }) ?? []
-    )
+    requestDetail?.assignees?.map((item) => ({
+      assignee_id: item?.assignee_id,
+      picture: item?.assignee?.user_info?.profile_picture,
+      id: item?.id,
+    })) ?? []
   );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
 
@@ -95,14 +92,11 @@ export function RequestDetailView() {
 
   useEffect(() => {
     setSelectedPic(
-      requestDetail?.assignees?.map(
-        (item) =>
-          ({
-            assignee_id: item?.assignee_id,
-            picture: item?.assignee?.user_info?.profile_picture,
-            id: item?.id,
-          }) ?? []
-      )
+      requestDetail?.assignees?.map((item) => ({
+        assignee_id: item?.assignee_id,
+        picture: item?.assignee?.user_info?.profile_picture,
+        id: item?.id,
+      })) ?? []
     );
   }, [requestDetail]);
 

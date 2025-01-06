@@ -18,8 +18,7 @@ import {
   useDeleteTask,
   useMutationAttachment,
 } from 'src/services/request/task';
-import { getFieldProps } from 'src/utils/form';
-import dayjs from 'dayjs';
+import * as formUtils from 'src/utils/form';
 
 interface RequestTaskFormProps {
   children: React.ReactElement;
@@ -29,7 +28,10 @@ interface RequestTaskFormProps {
 
 interface TaskFormProps extends Omit<RequestTaskFormProps, 'children'> {}
 
-const defaultFormValues = Task.fromJson({});
+const defaultFormValues = Task.fromJson({
+  status: 'to-do',
+  dueDate: new Date(),
+});
 
 function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
   const { onClose } = Drawer.useDisclosure();
@@ -82,7 +84,7 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
         <Divider />
 
         <Stack p={2} spacing={3} flexGrow={1}>
-          <TextField label="Task Name" {...getFieldProps(form, 'title')} />
+          <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
 
           <AssigneeField
             name="assignees"
@@ -95,16 +97,14 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
           <DatePicker
             disablePast
             label="Due date"
-            onChange={(value) => form.setValue('dueDate', value?.toISOString() ?? '')}
-            value={task?.dueDate ? dayjs(task.dueDate) : null}
+            {...formUtils.getDatePickerProps(form, 'dueDate')}
           />
 
           <TextField
             label="Status"
-            select
-            disabled={task?.taskId === undefined || task?.taskId === 0}
             defaultValue={task?.status}
-            {...getFieldProps(form, 'status')}
+            disabled={task?.taskId === undefined || task?.taskId === 0}
+            {...formUtils.getSelectProps(form, 'status')}
           >
             {Object.entries(Task.statusMap).map(([key, value]) => (
               <MenuItem key={key} value={key} children={value.label} />
@@ -115,13 +115,11 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
             label="Description"
             multiline
             rows={3}
-            {...getFieldProps(form, 'description')}
+            {...formUtils.getTextProps(form, 'description')}
           />
 
           <MultipleDropzoneField
             label="Attachment"
-            name="files"
-            control={form.control}
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
               if (!task?.taskId) return;
@@ -129,9 +127,9 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
             }}
             onRemove={(fileId) => {
               if (!task?.taskId) return;
-              if (!fileId) return; // TODO: remove all files
-              uploadOrDeleteFile({ kind: 'delete', fileId });
+              uploadOrDeleteFile({ kind: 'delete', fileId: fileId ?? 'all' });
             }}
+            {...formUtils.getMultipleDropzoneProps(form, 'files')}
           />
         </Stack>
 

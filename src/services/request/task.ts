@@ -218,7 +218,7 @@ export function useDeleteTask(requestId: Task['requestId']) {
 type UseMutationAttachmentPayload =
   | {
       kind: 'delete';
-      fileId: number;
+      fileId: number | 'all';
     }
   | {
       kind: 'create';

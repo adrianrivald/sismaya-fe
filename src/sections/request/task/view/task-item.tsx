@@ -1,5 +1,6 @@
-import { Box, Stack, AvatarGroup, Avatar, Divider, Typography } from '@mui/material';
+import { Box, Stack, Divider, Typography } from '@mui/material';
 import { type Task } from 'src/services/request/task';
+import { AssigneeList } from 'src/components/form/field/assignee';
 import { TaskAttachment } from './task-attachment';
 
 function TaskStatus({ bg, color, label }: ReturnType<Task['transformStatus']>) {
@@ -17,13 +18,7 @@ function TaskAssignees({ assignees }: Pick<Task, 'assignees'>) {
     return null;
   }
 
-  return (
-    <AvatarGroup total={assignees.length}>
-      {assignees.map((assignee) => (
-        <Avatar key={assignee.id} title={assignee.name} alt={assignee.name} src={assignee.avatar} />
-      ))}
-    </AvatarGroup>
-  );
+  return <AssigneeList assignees={assignees} />;
 }
 
 interface TaskItemProps {
@@ -57,7 +52,7 @@ export function TaskItem({ task, onClick }: TaskItemProps) {
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Stack direction="row" alignItems="center" flexGrow={1} spacing={1}>
-          <TaskAssignees assignees={task.assignees} />
+          {!!task.assignees && <TaskAssignees assignees={task.assignees} />}
 
           <Divider orientation="vertical" flexItem />
 
