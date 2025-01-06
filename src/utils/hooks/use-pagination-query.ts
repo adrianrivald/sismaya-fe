@@ -18,6 +18,8 @@ export function usePaginationQuery<TData>(
   const [{ pageIndex, pageSize }, setPagination] =
     useSetState<PaginationState>(initialPagination);
 
+    console.log(pageIndex,'pageIndex')
+
   const query = useQuery({
     queryKey: [...queryKey, pageSize, pageIndex],
     queryFn: () => queryFn({ pageIndex, pageSize }),
@@ -27,24 +29,24 @@ export function usePaginationQuery<TData>(
   const queryData = {
     items: query.data?.data ?? [],
     meta: {
-      total: query.data?.meta?.total ?? 0,
-      page: query.data?.meta?.current_page ?? 1,
-      pageCount: query.data?.meta?.last_page ?? 1,
-      pageLinks: query?.data?.meta?.links ?? []
+      total: query.data?.meta?.total_data ?? 0,
+      page: query.data?.meta?.page ?? 1,
+      // pageCount: query.data?.meta?.last_page ?? 1,
+      // pageLinks: query?.data?.meta?.links ?? []
     },
   };
 
-  function prevPageHandler() {
-    setPagination({ pageIndex: Math.max(0, pageIndex - 1) });
-  }
+  // function prevPageHandler() {
+  //   setPagination({ pageIndex: Math.max(0, pageIndex - 1) });
+  // }
 
-  function nextPageHandler() {
-    const hasMore = queryData.meta.page < queryData.meta.pageCount;
+  // function nextPageHandler() {
+  //   const hasMore = queryData.meta.page < queryData.meta.pageCount;
 
-    if (!query.isPreviousData && hasMore) {
-      setPagination({ pageIndex: pageIndex + 1 });
-    }
-  }
+  //   if (!query.isPreviousData && hasMore) {
+  //     setPagination({ pageIndex: pageIndex + 1 });
+  //   }
+  // }
 
   function jumpToPageHandler(gotoPage: number) {
     setPagination({ pageIndex: gotoPage });
@@ -58,8 +60,8 @@ export function usePaginationQuery<TData>(
     return {
       data: queryData.items,
       total: queryData.meta.total,
-      pageCount: queryData.meta.pageCount,
-      pageLinks: queryData?.meta?.pageLinks,
+      // pageCount: queryData.meta.pageCount,
+      // pageLinks: queryData?.meta?.pageLinks,
       pagination: { pageIndex, pageSize },
       onPaginationChange: setPagination,
     };
@@ -69,8 +71,8 @@ export function usePaginationQuery<TData>(
     ...query,
     data: queryData,
     isEmpty: queryData.items.length < 1,
-    prevPageHandler,
-    nextPageHandler,
+    // prevPageHandler,
+    // nextPageHandler,
     jumpToPageHandler,
     changePageSizeHandler,
     getDataTableProps,

@@ -58,17 +58,17 @@ export function filterParamsBuilder(options: FilterBuilderOptions) {
 export function dataTableParamsBuilder(options: DataTableBuilderOptions) {
   const { searchParams, pageIndex, pageSize, keyword, filterValues , searchKey = 'q', autoPagination = false} = options;
 
-  if (autoPagination === false) {
-    searchParams.append('type', 'pagination');
-  }
+  // if (autoPagination === false) {
+  //   searchParams.append('type', 'pagination');
+  // }
 
   if (pageIndex) {
     searchParams.append('page', String(pageIndex + 1));
   }
 
-  if (pageSize) {
-    searchParams.append('limit', String(pageSize));
-  }
+  // if (pageSize) {
+  //   searchParams.append('limit', String(pageSize));
+  // }
 
   if (keyword) {
     searchParams.append(searchKey, keyword);

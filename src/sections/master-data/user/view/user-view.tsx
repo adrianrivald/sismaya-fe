@@ -1,39 +1,103 @@
+import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box, Button } from '@mui/material';
+import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
 
-import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
-import { Table } from '../sample/table/table';
-import { _userComp } from '../sample/data';
-
-export type ProjectProps = {
-  id: string;
-  requestId: string;
-  requester: string;
-  category: string;
-  deadline: string;
-  status: string;
-  priority: string;
-};
+import { DataTable } from 'src/components/table/data-tables';
+import { CellContext, createColumnHelper } from '@tanstack/react-table';
+import { Iconify } from 'src/components/iconify';
+import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
+import { User } from 'src/services/master-data/user/types';
 
 // ----------------------------------------------------------------------
 
-const columns = [
-  { id: 'name', label: 'Name' },
-  { id: 'company', label: 'Company' },
-  { id: 'division', label: 'Division' },
-  { id: 'email', label: 'Email' },
-  { id: 'phone', label: 'Phone' },
-  { id: 'role', label: 'Role' },
-  { id: '', label: 'Action' },
+interface PopoverProps {
+  handleEdit: (id: number) => void;
+  handleDelete: (id: number) => void;
+}
+
+const columnHelper = createColumnHelper<User>();
+
+const columns = (popoverProps: PopoverProps) => [
+  columnHelper.accessor('user_info.name', {
+    header: 'Name',
+  }),
+
+  columnHelper.accessor('email', {
+    header: 'Email',
+  }),
+
+  columnHelper.accessor('phone', {
+    header: 'Phone Number',
+  }),
+
+  columnHelper.display({
+    id: 'actions',
+    cell: (info) => ButtonActions(info, popoverProps),
+  }),
 ];
 
-export function UserView() {
+function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverProps) {
+  const { row } = props;
+  const companyId = row.original.id;
+  const { handleEdit, handleDelete } = popoverProps;
+  return (
+    <MenuList
+      disablePadding
+      sx={{
+        p: 0.5,
+        gap: 0.5,
+        display: 'flex',
+        flexDirection: 'row',
+        [`& .${menuItemClasses.root}`]: {
+          px: 1,
+          gap: 2,
+          borderRadius: 0.75,
+          [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+        },
+      }}
+    >
+      <MenuItem onClick={() => handleEdit(companyId)}>
+        <Iconify icon="solar:pen-bold" />
+        Edit
+      </MenuItem>
+
+      <MenuItem onClick={() => handleDelete(companyId)} sx={{ color: 'error.main' }}>
+        <Iconify icon="solar:trash-bin-trash-bold" />
+        Delete
+      </MenuItem>
+    </MenuList>
+  );
+}
+
+interface UserViewProps {
+  type: 'internal' | 'client';
+}
+
+export function UserView({ type }: UserViewProps) {
+  const { isEmpty, getDataTableProps } = useUserList({ type });
+  // const clientData = data?.items?.filter((item) => item?.user_info?.company_id !== null);
+  // const internalData = data?.items?.filter((item) => item?.user_info?.company_id === null);
+  const { mutate: deleteUserById } = useDeleteUserById();
+
+  console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/user/create');
+    navigate('create');
+  };
+
+  const popoverFuncs = () => {
+    const handleEdit = (id: number) => {
+      navigate(`${id}/edit`);
+    };
+
+    const handleDelete = (id: number) => {
+      deleteUserById(id);
+    };
+
+    return { handleEdit, handleDelete };
   };
 
   return (
@@ -41,7 +105,7 @@ export function UserView() {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            User
+            {type === 'client' ? 'Client' : 'Internal'} User
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Master Data</Typography>
@@ -58,7 +122,7 @@ export function UserView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <Table columns={columns} data={_userComp} />
+          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
         </Grid>
       </Grid>
     </DashboardContent>

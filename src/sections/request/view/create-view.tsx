@@ -1,5 +1,6 @@
 import Typography from '@mui/material/Typography';
 import {
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -17,34 +18,101 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, ChangeEventHandler } from 'react';
+import { useAuth } from 'src/sections/auth/providers/auth';
+import { RequestDTO } from 'src/services/request/schemas/request-schema';
+import { useUserById, useUsers } from 'src/services/master-data/user';
+import { useAddRequest } from 'src/services/request';
+import {
+  useCategoryByCompanyId,
+  useClientCompanies,
+  useProductByCompanyId,
+} from 'src/services/master-data/company';
+import { Department } from 'src/services/master-data/company/types';
+import { API_URL } from 'src/constants';
+import { getSession } from 'src/sections/auth/session/session';
+import { useRole } from 'src/services/master-data/role';
+import { User } from 'src/services/master-data/user/types';
 
 export function CreateRequestView() {
-  const [files, setFiles] = React.useState<File[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = (formData: any) => {
-    setIsLoading(true);
-    const payload = {
-      ...formData,
-      files,
-    };
+  const { user } = useAuth();
+  const { data } = useUserById(user?.id);
+  const location = useLocation();
+  const { vendor } = useParams();
+  const idCurrentCompany = user?.internal_companies?.find(
+    (item) => item?.company?.name?.toLowerCase() === vendor
+  )?.company?.id;
+  const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
+  const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
+  const [files, setFiles] = React.useState<FileList | any>([]);
+  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const { data: companies } = useClientCompanies();
+  const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
+  const { mutate: addRequest } = useAddRequest();
+
+  const [selectedCompany, setSelectedCompany] = React.useState('');
+  const [selectedDepartment, setSelectedDepartment] = React.useState('');
+
+  const handleSubmit = (formData: RequestDTO) => {
+    let payload = {};
+    if (user?.user_info?.user_type === 'client') {
+      payload = {
+        ...formData,
+        creator_id: user?.id,
+        user_id: user?.id,
+        company_id: user?.user_info?.company?.id,
+        department_id: user?.user_info?.department?.id,
+        assignee_company_id: idCurrentCompany,
+        files,
+      };
+    } else {
+      payload = {
+        ...formData,
+        creator_id: user?.id,
+        assignee_company_id: idCurrentCompany,
+        files,
+      };
+    }
+    addRequest(payload);
     console.log(payload, 'test');
-    setTimeout(() => {
-      navigate('/request/test');
-      setIsLoading(false);
-    }, 1000);
-    // await createRequest(payload) //Todo: soon
+  };
+
+  const fetchDivision = async (companyId: number) => {
+    const departmentData = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        console.log(value?.data, 'value?.data');
+        setDivisions(value?.data);
+      })
+    );
+    return departmentData;
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Convert FileList to an array and update state
+    console.log(e.target.files, 'e.target.files');
     const selectedFiles = Array.from(e.target.files as ArrayLike<File>);
     const mergedFiles = [...files, ...selectedFiles];
-    setFiles(mergedFiles);
+    if (e.target.files) {
+      setFiles(e.target.files);
+    }
   };
+
+  const requesterList =
+    clientUsers &&
+    clientUsers?.map((clientUser) => ({
+      label: clientUser?.user_info?.name,
+      id: clientUser?.id,
+      company_id: clientUser?.user_info?.company_id,
+      company_name: clientUser?.user_info?.company?.name,
+      department_id: clientUser?.user_info?.department_id,
+      department_name: clientUser?.user_info?.department?.name,
+    }));
 
   return (
     <DashboardContent maxWidth="xl">
@@ -54,118 +122,180 @@ export function CreateRequestView() {
       <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
         <Typography>Request</Typography>
         <Typography color="grey.500">•</Typography>
-        <Typography color="grey.500">KMI Request Management</Typography>
+        <Typography color="grey.500">{vendor?.toUpperCase()} Request Management</Typography>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, control, formState }) => (
+          {({ register, formState, watch, setValue }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
-                <Stack
-                  justifyContent="space-between"
-                  gap={3}
-                  alignItems="center"
-                  direction={{ xs: 'column', md: 'row' }}
-                >
-                  <Box
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
+                {user?.user_info?.user_type === 'client' ? (
+                  <Stack
+                    justifyContent="space-between"
+                    gap={3}
+                    alignItems="center"
+                    direction={{ xs: 'column', md: 'row' }}
+                    bgcolor="blue.50"
+                    p={2}
+                    borderRadius={2}
                   >
-                    <TextField
-                      error={Boolean(formState?.errors?.name)}
+                    <Stack
                       sx={{
-                        width: '100%',
+                        width: { xs: '100%', md: '25%' },
                       }}
-                      label="Request Name"
-                      {...register('name', {
-                        required: 'Request Name must be filled out',
-                      })}
-                      autoComplete="off"
-                    />
-                    {formState?.errors?.name && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.name?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                  <Box
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Requester Name</Typography>
+                      <Typography>{user?.user_info?.name}</Typography>
+                    </Stack>
+
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Company</Typography>
+                      <Typography>{user?.user_info?.company?.name}</Typography>
+                    </Stack>
+
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Division</Typography>
+                      <Typography>{user?.user_info?.department?.name}</Typography>
+                    </Stack>
+
+                    <Stack
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <Typography color="grey.600">Role</Typography>
+                      <Typography>{user?.user_info?.role?.name}</Typography>
+                    </Stack>
+                  </Stack>
+                ) : (
+                  <Stack
+                    justifyContent="space-between"
+                    gap={3}
+                    alignItems="center"
+                    direction={{ xs: 'column', md: 'row' }}
                   >
-                    <FormControl fullWidth>
-                      <InputLabel id="select-source">Source</InputLabel>
-                      <Select
-                        labelId="select-source"
-                        error={Boolean(formState?.errors?.source)}
-                        {...register('source', {
-                          required: 'Source must be filled out',
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <Autocomplete
+                        disablePortal
+                        id="combo-box-requester"
+                        options={requesterList ?? []}
+                        sx={{
+                          width: '100%',
+                        }}
+                        onChange={(_event: any, newValue: any) => {
+                          console.log(newValue, 'newValue');
+                          setValue('user_id', newValue?.id);
+                          setValue('company_id', newValue?.company_id);
+                          setValue('department_id', newValue?.department_id);
+                          setSelectedCompany(newValue?.company_name);
+                          setSelectedDepartment(newValue?.department_name);
+                        }}
+                        value={watch('user_id')}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            error={Boolean(formState?.errors?.user_id)}
+                            label="Requester"
+                          />
+                        )}
+                      />
+                      {formState?.errors?.user_id && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.user_id?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.company_id)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Company"
+                        autoComplete="off"
+                        value={watch('user_id') !== undefined ? selectedCompany : ''}
+                        disabled
+                      />
+                      {formState?.errors?.company_id && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.company_id?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.department_id)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Division"
+                        autoComplete="off"
+                        value={watch('user_id') !== undefined ? selectedDepartment : ''}
+                        disabled
+                      />
+                      {formState?.errors?.department_id && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.department_id?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        width: { xs: '100%', md: '25%' },
+                      }}
+                    >
+                      <TextField
+                        error={Boolean(formState?.errors?.title)}
+                        sx={{
+                          width: '100%',
+                        }}
+                        label="Title"
+                        {...register('title', {
+                          required: 'Title must be filled out',
                         })}
-                        label="Source"
-                      >
-                        <MenuItem value="source1">PHTA</MenuItem>
-                        <MenuItem value="source2">Source 2</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.source && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.source?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                  <Box
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
-                  >
-                    <FormControl fullWidth>
-                      <InputLabel id="select-division">Division</InputLabel>
-                      <Select
-                        labelId="select-division"
-                        error={Boolean(formState?.errors?.division)}
-                        {...register('division', {
-                          required: 'Division must be filled out',
-                        })}
-                        label="Divison"
-                      >
-                        <MenuItem value="division1">Pengadaan</MenuItem>
-                        <MenuItem value="division2">Division 2</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.division && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.division?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                  <Box
-                    sx={{
-                      width: { xs: '100%', md: '25%' },
-                    }}
-                  >
-                    <FormControl fullWidth>
-                      <InputLabel id="select-role">Role</InputLabel>
-                      <Select
-                        labelId="select-role"
-                        error={Boolean(formState?.errors?.role)}
-                        {...register('role', {
-                          required: 'Role must be filled out',
-                        })}
-                        label="Role"
-                      >
-                        <MenuItem value="role1">Asset Manager</MenuItem>
-                        <MenuItem value="role2">Admin</MenuItem>
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.role && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.role?.message)}
-                      </FormHelperText>
-                    )}
-                  </Box>
-                </Stack>
+                        autoComplete="off"
+                      />
+                      {formState?.errors?.title && (
+                        <FormHelperText sx={{ color: 'error.main' }}>
+                          {String(formState?.errors?.title?.message)}
+                        </FormHelperText>
+                      )}
+                    </Box>
+                  </Stack>
+                )}
               </Grid>
 
               <Grid item xs={12} md={12}>
@@ -176,22 +306,49 @@ export function CreateRequestView() {
                     }}
                   >
                     <FormControl fullWidth>
+                      <InputLabel id="select-category">Product</InputLabel>
+                      <Select
+                        labelId="select-category"
+                        error={Boolean(formState?.errors?.product_id)}
+                        {...register('product_id', {
+                          required: 'Product must be filled out',
+                        })}
+                        label="Product"
+                      >
+                        {products?.map((product) => (
+                          <MenuItem value={product?.id}>{product?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.product_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.product_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: { xs: '100%', md: '25%' },
+                    }}
+                  >
+                    <FormControl fullWidth>
                       <InputLabel id="select-category">Category</InputLabel>
                       <Select
                         labelId="select-category"
-                        error={Boolean(formState?.errors?.category)}
-                        {...register('category', {
+                        error={Boolean(formState?.errors?.category_id)}
+                        {...register('category_id', {
                           required: 'Category must be filled out',
                         })}
                         label="Category"
                       >
-                        <MenuItem value="category1">Kalibrasi</MenuItem>
-                        <MenuItem value="category2">Category 2</MenuItem>
+                        {categories?.map((category) => (
+                          <MenuItem value={category?.id}>{category?.name}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
-                    {formState?.errors?.category && (
+                    {formState?.errors?.category_id && (
                       <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.category?.message)}
+                        {String(formState?.errors?.category_id?.message)}
                       </FormHelperText>
                     )}
                   </Box>
@@ -201,7 +358,10 @@ export function CreateRequestView() {
                     }}
                   >
                     <Typography fontWeight="bold">CITO Status</Typography>
-                    <FormControlLabel control={<Checkbox />} label="Request CITO" />
+                    <FormControlLabel
+                      control={<Checkbox {...register('is_cito')} />}
+                      label="Request CITO"
+                    />
                   </Box>
                   <Box
                     sx={{
@@ -246,7 +406,7 @@ export function CreateRequestView() {
                       mb={3}
                       sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
                     >
-                      {files?.map((file) => (
+                      {Array.from(files)?.map((file: any) => (
                         <Box display="flex" gap={1} alignItems="center">
                           <Box component="img" src="/assets/icons/file.png" />
                           <Box>
@@ -308,7 +468,6 @@ export function CreateRequestView() {
                 </Button>
                 <LoadingButton
                   size="small"
-                  loading={isLoading}
                   loadingIndicator="Submitting..."
                   type="submit"
                   variant="contained"

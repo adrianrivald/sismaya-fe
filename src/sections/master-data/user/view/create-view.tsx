@@ -2,6 +2,7 @@ import Typography from '@mui/material/Typography';
 import {
   Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -9,28 +10,103 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   TextField,
+  Theme,
+  useTheme,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Iconify } from 'src/components/iconify';
+import { useAddUser } from 'src/services/master-data/user';
+import { useRole } from 'src/services/master-data/role';
+import { FieldDropzone } from 'src/components/form';
+import {
+  fetchDivisionByCompanyId,
+  useClientCompanies,
+  useCompanies,
+  useDivisionByCompanyId,
+  useInternalCompanies,
+} from 'src/services/master-data/company';
+import { API_URL } from 'src/constants';
+import { getSession } from 'src/sections/auth/session/session';
+import { Department } from 'src/services/master-data/company/types';
+import {
+  UserInternalDTO,
+  UserClientDTO,
+  userClientSchema,
+  userInternalSchema,
+} from 'src/services/master-data/user/schemas/user-schema';
 
-export function CreateUserView() {
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
+  console.log(selectedInternalCompanies, 'selectedComp');
+  return {
+    fontWeight:
+      selectedInternalCompanies.indexOf(id) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
+interface CreateUserProps {
+  type: 'client' | 'internal';
+}
+
+export function CreateUserView({ type }: CreateUserProps) {
+  const theme = useTheme();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = (formData: any) => {
+  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const { mutate: addUser } = useAddUser();
+  const { data: roles } = useRole();
+  const { data: companies } = useClientCompanies();
+  const { data: internalCompanies } = useInternalCompanies();
+
+  const defaultValues = {
+    internal_id: [],
+  };
+
+  const fetchDivision = async (companyId: number) => {
+    const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        console.log(value?.data, 'value?.data');
+        setDivisions(value?.data);
+      })
+    );
+    return data;
+  };
+
+  const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
     setIsLoading(true);
-    setTimeout(() => {
+    // const { internal_id, ...restForm } = formData;
+    try {
+      addUser({
+        ...formData,
+        user_type: type,
+      });
       setIsLoading(false);
-      navigate('/user/test/edit');
-    }, 1000);
-    console.log(formData, 'test');
+    } catch (error) {
+      setIsLoading(false);
+    }
   };
   return (
     <DashboardContent maxWidth="xl">
@@ -44,9 +120,28 @@ export function CreateUserView() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, control, formState }) => (
+        <Form
+          width="100%"
+          onSubmit={handleSubmit}
+          schema={type === 'client' ? userClientSchema : userInternalSchema}
+          options={{
+            defaultValues: {
+              ...defaultValues,
+            },
+          }}
+        >
+          {({ register, control, watch, formState }) => (
             <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                  }}
+                />
+              </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.name)}
@@ -66,49 +161,108 @@ export function CreateUserView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="select-company">Company</InputLabel>
-                  <Select
-                    labelId="select-company"
-                    error={Boolean(formState?.errors?.company)}
-                    {...register('company', {
-                      required: 'Company must be filled out',
-                    })}
-                    label="Company"
-                  >
-                    <MenuItem value="company1">Company 1</MenuItem>
-                    <MenuItem value="company2">Company 2</MenuItem>
-                  </Select>
-                </FormControl>
-                {formState?.errors?.company && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.company?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
+              {type === 'client' ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-company">Company</InputLabel>
+                    <Select
+                      labelId="select-company"
+                      error={Boolean(formState?.errors?.company_id)}
+                      {...register('company_id', {
+                        required: 'Company must be filled out',
+                        onChange: async () => {
+                          await fetchDivision(watch('company_id'));
+                        },
+                      })}
+                      label="Company"
+                    >
+                      {companies?.map((company) => (
+                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.company_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.company_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
+              {type === 'client' ? (
+                watch('company_id') ? (
+                  <Grid item xs={12} md={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="select-division">Division</InputLabel>
+                      <Select
+                        labelId="select-division"
+                        error={Boolean(formState?.errors?.department_id)}
+                        {...register('department_id', {
+                          required: 'Division must be filled out',
+                        })}
+                        label="Division"
+                      >
+                        {divisions?.map((division) => (
+                          <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.department_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.department_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                ) : null
+              ) : null}
 
+              {/* {type === 'internal' ? ( */}
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
-                  <InputLabel id="select-division">Division</InputLabel>
+                  <InputLabel id="demo-simple-select-outlined-label-type">
+                    Internal Company
+                  </InputLabel>
                   <Select
-                    labelId="select-division"
-                    error={Boolean(formState?.errors?.division)}
-                    {...register('division', {
-                      required: 'Division must be filled out',
+                    label="Internal Company"
+                    labelId="demo-simple-select-outlined-label-type"
+                    id="internal_id"
+                    {...register('internal_id', {
+                      required: 'Internal Company must be filled out',
                     })}
-                    label="Division"
+                    multiple
+                    value={watch('internal_id')}
+                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {watch('internal_id').map((value: any) => (
+                          <Chip
+                            key={value}
+                            label={internalCompanies?.find((item) => item?.id === value)?.name}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                    MenuProps={MenuProps}
                   >
-                    <MenuItem value="div1">Division 1</MenuItem>
-                    <MenuItem value="div2">Division 2</MenuItem>
+                    {internalCompanies &&
+                      internalCompanies?.map((company) => (
+                        <MenuItem
+                          key={company?.id}
+                          value={company?.id}
+                          style={getStyles(company?.id, watch('internal_id'), theme)}
+                        >
+                          {company?.name}
+                        </MenuItem>
+                      ))}
                   </Select>
                 </FormControl>
-                {formState?.errors?.division && (
+                {formState?.errors?.internal_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.division?.message)}
+                    {String(formState?.errors?.internal_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>
+              {/* ) : null} */}
+
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.email)}
@@ -186,19 +340,20 @@ export function CreateUserView() {
                   <InputLabel id="select-role">Role</InputLabel>
                   <Select
                     labelId="select-role"
-                    error={Boolean(formState?.errors?.role)}
-                    {...register('role', {
+                    error={Boolean(formState?.errors?.role_id)}
+                    {...register('role_id', {
                       required: 'Role must be filled out',
                     })}
                     label="Role"
                   >
-                    <MenuItem value="admin">Admin</MenuItem>
-                    <MenuItem value="staff">Staff</MenuItem>
+                    {roles
+                      ?.filter((role) => (type === 'client' ? role?.id === 6 : role?.id !== 6))
+                      .map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
                   </Select>
                 </FormControl>
-                {formState?.errors?.role && (
+                {formState?.errors?.role_id && (
                   <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.role?.message)}
+                    {String(formState?.errors?.role_id?.message)}
                   </FormHelperText>
                 )}
               </Grid>

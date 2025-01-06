@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Navigate, useRoutes } from 'react-router-dom';
+import { Outlet, Navigate, useRoutes, type NonIndexRouteObject } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
@@ -8,13 +8,19 @@ import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 
+import { useAuth } from 'src/sections/auth/providers/auth';
+
 // ----------------------------------------------------------------------
 
-export const HomePage = lazy(() => import('src/pages/home'));
+export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 
 // Request
-export const RequestDetailPage = lazy(() => import('src/pages/request/request-detail'));
+export const RequestListPage = lazy(() => import('src/pages/request/list'));
+export const RequestDetailLayout = lazy(() => import('src/sections/request/view/detail-layout'));
+export const RequestDetailPage = lazy(() => import('src/pages/request/detail'));
+export const RequestTaskPage = lazy(() => import('src/pages/request/task'));
 export const RequestCreatePage = lazy(() => import('src/pages/request/create'));
+export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 
 // Master Data
 
@@ -40,10 +46,23 @@ export const ClientCompanyEditPage = lazy(
   () => import('src/pages/master-data/client-company/edit')
 );
 
-// User
-export const UserListPage = lazy(() => import('src/pages/master-data/user/list'));
-export const UserCreatePage = lazy(() => import('src/pages/master-data/user/create'));
-export const UserEditPage = lazy(() => import('src/pages/master-data/user/edit'));
+// Internal User
+export const UserInternalListPage = lazy(
+  () => import('src/pages/master-data/user/internal-user/list')
+);
+export const UserInternalCreatePage = lazy(
+  () => import('src/pages/master-data/user/internal-user/create')
+);
+export const UserInternalEditPage = lazy(
+  () => import('src/pages/master-data/user/internal-user/edit')
+);
+
+// Client
+export const UserClientListPage = lazy(() => import('src/pages/master-data/user/client-user/list'));
+export const UserClientCreatePage = lazy(
+  () => import('src/pages/master-data/user/client-user/create')
+);
+export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/client-user/edit'));
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -65,7 +84,72 @@ const renderFallback = (
   </Box>
 );
 
+const superAdminRoutes: NonIndexRouteObject = {
+  children: [
+    { element: <DashboardPage />, index: true },
+
+    // Master Data
+    // Internal Company
+    { path: 'internal-company', element: <InternalCompanyListPage /> },
+    { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
+    { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
+    // Client Company
+    { path: 'client-company', element: <ClientCompanyListPage /> },
+    { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
+    { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
+    // Internal User
+    { path: 'internal-user', element: <UserInternalListPage /> },
+    { path: 'internal-user/create', element: <UserInternalCreatePage /> },
+    { path: 'internal-user/:id/edit', element: <UserInternalEditPage /> },
+
+    // Internal User
+    { path: 'client-user', element: <UserClientListPage /> },
+    { path: 'client-user/create', element: <UserClientCreatePage /> },
+    { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
+  ],
+};
+
+const clientRoutes: NonIndexRouteObject = {
+  children: [
+    { element: <DashboardPage />, index: true },
+
+    // Request
+    { path: '/:vendor/request', element: <RequestListPage /> },
+    {
+      path: '/:vendor/request/:id',
+      element: <RequestDetailLayout />,
+      children: [
+        { index: true, element: <RequestDetailPage /> },
+        { path: 'task', element: <RequestTaskPage /> },
+      ],
+    },
+    { path: '/:vendor/request/create', element: <RequestCreatePage /> },
+    { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
+  ],
+};
+
 export function Router() {
+  const { user } = useAuth();
+  const role = user?.user_info?.role_id;
+  const isSuperAdmin = role === 1;
+  const isClient = role !== 1;
+
+  const routingCondition = () => {
+    if (isSuperAdmin) return superAdminRoutes;
+    if (isClient) return clientRoutes;
+
+    return superAdminRoutes;
+    // switch (role) {
+    //   case 1:
+    //     return superAdminRoutes;
+    //   case 6:
+    //     return clientRoutes;
+
+    //   default:
+    //     return superAdminRoutes;
+    // }
+  };
+
   return useRoutes([
     {
       element: (
@@ -75,29 +159,7 @@ export function Router() {
           </Suspense>
         </DashboardLayout>
       ),
-      children: [
-        { element: <HomePage />, index: true },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
-
-        // Request
-        { path: 'request/:id', element: <RequestDetailPage /> },
-        { path: 'request/create', element: <RequestCreatePage /> },
-
-        // Master Data
-        // Internal Company
-        { path: 'internal-company', element: <InternalCompanyListPage /> },
-        { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
-        { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
-        // Client Company
-        { path: 'client-company', element: <ClientCompanyListPage /> },
-        { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
-        { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
-        // User
-        { path: 'user', element: <UserListPage /> },
-        { path: 'user/create', element: <UserCreatePage /> },
-        { path: 'user/:id/edit', element: <UserEditPage /> },
-      ],
+      ...routingCondition(),
     },
     {
       path: 'sign-in',

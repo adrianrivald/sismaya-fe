@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Box,
   FormControl,
@@ -7,13 +8,13 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import * as React from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
-  FieldError,
-  FieldErrorsImpl,
-  Merge,
   useController,
+  type FieldError,
+  type FieldErrorsImpl,
+  type Merge,
+  type FieldValues,
   type UseControllerProps,
 } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
@@ -22,19 +23,17 @@ const acceptedFileExtension = {
   'image/*': ['.png', '.jpg', '.jpeg'],
 };
 
-interface FieldDropzoneProps<TFormFields> {
+export interface FieldDropzoneProps<TFormFields extends FieldValues = FieldValues> {
   label?: string;
   error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined;
   helperText?: string;
   defaultImage?: string;
-  controller: UseControllerProps<any>;
+  controller: UseControllerProps<TFormFields>;
   isDisabled?: boolean;
   maxSize?: number;
 }
 
-export function FieldDropzone<
-  TFormFields extends Record<string, unknown> = Record<string, unknown>,
->(props: FieldDropzoneProps<any>) {
+export function FieldDropzone(props: FieldDropzoneProps) {
   const { helperText, error, ...restProps } = props;
 
   return (
@@ -57,7 +56,7 @@ function Dropzone<TFormFields extends Record<string, unknown> = Record<string, u
   const [preview, setPreview] = React.useState<string>();
   const { field, formState, fieldState } = useController(controller);
   const { isDisabled, maxSize } = props;
-  const { isFocused, getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     accept: acceptedFileExtension,
     disabled: isDisabled,
     maxSize,
@@ -127,10 +126,6 @@ function Dropzone<TFormFields extends Record<string, unknown> = Record<string, u
         // https://github.com/react-dropzone/react-dropzone/issues/182#issuecomment-466629651
         onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => event.preventDefault(),
       })}
-      //   sx={{
-      //     alignItems: 'center',
-      //     justifyContent: 'center',
-      //   }}
     >
       <FormLabel
         component="label"
@@ -168,14 +163,10 @@ function Dropzone<TFormFields extends Record<string, unknown> = Record<string, u
             src={image}
           />
         ) : (
-          <>
-            {/* <AddImageIcon /> */}
-
-            <Box textAlign="center" p={2}>
-              <Typography>{label ?? 'Upload picture'}</Typography>
-              <Typography color="gray.600">or drop your image into this box</Typography>
-            </Box>
-          </>
+          <Box textAlign="center" p={2}>
+            <Typography>{label ?? 'Upload picture'}</Typography>
+            <Typography color="gray.600">or drop your image into this box</Typography>
+          </Box>
         )}
 
         <input

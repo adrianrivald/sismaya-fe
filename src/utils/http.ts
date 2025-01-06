@@ -1,6 +1,6 @@
 import { API_URL } from 'src/constants';
 import { joinURL, withQuery, type QueryObject } from 'ufo';
-import * as sessionService from '../sections/auth/session/session';
+import {getSession, flushStorage} from '../sections/auth/session/session';
 
 
 export interface RequestInitClient extends Omit<RequestInit, 'body'> {
@@ -17,7 +17,7 @@ interface HttpResponseError {
 
 export class HttpError extends Error {
   public status: number;
-  
+
   public info: unknown;
 
   constructor(status: number, message?: string, info?: unknown) {
@@ -65,7 +65,7 @@ function getBody(data: RequestInitClient['data']) {
 /**
  * HTTP request with several thing already configured
  */
-export function http<TData = unknown>(
+export function http<TData = any>(
   endpoint: string,
   requestInit: RequestInitClient = {}
 ) {
@@ -75,7 +75,7 @@ export function http<TData = unknown>(
     data,
     params = {},
     headers: customHeaders,
-    accessToken = sessionService.getSession(),
+    accessToken = getSession(),
     ...customConfig
   } = requestInit ?? {};
 
@@ -99,7 +99,8 @@ export function http<TData = unknown>(
     }
 
     if (response.status === 401 && !response.url.includes('auth/login')) {
-      sessionService.flushStorage();
+      flushStorage();
+      window.location.href= "/"
       // window.location.reload();
     }
 

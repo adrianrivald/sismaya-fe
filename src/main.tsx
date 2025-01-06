@@ -26,7 +26,7 @@ root.render(
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
                 <AppWithAuth />
-                <ToastContainer />
+                <ToastContainer hideProgressBar closeOnClick draggable />
               </AuthProvider>
             </QueryClientProvider>
           </ThemeProvider>
