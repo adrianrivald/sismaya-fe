@@ -135,7 +135,7 @@ export class Task {
   });
 }
 
-interface TaskFilters {
+export interface TaskFilters {
   step?: string;
   request_id: number;
   // assignee_id?: number; /** we don't have this yet */
@@ -154,7 +154,7 @@ export function useAllTask(filters: TaskFilters) {
   });
 }
 
-interface UseCreateOrUpdateTaskOptions extends UseMutationOptions<Task, Error, Task> {
+export interface UseCreateOrUpdateTaskOptions extends UseMutationOptions<Task, Error, Task> {
   defaultValues?: Task;
 }
 
@@ -215,7 +215,7 @@ export function useDeleteTask(requestId: Task['requestId']) {
   return [mutation.isLoading, onSubmit] as const;
 }
 
-type UseMutationAttachmentPayload =
+export type UseMutationAttachmentPayload =
   | {
       kind: 'delete';
       fileId: number | 'all';
@@ -259,4 +259,38 @@ export function useMutationAttachment(requestId: Task['requestId']) {
     });
 
   return [isLoading, onSubmit] as const;
+}
+
+export interface UseTaskActivitiesParams {
+  taskId: Task['taskId'];
+}
+
+export interface TaskActivity {
+  id: number;
+  title: string;
+  date: string;
+}
+
+export function useTaskActivities(params: UseTaskActivitiesParams) {
+  return useQuery<Array<TaskActivity>, Error>({
+    suspense: false,
+    useErrorBoundary: false,
+    queryKey: [...Task.queryKeys(params.taskId), 'activities'],
+    queryFn: async () => {
+      const activities = [
+        {
+          id: 0,
+          title: 'Request created',
+          date: new Date(2024, 10, 18, 15, 5).toISOString(),
+        },
+        {
+          id: 1,
+          title: 'Request approved',
+          date: new Date(2024, 10, 18, 18, 5).toISOString(),
+        },
+      ];
+
+      return activities;
+    },
+  });
 }

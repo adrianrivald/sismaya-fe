@@ -3,8 +3,8 @@ import { Stack, Typography, IconButton } from '@mui/material';
 import { Iconify } from 'src/components/iconify';
 import { useAllTask } from 'src/services/request/task';
 import { RequestTaskForm } from './task-form';
-import { TaskEmpty } from './task-empty';
-import { TaskItem } from './task-item';
+import { TaskEmpty } from '../task-empty';
+import { TaskItem } from '../task-item';
 
 interface TaskListProps {
   requestId: number;
