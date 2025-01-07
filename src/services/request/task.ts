@@ -6,6 +6,7 @@ import { useQuery, useMutation, type UseMutationOptions } from '@tanstack/react-
 import { http } from 'src/utils/http';
 import { fDate } from 'src/utils/format-time';
 import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
+import type { Assignee } from 'src/components/form/field/assignee';
 
 export class Task {
   static queryKeys(requestId: number) {
@@ -39,11 +40,7 @@ export class Task {
     public dueDate: string = new Date().toISOString(),
     public description: string = '',
     public status: keyof typeof Task.statusMap = 'to-do',
-    public assignees: Array<{
-      id: number;
-      name: string;
-      avatar: string;
-    }> = [],
+    public assignees: Array<Assignee> = [],
     public files: Array<{
       name: string;
       url: string;
@@ -61,6 +58,7 @@ export class Task {
       json?.assignees?.map((assignee: any) => ({
         id: assignee?.assignee_info?.id,
         name: assignee?.assignee_info?.name,
+        email: assignee?.assignee_info?.email,
         avatar: assignee?.assignee_info?.profile_picture,
       })) ?? [],
       json?.attachments?.map((attachment: any) => ({
@@ -215,6 +213,38 @@ export function useDeleteTask(requestId: Task['requestId']) {
   return [mutation.isLoading, onSubmit] as const;
 }
 
+export type UseMutationAssigneePayload =
+  | {
+      kind: 'unassign';
+      assigneeId: number;
+    }
+  | {
+      kind: 'assign';
+      taskId: Task['taskId'];
+      assigneeId: number;
+    };
+
+export function useMutationAssignee(requestId: Task['requestId']) {
+  const { isLoading, mutateAsync } = useMutation<Task, Error, UseMutationAssigneePayload>({
+    mutationKey: Task.queryKeys(requestId),
+    mutationFn: async (payload) => {
+      if (payload.kind === 'unassign') {
+        return http(`/task-assignee/${payload.assigneeId}`, { method: 'DELETE' });
+      }
+
+      return http(`/task-assignee`, {
+        method: 'POST',
+        data: {
+          task_id: payload.taskId,
+          assignee_id: payload.assigneeId,
+        },
+      });
+    },
+  });
+
+  return [isLoading, mutateAsync] as const;
+}
+
 export type UseMutationAttachmentPayload =
   | {
       kind: 'delete';
@@ -234,13 +264,11 @@ export function useMutationAttachment(requestId: Task['requestId']) {
         return http(`/task-attachment/${payload.fileId}`, { method: 'DELETE' });
       }
 
-      // unsupported multiple files
       const attachments = await Task.filesToAttachments(payload.files);
-      const [attachment] = attachments;
 
       return http(`/task-attachment`, {
         method: 'POST',
-        data: { ...attachment, task_id: payload.taskId },
+        data: { task_id: payload.taskId, attachments },
       });
     },
   });
