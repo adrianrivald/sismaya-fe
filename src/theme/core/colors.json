@@ -73,5 +73,9 @@
   "common": {
     "black": "#000000",
     "white": "#FFFFFF"
+  },
+  "mint": {
+    "500" : "#A4F7CC",
+    "700" : "#80ADBF"
   }
 }
