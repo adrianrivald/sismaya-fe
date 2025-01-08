@@ -178,7 +178,7 @@ export default function RequestDetailLayout() {
                     },
                   }}
                   onChange={(e: SelectChangeEvent<string>) => {
-                    if (e.target.value === 'completed') {
+                    if (e.target.value === 'done') {
                       const res = completeRequest({
                         id: Number(id),
                       });
