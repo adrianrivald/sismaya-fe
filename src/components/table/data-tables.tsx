@@ -28,11 +28,12 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   pagination: PaginationState;
   onPaginationChange: (nextState: PaginationState) => void;
   total: number;
+  withPagination?: boolean;
   //   pageLinks: MetaLink[];
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
-  const { data, columns, pagination, onPaginationChange, total } = props;
+  const { data, columns, pagination, onPaginationChange, total, withPagination = true } = props;
   const table = useReactTable({
     data,
     columns,
@@ -140,15 +141,17 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
           </TableMui>
         </TableContainer>
       </Scrollbar>
-      <TablePagination
-        component="div"
-        page={table.getState().pagination.pageIndex}
-        count={total}
-        rowsPerPage={table.getRowCount()}
-        onPageChange={onChangePage}
-        rowsPerPageOptions={[5, 10, 25]}
-        onRowsPerPageChange={onChangeRowsPerPage}
-      />
+      {withPagination && (
+        <TablePagination
+          component="div"
+          page={table.getState().pagination.pageIndex}
+          count={total}
+          rowsPerPage={table.getRowCount()}
+          onPageChange={onChangePage}
+          rowsPerPageOptions={[5, 10, 25]}
+          onRowsPerPageChange={onChangeRowsPerPage}
+        />
+      )}
     </Card>
   );
 }
