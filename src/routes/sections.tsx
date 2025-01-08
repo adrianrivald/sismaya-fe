@@ -12,7 +12,8 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
 
-export const DashboardPage = lazy(() => import('src/pages/dashboard'));
+export const DashboardInternalPage = lazy(() => import('src/pages/dashboard/dashboard-internal'));
+export const DashboardClientPage = lazy(() => import('src/pages/dashboard/dashboard-client'));
 
 // Request
 export const RequestListPage = lazy(() => import('src/pages/request/list'));
@@ -86,7 +87,7 @@ const renderFallback = (
 
 const superAdminRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardPage />, index: true },
+    { element: <DashboardInternalPage />, index: true },
 
     // Master Data
     // Internal Company
@@ -111,7 +112,7 @@ const superAdminRoutes: NonIndexRouteObject = {
 
 const clientRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardPage />, index: true },
+    { element: <DashboardClientPage />, index: true },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },

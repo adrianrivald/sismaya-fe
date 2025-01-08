@@ -82,7 +82,7 @@ export function RequestDetailView() {
           assignee_id: item?.assignee_id,
           picture: item?.assignee?.user_info?.profile_picture,
           id: item?.id,
-        }) ?? []
+        })
     )
   );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
@@ -91,7 +91,7 @@ export function RequestDetailView() {
 
   const filteredInternalUser = internalUser?.filter((item) =>
     item?.user_info?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  )
 
   useEffect(() => {
     setSelectedPic(
@@ -101,7 +101,7 @@ export function RequestDetailView() {
             assignee_id: item?.assignee_id,
             picture: item?.assignee?.user_info?.profile_picture,
             id: item?.id,
-          }) ?? []
+          }) 
       )
     );
   }, [requestDetail]);

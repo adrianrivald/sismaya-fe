@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
+import { DashboardInternalView } from 'src/sections/overview/view/internal-dashboard/dashboard-internal-view';
 
-import { DashboardView } from 'src/sections/overview/view';
 
 // ----------------------------------------------------------------------
 
-export default function Page() {
+export default function DashboardInternalPage() {
   return (
     <>
       <Helmet>
@@ -18,7 +18,7 @@ export default function Page() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <DashboardView />
+      <DashboardInternalView />
     </>
   );
 }
