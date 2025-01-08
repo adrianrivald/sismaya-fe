@@ -1,62 +1,62 @@
 import type { CardProps } from '@mui/material/Card';
 import type { ChartOptions } from 'src/components/chart';
-
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import { useTheme, alpha as hexAlpha } from '@mui/material/styles';
-
-import { Chart, useChart } from 'src/components/chart';
+import { Chart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
 type Props = CardProps & {
   title?: string;
   subheader?: string;
-  chart: {
-    colors?: string[];
-    categories?: string[];
-    series: {
-      name: string;
-      data: number[];
-    }[];
-    options?: ChartOptions;
-  };
+  value: number;
 };
 
-export function RequestDueChart({ title, subheader, chart, ...other }: Props) {
-  const theme = useTheme();
-
-  const chartColors = chart.colors ?? [
-    theme.palette.primary.dark,
-    hexAlpha(theme.palette.primary.light, 0.64),
-  ];
-
-  const options = {
+export function RequestDueChart({ title, subheader, value, ...other }: Props) {
+  const options: ChartOptions = {
+    series: [value],
     chart: {
-      height: 350,
+      height: 90,
       type: 'radialBar',
+    },
+
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: 'dark',
+        type: 'vertical',
+        gradientToColors: ['#C8FAD6'],
+        stops: [0, 100],
+      },
     },
     plotOptions: {
       radialBar: {
         hollow: {
-          size: '70%',
+          size: '50%',
+        },
+        dataLabels: {
+          name: {
+            offsetY: -10,
+            show: true,
+            color: '#888',
+            fontSize: '13px',
+          },
+          value: {
+            color: '#111',
+            fontSize: '30px',
+            show: true,
+          },
         },
       },
     },
-    labels: ['Cricket'],
+    labels: ['Resolved'],
   };
 
   return (
-    <Card {...other}>
-      <CardHeader title={title} subheader={subheader} />
-
-      <Chart
-        type="radialBar"
-        series={chart.series}
-        options={options}
-        height={364}
-        sx={{ py: 2.5, pl: 1, pr: 2.5 }}
-      />
-    </Card>
+    <Chart
+      type="radialBar"
+      series={options?.series}
+      options={options}
+      height={150}
+      style={{ width: 'auto' }}
+    />
   );
 }

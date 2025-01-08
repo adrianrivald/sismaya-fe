@@ -1,18 +1,33 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box, Card, CardHeader, MenuItem, Select, Stack, styled, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  Stack,
+  styled,
+  Switch,
+} from '@mui/material';
+import dayjs from 'dayjs';
 
+import {
+  useClientTotalRequest,
+  useClientTotalRequestByState,
+  usePendingRequest,
+} from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
-import { Request } from 'src/services/request/types';
+import type { Request } from 'src/services/request/types';
 import { useRequestList } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { FormControlLabel } from '@mui/material';
-import { Switch } from '@mui/material';
 import { DataTable } from 'src/components/table/data-tables';
 import { AnalyticsWebsiteVisits } from '../../analytics-website-visits';
 import { RequestDueChart } from '../../request-due-chart';
+import { RequestSuccessRate } from '../../request-success-rate';
 
 const columnHelper = createColumnHelper<Request & { isCenter?: boolean }>();
 
@@ -53,9 +68,14 @@ const columns = () => [
 ];
 
 export function DashboardClientView() {
-  const [dateFilter, setDateFilter] = React.useState<string>(null);
+  const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
+  const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const { isEmpty, getDataTableProps, data } = useRequestList({}, String(29));
-  const theme = useTheme();
+  const dateNow = dayjs().format('YYYY-MM-DD');
+  const { data: clientTotalRequest } = useClientTotalRequest(dateFrom, dateNow);
+  const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
+  const { data: pendingRequest } = usePendingRequest();
+  console.log(clientTotalRequestByState, 'clientTotalRequestByState');
 
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     width: 62,
@@ -104,6 +124,19 @@ export function DashboardClientView() {
     },
   }));
 
+  const handleChangeRequestState = (state: 'priority' | 'status') => {
+    setRequestState(state);
+  };
+
+  const handleChangeDateFilter = (e: SelectChangeEvent<number>) => {
+    const filterValue = e.target.value;
+
+    const dateFromValue = dayjs()
+      .subtract(filterValue as number, 'day')
+      .format('YYYY-MM-DD');
+    setDateFrom(dateFromValue);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -112,12 +145,36 @@ export function DashboardClientView() {
             Dashboard
           </Typography>
         </Box>
-        {/* <Box>
-          <Button onClick={onClickAddNew} variant="contained" color="primary">
-            Create New Request
-          </Button>
-        </Box> */}
       </Box>
+      {(pendingRequest?.pending_request ?? 0) > 0 && (
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{
+            backgroundColor: 'warning.200',
+            p: 3,
+            borderRadius: 2,
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={2}>
+            <SvgColor color="#FFC107" src="/assets/icons/ic-alert.svg" />
+            <Typography color="warning.600">
+              {pendingRequest?.pending_request} requests haven&apos;t been approved
+            </Typography>
+          </Box>
+          <Button
+            sx={{
+              borderWidth: 1,
+              borderStyle: 'solid',
+              color: 'warning.600',
+              borderColor: 'warning.600',
+            }}
+          >
+            View Requests
+          </Button>
+        </Box>
+      )}
 
       <Grid container spacing={2}>
         <Grid xs={12} sm={6} md={8} spacing={2}>
@@ -136,7 +193,7 @@ export function DashboardClientView() {
                   labelId="date-filter-label"
                   id="date-filter"
                   label="Filter"
-                  onChange={() => {}}
+                  onChange={handleChangeDateFilter}
                   defaultValue={7}
                 >
                   <MenuItem defaultChecked value={7}>
@@ -164,12 +221,12 @@ export function DashboardClientView() {
                   <Typography fontSize={14}>Total Request</Typography>
                   <Typography fontSize={12}>for the last 7 days</Typography>
                   <Typography fontSize={36} fontWeight="bold">
-                    106
+                    {clientTotalRequest?.total_request}
                   </Typography>
                   <Box display="flex" gap={1} alignItems="center">
                     <SvgColor src="/assets/icons/ic-grow.svg" />
                     <Typography fontSize={14} sx={{ color: 'mint.500' }}>
-                      2.6%
+                      {clientTotalRequest?.percentage}%
                     </Typography>
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
@@ -199,35 +256,71 @@ export function DashboardClientView() {
                       alignItems="center"
                       sx={{ backgroundColor: 'grey.200', padding: 1, borderRadius: 1 }}
                     >
-                      <Box sx={{ backgroundColor: 'common.white', padding: 1, borderRadius: 1 }}>
+                      <Box
+                        onClick={() => handleChangeRequestState('priority')}
+                        sx={{
+                          cursor: 'pointer',
+                          backgroundColor: requestState === 'priority' ? 'common.white' : '',
+                          padding: 1,
+                          borderRadius: 1,
+                        }}
+                      >
                         <Typography>Priority</Typography>
                       </Box>
-                      <Typography>Status</Typography>
+                      <Box
+                        onClick={() => handleChangeRequestState('status')}
+                        sx={{
+                          cursor: 'pointer',
+                          backgroundColor: requestState === 'status' ? 'common.white' : '',
+                          padding: 1,
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Typography>Status</Typography>
+                      </Box>
                     </Box>
                   </Box>
                   <Stack direction="row" gap={2} mt={2}>
-                    <Box
-                      position="relative"
-                      sx={{
-                        borderRadius: 2,
-                        background: 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)',
-                        padding: 2,
-                        width: '100%',
-                        color: 'error.darker',
-                      }}
-                    >
-                      <Typography>High</Typography>
-                      <Typography mt={2} variant="h4">
-                        26
-                      </Typography>
-                      <Typography fontSize={12}>Requests</Typography>
-                      <Box
-                        component="img"
-                        src="/assets/background/shape-square.png"
-                        sx={{ position: 'absolute', top: 2, left: 2 }}
-                      />
-                    </Box>
-
+                    {clientTotalRequestByState?.[requestState]?.map((item, index) => {
+                      console.log(item, 'itemnya');
+                      const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
+                      const renderedBackground = () => {
+                        switch (index) {
+                          case 0:
+                            return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
+                          case 1:
+                            return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
+                          case 2:
+                            return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
+                          default:
+                            return '';
+                        }
+                      };
+                      return (
+                        <Box
+                          position="relative"
+                          sx={{
+                            borderRadius: 2,
+                            background: renderedBackground(),
+                            padding: 2,
+                            width: '100%',
+                            color: 'error.darker',
+                          }}
+                        >
+                          <Typography textTransform="capitalize">{getKey(item)}</Typography>
+                          <Typography mt={2} variant="h4">
+                            {item[`${getKey(item)}`]}
+                          </Typography>
+                          <Typography fontSize={12}>Requests</Typography>
+                          <Box
+                            component="img"
+                            src="/assets/background/shape-square.png"
+                            sx={{ position: 'absolute', top: 2, left: 2 }}
+                          />
+                        </Box>
+                      );
+                    })}
+                    {/* 
                     <Box
                       position="relative"
                       sx={{
@@ -270,7 +363,7 @@ export function DashboardClientView() {
                         src="/assets/background/shape-square.png"
                         sx={{ position: 'absolute', top: 2, left: 2 }}
                       />
-                    </Box>
+                    </Box> */}
                   </Stack>
                 </Card>
               </Stack>
@@ -338,8 +431,13 @@ export function DashboardClientView() {
                   <MenuItem value="yesterday">Yesterday</MenuItem>
                 </Select>
               </Box>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                flexDirection="row"
+                alignItems="center"
+              >
+                <Box flex="none">
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography fontSize={24} fontWeight="bold">
                       8
@@ -351,14 +449,22 @@ export function DashboardClientView() {
                       2 unresolved requests
                     </Typography>
                   </Box>
-
-                  <RequestDueChart
-                    chart={{
-                      series: [70],
-                    }}
-                  />
                 </Box>
+
+                <RequestDueChart value={75} />
               </Box>
+            </Box>
+            <Box
+              sx={{
+                mt: 2,
+                p: 3,
+                position: 'relative',
+                backgroundColor: 'common.white',
+                borderRadius: 2,
+              }}
+            >
+              <Typography sx={{ mb: 4 }}>Requests Delivery Success Rate</Typography>
+              <RequestSuccessRate value={90} />
             </Box>
           </Box>
         </Grid>
