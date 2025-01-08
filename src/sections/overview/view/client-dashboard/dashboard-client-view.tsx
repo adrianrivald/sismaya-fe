@@ -12,6 +12,7 @@ import { FormControlLabel } from '@mui/material';
 import { Switch } from '@mui/material';
 import { DataTable } from 'src/components/table/data-tables';
 import { AnalyticsWebsiteVisits } from '../../analytics-website-visits';
+import { RequestDueChart } from '../../request-due-chart';
 
 const columnHelper = createColumnHelper<Request & { isCenter?: boolean }>();
 
@@ -313,7 +314,52 @@ export function DashboardClientView() {
               borderRadius: 2,
             }}
           >
-            Tes
+            <Box
+              sx={{
+                p: 3,
+                position: 'relative',
+                backgroundColor: 'common.white',
+                borderRadius: 2,
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography>Request Due</Typography>
+
+                <Select
+                  labelId="date-filter-label"
+                  id="date-filter"
+                  label="Filter"
+                  onChange={() => {}}
+                  defaultValue="today"
+                >
+                  <MenuItem defaultChecked value="today">
+                    Today
+                  </MenuItem>
+                  <MenuItem value="yesterday">Yesterday</MenuItem>
+                </Select>
+              </Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography fontSize={24} fontWeight="bold">
+                      8
+                    </Typography>
+                    <Typography color="grey.600">Requests</Typography>
+                  </Box>
+                  <Box>
+                    <Typography fontStyle="underline" color="warning.dark">
+                      2 unresolved requests
+                    </Typography>
+                  </Box>
+
+                  <RequestDueChart
+                    chart={{
+                      series: [70],
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Box>
           </Box>
         </Grid>
       </Grid>
