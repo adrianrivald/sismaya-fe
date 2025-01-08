@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Divider,
   Box,
@@ -41,6 +42,11 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
       form.reset({});
     },
   });
+
+  useEffect(() => {
+    form.reset(task);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task]);
 
   return (
     <Drawer.Content anchor="right">

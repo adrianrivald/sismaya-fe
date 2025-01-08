@@ -56,7 +56,8 @@ export class Task {
       json?.description,
       json.step,
       json?.assignees?.map((assignee: any) => ({
-        id: assignee?.assignee_info?.id,
+        id: assignee?.id,
+        userId: assignee?.assignee_info?.id,
         name: assignee?.assignee_info?.name,
         email: assignee?.assignee_info?.email,
         avatar: assignee?.assignee_info?.profile_picture,
