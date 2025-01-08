@@ -13,13 +13,13 @@ import { _posts, _tasks, _timeline } from 'src/_mock';
 import { Request } from 'src/services/request/types';
 import { AnalyticsProjectSummary } from '../../analytics-project-summary';
 import { AnalyticsCurrentVisits } from '../../analytics-current-visits';
-import { AnalyticsWebsiteVisits } from '../../analytics-website-visits';
 import { AnalyticsCurrentSubject } from '../../analytics-current-subject';
 import { AnalyticsNews } from '../../analytics-news';
 import { AnalyticsOrderTimeline } from '../../analytics-order-timeline';
 import { AnalyticsTrafficBySite } from '../../analytics-traffic-by-site';
 import { AnalyticsTasks } from '../../analytics-tasks';
 import { AnalyticsConversionRates } from '../../analytics-conversion-rates';
+import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 
 const columnHelper = createColumnHelper<Request & { isCenter?: boolean }>();
 
@@ -143,7 +143,7 @@ export function DashboardInternalView() {
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
-          <AnalyticsWebsiteVisits
+          <TotalRequestOvertimeChart
             title="Website visits"
             subheader="(+43%) than last year"
             chart={{

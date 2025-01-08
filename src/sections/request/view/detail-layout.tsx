@@ -158,6 +158,7 @@ export default function RequestDetailLayout() {
                 Status
                 <Select
                   value={currentStatus}
+                  disabled={requestDetail?.step === 'done'}
                   sx={{
                     fontWeight: 'bold',
                     height: 40,
@@ -178,7 +179,7 @@ export default function RequestDetailLayout() {
                     },
                   }}
                   onChange={(e: SelectChangeEvent<string>) => {
-                    if (e.target.value === 'completed') {
+                    if (e.target.value === 'done') {
                       const res = completeRequest({
                         id: Number(id),
                       });

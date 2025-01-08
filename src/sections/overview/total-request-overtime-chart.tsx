@@ -23,7 +23,7 @@ type Props = CardProps & {
   };
 };
 
-export function AnalyticsWebsiteVisits({ title, subheader, chart, ...other }: Props) {
+export function TotalRequestOvertimeChart({ title, subheader, chart, ...other }: Props) {
   const theme = useTheme();
 
   const chartColors = chart.colors ?? [

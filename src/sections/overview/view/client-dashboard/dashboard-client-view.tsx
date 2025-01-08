@@ -18,43 +18,38 @@ import {
   useClientTotalRequest,
   useClientTotalRequestByState,
   usePendingRequest,
+  useTotalRequestOvertime,
+  useUnresolvedCito,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
-import type { Request } from 'src/services/request/types';
-import { useRequestList } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
-import { AnalyticsWebsiteVisits } from '../../analytics-website-visits';
+import { UnresolvedCito } from 'src/services/dashboard/types';
+import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
 
-const columnHelper = createColumnHelper<Request & { isCenter?: boolean }>();
+const columnHelper = createColumnHelper<UnresolvedCito>();
 
 const columns = () => [
-  columnHelper.accessor('number', {
-    header: 'Request ID',
+  columnHelper.accessor('id', {
+    header: 'ID',
   }),
-
-  columnHelper.accessor((row) => row, {
-    header: 'Requester',
-    cell: (info) => {
-      const requester = info.getValue()?.requester;
-      const product = info.getValue()?.product;
-      return (
-        <Box>
-          <Typography>{requester?.name}</Typography>
-          <Typography color="grey.600">{product?.name}</Typography>
-        </Box>
-      );
-    },
-  }),
-
   columnHelper.accessor('category', {
     header: 'Category',
+  }),
+
+  columnHelper.accessor('requester', {
+    header: 'Requester',
+  }),
+
+  columnHelper.accessor('created_at', {
+    header: 'Created',
     cell: (info) => {
-      const categoryName = info.getValue().name;
-      return categoryName;
+      const value = info.getValue();
+      const createdAt = dayjs(value).format('DD MMM YYYY hh:mm:ss');
+      return createdAt;
     },
   }),
 
@@ -70,12 +65,13 @@ const columns = () => [
 export function DashboardClientView() {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
-  const { isEmpty, getDataTableProps, data } = useRequestList({}, String(29));
+  const { getDataTableProps, data } = useUnresolvedCito({});
   const dateNow = dayjs().format('YYYY-MM-DD');
   const { data: clientTotalRequest } = useClientTotalRequest(dateFrom, dateNow);
   const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
   const { data: pendingRequest } = usePendingRequest();
-  console.log(clientTotalRequestByState, 'clientTotalRequestByState');
+  const { data: totalRequestOvertime } = useTotalRequestOvertime();
+  console.log(totalRequestOvertime, 'totalRequestOvertime');
 
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     width: 62,
@@ -155,6 +151,7 @@ export function DashboardClientView() {
             backgroundColor: 'warning.200',
             p: 3,
             borderRadius: 2,
+            mb: 2,
           }}
         >
           <Box display="flex" alignItems="center" gap={2}>
@@ -385,7 +382,7 @@ export function DashboardClientView() {
                 data={data?.items?.slice(0, 5)}
               />
             </Card>
-            <AnalyticsWebsiteVisits
+            <TotalRequestOvertimeChart
               sx={{ mt: 2 }}
               title="Total Requests Over Time"
               chart={{

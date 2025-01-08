@@ -17,3 +17,11 @@ interface RequestByState {
 export interface PendingRequest {
     pending_request: number;
 }
+
+export interface UnresolvedCito {
+    category: string;
+    created_at: string;
+    id: number;
+    number: string;
+    requester : string;
+}
