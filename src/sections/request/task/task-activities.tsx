@@ -9,14 +9,10 @@ import {
 } from '@mui/lab';
 import { timelineItemClasses } from '@mui/lab/TimelineItem';
 import { fDateTime } from 'src/utils/format-time';
-import {
-  useTaskActivities,
-  type UseTaskActivitiesParams,
-  type TaskActivity,
-} from 'src/services/request/task';
+import { useTaskActivities, type Task, type TaskActivity } from 'src/services/request/task';
 import * as Tab from 'src/components/tabs';
 
-function ActivityItem({ title, date }: TaskActivity) {
+function ActivityItem({ description: title, created_at: date }: TaskActivity) {
   return (
     <Stack>
       <Typography sx={{ color: '#212B36', lineHeight: '20px', fontSize: '14px', fontWeight: 500 }}>
@@ -29,7 +25,9 @@ function ActivityItem({ title, date }: TaskActivity) {
   );
 }
 
-interface TaskActivitiesProps extends UseTaskActivitiesParams {}
+interface TaskActivitiesProps {
+  requestId: Task['requestId'];
+}
 
 export function TaskActivities(props: TaskActivitiesProps) {
   const { isLoading, error, data: activities = [] } = useTaskActivities(props);
@@ -78,7 +76,7 @@ export function TaskActivities(props: TaskActivitiesProps) {
   );
 }
 
-export default function Messenger({ children }: React.PropsWithChildren) {
+export default function Messenger({ children }: React.PropsWithChildren<TaskActivitiesProps>) {
   return (
     <Box sx={{ border: 1, borderRadius: 3, borderColor: 'grey.300' }}>
       <Tab.Root defaultValue="activity">
@@ -91,7 +89,7 @@ export default function Messenger({ children }: React.PropsWithChildren) {
 
         <Box overflow="auto" height={400}>
           <Tab.Panel value="activity">
-            <TaskActivities taskId={0} />
+            <TaskActivities requestId={0} />
           </Tab.Panel>
 
           <Tab.Panel value="chat">{children}</Tab.Panel>
