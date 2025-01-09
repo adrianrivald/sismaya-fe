@@ -12,7 +12,8 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
 
-export const DashboardPage = lazy(() => import('src/pages/dashboard'));
+export const DashboardInternalPage = lazy(() => import('src/pages/dashboard/dashboard-internal'));
+export const DashboardClientPage = lazy(() => import('src/pages/dashboard/dashboard-client'));
 
 // Request
 export const RequestListPage = lazy(() => import('src/pages/request/list'));
@@ -86,7 +87,7 @@ const renderFallback = (
 
 const superAdminRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardPage />, index: true },
+    { element: <DashboardInternalPage />, index: true },
 
     // Master Data
     // Internal Company
@@ -109,9 +110,28 @@ const superAdminRoutes: NonIndexRouteObject = {
   ],
 };
 
+const internalRoutes: NonIndexRouteObject = {
+  children: [
+    { element: <DashboardInternalPage />, index: true },
+
+    // Request
+    { path: '/:vendor/request', element: <RequestListPage /> },
+    {
+      path: '/:vendor/request/:id',
+      element: <RequestDetailLayout />,
+      children: [
+        { index: true, element: <RequestDetailPage /> },
+        { path: 'task', element: <RequestTaskPage /> },
+      ],
+    },
+    { path: '/:vendor/request/create', element: <RequestCreatePage /> },
+    { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
+  ],
+};
+
 const clientRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardPage />, index: true },
+    { element: <DashboardClientPage />, index: true },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
@@ -131,12 +151,15 @@ const clientRoutes: NonIndexRouteObject = {
 export function Router() {
   const { user } = useAuth();
   const role = user?.user_info?.role_id;
+  const type = user?.user_info?.user_type;
   const isSuperAdmin = role === 1;
-  const isClient = role !== 1;
+  const isClient = type === 'client';
+  const isInternal = type === 'internal';
 
   const routingCondition = () => {
     if (isSuperAdmin) return superAdminRoutes;
     if (isClient) return clientRoutes;
+    if (isInternal) return internalRoutes;
 
     return superAdminRoutes;
     // switch (role) {

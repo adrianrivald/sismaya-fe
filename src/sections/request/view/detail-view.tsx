@@ -80,7 +80,7 @@ export function RequestDetailView() {
       assignee_id: item?.assignee_id,
       picture: item?.assignee?.user_info?.profile_picture,
       id: item?.id,
-    })) ?? []
+    }))
   );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
 
@@ -96,7 +96,7 @@ export function RequestDetailView() {
         assignee_id: item?.assignee_id,
         picture: item?.assignee?.user_info?.profile_picture,
         id: item?.id,
-      })) ?? []
+      }))
     );
   }, [requestDetail]);
 
