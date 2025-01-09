@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -7,6 +8,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  Typography,
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import TableContainer from '@mui/material/TableContainer';
@@ -21,9 +23,7 @@ import {
   type TableOptions,
   type PaginationState,
 } from '@tanstack/react-table';
-import { MetaLink } from 'src/utils/types';
 import React from 'react';
-import { Typography } from '@mui/material';
 import { SvgColor } from '../svg-color';
 
 interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'columns'> {
@@ -33,6 +33,7 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   total: number;
   withPagination?: boolean;
   withViewAll?: boolean;
+  viewAllHref?: string;
   //   pageLinks: MetaLink[];
 }
 
@@ -45,6 +46,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     total,
     withPagination = true,
     withViewAll = false,
+    viewAllHref,
   } = props;
   const table = useReactTable({
     data,
@@ -164,6 +166,8 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
       )}
       {withViewAll && (
         <Box
+          component="a"
+          href={viewAllHref}
           mt={2}
           px={4}
           py={1}
@@ -174,6 +178,8 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
           sx={{
             borderTop: '1px solid',
             borderColor: 'grey.150',
+            textDecoration: 'none',
+            color: 'blue.700',
           }}
         >
           <Typography>View All</Typography>

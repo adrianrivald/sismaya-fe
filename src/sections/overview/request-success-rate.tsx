@@ -10,13 +10,17 @@ type Props = CardProps & {
 };
 
 export function RequestSuccessRate({ title, subheader, value, ...other }: Props) {
-  const options = useChart({
+  const options = {
     series: [36, 54, 10],
     legend: {
-      position: 'bottom',
+      show: true,
+      position: 'bottom' as const,
     },
-
     plotOptions: {
+      // legend: {
+      //   show: true,
+      //   position: 'bottom',
+      // },
       pie: {
         startAngle: 0,
         endAngle: 360,
@@ -66,7 +70,7 @@ export function RequestSuccessRate({ title, subheader, value, ...other }: Props)
     //     },
     //   },
     // ],
-  });
+  };
 
   return (
     <Chart

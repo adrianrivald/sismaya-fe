@@ -75,8 +75,8 @@ export function DashboardClientView() {
   const { data: pendingRequest } = usePendingRequest();
   const { data: totalRequestOvertime } = useTotalRequestOvertime();
   const { data: requestDue } = useRequestDue(dateFromRequestDue, dateNow);
-  // const { data: requestDeliveryRate } = useRequestDeliveryRate();
-  // console.log(requestDeliveryRate, 'requestDeliveryRate');
+  const { data: requestDeliveryRate } = useRequestDeliveryRate();
+  console.log(requestDeliveryRate, 'requestDeliveryRate');
 
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     width: 62,
@@ -369,7 +369,8 @@ export function DashboardClientView() {
               </Box>
               <DataTable
                 withPagination={false}
-                withViewAll={true}
+                withViewAll
+                viewAllHref="/unresolved-cito"
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}
