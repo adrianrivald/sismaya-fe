@@ -18,6 +18,11 @@ export interface PendingRequest {
     pending_request: number;
 }
 
+export interface RequestOvertime {
+    date: string;
+    request_count: number
+}
+
 export interface UnresolvedCito {
     category: string;
     created_at: string;
