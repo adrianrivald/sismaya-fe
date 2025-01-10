@@ -66,7 +66,7 @@ const columns = () => [
 
 export function DashboardClientView() {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
-  const [dateFromRequestDue, setDateFromRequestDue] = React.useState<string>('2024-12-25');
+  const [requestDueDate, setRequestDueDate] = React.useState<string>('2024-12-25');
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const { getDataTableProps, data } = useUnresolvedCito({});
   const dateNow = dayjs().format('YYYY-MM-DD');
@@ -74,7 +74,7 @@ export function DashboardClientView() {
   const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
   const { data: pendingRequest } = usePendingRequest();
   const { data: totalRequestOvertime } = useTotalRequestOvertime();
-  const { data: requestDue } = useRequestDue(dateFromRequestDue, dateNow);
+  const { data: requestDue } = useRequestDue(requestDueDate);
   const { data: requestDeliveryRate } = useRequestDeliveryRate();
   const requestDeliveryArr = Object.entries(requestDeliveryRate).map((entry) => ({
     [entry[0]]: entry[1],
@@ -144,13 +144,10 @@ export function DashboardClientView() {
     setDateFrom(dateFromValue);
   };
 
-  const handleChangeRequestDueDateFilter = (e: SelectChangeEvent<number>) => {
+  const handleChangeRequestDueDateFilter = (e: SelectChangeEvent<string>) => {
     const filterValue = e.target.value;
 
-    const dateFromValue = dayjs()
-      .subtract(filterValue as number, 'day')
-      .format('YYYY-MM-DD');
-    setDateFromRequestDue(dateFromValue);
+    setRequestDueDate(filterValue);
   };
 
   return (
@@ -316,45 +313,60 @@ export function DashboardClientView() {
                     </Box>
                   </Box>
                   <Stack direction="row" gap={2} mt={2}>
-                    {clientTotalRequestByState?.[requestState]?.map((item, index) => {
-                      const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
-                      const renderedBackground = () => {
-                        switch (index) {
-                          case 0:
-                            return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
-                          case 1:
-                            return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
-                          case 2:
-                            return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
-                          default:
-                            return '';
-                        }
-                      };
-                      console.log(item[`${getKey(item)}`], 'item');
-                      return (
-                        <Box
-                          position="relative"
-                          sx={{
-                            borderRadius: 2,
-                            background: renderedBackground(),
-                            padding: 2,
-                            width: '100%',
-                            color: 'error.darker',
-                          }}
-                        >
-                          <Typography textTransform="capitalize">{getKey(item)}</Typography>
-                          <Typography mt={2} variant="h4">
-                            {item[`${getKey(item)}`]}
-                          </Typography>
-                          <Typography fontSize={12}>Requests</Typography>
+                    {clientTotalRequestByState?.[requestState]
+                      ?.map((item, index) => {
+                        const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
+                        const renderedBackground = () => {
+                          if (requestState === 'priority') {
+                            switch (getKey(item)[0]) {
+                              case 'high':
+                                return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
+                              case 'medium':
+                                return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
+                              case 'low':
+                                return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
+                              default:
+                                return '';
+                            }
+                          } else {
+                            switch (getKey(item)[0]) {
+                              case 'to_do':
+                                return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
+                              case 'in_progress':
+                                return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
+                              case 'done':
+                                return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
+                              default:
+                                return '';
+                            }
+                          }
+                        };
+                        console.log(getKey(item)[0], 'item');
+                        return (
                           <Box
-                            component="img"
-                            src="/assets/background/shape-square.png"
-                            sx={{ position: 'absolute', top: 2, left: 2 }}
-                          />
-                        </Box>
-                      );
-                    })}
+                            position="relative"
+                            sx={{
+                              borderRadius: 2,
+                              background: renderedBackground(),
+                              padding: 2,
+                              width: '100%',
+                              color: 'error.darker',
+                            }}
+                          >
+                            <Typography textTransform="capitalize">{getKey(item)}</Typography>
+                            <Typography mt={2} variant="h4">
+                              {item[`${getKey(item)}`]}
+                            </Typography>
+                            <Typography fontSize={12}>Requests</Typography>
+                            <Box
+                              component="img"
+                              src="/assets/background/shape-square.png"
+                              sx={{ position: 'absolute', top: 2, left: 2 }}
+                            />
+                          </Box>
+                        );
+                      })
+                      .reverse()}
                   </Stack>
                 </Card>
               </Stack>
@@ -423,7 +435,7 @@ export function DashboardClientView() {
                   id="date-filter"
                   label="Filter"
                   onChange={handleChangeRequestDueDateFilter}
-                  defaultValue={0}
+                  defaultValue="today"
                   sx={{
                     fontWeight: 'bold',
                     height: 40,
@@ -443,11 +455,11 @@ export function DashboardClientView() {
                     },
                   }}
                 >
-                  <MenuItem defaultChecked value={0}>
+                  <MenuItem defaultChecked value="today">
                     Today
                   </MenuItem>
-                  <MenuItem value={7}>Last 7 days</MenuItem>
-                  <MenuItem value={14}>Last 14 days</MenuItem>
+                  <MenuItem value="this-week">This week</MenuItem>
+                  <MenuItem value="this-month">This month</MenuItem>
                 </Select>
               </Box>
               <Box
