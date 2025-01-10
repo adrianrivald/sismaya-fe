@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Stack, Typography, IconButton } from '@mui/material';
 import { Iconify } from 'src/components/iconify';
-import { useAllTask } from 'src/services/request/task';
+import { useTaskByRequest } from 'src/services/request/task';
 import { RequestTaskForm } from './task-form';
 import { TaskEmpty } from '../task-empty';
 import { TaskItem } from '../task-item';
@@ -11,7 +11,7 @@ interface TaskListProps {
 }
 
 function TaskList({ requestId }: TaskListProps) {
-  const { data = [] } = useAllTask({ request_id: requestId });
+  const { data = [] } = useTaskByRequest(requestId);
 
   if (!data || data.length < 1) {
     return <TaskEmpty />;
