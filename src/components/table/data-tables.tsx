@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom';
 import {
+  Box,
   Card,
   TableBody,
   TableCell,
@@ -6,6 +8,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  Typography,
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import TableContainer from '@mui/material/TableContainer';
@@ -20,8 +23,8 @@ import {
   type TableOptions,
   type PaginationState,
 } from '@tanstack/react-table';
-import { MetaLink } from 'src/utils/types';
 import React from 'react';
+import { SvgColor } from '../svg-color';
 
 interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'columns'> {
   // pageCount: number;
@@ -29,11 +32,22 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   onPaginationChange: (nextState: PaginationState) => void;
   total: number;
   withPagination?: boolean;
+  withViewAll?: boolean;
+  viewAllHref?: string;
   //   pageLinks: MetaLink[];
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
-  const { data, columns, pagination, onPaginationChange, total, withPagination = true } = props;
+  const {
+    data,
+    columns,
+    pagination,
+    onPaginationChange,
+    total,
+    withPagination = true,
+    withViewAll = false,
+    viewAllHref,
+  } = props;
   const table = useReactTable({
     data,
     columns,
@@ -52,8 +66,6 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     },
     manualPagination: true,
   });
-
-  console.log(table.getState().pagination.pageIndex, 'table.getState().pagination.pageIndex');
 
   const onChangePage = (event: unknown, newPage: number) => {
     console.log(newPage, 'newPage');
@@ -151,6 +163,28 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
           rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={onChangeRowsPerPage}
         />
+      )}
+      {withViewAll && (
+        <Box
+          component="a"
+          href={viewAllHref}
+          mt={2}
+          px={4}
+          py={1}
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="center"
+          gap={1}
+          sx={{
+            borderTop: '1px solid',
+            borderColor: 'grey.150',
+            textDecoration: 'none',
+            color: 'blue.700',
+          }}
+        >
+          <Typography>View All</Typography>
+          <SvgColor color="blue.700" width={15} src="/assets/icons/ic-chevron-right.svg" />
+        </Box>
       )}
     </Card>
   );

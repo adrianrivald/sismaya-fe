@@ -25,3 +25,9 @@ export interface UnresolvedCito {
     number: string;
     requester : string;
 }
+
+export interface RequestDue {
+    resolved: number;
+    resolved_percentage: number;
+    unresolved: number;
+}

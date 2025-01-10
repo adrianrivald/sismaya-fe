@@ -18,6 +18,8 @@ import {
   useClientTotalRequest,
   useClientTotalRequestByState,
   usePendingRequest,
+  useRequestDeliveryRate,
+  useRequestDue,
   useTotalRequestOvertime,
   useUnresolvedCito,
 } from 'src/services/dashboard';
@@ -64,6 +66,7 @@ const columns = () => [
 
 export function DashboardClientView() {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
+  const [dateFromRequestDue, setDateFromRequestDue] = React.useState<string>('2024-12-25');
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const { getDataTableProps, data } = useUnresolvedCito({});
   const dateNow = dayjs().format('YYYY-MM-DD');
@@ -71,7 +74,9 @@ export function DashboardClientView() {
   const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
   const { data: pendingRequest } = usePendingRequest();
   const { data: totalRequestOvertime } = useTotalRequestOvertime();
-  console.log(totalRequestOvertime, 'totalRequestOvertime');
+  const { data: requestDue } = useRequestDue(dateFromRequestDue, dateNow);
+  const { data: requestDeliveryRate } = useRequestDeliveryRate();
+  console.log(requestDeliveryRate, 'requestDeliveryRate');
 
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     width: 62,
@@ -133,6 +138,15 @@ export function DashboardClientView() {
     setDateFrom(dateFromValue);
   };
 
+  const handleChangeRequestDueDateFilter = (e: SelectChangeEvent<number>) => {
+    const filterValue = e.target.value;
+
+    const dateFromValue = dayjs()
+      .subtract(filterValue as number, 'day')
+      .format('YYYY-MM-DD');
+    setDateFromRequestDue(dateFromValue);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -192,6 +206,24 @@ export function DashboardClientView() {
                   label="Filter"
                   onChange={handleChangeDateFilter}
                   defaultValue={7}
+                  sx={{
+                    fontWeight: 'bold',
+                    height: 40,
+                    paddingY: 0.5,
+                    paddingX: 1,
+                    ml: 1,
+                    borderWidth: 1,
+                    borderStyle: 'solid',
+                    borderColor: 'grey.175',
+                    borderRadius: 1.5,
+                    width: 'max-content',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 0,
+                    },
+                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                  }}
                 >
                   <MenuItem defaultChecked value={7}>
                     Last 7 days
@@ -317,50 +349,6 @@ export function DashboardClientView() {
                         </Box>
                       );
                     })}
-                    {/* 
-                    <Box
-                      position="relative"
-                      sx={{
-                        borderRadius: 2,
-                        background: 'linear-gradient(to right bottom, #FFF5CC, #FFD666)',
-                        padding: 2,
-                        width: '100%',
-                        color: 'warning.darker',
-                      }}
-                    >
-                      <Typography>Medium</Typography>
-                      <Typography mt={2} variant="h4">
-                        50
-                      </Typography>
-                      <Typography fontSize={12}>Requests</Typography>
-                      <Box
-                        component="img"
-                        src="/assets/background/shape-square.png"
-                        sx={{ position: 'absolute', top: 2, left: 2 }}
-                      />
-                    </Box>
-
-                    <Box
-                      position="relative"
-                      sx={{
-                        borderRadius: 2,
-                        background: 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)',
-                        padding: 2,
-                        width: '100%',
-                        color: 'primary.darker',
-                      }}
-                    >
-                      <Typography>Low</Typography>
-                      <Typography mt={2} variant="h4">
-                        30
-                      </Typography>
-                      <Typography fontSize={12}>Requests</Typography>
-                      <Box
-                        component="img"
-                        src="/assets/background/shape-square.png"
-                        sx={{ position: 'absolute', top: 2, left: 2 }}
-                      />
-                    </Box> */}
                   </Stack>
                 </Card>
               </Stack>
@@ -375,8 +363,14 @@ export function DashboardClientView() {
                 borderRadius: 4,
               }}
             >
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <SvgColor width={20} color="error.light" src="/assets/icons/ic-alert-rounded.svg" />
+                <Typography>{data?.items?.length} Unresolved CITO Requests</Typography>
+              </Box>
               <DataTable
                 withPagination={false}
+                withViewAll
+                viewAllHref="/unresolved-cito"
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}
@@ -419,13 +413,32 @@ export function DashboardClientView() {
                   labelId="date-filter-label"
                   id="date-filter"
                   label="Filter"
-                  onChange={() => {}}
-                  defaultValue="today"
+                  onChange={handleChangeRequestDueDateFilter}
+                  defaultValue={0}
+                  sx={{
+                    fontWeight: 'bold',
+                    height: 40,
+                    paddingY: 0.5,
+                    paddingX: 1,
+                    ml: 1,
+                    borderWidth: 1,
+                    borderStyle: 'solid',
+                    borderColor: 'grey.175',
+                    borderRadius: 1.5,
+                    width: 'max-content',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 0,
+                    },
+                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                  }}
                 >
-                  <MenuItem defaultChecked value="today">
+                  <MenuItem defaultChecked value={0}>
                     Today
                   </MenuItem>
-                  <MenuItem value="yesterday">Yesterday</MenuItem>
+                  <MenuItem value={7}>Last 7 days</MenuItem>
+                  <MenuItem value={14}>Last 14 days</MenuItem>
                 </Select>
               </Box>
               <Box
@@ -437,18 +450,32 @@ export function DashboardClientView() {
                 <Box flex="none">
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography fontSize={24} fontWeight="bold">
-                      8
+                      {requestDue?.resolved}
                     </Typography>
                     <Typography color="grey.600">Requests</Typography>
                   </Box>
-                  <Box>
-                    <Typography fontStyle="underline" color="warning.dark">
-                      2 unresolved requests
-                    </Typography>
-                  </Box>
+                  {(requestDue?.unresolved ?? 0) > 0 && (
+                    <Box display="flex" alignItems="center" gap={1} mt={2}>
+                      <SvgColor
+                        width={20}
+                        color="#FFC107"
+                        src="/assets/icons/ic-alert-rounded.svg"
+                      />
+
+                      <Typography
+                        color="warning.dark"
+                        sx={{
+                          textDecoration: 'underline',
+                          fontSize: '12px',
+                        }}
+                      >
+                        {requestDue?.unresolved} unresolved requests
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
-                <RequestDueChart value={75} />
+                <RequestDueChart value={requestDue?.resolved_percentage ?? 0} />
               </Box>
             </Box>
             <Box

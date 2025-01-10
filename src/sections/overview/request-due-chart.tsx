@@ -14,7 +14,6 @@ export function RequestDueChart({ title, subheader, value, ...other }: Props) {
   const options: ChartOptions = {
     series: [value],
     chart: {
-      height: 90,
       type: 'radialBar',
     },
 
@@ -56,7 +55,8 @@ export function RequestDueChart({ title, subheader, value, ...other }: Props) {
       series={options?.series}
       options={options}
       height={150}
-      style={{ width: 'auto' }}
+      width={150}
+      style={{ width: '150px' }}
     />
   );
 }

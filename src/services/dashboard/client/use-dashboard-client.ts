@@ -3,7 +3,7 @@ import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
 import { http } from 'src/utils/http'
 import { WithPagination } from 'src/utils/types';
-import type { ClientTotalRequest, ClientTotalRequestByState, PendingRequest } from '../types';
+import type { ClientTotalRequest, ClientTotalRequestByState, PendingRequest, RequestDue } from '../types';
 
 // Total Request
 async function fetchTotalRequest(dateFrom: string, dateTo: string) {
@@ -86,3 +86,31 @@ export function useTotalRequestOvertime() {
 
   return data;
 }
+
+
+// Request Due
+async function fetchRequestDue(dateFrom: string, dateTo: string) {
+  const { data } = await http<{ data: RequestDue }>(`dashboard-client/request-due?from=${dateFrom}&to=${dateTo}`);
+
+  return data;
+}
+
+export function useRequestDue(dateFrom: string, dateTo: string) {
+  const data = useQuery(['request-due', dateFrom], () => fetchRequestDue(dateFrom, dateTo));
+
+  return data;
+}
+
+// Request Delivery Rate
+async function fetchRequestDeliveryRate() {
+  const { data } = await http<{ data: any }>(`dashboard-client/request-delivery-rate`);
+
+  return data;
+}
+
+export function useRequestDeliveryRate() {
+  const data = useQuery(['request-delivery-rate'], () => fetchRequestDeliveryRate());
+
+  return data;
+}
+
