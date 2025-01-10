@@ -135,3 +135,11 @@ export interface Attachment {
     id: number;
     updated_at: string;
 }
+
+export interface RequestStatus {
+    id: number;
+    name: string;
+    sort: number;
+    company: Company;
+    step: string;
+}
