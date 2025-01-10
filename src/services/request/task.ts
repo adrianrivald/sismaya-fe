@@ -56,7 +56,8 @@ export class Task {
       json?.description,
       json.step,
       json?.assignees?.map((assignee: any) => ({
-        id: assignee?.assignee_info?.id,
+        id: assignee?.id,
+        userId: assignee?.assignee_info?.id,
         name: assignee?.assignee_info?.name,
         email: assignee?.assignee_info?.email,
         avatar: assignee?.assignee_info?.profile_picture,
@@ -133,17 +134,11 @@ export class Task {
   });
 }
 
-export interface TaskFilters {
-  step?: string;
-  request_id: number;
-  // assignee_id?: number; /** we don't have this yet */
-}
-
-export function useAllTask(filters: TaskFilters) {
+export function useTaskByRequest(requestId: Task['requestId']) {
   return useQuery({
-    queryKey: [...Task.queryKeys(filters.request_id), { filters }],
+    queryKey: Task.queryKeys(requestId),
     queryFn: async () => {
-      const response = await http('/tasks', { params: { ...filters } });
+      const response = await http('/tasks', { params: { request_id: requestId } });
       const items = response.data ?? [];
       const transformed: Array<Task> = items.map((item: any) => Task.fromJson(item));
 
@@ -295,30 +290,23 @@ export interface UseTaskActivitiesParams {
 
 export interface TaskActivity {
   id: number;
-  title: string;
-  date: string;
+  description: string;
+  created_at: string;
 }
 
-export function useTaskActivities(params: UseTaskActivitiesParams) {
+export function useTaskActivities(params: { requestId: Task['requestId'] }) {
   return useQuery<Array<TaskActivity>, Error>({
     suspense: false,
     useErrorBoundary: false,
-    queryKey: [...Task.queryKeys(params.taskId), 'activities'],
+    queryKey: [...Task.queryKeys(params.requestId), 'activities'],
     queryFn: async () => {
-      const activities = [
-        {
-          id: 0,
-          title: 'Request created',
-          date: new Date(2024, 10, 18, 15, 5).toISOString(),
+      const response = await http(`/requests/${params.requestId}/activity-logs`, {
+        params: {
+          page_size: 100,
         },
-        {
-          id: 1,
-          title: 'Request approved',
-          date: new Date(2024, 10, 18, 18, 5).toISOString(),
-        },
-      ];
+      });
 
-      return activities;
+      return response.data;
     },
   });
 }

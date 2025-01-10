@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useParams } from 'react-router-dom';
 import { Box, Input, Typography, CircularProgress as Loader } from '@mui/material';
 import { SvgColor } from 'src/components/svg-color';
 
@@ -63,12 +64,13 @@ function RequestChat() {
 }
 
 export function RequestMessenger() {
+  const requestId = useParams()?.id;
   const isTask = window.location.pathname.includes('/task');
 
   if (isTask) {
     return (
       <React.Suspense fallback={<Loader />}>
-        <Messenger>
+        <Messenger requestId={Number(requestId)}>
           <RequestChat />
         </Messenger>
       </React.Suspense>
