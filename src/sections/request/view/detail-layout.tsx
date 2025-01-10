@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from 'src/sections/auth/providers/auth';
 import { Outlet, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import {
@@ -12,7 +13,13 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import { useCompleteRequest, useRequestById, useUpdateRequestPriority } from 'src/services/request';
+import {
+  useCompleteRequest,
+  useRequestById,
+  useRequestStatus,
+  useUpdateRequestPriority,
+  useUpdateRequestStatus,
+} from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
@@ -20,22 +27,24 @@ import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
 
+type StatusStepEnum = 'to_do' | 'in_progress' | 'done' | 'pending';
+
 export default function RequestDetailLayout() {
+  const { user } = useAuth();
+  const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
+  const idCurrentCompany = user?.internal_companies?.find(
+    (item) => item?.company?.name?.toLowerCase() === vendor
+  )?.company?.id;
+  const { data: requestStatuses } = useRequestStatus(String(idCurrentCompany ?? ''));
   const { data: requestDetail } = useRequestById(id ?? '');
   const { mutate: completeRequest } = useCompleteRequest();
+  const { mutate: updateStatus } = useUpdateRequestStatus();
   const { mutate: updatePriority } = useUpdateRequestPriority();
   const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
-  const [currentStatus, setCurrentStatus] = useState(
-    requestDetail?.progress_status?.step ?? 'requested'
-  );
-  const statusEnum = () => {
-    if (currentStatus === 'on_progress') return 'on_progress';
-    if (currentStatus === 'to_do') return 'to_do';
-    if (currentStatus === 'requested') return 'requested';
-    if (currentStatus === 'completed') return 'completed';
-    return 'requested';
-  };
+  const [currentStatus, setCurrentStatus] = useState(requestDetail?.progress_status?.id ?? 0);
+  const statusStepEnum = requestStatuses?.find((item) => item?.id === currentStatus);
+
   const priorityEnum = () => {
     if (currentPriority === 'low') return 'low';
     if (currentPriority === 'medium') return 'medium';
@@ -49,9 +58,27 @@ export default function RequestDetailLayout() {
       setCurrentPriority(requestDetail?.priority);
     }
     if (requestDetail?.progress_status) {
-      setCurrentStatus(requestDetail?.progress_status?.step);
+      setCurrentStatus(requestDetail?.progress_status?.id);
     }
   }, [requestDetail]);
+
+  const handleChangeStatus = (e: SelectChangeEvent<number>) => {
+    const statusStep = requestStatuses?.find((item) => item?.id === e.target.value);
+    if (statusStep?.step === 'done') {
+      const res = completeRequest({
+        id: Number(id),
+      });
+      if (res !== undefined) {
+        setCurrentStatus(Number(e.target.value));
+      }
+    } else {
+      const res = updateStatus({
+        id: Number(id),
+        statusId: Number(e.target.value),
+      });
+      setCurrentStatus(Number(e.target.value));
+    }
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -162,8 +189,12 @@ export default function RequestDetailLayout() {
                   sx={{
                     fontWeight: 'bold',
                     height: 40,
-                    bgcolor: currentStatus ? stepColorMap[statusEnum()].bgColor : '',
-                    color: currentStatus ? stepColorMap[statusEnum()].color : '',
+                    bgcolor: currentStatus
+                      ? stepColorMap[statusStepEnum?.step as StatusStepEnum].bgColor
+                      : '',
+                    color: currentStatus
+                      ? stepColorMap[statusStepEnum?.step as StatusStepEnum].color
+                      : '',
                     paddingY: 0.5,
                     paddingX: 1,
                     ml: 1,
@@ -178,31 +209,20 @@ export default function RequestDetailLayout() {
                       border: 'none',
                     },
                   }}
-                  onChange={(e: SelectChangeEvent<string>) => {
-                    if (e.target.value === 'done') {
-                      const res = completeRequest({
-                        id: Number(id),
-                      });
-                      if (res !== undefined) {
-                        setCurrentStatus(e.target.value);
-                      }
-                    } else {
-                      setCurrentStatus(e.target.value);
-                    }
-                  }}
+                  onChange={handleChangeStatus}
                 >
-                  {['on_progress', 'done', 'to_do', 'requested']?.map((value) => (
-                    <MenuItem value={value}>
-                      {capitalize(`${value === 'done' ? 'completed' : value.replace('_', ' ')}`)}
-                    </MenuItem>
+                  {requestStatuses?.map((value) => (
+                    <MenuItem value={value?.id}>{capitalize(value?.name)}</MenuItem>
                   ))}
                 </Select>
               </Box>
             </Box>
 
-            <RequestTaskForm requestId={Number(id)}>
-              <Button variant="contained">Create Task</Button>
-            </RequestTaskForm>
+            {userType === 'internal' && (
+              <RequestTaskForm requestId={Number(id)}>
+                <Button variant="contained">Create Task</Button>
+              </RequestTaskForm>
+            )}
           </Stack>
           <Box>
             <Outlet />
