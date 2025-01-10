@@ -58,30 +58,24 @@ export const statusColorMap = {
   };
   
   export const stepColorMap = { 
-    // requested
-    "requested": {
+    // todo
+    "to_do": {
       bgColor: 'blue.100',
       color: 'blue.600'
     },
 
-    // completed
-    "completed": {
+    // done
+    "done": {
       bgColor: 'blue.100',
       color: 'blue.600'
     },
 
-    // on_progress
-    "on_progress" : {
+    // in_progress
+    "in_progress" : {
       bgColor: 'warning.main',
       color: 'warning.dark'
     },
     
-    // to_do
-    "to_do" : {
-      bgColor: 'warning.main',
-      color: 'warning.dark'
-    },
-
     // pending
     "pending" : {
       bgColor: "error.lighter",

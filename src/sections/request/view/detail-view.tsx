@@ -22,7 +22,6 @@ import {
   useAddRequestAssignee,
   useApproveRequest,
   useCitoById,
-  useCompleteRequest,
   useDeleteRequestAssigneeById,
   useRejectRequest,
   useRequestById,
