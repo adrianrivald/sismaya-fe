@@ -8,7 +8,7 @@ import { RequestDTO } from "./schemas/request-schema";
 type Assignees = {
   assignee_id: number
 }
-export type ApproveRequest = {id: number; priority: string; start_date: string; assignees: Assignees[] };
+export type ApproveRequest = {id: number; priority: string; start_date: string; assignees: Assignees[]; end_date:string };
 
 export function useApproveRequest() {
     const queryClient = useQueryClient();
