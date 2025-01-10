@@ -119,6 +119,7 @@ export interface RequestDetail {
     requester: UserInfo
     step: string;
     start_date: string;
+    end_date: string;
     reject_reason: string
     task_count: number;
 }

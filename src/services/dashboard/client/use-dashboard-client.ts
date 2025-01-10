@@ -3,7 +3,7 @@ import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
 import { http } from 'src/utils/http'
 import { WithPagination } from 'src/utils/types';
-import type { ClientTotalRequest, ClientTotalRequestByState, PendingRequest, RequestDue } from '../types';
+import type { ClientTotalRequest, ClientTotalRequestByState, PendingRequest, RequestDue, RequestOvertime } from '../types';
 
 // Total Request
 async function fetchTotalRequest(dateFrom: string, dateTo: string) {
@@ -34,14 +34,14 @@ async function fetchTotalRequestByState(dateFrom: string, dateTo: string) {
 
 // Request Pending
 
-async function fetchTotalRequestOverTime() {
+async function fetchPendingRequest() {
     const { data } = await http<{ data: PendingRequest }>(`dashboard-client/request-pending`);
   
     return data;
   }
   
   export function usePendingRequest() {
-    const data = useQuery(['client-pending-request'], () => fetchTotalRequestOverTime());
+    const data = useQuery(['client-pending-request'], () => fetchPendingRequest());
   
     return data;
   }
@@ -76,7 +76,7 @@ export function useUnresolvedCito(params: Partial<any> ) {
 // Total Request Overtime
 
 async function fetchTotalRequestOvertime() {
-  const { data } = await http<{ data: any }>(`dashboard-client/total-request-over-time`);
+  const { data } = await http<{ data: RequestOvertime[] }>(`dashboard-client/total-request-over-time`);
 
   return data;
 }
@@ -89,14 +89,14 @@ export function useTotalRequestOvertime() {
 
 
 // Request Due
-async function fetchRequestDue(dateFrom: string, dateTo: string) {
-  const { data } = await http<{ data: RequestDue }>(`dashboard-client/request-due?from=${dateFrom}&to=${dateTo}`);
+async function fetchRequestDue(requestDueDate: string) {
+  const { data } = await http<{ data: RequestDue }>(`dashboard-client/request-due?due=${requestDueDate}`);
 
   return data;
 }
 
-export function useRequestDue(dateFrom: string, dateTo: string) {
-  const data = useQuery(['request-due', dateFrom], () => fetchRequestDue(dateFrom, dateTo));
+export function useRequestDue(requestDueDate: string) {
+  const data = useQuery(['request-due', requestDueDate], () => fetchRequestDue(requestDueDate));
 
   return data;
 }

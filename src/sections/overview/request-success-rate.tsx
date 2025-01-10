@@ -6,12 +6,12 @@ import { Chart, useChart } from 'src/components/chart';
 type Props = CardProps & {
   title?: string;
   subheader?: string;
-  value: number;
+  value: number[];
 };
 
 export function RequestSuccessRate({ title, subheader, value, ...other }: Props) {
-  const options = {
-    series: [36, 54, 10],
+  const options: any = {
+    series: value,
     legend: {
       show: true,
       position: 'bottom' as const,
@@ -73,12 +73,6 @@ export function RequestSuccessRate({ title, subheader, value, ...other }: Props)
   };
 
   return (
-    <Chart
-      type="donut"
-      series={options?.series}
-      options={options}
-      height={350}
-      style={{ width: 'auto' }}
-    />
+    <Chart type="donut" series={value} options={options} height={350} style={{ width: 'auto' }} />
   );
 }
