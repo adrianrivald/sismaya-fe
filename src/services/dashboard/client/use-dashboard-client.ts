@@ -89,14 +89,14 @@ export function useTotalRequestOvertime() {
 
 
 // Request Due
-async function fetchRequestDue(dateFrom: string, dateTo: string) {
-  const { data } = await http<{ data: RequestDue }>(`dashboard-client/request-due?from=${dateFrom}&to=${dateTo}`);
+async function fetchRequestDue(requestDueDate: string) {
+  const { data } = await http<{ data: RequestDue }>(`dashboard-client/request-due?due=${requestDueDate}`);
 
   return data;
 }
 
-export function useRequestDue(dateFrom: string, dateTo: string) {
-  const data = useQuery(['request-due', dateFrom], () => fetchRequestDue(dateFrom, dateTo));
+export function useRequestDue(requestDueDate: string) {
+  const data = useQuery(['request-due', requestDueDate], () => fetchRequestDue(requestDueDate));
 
   return data;
 }
