@@ -58,6 +58,10 @@ export const UserInternalEditPage = lazy(
   () => import('src/pages/master-data/user/internal-user/edit')
 );
 
+export const DashboardInternalCompanyPage = lazy(
+  () => import('src/pages/dashboard/dashboard-internal/dashboard-company')
+);
+
 // Client
 export const UserClientListPage = lazy(() => import('src/pages/master-data/user/client-user/list'));
 export const UserClientCreatePage = lazy(
@@ -126,6 +130,7 @@ const internalRoutes: NonIndexRouteObject = {
     },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
+    { path: '/:vendor/dashboard', element: <DashboardInternalCompanyPage /> },
   ],
 };
 

@@ -1,33 +1,24 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import {
-  Box,
-  Button,
-  Card,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Stack,
-  styled,
-  Switch,
-} from '@mui/material';
+import { Box, Button, Card, MenuItem, Select, type SelectChangeEvent, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 
 import {
-  useClientTotalRequest,
-  useClientTotalRequestByState,
-  usePendingRequest,
-  useRequestDeliveryRate,
-  useRequestDue,
-  useTotalRequestOvertime,
+  useInternalTotalRequestByCompany,
   useUnresolvedCito,
+  usePendingRequestInternal,
+  useTotalRequestOvertimeInternal,
+  useRequestDueInternal,
+  useRequestDeliveryRateInternal,
+  useInternalTotalRequestByState,
+  useUnresolvedCitoInternal,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
-import { UnresolvedCito } from 'src/services/dashboard/types';
+import type { UnresolvedCito } from 'src/services/dashboard/types';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
@@ -64,18 +55,26 @@ const columns = () => [
   }),
 ];
 
-export function DashboardClientView() {
+export function DashboardInternalCompanyView({ idCompany }: { idCompany: number }) {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
   const [requestDueDate, setRequestDueDate] = React.useState<string>('2024-12-25');
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
-  const { getDataTableProps, data } = useUnresolvedCito({});
+  const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
   const dateNow = dayjs().format('YYYY-MM-DD');
-  const { data: clientTotalRequest } = useClientTotalRequest(dateFrom, dateNow);
-  const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
-  const { data: pendingRequest } = usePendingRequest();
-  const { data: totalRequestOvertime } = useTotalRequestOvertime();
-  const { data: requestDue } = useRequestDue(requestDueDate);
-  const { data: requestDeliveryRate } = useRequestDeliveryRate();
+  const { data: internalTotalRequest } = useInternalTotalRequestByCompany(
+    idCompany,
+    dateFrom,
+    dateNow
+  );
+  const { data: internalTotalRequestByState } = useInternalTotalRequestByState(
+    idCompany,
+    dateFrom,
+    dateNow
+  );
+  const { data: pendingRequest } = usePendingRequestInternal(idCompany);
+  const { data: totalRequestOvertime } = useTotalRequestOvertimeInternal(idCompany);
+  const { data: requestDue } = useRequestDueInternal(idCompany, requestDueDate);
+  const { data: requestDeliveryRate } = useRequestDeliveryRateInternal(idCompany);
   const requestDeliveryArr = Object.entries(requestDeliveryRate).map((entry) => ({
     [entry[0]]: entry[1],
   }));
@@ -254,12 +253,12 @@ export function DashboardClientView() {
                   <Typography fontSize={14}>Total Request</Typography>
                   <Typography fontSize={12}>for the last 7 days</Typography>
                   <Typography fontSize={36} fontWeight="bold">
-                    {clientTotalRequest?.total_request}
+                    {internalTotalRequest?.total_request}
                   </Typography>
                   <Box display="flex" gap={1} alignItems="center">
                     <SvgColor src="/assets/icons/ic-grow.svg" />
                     <Typography fontSize={14} sx={{ color: 'mint.500' }}>
-                      {clientTotalRequest?.percentage}%
+                      {internalTotalRequest?.percentage}%
                     </Typography>
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
@@ -314,7 +313,7 @@ export function DashboardClientView() {
                     </Box>
                   </Box>
                   <Stack direction="row" gap={2} mt={2}>
-                    {clientTotalRequestByState?.[requestState]
+                    {internalTotalRequestByState?.[requestState]
                       ?.map((item, index) => {
                         const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
                         const renderedBackground = () => {

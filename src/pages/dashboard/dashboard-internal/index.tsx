@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { DashboardInternalView } from 'src/sections/overview/view/internal-dashboard/dashboard-internal-view';
+import { DashboardInternalView } from 'src/sections/overview/view/internal-dashboard/dashboard-internal-general-view';
 
 // ----------------------------------------------------------------------
 

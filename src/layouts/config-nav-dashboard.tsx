@@ -45,13 +45,16 @@ interface InternalCompanyMenus {
 export const menus = (internalCompanies?: InternalCompanyMenus[]) => [
   {
     // isShownInRole: [6],
+    isAccordion: true,
     heading: 'GENERAL',
     id: 'general',
     list: [
       {
         heading: 'Dashboard',
         path: '/',
+        id: 'dashboard',
         icon: icon('ic-analytics'),
+        list: internalCompanies,
       },
       {
         heading: 'Reports',
