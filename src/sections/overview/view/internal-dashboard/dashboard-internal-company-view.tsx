@@ -6,13 +6,13 @@ import dayjs from 'dayjs';
 
 import {
   useInternalTotalRequestByCompany,
-  useUnresolvedCito,
   usePendingRequestInternal,
   useTotalRequestOvertimeInternal,
   useRequestDueInternal,
-  useRequestDeliveryRateInternal,
   useInternalTotalRequestByState,
   useUnresolvedCitoInternal,
+  useInternalTopRequester,
+  useInternalTopStaff,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -22,6 +22,8 @@ import type { UnresolvedCito } from 'src/services/dashboard/types';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
+import { TopRequesterChart } from '../../top-requester-chart';
+import { TopStaffChart } from '../../top-staff-chart';
 
 const columnHelper = createColumnHelper<UnresolvedCito>();
 
@@ -57,8 +59,11 @@ const columns = () => [
 
 export function DashboardInternalCompanyView({ idCompany }: { idCompany: number }) {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
+  const [dateFromTopRequester, setDateFromTopRequester] = React.useState<string>('2024-12-25');
+  const [dateFromTopStaff, setDateFromTopStaff] = React.useState<string>('2024-12-25');
   const [requestDueDate, setRequestDueDate] = React.useState<string>('2024-12-25');
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
+  const [staffState, setStaffState] = React.useState<'quantity' | 'hour'>('quantity');
   const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
   const dateNow = dayjs().format('YYYY-MM-DD');
   const { data: internalTotalRequest } = useInternalTotalRequestByCompany(
@@ -74,14 +79,9 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
   const { data: pendingRequest } = usePendingRequestInternal(idCompany);
   const { data: totalRequestOvertime } = useTotalRequestOvertimeInternal(idCompany);
   const { data: requestDue } = useRequestDueInternal(idCompany, requestDueDate);
-  const { data: requestDeliveryRate } = useRequestDeliveryRateInternal(idCompany);
-  const requestDeliveryArr = Object.entries(requestDeliveryRate).map((entry) => ({
-    [entry[0]]: entry[1],
-  }));
-  const requestDeliveryRateValues = Object.entries(requestDeliveryRate).map(
-    (entry) => entry[1] as number
-  );
-  console.log(totalRequestOvertime, 'totalRequestOvertime');
+  const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
+  const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
+  console.log(topStaff, 'topStaff ');
 
   // const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   //   width: 62,
@@ -134,6 +134,10 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
     setRequestState(state);
   };
 
+  const handleChangeStaffState = (state: 'quantity' | 'hour') => {
+    setStaffState(state);
+  };
+
   const handleChangeDateFilter = (e: SelectChangeEvent<number>) => {
     const filterValue = e.target.value;
 
@@ -147,6 +151,24 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
     const filterValue = e.target.value;
 
     setRequestDueDate(filterValue);
+  };
+
+  const handleChangeDateTopRequesterFilter = (e: SelectChangeEvent<number>) => {
+    const filterValue = e.target.value;
+
+    const dateFromValue = dayjs()
+      .subtract(filterValue as number, 'day')
+      .format('YYYY-MM-DD');
+    setDateFromTopRequester(dateFromValue);
+  };
+
+  const handleChangeDateTopStaffFilter = (e: SelectChangeEvent<number>) => {
+    const filterValue = e.target.value;
+
+    const dateFromValue = dayjs()
+      .subtract(filterValue as number, 'day')
+      .format('YYYY-MM-DD');
+    setDateFromTopStaff(dateFromValue);
   };
 
   return (
@@ -408,6 +430,30 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
                 ],
               }}
             />
+            <TopRequesterChart
+              title="Top 5 Requester"
+              chart={{
+                categories: topRequester?.map((item) => item?.company_name),
+                series: [
+                  { name: 'Request', data: topRequester?.map((item) => item?.request_count) ?? [] },
+                ],
+                colors: ['#2CD9C5'],
+              }}
+              sx={{ mt: 2 }}
+              handleChangeDate={handleChangeDateTopRequesterFilter}
+            />
+            <TopStaffChart
+              title="Top 5 Staff"
+              chart={{
+                categories: topStaff?.map((item) => item?.staff_name),
+                series: [{ name: 'Task', data: topStaff?.map((item) => item?.task_count) ?? [] }],
+                colors: ['#FF6C40'],
+              }}
+              sx={{ mt: 2 }}
+              handleChangeDate={handleChangeDateTopStaffFilter}
+              handleChangeStaffState={handleChangeStaffState}
+              staffState={staffState}
+            />
           </Card>
         </Grid>
         <Grid xs={12} sm={6} md={4} spacing={2}>
@@ -502,14 +548,80 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
             <Box
               sx={{
                 mt: 2,
-                p: 3,
+                pt: 3,
                 position: 'relative',
                 backgroundColor: 'common.white',
                 borderRadius: 2,
               }}
+              display="flex"
+              justifyContent="center"
+              flexDirection="column"
+              alignItems="center"
             >
-              <Typography sx={{ mb: 4 }}>Requests Delivery Success Rate</Typography>
-              <RequestSuccessRate value={requestDeliveryRateValues} />
+              <Typography fontSize="36px" fontWeight="bold" sx={{ mb: 2 }}>
+                56
+              </Typography>
+              <Typography>Average Handling Time</Typography>
+              <Box display="flex" alignItems="center" gap={1} mt={3}>
+                <SvgColor src="/assets/icons/ic-grow.svg" />
+                <Typography>8 minutes than last month</Typography>
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                sx={{
+                  mt: 2,
+                  width: '100%',
+                  borderStyle: 'solid',
+                  borderTopWidth: 1,
+                  borderBottomWidth: 0,
+                  borderLeftWidth: 0,
+                  borderRightWidth: 0,
+                  borderColor: 'grey.200',
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  flexDirection="column"
+                  sx={{
+                    p: 3,
+                    width: '50%',
+                    borderStyle: 'solid',
+                    borderRightWidth: 1,
+                    borderBottomWidth: 0,
+                    borderLeftWidth: 0,
+                    borderTopWidth: 0,
+                    borderColor: 'grey.200',
+                  }}
+                >
+                  <Typography color="grey.600" fontSize="12px" textAlign="center">
+                    First Response Time
+                  </Typography>
+                  <Typography color="blue.700" fontSize="24px" fontWeight="bold" textAlign="center">
+                    1h 30m
+                  </Typography>
+                </Box>
+
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  flexDirection="column"
+                  sx={{
+                    p: 3,
+                    width: '50%',
+                  }}
+                >
+                  <Typography color="grey.600" fontSize="12px" textAlign="center">
+                    Next Response Time
+                  </Typography>
+                  <Typography color="blue.700" fontSize="24px" fontWeight="bold" textAlign="center">
+                    45m
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           </Box>
         </Grid>

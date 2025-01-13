@@ -36,3 +36,12 @@ export interface RequestDue {
     resolved_percentage: number;
     unresolved: number;
 }
+
+export interface TopRequester {
+    company_name: string;
+    request_count: number
+}
+export interface TopStaff {
+    staff_name: string;
+    task_count: number
+}

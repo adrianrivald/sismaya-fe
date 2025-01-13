@@ -46,7 +46,7 @@ export function RequestDueChart({ title, subheader, value, ...other }: Props) {
         },
       },
     },
-    labels: ['Resolved'],
+    labels: ['resolved'],
   };
 
   return (
