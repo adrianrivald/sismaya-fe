@@ -25,6 +25,7 @@ import { useRequestAssignees } from 'src/services/request/use-request-detail';
 
 export interface Assignee {
   id: number;
+  userId: number;
   name: string;
   email?: string;
   avatar: string;
@@ -97,12 +98,12 @@ export function AssigneeChooser({
           ) : (
             <Stack component="ul" spacing={2}>
               {items.map((assignee, index) => {
-                const isAssigned = !!assignees.find((a) => a.id === assignee.id);
+                const isAssigned = !!assignees.find((a) => a.userId === assignee.userId);
 
                 return (
                   <Stack
                     component="li"
-                    key={assignee.id}
+                    key={assignee.userId}
                     direction="row"
                     alignItems="center"
                     gap={2}

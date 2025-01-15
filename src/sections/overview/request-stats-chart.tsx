@@ -13,15 +13,16 @@ type Props = CardProps & {
   chart: {
     colors?: string[];
     categories?: string[];
-    series: {
-      name: string;
-      data: number[];
-    }[];
+    series?: any;
+    // series?: {
+    //   name: string;
+    //   data: number[];
+    // }[];
     options?: ChartOptions;
   };
 };
 
-export function TotalRequestOvertimeChart({ chart, ...other }: Props) {
+export function RequestStatsChart({ chart, ...other }: Props) {
   const theme = useTheme();
 
   const chartColors = chart.colors ?? [
@@ -40,6 +41,7 @@ export function TotalRequestOvertimeChart({ chart, ...other }: Props) {
     },
     legend: {
       show: true,
+      position: 'bottom',
     },
     tooltip: {
       y: {
@@ -51,7 +53,7 @@ export function TotalRequestOvertimeChart({ chart, ...other }: Props) {
 
   return (
     <Card {...other}>
-      <CardHeader title="Total Requests Over Time" />
+      <CardHeader title="Request Stats" />
 
       <Chart
         type="bar"

@@ -20,6 +20,5 @@ jobs:
             cd /home/sismedika/app/sismaya-sim
             git stash
             git pull origin staging
-            npm i --legacy-peer-deps
             npm ci --legacy-peer-deps
-            npm run build --legacy-peer-deps
+            npm run build

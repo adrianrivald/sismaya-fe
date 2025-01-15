@@ -18,11 +18,11 @@ import { Chart, useChart } from 'src/components/chart';
 
 type Props = CardProps & {
   title: string;
-  total: number;
-  color?: ColorType;
+  value?: string;
+  color?: string;
 };
 
-export function AnalyticsProjectSummary({ title, total, color = 'primary', sx, ...other }: Props) {
+export function TimeSummaryCard({ title, value, color, sx, ...other }: Props) {
   const theme = useTheme();
   return (
     <Card
@@ -30,7 +30,7 @@ export function AnalyticsProjectSummary({ title, total, color = 'primary', sx, .
         p: 3,
         boxShadow: '2',
         position: 'relative',
-        color: `${color}.darker`,
+        color: `${color}`,
         backgroundColor: 'common.white',
         borderRadius: 4,
         borderLeft: 8,
@@ -49,8 +49,8 @@ export function AnalyticsProjectSummary({ title, total, color = 'primary', sx, .
         }}
       >
         <Box sx={{ flexGrow: 1, minWidth: 112 }}>
-          <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
-          <Box sx={{ typography: 'h4' }}>{fShortenNumber(total)}</Box>
+          <Box sx={{ mb: 1, typography: 'subtitle2', color: 'grey.600' }}>{title}</Box>
+          <Box sx={{ typography: 'h4', color: 'blue.700' }}>{value}</Box>
         </Box>
       </Box>
     </Card>

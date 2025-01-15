@@ -38,12 +38,15 @@ export type DashboardLayoutProps = {
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
   const theme = useTheme();
   const { user } = useAuth();
-  const internalCompanies = user?.internal_companies?.map((item) => ({
+  const internalCompaniesDashboard = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/dashboard`,
+  }));
+  const internalCompaniesRequest = user?.internal_companies?.map((item) => ({
     heading: item?.company?.name,
     path: `/${item?.company?.name.toLowerCase()}/request`,
   }));
   const [navOpen, setNavOpen] = useState(false);
-  console.log(internalCompanies, 'internalCompanies');
   const layoutQuery: Breakpoint = 'lg';
 
   return (
@@ -77,7 +80,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  menus={menus(internalCompanies)}
+                  menus={menus(internalCompaniesDashboard, internalCompaniesRequest)}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   workspaces={_workspaces}
@@ -117,7 +120,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        *************************************** */
       sidebarSection={
         <NavDesktop
-          menus={menus(internalCompanies)}
+          menus={menus(internalCompaniesDashboard, internalCompaniesRequest)}
           layoutQuery={layoutQuery}
           workspaces={_workspaces}
           slots={{

@@ -1,36 +1,29 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import {
-  Box,
-  Button,
-  Card,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Stack,
-  styled,
-  Switch,
-} from '@mui/material';
+import { Box, Button, Card, MenuItem, Select, type SelectChangeEvent, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 
 import {
-  useClientTotalRequest,
-  useClientTotalRequestByState,
-  usePendingRequest,
-  useRequestDeliveryRate,
-  useRequestDue,
-  useTotalRequestOvertime,
-  useUnresolvedCito,
+  useInternalTotalRequestByCompany,
+  usePendingRequestInternal,
+  useTotalRequestOvertimeInternal,
+  useRequestDueInternal,
+  useInternalTotalRequestByState,
+  useUnresolvedCitoInternal,
+  useInternalTopRequester,
+  useInternalTopStaff,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
-import { UnresolvedCito } from 'src/services/dashboard/types';
+import type { UnresolvedCito } from 'src/services/dashboard/types';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
+import { TopRequesterChart } from '../../top-requester-chart';
+import { TopStaffChart } from '../../top-staff-chart';
 
 const columnHelper = createColumnHelper<UnresolvedCito>();
 
@@ -64,25 +57,37 @@ const columns = () => [
   }),
 ];
 
-export function DashboardClientView() {
+export function DashboardInternalCompanyView({
+  idCompany,
+  vendor,
+}: {
+  idCompany: number;
+  vendor: string;
+}) {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
+  const [dateFromTopRequester, setDateFromTopRequester] = React.useState<string>('2024-12-25');
+  const [dateFromTopStaff, setDateFromTopStaff] = React.useState<string>('2024-12-25');
   const [requestDueDate, setRequestDueDate] = React.useState<string>('2024-12-25');
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
-  const { getDataTableProps, data } = useUnresolvedCito({});
+  const [staffState, setStaffState] = React.useState<'quantity' | 'hour'>('quantity');
+  const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
   const dateNow = dayjs().format('YYYY-MM-DD');
-  const { data: clientTotalRequest } = useClientTotalRequest(dateFrom, dateNow);
-  const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
-  const { data: pendingRequest } = usePendingRequest();
-  const { data: totalRequestOvertime } = useTotalRequestOvertime();
-  const { data: requestDue } = useRequestDue(requestDueDate);
-  const { data: requestDeliveryRate } = useRequestDeliveryRate();
-  const requestDeliveryArr = Object.entries(requestDeliveryRate).map((entry) => ({
-    [entry[0]]: entry[1],
-  }));
-  const requestDeliveryRateValues = Object.entries(requestDeliveryRate).map(
-    (entry) => entry[1] as number
+  const { data: internalTotalRequest } = useInternalTotalRequestByCompany(
+    idCompany,
+    dateFrom,
+    dateNow
   );
-  console.log(totalRequestOvertime, 'totalRequestOvertime');
+  const { data: internalTotalRequestByState } = useInternalTotalRequestByState(
+    idCompany,
+    dateFrom,
+    dateNow
+  );
+  const { data: pendingRequest } = usePendingRequestInternal(idCompany);
+  const { data: totalRequestOvertime } = useTotalRequestOvertimeInternal(idCompany);
+  const { data: requestDue } = useRequestDueInternal(idCompany, requestDueDate);
+  const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
+  const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
+  console.log(topStaff, 'topStaff ');
 
   // const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   //   width: 62,
@@ -135,6 +140,10 @@ export function DashboardClientView() {
     setRequestState(state);
   };
 
+  const handleChangeStaffState = (state: 'quantity' | 'hour') => {
+    setStaffState(state);
+  };
+
   const handleChangeDateFilter = (e: SelectChangeEvent<number>) => {
     const filterValue = e.target.value;
 
@@ -150,12 +159,30 @@ export function DashboardClientView() {
     setRequestDueDate(filterValue);
   };
 
+  const handleChangeDateTopRequesterFilter = (e: SelectChangeEvent<number>) => {
+    const filterValue = e.target.value;
+
+    const dateFromValue = dayjs()
+      .subtract(filterValue as number, 'day')
+      .format('YYYY-MM-DD');
+    setDateFromTopRequester(dateFromValue);
+  };
+
+  const handleChangeDateTopStaffFilter = (e: SelectChangeEvent<number>) => {
+    const filterValue = e.target.value;
+
+    const dateFromValue = dayjs()
+      .subtract(filterValue as number, 'day')
+      .format('YYYY-MM-DD');
+    setDateFromTopStaff(dateFromValue);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            Dashboard
+            {vendor.toUpperCase()} Dashboard
           </Typography>
         </Box>
       </Box>
@@ -254,12 +281,12 @@ export function DashboardClientView() {
                   <Typography fontSize={14}>Total Request</Typography>
                   <Typography fontSize={12}>for the last 7 days</Typography>
                   <Typography fontSize={36} fontWeight="bold">
-                    {clientTotalRequest?.total_request}
+                    {internalTotalRequest?.total_request}
                   </Typography>
                   <Box display="flex" gap={1} alignItems="center">
                     <SvgColor src="/assets/icons/ic-grow.svg" />
                     <Typography fontSize={14} sx={{ color: 'mint.500' }}>
-                      {clientTotalRequest?.percentage}%
+                      {internalTotalRequest?.percentage}%
                     </Typography>
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
@@ -314,7 +341,7 @@ export function DashboardClientView() {
                     </Box>
                   </Box>
                   <Stack direction="row" gap={2} mt={2}>
-                    {clientTotalRequestByState?.[requestState]
+                    {internalTotalRequestByState?.[requestState]
                       ?.map((item, index) => {
                         const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
                         const renderedBackground = () => {
@@ -342,7 +369,6 @@ export function DashboardClientView() {
                             }
                           }
                         };
-                        console.log(getKey(item)[0], 'item');
                         return (
                           <Box
                             position="relative"
@@ -397,6 +423,7 @@ export function DashboardClientView() {
             </Card>
             <TotalRequestOvertimeChart
               sx={{ mt: 2 }}
+              title="Total Requests Over Time"
               chart={{
                 categories: totalRequestOvertime?.map((item) => item?.date),
                 series: [
@@ -407,6 +434,30 @@ export function DashboardClientView() {
                   // { name: 'Team B', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
                 ],
               }}
+            />
+            <TopRequesterChart
+              title="Top 5 Requester"
+              chart={{
+                categories: topRequester?.map((item) => item?.company_name),
+                series: [
+                  { name: 'Request', data: topRequester?.map((item) => item?.request_count) ?? [] },
+                ],
+                colors: ['#2CD9C5'],
+              }}
+              sx={{ mt: 2 }}
+              handleChangeDate={handleChangeDateTopRequesterFilter}
+            />
+            <TopStaffChart
+              title="Top 5 Staff"
+              chart={{
+                categories: topStaff?.map((item) => item?.staff_name),
+                series: [{ name: 'Task', data: topStaff?.map((item) => item?.task_count) ?? [] }],
+                colors: ['#FF6C40'],
+              }}
+              sx={{ mt: 2 }}
+              handleChangeDate={handleChangeDateTopStaffFilter}
+              handleChangeStaffState={handleChangeStaffState}
+              staffState={staffState}
             />
           </Card>
         </Grid>
@@ -502,14 +553,85 @@ export function DashboardClientView() {
             <Box
               sx={{
                 mt: 2,
-                p: 3,
+                pt: 3,
                 position: 'relative',
                 backgroundColor: 'common.white',
                 borderRadius: 2,
               }}
+              display="flex"
+              justifyContent="center"
+              flexDirection="column"
+              alignItems="center"
             >
-              <Typography sx={{ mb: 4 }}>Requests Delivery Success Rate</Typography>
-              <RequestSuccessRate value={requestDeliveryRateValues} />
+              <Typography fontSize="36px" fontWeight="bold" sx={{ mb: 2 }}>
+                56
+              </Typography>
+              <Typography>Average Handling Time</Typography>
+              <Box display="flex" alignItems="center" gap={1} mt={3}>
+                <SvgColor color="error.dark" src="/assets/icons/ic-grow.svg" />
+                <Typography>
+                  <Typography color="error.dark" component="span">
+                    8 minutes
+                  </Typography>{' '}
+                  than last month
+                </Typography>
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                sx={{
+                  mt: 2,
+                  width: '100%',
+                  borderStyle: 'solid',
+                  borderTopWidth: 1,
+                  borderBottomWidth: 0,
+                  borderLeftWidth: 0,
+                  borderRightWidth: 0,
+                  borderColor: 'grey.200',
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  flexDirection="column"
+                  sx={{
+                    p: 3,
+                    width: '50%',
+                    borderStyle: 'solid',
+                    borderRightWidth: 1,
+                    borderBottomWidth: 0,
+                    borderLeftWidth: 0,
+                    borderTopWidth: 0,
+                    borderColor: 'grey.200',
+                  }}
+                >
+                  <Typography color="grey.600" fontSize="12px" textAlign="center">
+                    First Response Time
+                  </Typography>
+                  <Typography color="blue.700" fontSize="24px" fontWeight="bold" textAlign="center">
+                    1h 30m
+                  </Typography>
+                </Box>
+
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  flexDirection="column"
+                  sx={{
+                    p: 3,
+                    width: '50%',
+                  }}
+                >
+                  <Typography color="grey.600" fontSize="12px" textAlign="center">
+                    Next Response Time
+                  </Typography>
+                  <Typography color="blue.700" fontSize="24px" fontWeight="bold" textAlign="center">
+                    45m
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           </Box>
         </Grid>
