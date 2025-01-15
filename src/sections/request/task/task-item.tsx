@@ -1,19 +1,10 @@
-import { Box, Stack, Divider, Typography } from '@mui/material';
-import { type Task } from 'src/services/request/task';
+import { Stack, Divider, Typography } from '@mui/material';
+import type { RequestTask } from 'src/services/request/task';
 import { AssigneeList } from 'src/components/form/field/assignee';
 import { TaskAttachment } from './task-attachment';
+import { TaskStatus } from './task-status';
 
-function TaskStatus({ bg, color, label }: ReturnType<Task['transformStatus']>) {
-  return (
-    <Box bgcolor={bg} color={color} borderRadius={0.5} px={1} py="1px">
-      <Typography fontWeight={600} fontSize={12} lineHeight="20px">
-        {label}
-      </Typography>
-    </Box>
-  );
-}
-
-function TaskAssignees({ assignees }: Pick<Task, 'assignees'>) {
+function TaskAssignees({ assignees }: Pick<RequestTask, 'assignees'>) {
   if (!assignees || assignees.length < 1) {
     return null;
   }
@@ -22,7 +13,7 @@ function TaskAssignees({ assignees }: Pick<Task, 'assignees'>) {
 }
 
 interface TaskItemProps {
-  task: Task;
+  task: RequestTask;
   onClick?: () => void;
 }
 
@@ -56,7 +47,7 @@ export function TaskItem({ task, onClick }: TaskItemProps) {
 
           <Divider orientation="vertical" flexItem />
 
-          <TaskStatus {...task.transformStatus()} />
+          <TaskStatus status={task.status} />
         </Stack>
 
         <TaskAttachment files={task.files} />

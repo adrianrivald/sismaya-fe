@@ -70,7 +70,6 @@ export function RequestDetailView() {
   const [open, setOpen] = useState(false);
   const [openApprove, setOpenApprove] = useState(false);
   const [openAssigneeModal, setOpenAssigneeModal] = useState(false);
-  const chats = [];
   const navigate = useNavigate();
   const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs());
