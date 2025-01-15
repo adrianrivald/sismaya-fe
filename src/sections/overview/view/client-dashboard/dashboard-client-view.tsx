@@ -397,7 +397,6 @@ export function DashboardClientView() {
             </Card>
             <TotalRequestOvertimeChart
               sx={{ mt: 2 }}
-              title="Total Requests Over Time"
               chart={{
                 categories: totalRequestOvertime?.map((item) => item?.date),
                 series: [

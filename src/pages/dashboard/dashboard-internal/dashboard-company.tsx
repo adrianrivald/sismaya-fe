@@ -25,7 +25,7 @@ export default function DashboardInternalCompanyPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <DashboardInternalCompanyView idCompany={idCurrentCompany} />
+      <DashboardInternalCompanyView idCompany={idCurrentCompany} vendor={vendor ?? ''} />
     </>
   );
 }

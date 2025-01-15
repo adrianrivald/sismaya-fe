@@ -57,7 +57,13 @@ const columns = () => [
   }),
 ];
 
-export function DashboardInternalCompanyView({ idCompany }: { idCompany: number }) {
+export function DashboardInternalCompanyView({
+  idCompany,
+  vendor,
+}: {
+  idCompany: number;
+  vendor: string;
+}) {
   const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
   const [dateFromTopRequester, setDateFromTopRequester] = React.useState<string>('2024-12-25');
   const [dateFromTopStaff, setDateFromTopStaff] = React.useState<string>('2024-12-25');
@@ -176,7 +182,7 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            Dashboard
+            {vendor.toUpperCase()} Dashboard
           </Typography>
         </Box>
       </Box>
@@ -563,8 +569,13 @@ export function DashboardInternalCompanyView({ idCompany }: { idCompany: number 
               </Typography>
               <Typography>Average Handling Time</Typography>
               <Box display="flex" alignItems="center" gap={1} mt={3}>
-                <SvgColor src="/assets/icons/ic-grow.svg" />
-                <Typography>8 minutes than last month</Typography>
+                <SvgColor color="error.dark" src="/assets/icons/ic-grow.svg" />
+                <Typography>
+                  <Typography color="error.dark" component="span">
+                    8 minutes
+                  </Typography>{' '}
+                  than last month
+                </Typography>
               </Box>
               <Box
                 display="flex"

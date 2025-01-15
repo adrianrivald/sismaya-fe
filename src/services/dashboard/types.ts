@@ -45,3 +45,21 @@ export interface TopStaff {
     staff_name: string;
     task_count: number
 }
+
+export interface RequestSummary {
+    done?: number;
+    due_today?: number;
+    in_progress?: number;
+    overdue?: number;
+    pending?: number;
+    to_do?: number
+}
+
+export type RequestSummaryCompany = RequestSummary & {company_name: string}
+
+export interface RequestStats {
+    done: number;
+    in_progress: number;
+    month: string;
+    new_request: number;
+}
