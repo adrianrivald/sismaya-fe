@@ -369,7 +369,6 @@ export function DashboardInternalCompanyView({
                             }
                           }
                         };
-                        console.log(getKey(item)[0], 'item');
                         return (
                           <Box
                             position="relative"

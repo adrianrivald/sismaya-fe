@@ -13,10 +13,11 @@ type Props = CardProps & {
   chart: {
     colors?: string[];
     categories?: string[];
-    series?: {
-      name: string;
-      data: any[];
-    }[];
+    series?: any;
+    // series?: {
+    //   name: string;
+    //   data: number[];
+    // }[];
     options?: ChartOptions;
   };
 };
