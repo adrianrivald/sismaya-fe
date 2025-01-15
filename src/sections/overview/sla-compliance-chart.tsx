@@ -10,7 +10,7 @@ type Props = CardProps & {
   value: number;
 };
 
-export function RequestDueChart({ title, subheader, value, ...other }: Props) {
+export function SlaComplianceChart({ title, subheader, value, ...other }: Props) {
   const options: ChartOptions = {
     series: [value],
     chart: {
@@ -22,14 +22,17 @@ export function RequestDueChart({ title, subheader, value, ...other }: Props) {
       gradient: {
         shade: 'dark',
         type: 'vertical',
-        gradientToColors: ['#C8FAD6'],
+        gradientToColors: ['#005B7F'],
+
+        opacityFrom: 1,
+        opacityTo: 1,
         stops: [0, 100],
       },
     },
     plotOptions: {
       radialBar: {
         hollow: {
-          size: '50%',
+          size: '70%',
         },
         dataLabels: {
           name: {
@@ -46,7 +49,7 @@ export function RequestDueChart({ title, subheader, value, ...other }: Props) {
         },
       },
     },
-    labels: ['resolved'],
+    labels: ['SLA'],
   };
 
   return (
@@ -54,9 +57,9 @@ export function RequestDueChart({ title, subheader, value, ...other }: Props) {
       type="radialBar"
       series={options?.series}
       options={options}
-      height={150}
-      width={150}
-      style={{ width: '150px' }}
+      height={300}
+      width={300}
+      style={{ width: '300px' }}
     />
   );
 }

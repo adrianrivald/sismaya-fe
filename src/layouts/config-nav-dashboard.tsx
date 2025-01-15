@@ -42,16 +42,22 @@ interface InternalCompanyMenus {
   path: string;
 }
 
-export const menus = (internalCompanies?: InternalCompanyMenus[]) => [
+export const menus = (
+  internalCompaniesDashboard?: InternalCompanyMenus[],
+  internalCompaniesRequest?: InternalCompanyMenus[]
+) => [
   {
     // isShownInRole: [6],
+    isAccordion: true,
     heading: 'GENERAL',
     id: 'general',
     list: [
       {
         heading: 'Dashboard',
         path: '/',
+        id: 'dashboard',
         icon: icon('ic-analytics'),
+        list: internalCompaniesDashboard,
       },
       {
         heading: 'Reports',
@@ -69,7 +75,7 @@ export const menus = (internalCompanies?: InternalCompanyMenus[]) => [
         heading: 'Request',
         id: 'request',
         icon: icon('ic-chat'),
-        list: internalCompanies,
+        list: internalCompaniesRequest,
       },
       {
         heading: 'Master Data',

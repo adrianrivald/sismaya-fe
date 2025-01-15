@@ -9,7 +9,7 @@ import { DataTable } from 'src/components/table/data-tables';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteRequestById, useRequestList } from 'src/services/request';
-import { AnalyticsProjectSummary } from '../analytics-project-summary';
+import { RequestSummaryCard } from '../request-summary-card';
 
 export function DashboardView() {
   const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);

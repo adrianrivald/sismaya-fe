@@ -48,7 +48,6 @@ async function fetchPendingRequest() {
 
   // Unresolved CITO
 
-
 export function fetchUnresolvedCito(params: Partial<any>) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/dashboard-client/unresolved-cito', baseUrl);
