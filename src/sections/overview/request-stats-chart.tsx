@@ -42,6 +42,7 @@ export function RequestStatsChart({ chart, ...other }: Props) {
     legend: {
       show: true,
       position: 'bottom',
+      horizontalAlign: 'center',
     },
     tooltip: {
       y: {

@@ -11,6 +11,7 @@ export interface Menus {
   heading: string;
   icon?: React.ReactNode;
   list: any[];
+  path?: string;
 }
 
 interface MenuList {
@@ -24,33 +25,21 @@ interface MenuList {
 export const icon = (name: string) => (
   <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
 );
-
-export const menuByRole: any = {
-  1: {
-    menus: ['master-data'],
-  },
-  6: {
-    menus: ['request'],
-  },
-  3: {
-    menus: ['request'],
-  },
-};
-
 interface InternalCompanyMenus {
   heading: string;
   path: string;
 }
 
 export const menus = (
+  type: 'internal' | 'client',
   internalCompaniesDashboard?: InternalCompanyMenus[],
   internalCompaniesRequest?: InternalCompanyMenus[]
 ) => [
   {
-    // isShownInRole: [6],
-    isAccordion: true,
+    isAccordion: type === 'internal',
     heading: 'GENERAL',
     id: 'general',
+    path: '/',
     list: [
       {
         heading: 'Dashboard',

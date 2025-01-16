@@ -126,8 +126,8 @@ export function DashboardInternalView() {
     data: filtered?.map((item: any) => item?.new_request),
   }))[0];
 
-  const convertedDataToChart = [doneValue, inProgressValue, newRequestValue];
-
+  const convertedDataToChart = [newRequestValue, inProgressValue, doneValue];
+  console.log(convertedDataToChart, 'convertedDataToChart');
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -231,6 +231,7 @@ export function DashboardInternalView() {
             chart={{
               categories: requestStats?.map((item) => item?.month),
               series: convertedDataToChart,
+              colors: ['#005B7F', '#FFE700', '#2CD9C5'],
               // series:
             }}
           />

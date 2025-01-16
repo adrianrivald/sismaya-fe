@@ -1,4 +1,5 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 import { Fragment, useEffect } from 'react';
 
@@ -19,7 +20,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
-import { menuByRole, Menus } from '../config-nav-dashboard';
+import { Menus } from '../config-nav-dashboard';
 
 // ----------------------------------------------------------------------
 
@@ -112,9 +113,17 @@ export function NavMobile({
 export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const role = user?.user_info?.role_id;
   const currentMenu = window.location.href.split('/')[3];
   const accessibleMenus = role === 1 ? ['master-data'] : ['request', 'dashboard'];
+
+  const onClickParentAccordion = (path?: string) => {
+    console.log('parent clicked');
+    if (path) {
+      navigate(`${path}`);
+    }
+  };
 
   return (
     <>
@@ -166,15 +175,8 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                                 fontWeight: 'fontWeightMedium',
                                 color: 'var(--layout-nav-item-color)',
                                 minHeight: 'var(--layout-nav-item-height)',
-                                // ...(isActived && {
-                                //   fontWeight: 'fontWeightSemiBold',
-                                //   bgcolor: 'var(--layout-nav-item-active-bg)',
-                                //   color: 'var(--layout-nav-item-active-color)',
-                                //   '&:hover': {
-                                //     bgcolor: 'var(--layout-nav-item-hover-bg)',
-                                //   },
-                                // }),
                               }}
+                              onClick={() => onClickParentAccordion(menu?.path)}
                             >
                               <Box component="span" sx={{ width: 24, height: 24 }}>
                                 {childMenu?.icon}
