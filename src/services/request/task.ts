@@ -7,31 +7,14 @@ import { http } from 'src/utils/http';
 import { fDate } from 'src/utils/format-time';
 import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
 import type { Assignee } from 'src/components/form/field/assignee';
+import { taskStatusMap } from 'src/constants/status';
 
-export class Task {
+export class RequestTask {
   static queryKeys(requestId: number) {
     return ['task', `request-${requestId}`];
   }
 
-  static statusMap = {
-    'to-do': {
-      label: 'To Do',
-      color: '#004C6A',
-      bg: 'rgba(0, 91, 127, 0.16)',
-    },
-
-    'in-progress': {
-      label: 'On Progress',
-      color: '#B78103',
-      bg: 'rgba(255, 245, 215, 1)',
-    },
-
-    completed: {
-      label: 'Completed',
-      color: '#229A16',
-      bg: 'rgba(84, 214, 44, 0.16)',
-    },
-  };
+  static statusMap = taskStatusMap;
 
   constructor(
     public requestId: number = 0,
@@ -39,16 +22,17 @@ export class Task {
     public title: string = '',
     public dueDate: string = new Date().toISOString(),
     public description: string = '',
-    public status: keyof typeof Task.statusMap = 'to-do',
+    public status: keyof typeof RequestTask.statusMap = 'to-do',
     public assignees: Array<Assignee> = [],
     public files: Array<{
+      id: number;
       name: string;
       url: string;
     }> = []
   ) {}
 
   static fromJson(json: any) {
-    return new Task(
+    return new RequestTask(
       json.request?.id,
       json.id,
       json.name,
@@ -71,7 +55,7 @@ export class Task {
   }
 
   static async toJson(task: any) {
-    const attachments = await Task.filesToAttachments(task.files);
+    const attachments = await RequestTask.filesToAttachments(task.files);
 
     return {
       request_id: task.requestId,
@@ -114,10 +98,6 @@ export class Task {
     return fDate(this.dueDate, 'DD MMMM YYYY');
   }
 
-  public transformStatus() {
-    return Task.statusMap[this.status || 'to-do'];
-  }
-
   static formSchema = z.object({
     request_id: z.number().optional(),
     title: z.string().min(1, 'Required'),
@@ -134,39 +114,40 @@ export class Task {
   });
 }
 
-export function useTaskByRequest(requestId: Task['requestId']) {
+export function useTaskByRequest(requestId: RequestTask['requestId']) {
   return useQuery({
-    queryKey: Task.queryKeys(requestId),
+    queryKey: RequestTask.queryKeys(requestId),
     queryFn: async () => {
       const response = await http('/tasks', { params: { request_id: requestId } });
       const items = response.data ?? [];
-      const transformed: Array<Task> = items.map((item: any) => Task.fromJson(item));
+      const transformed: Array<RequestTask> = items.map((item: any) => RequestTask.fromJson(item));
 
       return transformed;
     },
   });
 }
 
-export interface UseCreateOrUpdateTaskOptions extends UseMutationOptions<Task, Error, Task> {
-  defaultValues?: Task;
+export interface UseCreateOrUpdateTaskOptions
+  extends UseMutationOptions<RequestTask, Error, RequestTask> {
+  defaultValues?: RequestTask;
 }
 
 export function useCreateOrUpdateTask(
-  requestId: Task['requestId'],
+  requestId: RequestTask['requestId'],
   { defaultValues, ...options }: UseCreateOrUpdateTaskOptions = {}
 ) {
   const isEdit = !!defaultValues?.taskId;
 
-  const form = useForm<Task>({
-    resolver: zodResolver(Task.formSchema),
+  const form = useForm<RequestTask>({
+    resolver: zodResolver(RequestTask.formSchema),
     defaultValues,
   });
 
-  const mutation = useMutation<Task, Error, Task>({
+  const mutation = useMutation<RequestTask, Error, RequestTask>({
     ...options,
-    mutationKey: Task.queryKeys(requestId),
+    mutationKey: RequestTask.queryKeys(requestId),
     mutationFn: async (task) => {
-      const formData = await Task.toJson({ ...task, requestId });
+      const formData = await RequestTask.toJson({ ...task, requestId });
 
       return http(['/tasks', isEdit ? `/${defaultValues.taskId}` : ''].join(''), {
         method: isEdit ? 'PUT' : 'POST',
@@ -177,7 +158,7 @@ export function useCreateOrUpdateTask(
 
   const onSubmit = form.handleSubmit(
     (formValues) =>
-      toast.promise<Task, Error>(mutation.mutateAsync(formValues), {
+      toast.promise<RequestTask, Error>(mutation.mutateAsync(formValues), {
         pending: `${isEdit ? 'Updating' : 'Creating'} task...`,
         success: `${isEdit ? 'Updated' : 'Created'} task successfully`,
         error: {
@@ -192,14 +173,14 @@ export function useCreateOrUpdateTask(
   return [form, onSubmit] as const;
 }
 
-export function useDeleteTask(requestId: Task['requestId']) {
-  const mutation = useMutation<Task, Error, Pick<Task, 'taskId'>>({
-    mutationKey: Task.queryKeys(requestId),
+export function useDeleteTask(requestId: RequestTask['requestId']) {
+  const mutation = useMutation<RequestTask, Error, Pick<RequestTask, 'taskId'>>({
+    mutationKey: RequestTask.queryKeys(requestId),
     mutationFn: async ({ taskId }) => http(`/tasks/${taskId}`, { method: 'DELETE' }),
   });
 
-  const onSubmit = ({ taskId }: Pick<Task, 'taskId'>) =>
-    toast.promise<Task, Error>(mutation.mutateAsync({ taskId }), {
+  const onSubmit = ({ taskId }: Pick<RequestTask, 'taskId'>) =>
+    toast.promise<RequestTask, Error>(mutation.mutateAsync({ taskId }), {
       pending: 'Deleting task...',
       success: 'Deleted task successfully',
       error: { render: ({ data }) => data?.message || 'Failed to delete task' },
@@ -215,13 +196,13 @@ export type UseMutationAssigneePayload =
     }
   | {
       kind: 'assign';
-      taskId: Task['taskId'];
+      taskId: RequestTask['taskId'];
       assigneeId: number;
     };
 
-export function useMutationAssignee(requestId: Task['requestId']) {
-  const { isLoading, mutateAsync } = useMutation<Task, Error, UseMutationAssigneePayload>({
-    mutationKey: Task.queryKeys(requestId),
+export function useMutationAssignee(requestId: RequestTask['requestId']) {
+  const { isLoading, mutateAsync } = useMutation<RequestTask, Error, UseMutationAssigneePayload>({
+    mutationKey: RequestTask.queryKeys(requestId),
     mutationFn: async (payload) => {
       if (payload.kind === 'unassign') {
         return http(`/task-assignee/${payload.assigneeId}`, { method: 'DELETE' });
@@ -247,19 +228,19 @@ export type UseMutationAttachmentPayload =
     }
   | {
       kind: 'create';
-      taskId: Task['taskId'];
+      taskId: RequestTask['taskId'];
       files: Array<File>;
     };
 
-export function useMutationAttachment(requestId: Task['requestId']) {
-  const { isLoading, mutateAsync } = useMutation<Task, Error, UseMutationAttachmentPayload>({
-    mutationKey: Task.queryKeys(requestId),
+export function useMutationAttachment(requestId: RequestTask['requestId']) {
+  const { isLoading, mutateAsync } = useMutation<RequestTask, Error, UseMutationAttachmentPayload>({
+    mutationKey: RequestTask.queryKeys(requestId),
     mutationFn: async (payload) => {
       if (payload.kind === 'delete') {
         return http(`/task-attachment/${payload.fileId}`, { method: 'DELETE' });
       }
 
-      const attachments = await Task.filesToAttachments(payload.files);
+      const attachments = await RequestTask.filesToAttachments(payload.files);
 
       return http(`/task-attachment`, {
         method: 'POST',
@@ -269,7 +250,7 @@ export function useMutationAttachment(requestId: Task['requestId']) {
   });
 
   const onSubmit = (payload: UseMutationAttachmentPayload) =>
-    toast.promise<Task, Error>(mutateAsync(payload), {
+    toast.promise<RequestTask, Error>(mutateAsync(payload), {
       pending: payload.kind === 'delete' ? 'Deleting attachment...' : 'Uploading attachment...',
       success:
         payload.kind === 'delete'
@@ -285,7 +266,7 @@ export function useMutationAttachment(requestId: Task['requestId']) {
 }
 
 export interface UseTaskActivitiesParams {
-  taskId: Task['taskId'];
+  taskId: RequestTask['taskId'];
 }
 
 export interface TaskActivity {
@@ -294,11 +275,11 @@ export interface TaskActivity {
   created_at: string;
 }
 
-export function useTaskActivities(params: { requestId: Task['requestId'] }) {
+export function useTaskActivities(params: { requestId: RequestTask['requestId'] }) {
   return useQuery<Array<TaskActivity>, Error>({
     suspense: false,
     useErrorBoundary: false,
-    queryKey: [...Task.queryKeys(params.requestId), 'activities'],
+    queryKey: [...RequestTask.queryKeys(params.requestId), 'activities'],
     queryFn: async () => {
       const response = await http(`/requests/${params.requestId}/activity-logs`, {
         params: {

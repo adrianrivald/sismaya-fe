@@ -2,13 +2,13 @@ import { Box, Stack, Typography, ButtonBase, Button } from '@mui/material';
 import * as Dialog from 'src/components/disclosure/modal';
 import { Iconify } from 'src/components/iconify';
 import { downloadFile } from 'src/utils/download';
-import { type Task } from 'src/services/request/task';
+import { type RequestTask } from 'src/services/request/task';
 
 function AttachmentItem({
   file,
   variant = 'list',
 }: {
-  file: Task['files'][number];
+  file: RequestTask['files'][number];
   variant?: 'list' | 'modal';
 }) {
   return (
@@ -47,7 +47,7 @@ function AttachmentItem({
   );
 }
 
-export function TaskAttachment({ files }: Pick<Task, 'files'>) {
+export function TaskAttachment({ files }: Pick<RequestTask, 'files'>) {
   if (!files || files.length < 1) {
     return null;
   }

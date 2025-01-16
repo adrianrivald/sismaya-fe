@@ -9,7 +9,7 @@ import {
 } from '@mui/lab';
 import { timelineItemClasses } from '@mui/lab/TimelineItem';
 import { fDateTime } from 'src/utils/format-time';
-import { useTaskActivities, type Task, type TaskActivity } from 'src/services/request/task';
+import { useTaskActivities, type RequestTask, type TaskActivity } from 'src/services/request/task';
 import * as Tab from 'src/components/tabs';
 
 function ActivityItem({ description: title, created_at: date }: TaskActivity) {
@@ -26,7 +26,7 @@ function ActivityItem({ description: title, created_at: date }: TaskActivity) {
 }
 
 interface TaskActivitiesProps {
-  requestId: Task['requestId'];
+  requestId: RequestTask['requestId'];
 }
 
 export function TaskActivities(props: TaskActivitiesProps) {
