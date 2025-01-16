@@ -27,7 +27,7 @@ import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
 
-type StatusStepEnum = 'to_do' | 'in_progress' | 'done' | 'pending';
+type StatusStepEnum = 'to_do' | 'in_progress' | 'completed' | 'pending' | 'requested';
 
 export default function RequestDetailLayout() {
   const { user } = useAuth();

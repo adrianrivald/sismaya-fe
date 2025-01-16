@@ -70,7 +70,7 @@ export const stepColorMap = {
   },
 
   // on_progress
-  on_progress: {
+  in_progress: {
     bgColor: 'warning.main',
     color: 'warning.dark',
   },
