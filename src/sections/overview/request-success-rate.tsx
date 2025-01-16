@@ -11,16 +11,17 @@ type Props = CardProps & {
 
 export function RequestSuccessRate({ title, subheader, value, ...other }: Props) {
   const options: any = {
-    series: value,
+    dataLabels: {
+      enabled: false,
+    },
     legend: {
       show: true,
-      position: 'bottom' as const,
+      position: 'bottom',
+      horizontalAlign: 'center',
     },
+    colors: ['#D3FCD2', '#77ED8B', '#FFAC82'],
+    labels: ['Early', 'On-Time', 'Late'],
     plotOptions: {
-      // legend: {
-      //   show: true,
-      //   position: 'bottom',
-      // },
       pie: {
         startAngle: 0,
         endAngle: 360,
@@ -28,48 +29,30 @@ export function RequestSuccessRate({ title, subheader, value, ...other }: Props)
         offsetX: 0,
         offsetY: 0,
         customScale: 1,
-        dataLabels: {
-          offset: 0,
-          minAngleToShowLabel: 10,
-        },
         donut: {
           size: '65%',
           background: 'transparent',
           labels: {
             show: true,
-            name: {
-              show: true,
-              fontSize: '22px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              fontWeight: 600,
-              color: undefined,
-              offsetY: -10,
-            },
             total: {
+              label: '',
               show: true,
               showAlways: true,
-              fontSize: '22px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontSize: '24px',
               fontWeight: 700,
               color: '#373d3f',
+              formatter(w: any) {
+                const totalValue: number = w.globals.seriesTotals.reduce(
+                  (a: number, b: number) => a + b,
+                  0
+                );
+                return `${totalValue}%`;
+              },
             },
           },
         },
       },
     },
-    // responsive: [
-    //   {
-    //     breakpoint: 480,
-    //     options: {
-    //       chart: {
-    //         width: 200,
-    //       },
-    //       legend: {
-    //         position: 'bottom',
-    //       },
-    //     },
-    //   },
-    // ],
   };
 
   return (

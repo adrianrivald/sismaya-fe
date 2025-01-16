@@ -24,6 +24,7 @@ import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
 import { TopRequesterChart } from '../../top-requester-chart';
 import { TopStaffChart } from '../../top-staff-chart';
+import { HappinessRatingChart } from '../../happiness-rating-chart';
 
 const columnHelper = createColumnHelper<UnresolvedCito>();
 
@@ -87,54 +88,6 @@ export function DashboardInternalCompanyView({
   const { data: requestDue } = useRequestDueInternal(idCompany, requestDueDate);
   const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
-  console.log(topStaff, 'topStaff ');
-
-  // const MaterialUISwitch = styled(Switch)(({ theme }) => ({
-  //   width: 62,
-  //   height: 34,
-  //   padding: 7,
-  //   '& .MuiSwitch-switchBase': {
-  //     margin: 1,
-  //     padding: 0,
-  //     transform: 'translateX(6px)',
-  //     '&.Mui-checked': {
-  //       color: '#fff',
-  //       transform: 'translateX(22px)',
-  //       '& .MuiSwitch-thumb:before': {
-  //         backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
-  //           '#fff'
-  //         )}" d="M4.2 2.5l-.7 1.8-1.8.7 1.8.7.7 1.8.6-1.8L6.7 5l-1.9-.7-.6-1.8zm15 8.3a6.7 6.7 0 11-6.6-6.6 5.8 5.8 0 006.6 6.6z"/></svg>')`,
-  //       },
-  //       '& + .MuiSwitch-track': {
-  //         opacity: 1,
-  //         backgroundColor: theme.palette.mode === 'dark' ? '#8796A5' : '#aab4be',
-  //       },
-  //     },
-  //   },
-  //   '& .MuiSwitch-thumb': {
-  //     backgroundColor: theme.palette.mode === 'dark' ? '#003892' : '#001e3c',
-  //     width: 32,
-  //     height: 32,
-  //     '&::before': {
-  //       content: "''",
-  //       position: 'absolute',
-  //       width: '100%',
-  //       height: '100%',
-  //       left: 0,
-  //       top: 0,
-  //       backgroundRepeat: 'no-repeat',
-  //       backgroundPosition: 'center',
-  //       backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
-  //         '#fff'
-  //       )}" d="M9.305 1.667V3.75h1.389V1.667h-1.39zm-4.707 1.95l-.982.982L5.09 6.072l.982-.982-1.473-1.473zm10.802 0L13.927 5.09l.982.982 1.473-1.473-.982-.982zM10 5.139a4.872 4.872 0 00-4.862 4.86A4.872 4.872 0 0010 14.862 4.872 4.872 0 0014.86 10 4.872 4.872 0 0010 5.139zm0 1.389A3.462 3.462 0 0113.471 10a3.462 3.462 0 01-3.473 3.472A3.462 3.462 0 016.527 10 3.462 3.462 0 0110 6.528zM1.665 9.305v1.39h2.083v-1.39H1.666zm14.583 0v1.39h2.084v-1.39h-2.084zM5.09 13.928L3.616 15.4l.982.982 1.473-1.473-.982-.982zm9.82 0l-.982.982 1.473 1.473.982-.982-1.473-1.473zM9.305 16.25v2.083h1.389V16.25h-1.39z"/></svg>')`,
-  //     },
-  //   },
-  //   '& .MuiSwitch-track': {
-  //     opacity: 1,
-  //     backgroundColor: theme.palette.mode === 'dark' ? '#8796A5' : '#aab4be',
-  //     borderRadius: 20 / 2,
-  //   },
-  // }));
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -176,6 +129,60 @@ export function DashboardInternalCompanyView({
       .format('YYYY-MM-DD');
     setDateFromTopStaff(dateFromValue);
   };
+
+  const arrRequestByState =
+    internalTotalRequestByState?.[requestState]?.map((item, index) => {
+      const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
+      const renderedBackground = () => {
+        if (requestState === 'priority') {
+          switch (getKey(item)[0]) {
+            case 'high':
+              return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
+            case 'medium':
+              return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
+            case 'low':
+              return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
+            default:
+              return '';
+          }
+        } else {
+          switch (getKey(item)[0]) {
+            case 'to_do':
+              return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
+            case 'in_progress':
+              return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
+            case 'done':
+              return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
+            default:
+              return '';
+          }
+        }
+      };
+      const label = getKey(item).toString();
+      return (
+        <Box
+          position="relative"
+          sx={{
+            borderRadius: 2,
+            background: renderedBackground(),
+            padding: 2,
+            width: '100%',
+            color: 'error.darker',
+          }}
+        >
+          <Typography textTransform="capitalize">{label.replaceAll('_', '-')}</Typography>
+          <Typography mt={2} variant="h4">
+            {item[`${getKey(item)}`]}
+          </Typography>
+          <Typography fontSize={12}>Requests</Typography>
+          <Box
+            component="img"
+            src="/assets/background/shape-square.png"
+            sx={{ position: 'absolute', top: 2, left: 2 }}
+          />
+        </Box>
+      );
+    }) ?? [];
 
   return (
     <DashboardContent maxWidth="xl">
@@ -341,59 +348,7 @@ export function DashboardInternalCompanyView({
                     </Box>
                   </Box>
                   <Stack direction="row" gap={2} mt={2}>
-                    {internalTotalRequestByState?.[requestState]
-                      ?.map((item, index) => {
-                        const getKey = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
-                        const renderedBackground = () => {
-                          if (requestState === 'priority') {
-                            switch (getKey(item)[0]) {
-                              case 'high':
-                                return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
-                              case 'medium':
-                                return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
-                              case 'low':
-                                return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
-                              default:
-                                return '';
-                            }
-                          } else {
-                            switch (getKey(item)[0]) {
-                              case 'to_do':
-                                return 'linear-gradient(to right bottom, #FFE9D5, #FFAC82)';
-                              case 'in_progress':
-                                return 'linear-gradient(to right bottom, #FFF5CC, #FFD666)';
-                              case 'done':
-                                return 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)';
-                              default:
-                                return '';
-                            }
-                          }
-                        };
-                        return (
-                          <Box
-                            position="relative"
-                            sx={{
-                              borderRadius: 2,
-                              background: renderedBackground(),
-                              padding: 2,
-                              width: '100%',
-                              color: 'error.darker',
-                            }}
-                          >
-                            <Typography textTransform="capitalize">{getKey(item)}</Typography>
-                            <Typography mt={2} variant="h4">
-                              {item[`${getKey(item)}`]}
-                            </Typography>
-                            <Typography fontSize={12}>Requests</Typography>
-                            <Box
-                              component="img"
-                              src="/assets/background/shape-square.png"
-                              sx={{ position: 'absolute', top: 2, left: 2 }}
-                            />
-                          </Box>
-                        );
-                      })
-                      .reverse()}
+                    {requestState === 'priority' ? arrRequestByState.reverse() : arrRequestByState}
                   </Stack>
                 </Card>
               </Stack>
@@ -564,7 +519,7 @@ export function DashboardInternalCompanyView({
               alignItems="center"
             >
               <Typography fontSize="36px" fontWeight="bold" sx={{ mb: 2 }}>
-                56
+                56m
               </Typography>
               <Typography>Average Handling Time</Typography>
               <Box display="flex" alignItems="center" gap={1} mt={3}>
@@ -631,6 +586,33 @@ export function DashboardInternalCompanyView({
                     45m
                   </Typography>
                 </Box>
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                mt: 2,
+                p: 3,
+                position: 'relative',
+                backgroundColor: 'common.white',
+                borderRadius: 2,
+              }}
+              display="flex"
+              justifyContent="center"
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Typography fontSize="18px" fontWeight="600" variant="h6">
+                Happiness Rating
+              </Typography>
+              <HappinessRatingChart value={90} />
+              <Box textAlign="center">
+                <Typography color="grey.500" fontSize={12}>
+                  Based on
+                </Typography>
+                <Typography color="blue.700" fontSize={12} sx={{ textDecoration: 'underline' }}>
+                  16 performance evaluation feedbacks
+                </Typography>
               </Box>
             </Box>
           </Box>
