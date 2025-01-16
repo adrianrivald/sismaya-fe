@@ -15,10 +15,7 @@ export function usePaginationQuery<TData>(
   queryKey: QueryKey,
   queryFn: (pagination: PaginationState) => Promise<WithPagination<TData>>
 ) {
-  const [{ pageIndex, pageSize }, setPagination] =
-    useSetState<PaginationState>(initialPagination);
-
-    console.log(pageIndex,'pageIndex')
+  const [{ pageIndex, pageSize }, setPagination] = useSetState<PaginationState>(initialPagination);
 
   const query = useQuery({
     queryKey: [...queryKey, pageSize, pageIndex],

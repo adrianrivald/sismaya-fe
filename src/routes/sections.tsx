@@ -23,6 +23,12 @@ export const RequestTaskPage = lazy(() => import('src/pages/request/task'));
 export const RequestCreatePage = lazy(() => import('src/pages/request/create'));
 export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 
+// Task Management
+export const TaskLayout = lazy(() => import('src/pages/task/layout'));
+export const TaskListPage = lazy(() => import('src/pages/task/list'));
+export const TaskKanbanPage = lazy(() => import('src/pages/task/kanban'));
+export const TaskDetailPage = lazy(() => import('src/pages/task/detail'));
+
 // Master Data
 
 // Internal Company
@@ -150,6 +156,22 @@ const clientRoutes: NonIndexRouteObject = {
     },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
+
+    // Task Management
+    {
+      path: '/task',
+      element: <TaskLayout />,
+      children: [
+        { index: true, element: <TaskKanbanPage /> },
+        { path: 'list', element: <TaskListPage /> },
+        { path: 'kanban', element: <TaskKanbanPage /> },
+      ],
+    },
+
+    {
+      path: '/task/:taskId',
+      element: <TaskDetailPage />,
+    },
   ],
 };
 

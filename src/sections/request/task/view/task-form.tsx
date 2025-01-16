@@ -19,12 +19,12 @@ import * as formUtils from 'src/utils/form';
 interface RequestTaskFormProps {
   children: React.ReactElement;
   requestId: number;
-  task?: taskService.Task;
+  task?: taskService.RequestTask;
 }
 
 interface TaskFormProps extends Omit<RequestTaskFormProps, 'children'> {}
 
-const defaultFormValues = taskService.Task.fromJson({
+const defaultFormValues = taskService.RequestTask.fromJson({
   status: 'to-do',
   dueDate: new Date(),
 });
@@ -87,7 +87,7 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
         <Divider />
 
         <Stack p={2} spacing={3} flexGrow={1}>
-          <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
+          <TextField label="RequestTask Name" {...formUtils.getTextProps(form, 'title')} />
 
           <AssigneeChooserField
             name="assignees"
@@ -113,7 +113,7 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
             disabled={task?.taskId === undefined || task?.taskId === 0}
             {...formUtils.getSelectProps(form, 'status')}
           >
-            {Object.entries(taskService.Task.statusMap).map(([key, value]) => (
+            {Object.entries(taskService.RequestTask.statusMap).map(([key, value]) => (
               <MenuItem key={key} value={key} children={value.label} />
             ))}
           </TextField>

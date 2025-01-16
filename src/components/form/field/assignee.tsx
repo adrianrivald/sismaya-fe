@@ -37,7 +37,7 @@ export function AssigneeList({ assignees }: { assignees: Array<Assignee> }) {
   }
 
   return (
-    <AvatarGroup total={assignees.length}>
+    <AvatarGroup max={4} total={assignees.length}>
       {assignees.map((assignee) => (
         <Avatar key={assignee.id} title={assignee.name} alt={assignee.name} src={assignee.avatar} />
       ))}

@@ -185,7 +185,7 @@ export default function RequestDetailLayout() {
                 Status
                 <Select
                   value={currentStatus}
-                  disabled={requestDetail?.step === 'done'}
+                  disabled={requestDetail?.step === 'done' || requestDetail?.step === 'pending'}
                   sx={{
                     fontWeight: 'bold',
                     height: 40,
