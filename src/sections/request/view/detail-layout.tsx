@@ -190,10 +190,10 @@ export default function RequestDetailLayout() {
                     fontWeight: 'bold',
                     height: 40,
                     bgcolor: currentStatus
-                      ? stepColorMap[statusStepEnum?.step as StatusStepEnum].bgColor
+                      ? stepColorMap[statusStepEnum?.step as StatusStepEnum]?.bgColor
                       : '',
                     color: currentStatus
-                      ? stepColorMap[statusStepEnum?.step as StatusStepEnum].color
+                      ? stepColorMap[statusStepEnum?.step as StatusStepEnum]?.color
                       : '',
                     paddingY: 0.5,
                     paddingX: 1,
