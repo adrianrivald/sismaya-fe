@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
 import { fDate, fDateTime } from 'src/utils/format-time';
 import dayjs from 'dayjs';
@@ -124,21 +125,18 @@ async function getTaskManagement(filter: Partial<TaskManagementParams>) {
 }
 
 export function useTaskList(filter: TaskManagementFilter = {}) {
-  return usePaginationQuery<TaskManagement>(
-    ['task-management', filter],
-    async (paginationState) => {
-      const response = await getTaskManagement({
-        ...filter,
-        page: paginationState.pageIndex + 1,
-        page_size: paginationState.pageSize,
-      });
+  return usePaginationQuery<TaskManagement>(['task', 'table', filter], async (paginationState) => {
+    const response = await getTaskManagement({
+      ...filter,
+      page: paginationState.pageIndex + 1,
+      page_size: paginationState.pageSize,
+    });
 
-      return {
-        ...response,
-        data: response.data.map((item: any) => TaskManagement.fromJson(item)),
-      };
-    }
-  );
+    return {
+      ...response,
+      data: response.data.map((item: any) => TaskManagement.fromJson(item)),
+    };
+  });
 }
 
 export type KanbanColumn = {
@@ -149,11 +147,18 @@ export type KanbanColumn = {
   items: Array<TaskManagement>;
 };
 
+const kanbanKeys = (column: Task['status'], ...rest: any) => [
+  'task',
+  `kanban-column=${column}`,
+  ...rest,
+];
+
 export function useKanbanColumn(column: Task['status'], filter: TaskManagementFilter = {}) {
   return useQuery<KanbanColumn>({
     suspense: false,
     useErrorBoundary: false,
-    queryKey: ['task-management', `kanban-column=${column}`, filter],
+    refetchOnWindowFocus: false,
+    queryKey: kanbanKeys(column, filter),
     queryFn: async () => {
       const response = await getTaskManagement({
         ...filter,
@@ -175,9 +180,76 @@ export function useKanbanColumn(column: Task['status'], filter: TaskManagementFi
   });
 }
 
+export function useKanbanChangeStatus() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    unknown,
+    Error,
+    { taskId: number; status: Task['status']; prevStatus: Task['status'] }
+  >({
+    mutationFn: async ({ taskId, status }) =>
+      http(`/tasks/${taskId}`, {
+        method: 'PUT',
+        data: { step: status },
+      }),
+    onMutate: async ({ taskId, status, prevStatus }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['task'] });
+
+      // Snapshot the previous value
+      const [[sourceKey, previousSource]]: any = queryClient.getQueriesData(kanbanKeys(prevStatus));
+      const [[destinationKey, previousDestination]]: any = queryClient.getQueriesData(
+        kanbanKeys(status)
+      );
+
+      // Optimistically update to the new value
+      if (previousSource) {
+        queryClient.setQueryData(sourceKey, (old: any) => ({
+          ...old,
+          items: old.items.filter((item: any) => item.id !== taskId),
+        }));
+      }
+      if (previousDestination) {
+        queryClient.setQueryData(destinationKey, (old: any) => ({
+          ...old,
+          items: [
+            ...old.items,
+            // find the task in the previous source and add it to the destination
+            previousSource.items.find((item: any) => item.id === taskId),
+          ],
+        }));
+      }
+
+      // Return a context object with the snapshotted value
+      return {
+        source: {
+          key: sourceKey,
+          items: previousSource,
+        },
+        destination: {
+          key: destinationKey,
+          items: previousDestination,
+        },
+      };
+    },
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (error, newData, context: any) => {
+      queryClient.setQueryData(context?.source?.key, context?.source?.items);
+      queryClient.setQueryData(context?.destination?.key, context?.destination?.items);
+
+      toast.error(error?.message || 'Failed to change status');
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['task'] });
+    },
+  });
+}
+
 export function useTaskDetail(id: number) {
   return useQuery<TaskManagement>({
-    queryKey: ['task-management', `task-detail=${id}`],
+    queryKey: ['task', `task-detail=${id}`],
     queryFn: async () => {
       const response = await http(`/tasks/${id}`);
       return TaskManagement.fromJson(response.data);
