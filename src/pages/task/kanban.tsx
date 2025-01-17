@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import {
   useKanbanColumn,
+  useKanbanChangeStatus,
   TaskManagement,
   type Task,
   type KanbanColumn,
@@ -151,38 +152,30 @@ function BoardColumn({ column }: { column: Task['status'] }) {
 }
 
 export default function TaskKanbanPage() {
+  const { mutate } = useKanbanChangeStatus();
+
   const onDragEnd: OnDragEndResponder = (result) => {
     const taskId = Number(result.draggableId);
     const sourceStatus = result.source.droppableId;
     const destinationStatus = result.destination?.droppableId;
 
-    // dropped outside the list or source and destination status is same
-    if (!destinationStatus || sourceStatus === destinationStatus) {
+    // dropped outside the list
+    if (!destinationStatus) {
       return;
     }
 
-    console.log(
-      `👾 ~ TODO: change task id: ${taskId}, from ${sourceStatus} status to ${destinationStatus} status`
-    );
+    // source and destination status in same column
+    if (sourceStatus === destinationStatus) {
+      console.log(`👾 ~ TODO: reorder column ${sourceStatus}`);
+      return;
+    }
 
-    // const sInd = +source.droppableId;
-    // const dInd = +destination.droppableId;
-
-    // if (sInd === dInd) {
-    //   const items = reorder(state[sInd], source.index, destination.index);
-    //   const newState = [...state];
-    //   // @ts-ignore
-    //   newState[sInd] = items;
-    //   setState(newState);
-    // } else {
-    //   const result = move(state[sInd], state[dInd], source, destination);
-    //   const newState = [...state];
-
-    //   newState[sInd] = result[sInd];
-    //   newState[dInd] = result[dInd];
-
-    //   setState(newState.filter((group) => group.length));
-    // }
+    // change status when dropped to different column
+    mutate({
+      taskId,
+      status: destinationStatus as Task['status'],
+      prevStatus: sourceStatus as Task['status'],
+    });
   };
 
   return (
