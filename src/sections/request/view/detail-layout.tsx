@@ -25,6 +25,7 @@ import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
+import { CompleteAction } from '../complete-action';
 
 type StatusStepEnum = 'to_do' | 'in_progress' | 'completed' | 'pending' | 'requested';
 
@@ -37,13 +38,14 @@ export default function RequestDetailLayout() {
   )?.company?.id;
   const { data: requestStatuses } = useRequestStatus(String(idCurrentCompany ?? ''));
   const { data: requestDetail } = useRequestById(id ?? '');
-  const { mutate: completeRequest } = useCompleteRequest();
+  // const { mutate: completeRequest } = useCompleteRequest();
   const { mutate: updateStatus } = useUpdateRequestStatus();
   const { mutate: updatePriority } = useUpdateRequestPriority();
   const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
   const [currentStatus, setCurrentStatus] = useState(requestDetail?.progress_status?.id ?? 0);
   const statusStepEnum =
     requestStatuses && requestStatuses?.find((item) => item?.id === currentStatus);
+  const [openCompleteRequest, setOpenCompleteRequest] = useState(false);
 
   const priorityEnum = () => {
     if (currentPriority === 'low') return 'low';
@@ -63,11 +65,29 @@ export default function RequestDetailLayout() {
   }, [requestDetail]);
 
   const handleChangeStatus = (e: SelectChangeEvent<number>) => {
+    const statusStep = requestStatuses?.find((item) => item?.id === e.target.value);
+    if (statusStep?.step === 'done') {
+      e.stopPropagation();
+      e.preventDefault();
+      setOpenCompleteRequest(true);
+    } else {
+      updateStatus({
+        id: Number(id),
+        statusId: Number(e.target.value),
+      });
+      setCurrentStatus(Number(e.target.value));
+    }
+  };
+
+  const onCompleteRequest = () => {
+    const idComplete = requestStatuses?.find((item) => item?.step === 'done')?.id ?? 0;
+
     updateStatus({
       id: Number(id),
-      statusId: Number(e.target.value),
+      statusId: idComplete,
     });
-    setCurrentStatus(Number(e.target.value));
+    setCurrentStatus(idComplete);
+    setOpenCompleteRequest(false);
   };
 
   return (
@@ -222,6 +242,12 @@ export default function RequestDetailLayout() {
           <RequestMessenger />
         </Grid>
       </Grid>
+
+      <CompleteAction
+        onCompleteRequest={onCompleteRequest}
+        openCompleteRequest={openCompleteRequest}
+        setOpenCompleteRequest={setOpenCompleteRequest}
+      />
     </DashboardContent>
   );
 }
