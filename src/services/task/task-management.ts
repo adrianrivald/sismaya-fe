@@ -108,6 +108,8 @@ export interface TaskManagementParams {
 export type TaskManagementFilter = Partial<Omit<TaskManagementParams, 'page' | 'page_size'>>;
 
 async function getTaskManagement(filter: Partial<TaskManagementParams>) {
+  const productId = Number.isNaN(filter.productId) ? 0 : filter.productId;
+
   return http('/tasks', {
     params: {
       page: filter.page,
@@ -115,7 +117,7 @@ async function getTaskManagement(filter: Partial<TaskManagementParams>) {
 
       step: filter.status,
       search: filter.search,
-      product_id: filter.productId,
+      product_id: productId,
       assignee_company_id: filter.companyId,
     },
   });

@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { createColumnHelper } from '@tanstack/react-table';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { TaskManagement, useTaskList } from 'src/services/task/task-management';
 import { DataTable } from 'src/components/table/data-tables';
 import { RequestPriority } from 'src/sections/request/request-priority';
@@ -51,7 +51,11 @@ const columns = [
 ];
 
 export default function TaskListPage() {
-  const { isEmpty, getDataTableProps } = useTaskList();
+  const [searchParams] = useSearchParams();
+  const { isEmpty, getDataTableProps } = useTaskList({
+    search: searchParams.get('search') || '',
+    productId: Number(searchParams.get('productId')) || 0,
+  });
 
   if (isEmpty) {
     return null;
