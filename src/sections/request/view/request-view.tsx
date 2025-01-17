@@ -1,16 +1,16 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box, Button, capitalize, MenuItem, menuItemClasses, MenuList } from '@mui/material';
-import { Request } from 'src/services/request/types';
+import { Box, Button, capitalize } from '@mui/material';
+import type { Request } from 'src/services/request/types';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { DataTable } from 'src/components/table/data-tables';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
-import { useDeleteRequestById, useRequestList } from 'src/services/request';
-import { AnalyticsProjectSummary } from '../analytics-project-summary';
+import { createColumnHelper, type CellContext } from '@tanstack/react-table';
+import { useDeleteRequestById, useRequestList, useRequestSummary } from 'src/services/request';
+import { RequestSummaryCard } from 'src/sections/overview/request-summary-card';
 import { StatusBadge } from '../status-badge';
 
 // ----------------------------------------------------------------------
@@ -157,10 +157,13 @@ export function RequestView() {
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   console.log(assigneeCompanyId, 'assigneeCompanyId');
-  const { isEmpty, getDataTableProps } = useRequestList({}, String(assigneeCompanyId));
+  const { getDataTableProps } = useRequestList({}, String(assigneeCompanyId));
+  const { data: requestSummary } = useRequestSummary(String(assigneeCompanyId));
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
   const currentCompany = location?.pathname?.split('/request')[0].replace('/', '');
+
+  console.log(requestSummary, 'requestSummary');
 
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
@@ -203,16 +206,32 @@ export function RequestView() {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={4}>
-          <AnalyticsProjectSummary title="Total Active Projects" total={714000} />
+        <Grid xs={12} sm={6} lg={12 / 5}>
+          <RequestSummaryCard
+            title="Total Active Project"
+            total={requestSummary?.active}
+            color="#005B7F"
+          />
         </Grid>
-
-        <Grid xs={12} sm={6} md={4}>
-          <AnalyticsProjectSummary title="Projects in Progress" total={714000} />
+        <Grid xs={12} sm={6} lg={12 / 5}>
+          <RequestSummaryCard
+            title="In Progress"
+            total={requestSummary?.in_progress}
+            color="#FFE16A"
+          />
         </Grid>
-
-        <Grid xs={12} sm={6} md={4}>
-          <AnalyticsProjectSummary title="Pending Approvals" total={714000} />
+        <Grid xs={12} sm={6} lg={12 / 5}>
+          <RequestSummaryCard
+            title="Pending Approvals"
+            total={requestSummary?.pending}
+            color="#2CD9C5"
+          />
+        </Grid>
+        <Grid xs={12} sm={6} lg={12 / 5}>
+          <RequestSummaryCard title="Completed" total={requestSummary?.done} color="#2CD9C5" />
+        </Grid>
+        <Grid xs={12} sm={6} lg={12 / 5}>
+          <RequestSummaryCard title="Canceled" total={requestSummary?.rejected} color="#FF6C40" />
         </Grid>
 
         {/* <Grid container spacing={3}> */}
