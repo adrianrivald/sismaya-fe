@@ -9,7 +9,7 @@ async function fetchRequestSummary(companyId: string) {
 }
 
 export function useRequestSummary(companyId: string, options: any = {}) {
-  const data = useQuery(['request-status', companyId], () => fetchRequestSummary(companyId), {
+  const data = useQuery(['request-summary', companyId], () => fetchRequestSummary(companyId), {
     enabled: companyId !== undefined,
     ...options,
   });

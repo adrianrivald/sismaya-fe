@@ -169,9 +169,6 @@ export function RequestView() {
   const location = useLocation();
   const currentCompany = location?.pathname?.split('/request')[0].replace('/', '');
 
-  console.log(requestStatusSummary, 'requestStatusSummary');
-
-  console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('create');
