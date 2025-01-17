@@ -143,3 +143,11 @@ export interface RequestStatus {
     company: Company;
     step: string;
 }
+
+export interface RequestSummary {
+    active: number;
+    done: number;
+    in_progress: number;
+    pending: number;
+    rejected: number;
+}
