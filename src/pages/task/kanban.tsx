@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Box, Stack, Typography } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
@@ -114,7 +114,11 @@ function BoardItem({ item, index }: { item: TaskManagement; index: number }) {
 }
 
 function BoardColumn({ column }: { column: Task['status'] }) {
-  const { data } = useKanbanColumn(column);
+  const [searchParams] = useSearchParams();
+  const { data } = useKanbanColumn(column, {
+    search: searchParams.get('search') || '',
+    productId: Number(searchParams.get('productId')) || 0,
+  });
 
   if (!data) return null;
 
