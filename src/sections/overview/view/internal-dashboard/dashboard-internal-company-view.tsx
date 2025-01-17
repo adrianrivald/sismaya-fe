@@ -65,10 +65,26 @@ export function DashboardInternalCompanyView({
   idCompany: number;
   vendor: string;
 }) {
-  const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
-  const [dateFromTopRequester, setDateFromTopRequester] = React.useState<string>('2024-12-25');
-  const [dateFromTopStaff, setDateFromTopStaff] = React.useState<string>('2024-12-25');
-  const [requestDueDate, setRequestDueDate] = React.useState<string>('2024-12-25');
+  const [dateFrom, setDateFrom] = React.useState<string>(
+    dayjs()
+      .subtract(7 as number, 'day')
+      .format('YYYY-MM-DD')
+  );
+  const [dateFromTopRequester, setDateFromTopRequester] = React.useState<string>(
+    dayjs()
+      .subtract(7 as number, 'day')
+      .format('YYYY-MM-DD')
+  );
+  const [dateFromTopStaff, setDateFromTopStaff] = React.useState<string>(
+    dayjs()
+      .subtract(7 as number, 'day')
+      .format('YYYY-MM-DD')
+  );
+  const [requestDueDate, setRequestDueDate] = React.useState<string>(
+    dayjs()
+      .subtract(7 as number, 'day')
+      .format('YYYY-MM-DD')
+  );
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const [staffState, setStaffState] = React.useState<'quantity' | 'hour'>('quantity');
   const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
@@ -84,7 +100,11 @@ export function DashboardInternalCompanyView({
     dateNow
   );
   const { data: pendingRequest } = usePendingRequestInternal(idCompany);
-  const { data: totalRequestOvertime } = useTotalRequestOvertimeInternal(idCompany);
+  const { data: totalRequestOvertime } = useTotalRequestOvertimeInternal(
+    idCompany,
+    dateFrom,
+    dateNow
+  );
   const { data: requestDue } = useRequestDueInternal(idCompany, requestDueDate);
   const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
@@ -380,7 +400,7 @@ export function DashboardInternalCompanyView({
               sx={{ mt: 2 }}
               title="Total Requests Over Time"
               chart={{
-                categories: totalRequestOvertime?.map((item) => item?.date),
+                categories: totalRequestOvertime?.map((item) => dayjs(item?.date).format('ddd')),
                 series: [
                   {
                     name: 'Team A',

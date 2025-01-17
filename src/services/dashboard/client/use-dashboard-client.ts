@@ -74,14 +74,14 @@ export function useUnresolvedCito(params: Partial<any> ) {
 
 // Total Request Overtime
 
-async function fetchTotalRequestOvertime() {
-  const { data } = await http<{ data: RequestOvertime[] }>(`dashboard-client/total-request-over-time`);
+async function fetchTotalRequestOvertime(dateFrom: string, dateTo: string) {
+  const { data } = await http<{ data: RequestOvertime[] }>(`dashboard-client/total-request-over-time?from=${dateFrom}&to=${dateTo}`);
 
   return data;
 }
 
-export function useTotalRequestOvertime() {
-  const data = useQuery(['request-over-time'], () => fetchTotalRequestOvertime());
+export function useTotalRequestOvertime(dateFrom: string, dateTo: string) {
+  const data = useQuery(['request-over-time', dateFrom], () => fetchTotalRequestOvertime(dateFrom, dateTo));
 
   return data;
 }
