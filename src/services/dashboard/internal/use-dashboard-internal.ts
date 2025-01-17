@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
 import { http } from 'src/utils/http'
-import { WithPagination } from 'src/utils/types';
+import type { WithPagination } from 'src/utils/types';
 import type { ClientTotalRequest, ClientTotalRequestByState, PendingRequest, RequestDue, RequestOvertime, TopRequester, TopStaff } from '../types';
 
 // Total Request
@@ -75,14 +75,14 @@ export function useUnresolvedCitoInternal(params: Partial<any>, internalCompanyI
 
 // Total Request Overtime
 
-async function fetchTotalRequestOvertimeInternal(internalCompanyId: number,) {
-  const { data } = await http<{ data: RequestOvertime[] }>(`dashboard-internal/total-request-over-time/${internalCompanyId}`);
+async function fetchTotalRequestOvertimeInternal(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const { data } = await http<{ data: RequestOvertime[] }>(`dashboard-internal/total-request-over-time/${internalCompanyId}?from=${dateFrom}&to=${dateTo}`);
 
   return data;
 }
 
-export function useTotalRequestOvertimeInternal(internalCompanyId: number) {
-  const data = useQuery(['request-over-time'], () => fetchTotalRequestOvertimeInternal(internalCompanyId));
+export function useTotalRequestOvertimeInternal(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const data = useQuery(['request-over-time', dateFrom], () => fetchTotalRequestOvertimeInternal(internalCompanyId, dateFrom, dateTo));
 
   return data;
 }

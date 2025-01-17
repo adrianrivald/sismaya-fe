@@ -21,7 +21,6 @@ import {
   useUpdateRequestStatus,
 } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { SvgColor } from 'src/components/svg-color';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
@@ -43,7 +42,8 @@ export default function RequestDetailLayout() {
   const { mutate: updatePriority } = useUpdateRequestPriority();
   const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
   const [currentStatus, setCurrentStatus] = useState(requestDetail?.progress_status?.id ?? 0);
-  const statusStepEnum = requestStatuses?.find((item) => item?.id === currentStatus);
+  const statusStepEnum =
+    requestStatuses && requestStatuses?.find((item) => item?.id === currentStatus);
 
   const priorityEnum = () => {
     if (currentPriority === 'low') return 'low';
@@ -63,21 +63,11 @@ export default function RequestDetailLayout() {
   }, [requestDetail]);
 
   const handleChangeStatus = (e: SelectChangeEvent<number>) => {
-    const statusStep = requestStatuses?.find((item) => item?.id === e.target.value);
-    if (statusStep?.step === 'done') {
-      const res = completeRequest({
-        id: Number(id),
-      });
-      if (res !== undefined) {
-        setCurrentStatus(Number(e.target.value));
-      }
-    } else {
-      const res = updateStatus({
-        id: Number(id),
-        statusId: Number(e.target.value),
-      });
-      setCurrentStatus(Number(e.target.value));
-    }
+    updateStatus({
+      id: Number(id),
+      statusId: Number(e.target.value),
+    });
+    setCurrentStatus(Number(e.target.value));
   };
 
   return (

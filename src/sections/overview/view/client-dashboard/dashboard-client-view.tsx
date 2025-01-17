@@ -65,15 +65,23 @@ const columns = () => [
 ];
 
 export function DashboardClientView() {
-  const [dateFrom, setDateFrom] = React.useState<string>('2024-12-25');
-  const [requestDueDate, setRequestDueDate] = React.useState<string>('2024-12-25');
+  const [dateFrom, setDateFrom] = React.useState<string>(
+    dayjs()
+      .subtract(7 as number, 'day')
+      .format('YYYY-MM-DD')
+  );
+  const [requestDueDate, setRequestDueDate] = React.useState<string>(
+    dayjs()
+      .subtract(7 as number, 'day')
+      .format('YYYY-MM-DD')
+  );
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const { getDataTableProps, data } = useUnresolvedCito({});
   const dateNow = dayjs().format('YYYY-MM-DD');
   const { data: clientTotalRequest } = useClientTotalRequest(dateFrom, dateNow);
   const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
   const { data: pendingRequest } = usePendingRequest();
-  const { data: totalRequestOvertime } = useTotalRequestOvertime();
+  const { data: totalRequestOvertime } = useTotalRequestOvertime(dateFrom, dateNow);
   const { data: requestDue } = useRequestDue(requestDueDate);
   const { data: requestDeliveryRate } = useRequestDeliveryRate();
   const requestDeliveryRateValues = Object.entries(requestDeliveryRate).map(
@@ -347,10 +355,10 @@ export function DashboardClientView() {
             <TotalRequestOvertimeChart
               sx={{ mt: 2 }}
               chart={{
-                categories: totalRequestOvertime?.map((item) => item?.date),
+                categories: totalRequestOvertime?.map((item) => dayjs(item?.date).format('ddd')),
                 series: [
                   {
-                    name: 'Team A',
+                    name: '',
                     data: totalRequestOvertime?.map((item) => item?.request_count) ?? [],
                   },
                   // { name: 'Team B', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
