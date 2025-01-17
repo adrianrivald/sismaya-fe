@@ -151,3 +151,9 @@ export interface RequestSummary {
     pending: number;
     rejected: number;
 }
+
+export interface RequestStatusSummary {
+    count: number;
+    id: number;
+    name: string
+}
