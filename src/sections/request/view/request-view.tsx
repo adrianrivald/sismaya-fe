@@ -9,7 +9,12 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper, type CellContext } from '@tanstack/react-table';
-import { useDeleteRequestById, useRequestList, useRequestSummary } from 'src/services/request';
+import {
+  useDeleteRequestById,
+  useRequestList,
+  useRequestStatusSummary,
+  useRequestSummary,
+} from 'src/services/request';
 import { RequestSummaryCard } from 'src/sections/overview/request-summary-card';
 import { StatusBadge } from '../status-badge';
 
@@ -159,13 +164,14 @@ export function RequestView() {
   console.log(assigneeCompanyId, 'assigneeCompanyId');
   const { getDataTableProps } = useRequestList({}, String(assigneeCompanyId));
   const { data: requestSummary } = useRequestSummary(String(assigneeCompanyId));
+  const { data: requestStatusSummary } = useRequestStatusSummary(String(assigneeCompanyId));
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
   const currentCompany = location?.pathname?.split('/request')[0].replace('/', '');
 
-  console.log(requestSummary, 'requestSummary');
+  console.log(requestStatusSummary, 'requestStatusSummary');
 
-  // console.log(getDataTableProps(), 'get data table props');
+  console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('create');
@@ -233,92 +239,65 @@ export function RequestView() {
         <Grid xs={12} sm={6} lg={12 / 5}>
           <RequestSummaryCard title="Canceled" total={requestSummary?.rejected} color="#FF6C40" />
         </Grid>
+        <Grid xs={12}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1}
+              sx={{
+                borderBottomWidth: 2,
+                pb: 1,
+                borderBottomColor: 'primary.main',
+                borderBottomStyle: 'solid',
+              }}
+            >
+              <Typography color="primary.main">All</Typography>
+              <Box
+                sx={{
+                  px: 1.5,
+                  py: 0.25,
+                  backgroundColor: '#B3B3B3',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                }}
+              >
+                {getDataTableProps().total}
+              </Box>
+            </Box>
+            {requestStatusSummary?.map((item) => (
+              <Box
+                display="flex"
+                alignItems="center"
+                id={item?.id.toString()}
+                gap={1}
+                sx={{
+                  borderBottomWidth: 0,
+                  pb: 1,
+                  borderBottomColor: 'primary.main',
+                  borderBottomStyle: 'solid',
+                }}
+              >
+                <Typography color="grey.600">{capitalize(item?.name)}</Typography>
+                <Box
+                  sx={{
+                    px: 1.5,
+                    py: 0.25,
+                    backgroundColor: '#B3B3B3',
+                    borderRadius: '6px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {item?.count}
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Grid>
 
-        {/* <Grid container spacing={3}> */}
         <Grid xs={12}>
           <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
         </Grid>
-        {/* </Grid> */}
-        {/* Default overview items */}
-        {/* <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsWebsiteVisits
-            title="Website visits"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-              series: [
-                { name: 'Team A', data: [43, 33, 22, 37, 67, 68, 37, 24, 55] },
-                { name: 'Team B', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsConversionRates
-            title="Conversion rates"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: ['Italy', 'Japan', 'China', 'Canada', 'France'],
-              series: [
-                { name: '2022', data: [44, 55, 41, 64, 22] },
-                { name: '2023', data: [53, 32, 33, 52, 13] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentSubject
-            title="Current subject"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="News" list={_posts.slice(0, 5)} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Order timeline" list={_timeline} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite
-            title="Traffic by site"
-            list={[
-              { value: 'facebook', label: 'Facebook', total: 323234 },
-              { value: 'google', label: 'Google', total: 341212 },
-              { value: 'linkedin', label: 'Linkedin', total: 411213 },
-              { value: 'twitter', label: 'Twitter', total: 443232 },
-            ]}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsTasks title="Tasks" list={_tasks} />
-        </Grid> */}
       </Grid>
     </DashboardContent>
   );
