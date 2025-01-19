@@ -1,7 +1,7 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Stack,
@@ -14,6 +14,9 @@ import {
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import * as Tab from 'src/components/tabs';
+import { useAuth } from 'src/sections/auth/providers/auth';
+import { useProductByCompanyId } from 'src/services/master-data/company';
+import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 
 // ----------------------------------------------------------------------
 
@@ -21,6 +24,17 @@ export default function TaskLayout() {
   const navigate = useNavigate();
   const lastPath = useLocation().pathname.split('/').pop();
   const currentTab = lastPath === 'task' ? 'list' : lastPath || 'kanban';
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { user } = useAuth();
+  const { data: products = [] } = useProductByCompanyId(user?.user_info?.company_id);
+
+  const [search, setSearch] = useSearchDebounce();
+  useEffect(() => {
+    if (search) {
+      setSearchParams({ search }, { replace: true });
+    }
+  }, [search, setSearchParams]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -71,20 +85,19 @@ export default function TaskLayout() {
               label="Product"
               defaultValue="all"
               sx={{ width: { xs: '100%', md: 350 } }}
-              onChange={(e) =>
-                navigate(`/task/${currentTab}?product=${e.target.value}`, { replace: true })
-              }
+              value={searchParams.get('productId') || 'all'}
+              onChange={(e) => setSearchParams({ productId: e.target.value }, { replace: true })}
             >
               <MenuItem value="all">All</MenuItem>
+              {products?.map((product) => <MenuItem value={product.id}>{product.name}</MenuItem>)}
             </TextField>
 
             <TextField
               fullWidth
               placeholder="Search..."
               sx={{ flexGrow: 1 }}
-              onChange={(e) =>
-                navigate(`/task/${currentTab}?search=${e.target.value}`, { replace: true })
-              }
+              defaultValue={searchParams.get('search') || ''}
+              onChange={(e) => setSearch(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
