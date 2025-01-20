@@ -42,6 +42,7 @@ import {
   userClientSchema,
   userInternalSchema,
 } from 'src/services/master-data/user/schemas/user-schema';
+import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -108,6 +109,19 @@ export function CreateUserView({ type }: CreateUserProps) {
       setIsLoading(false);
     }
   };
+
+  const onChangePhone = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    setValuePhone: UseFormSetValue<any>,
+    watchPhone: UseFormWatch<any>
+  ) => {
+    const phoneValue = e.target.value;
+    const numRegex = /^\d+$/;
+    if (numRegex.test(phoneValue) || watchPhone('phone').length === 1) {
+      setValuePhone('phone', phoneValue);
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -130,7 +144,7 @@ export function CreateUserView({ type }: CreateUserProps) {
             },
           }}
         >
-          {({ register, control, watch, formState }) => (
+          {({ register, control, watch, formState, setValue }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <FieldDropzone
@@ -296,6 +310,8 @@ export function CreateUserView({ type }: CreateUserProps) {
                   {...register('phone', {
                     required: 'Phone Number must be filled out',
                   })}
+                  value={watch('phone')}
+                  onChange={(e) => onChangePhone(e, setValue, watch)}
                   autoComplete="off"
                 />
                 {formState?.errors?.phone && (
