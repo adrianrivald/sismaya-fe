@@ -102,7 +102,11 @@ export function CardActivity({ taskId }: { taskId: number }) {
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <TimerCountdown variant="large" />
-          <TimerActionButton taskId={taskId} />
+          <TimerActionButton
+            activity={data?.task?.name}
+            request={data?.request?.name}
+            taskId={taskId}
+          />
         </Box>
       </Stack>
 
