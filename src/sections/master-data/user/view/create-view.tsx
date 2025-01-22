@@ -238,13 +238,20 @@ export function CreateUserView({ type }: CreateUserProps) {
                   <Select
                     label="Internal Company"
                     labelId="demo-simple-select-outlined-label-type"
+                    error={watch('internal_id')?.length === 0}
                     id="internal_id"
                     {...register('internal_id', {
                       required: 'Internal Company must be filled out',
                     })}
                     multiple
                     value={watch('internal_id')}
-                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                    input={
+                      <OutlinedInput
+                        error={Boolean(formState?.errors?.internal_id)}
+                        id="select-multiple-chip"
+                        label="Chip"
+                      />
+                    }
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                         {watch('internal_id').map((value: any) => (
@@ -269,10 +276,8 @@ export function CreateUserView({ type }: CreateUserProps) {
                       ))}
                   </Select>
                 </FormControl>
-                {formState?.errors?.internal_id && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.internal_id?.message)}
-                  </FormHelperText>
+                {watch('internal_id')?.length === 0 && (
+                  <FormHelperText sx={{ color: 'error.main' }}>Required</FormHelperText>
                 )}
               </Grid>
               {/* ) : null} */}
