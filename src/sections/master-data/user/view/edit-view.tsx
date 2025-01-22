@@ -123,6 +123,18 @@ function EditForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divisions]);
 
+  const onChangePhone = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    setValuePhone: UseFormSetValue<any>,
+    watchPhone: UseFormWatch<any>
+  ) => {
+    const phoneValue = e.target.value;
+    const numRegex = /^\d+$/;
+    if (numRegex.test(phoneValue) || watchPhone('phone').length === 1) {
+      setValuePhone('phone', phoneValue);
+    }
+  };
+
   return (
     <Grid container spacing={3} xs={12}>
       <Grid item xs={12} md={12}>
@@ -327,6 +339,8 @@ function EditForm({
           {...register('phone', {
             required: 'Phone Number must be filled out',
           })}
+          value={watch('phone')}
+          onChange={(e) => onChangePhone(e, setValue, watch)}
           autoComplete="off"
         />
         {formState?.errors?.phone && (
