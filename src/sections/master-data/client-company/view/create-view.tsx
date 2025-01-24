@@ -115,6 +115,7 @@ export function CreateClientCompanyView() {
                       // },
                     }}
                     error={formState.errors?.cover}
+                    maxSize={5000000}
                   />
                 </Grid>
 

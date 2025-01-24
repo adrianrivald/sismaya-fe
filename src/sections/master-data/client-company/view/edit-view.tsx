@@ -120,6 +120,7 @@ function EditForm({
             control,
           }}
           defaultImage={defaultValues?.image}
+          maxSize={5000000}
         />
       </Grid>
 
