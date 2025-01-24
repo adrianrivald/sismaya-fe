@@ -169,16 +169,16 @@ function EditForm({
 
       <Grid item xs={12} md={12}>
         <Typography variant="h4" color="primary" mb={2}>
-          User Company
+          Internal Company
         </Typography>
         <Box display="flex" flexDirection="column" gap={2}>
           {userCompanies?.map((item, index) => (
             <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
               <Box width="100%">
                 <FormControl fullWidth>
-                  <InputLabel id="type">User Company</InputLabel>
+                  <InputLabel id="type">Internal Company</InputLabel>
                   <Select
-                    label="User Company"
+                    label="Internal Company"
                     value={item?.company?.id}
                     onChange={(e: SelectChangeEvent<number>) => onChangeUserCompany(e, item?.id)}
                   >
@@ -216,9 +216,9 @@ function EditForm({
           <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
             <Box width="100%">
               <FormControl fullWidth>
-                <InputLabel id="userCompany">User Company</InputLabel>
+                <InputLabel id="userCompany">Internal Company</InputLabel>
                 <Select
-                  label="User Company"
+                  label="Internal Company"
                   value={userCompany}
                   onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
                 >

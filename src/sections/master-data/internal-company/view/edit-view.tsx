@@ -304,9 +304,6 @@ function EditForm({
                 label="Category"
                 value={item.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeCategory(e, item?.id)}
-                // InputProps={{
-                //   readOnly: true,
-                // }}
               />
 
               <MenuList
@@ -347,6 +344,10 @@ function EditForm({
               value={category}
               onChange={onChangeCategoryNew}
             />
+
+            <Button variant="contained" color="primary" onClick={onAddCategory} sx={{ marginY: 2 }}>
+              Submit
+            </Button>
           </Stack>
         </Box>
         <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
