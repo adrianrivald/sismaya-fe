@@ -68,9 +68,12 @@ function Dropzone<TFormFields extends Record<string, unknown> = Record<string, u
     },
     onDropRejected: (fileRejections) => {
       const [{ errors }] = fileRejections;
-      const [{ message }] = errors;
-
-      toast.error(message, {
+      const [{ message, code }] = errors;
+      const reason =
+        code === 'file-too-large' && maxSize
+          ? `File is larger than ${Math.round(maxSize / 1000000)} mb`
+          : message;
+      toast.error(reason, {
         position: 'top-right',
         autoClose: 5000,
         hideProgressBar: true,
