@@ -49,6 +49,7 @@ import {
 import { User } from 'src/services/master-data/user/types';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
+import { RemoveAction } from './remove-action';
 
 interface UserValues {
   name: string | undefined;
@@ -81,6 +82,7 @@ interface EditFormProps {
   onaddUserCompany: () => void;
   onChangeUserCompany: (e: SelectChangeEvent<number>, itemId: number) => void;
   internalCompanies: Company[] | undefined;
+  onClickRemove: (id: number) => void;
 }
 
 function EditForm({
@@ -104,6 +106,7 @@ function EditForm({
   onChangeUserCompany,
   onClickDeleteUserCompany,
   internalCompanies,
+  onClickRemove,
 }: EditFormProps) {
   console.log(watch(), 'formwatch');
   useEffect(() => {
@@ -203,10 +206,7 @@ function EditForm({
                   },
                 }}
               >
-                <MenuItem
-                  onClick={() => onClickDeleteUserCompany(item?.id)}
-                  sx={{ color: 'error.main' }}
-                >
+                <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
                   <Iconify icon="solar:trash-bin-trash-bold" />
                   Delete
                 </MenuItem>
@@ -242,8 +242,13 @@ function EditForm({
                 },
               }}
             >
-              <Button onClick={onaddUserCompany} sx={{ marginY: 2 }}>
-                Add More
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={onaddUserCompany}
+                sx={{ marginY: 2 }}
+              >
+                Submit
               </Button>
             </Box>
           </Stack>
@@ -406,6 +411,8 @@ export function EditUserView({ type }: EditUserProps) {
   const { id } = useParams();
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | undefined>();
 
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
@@ -429,8 +436,6 @@ export function EditUserView({ type }: EditUserProps) {
     internal_id: user?.internal_companies?.map((item) => item?.id) ?? [],
   };
 
-  console.log(defaultValues, 'defaultValues');
-
   useEffect(() => {
     if (defaultValues?.company_id) {
       fetchDivision(defaultValues?.company_id);
@@ -449,6 +454,16 @@ export function EditUserView({ type }: EditUserProps) {
       })
     );
     return data;
+  };
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
+
+  const onRemove = () => {
+    deleteUserCompany(selectedId ?? 0);
+    setOpenRemoveModal(false);
   };
 
   const handleSubmit = (formData: UserClientUpdateDTO) => {
@@ -542,10 +557,17 @@ export function EditUserView({ type }: EditUserProps) {
               onChangeUserCompany={onChangeUserCompany}
               internalCompanies={internalCompanies}
               onClickDeleteUserCompany={onClickDeleteUserCompany}
+              onClickRemove={onClickRemove}
             />
           )}
         </Form>
       </Grid>
+
+      <RemoveAction
+        onRemove={onRemove}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

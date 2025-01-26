@@ -45,6 +45,7 @@ import { Iconify } from 'src/components/iconify';
 import { CompanyDTO, companySchema } from 'src/services/master-data/company/schemas/company-schema';
 import { Categories, Company, Products, Status } from 'src/services/master-data/company/types';
 import { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import { RemoveAction } from './remove-action';
 
 interface InternalCompanyValues {
   name: string | undefined;
@@ -82,6 +83,7 @@ interface EditFormProps {
   product: string;
   onChangeProductNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddProduct: () => void;
+  onClickRemove: (mode: string, id: number) => void;
 }
 
 function EditForm({
@@ -94,24 +96,22 @@ function EditForm({
   onChangeStatus,
   onClickEditStatus,
   statuses,
-  onClickDeleteStatus,
   status,
   onChangeStatusNew,
   onAddStatus,
   onChangeCategory,
   onClickEditCategory,
   categories,
-  onClickDeleteCategory,
   category,
   onChangeCategoryNew,
   onAddCategory,
   onClickEditProduct,
   onChangeProduct,
   products,
-  onClickDeleteProduct,
   product,
   onChangeProductNew,
   onAddProduct,
+  onClickRemove,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -230,7 +230,7 @@ function EditForm({
                   Edit
                 </MenuItem>
                 <MenuItem
-                  onClick={() => onClickDeleteStatus(item?.id)}
+                  onClick={() => onClickRemove('status', item?.id)}
                   sx={{ color: 'error.main' }}
                 >
                   <Iconify icon="solar:trash-bin-trash-bold" />
@@ -282,8 +282,8 @@ function EditForm({
                 },
               }}
             >
-              <Button onClick={onAddStatus} sx={{ marginY: 2 }}>
-                Add More
+              <Button variant="contained" color="primary" onClick={onAddStatus} sx={{ marginY: 2 }}>
+                Submit
               </Button>
             </Box>
           </Stack>
@@ -326,7 +326,7 @@ function EditForm({
                   Edit
                 </MenuItem>
                 <MenuItem
-                  onClick={() => onClickDeleteCategory(item?.id)}
+                  onClick={() => onClickRemove('category', item?.id)}
                   sx={{ color: 'error.main' }}
                 >
                   <Iconify icon="solar:trash-bin-trash-bold" />
@@ -350,9 +350,6 @@ function EditForm({
             </Button>
           </Stack>
         </Box>
-        <Button onClick={onAddCategory} sx={{ marginY: 2 }}>
-          Add More
-        </Button>
       </Grid>
 
       <Grid item xs={12} md={12}>
@@ -394,7 +391,7 @@ function EditForm({
                   Edit
                 </MenuItem>
                 <MenuItem
-                  onClick={() => onClickDeleteProduct(item?.id)}
+                  onClick={() => onClickRemove('product', item?.id)}
                   sx={{ color: 'error.main' }}
                 >
                   <Iconify icon="solar:trash-bin-trash-bold" />
@@ -412,11 +409,12 @@ function EditForm({
               value={product}
               onChange={onChangeProductNew}
             />
+
+            <Button variant="contained" color="primary" onClick={onAddProduct} sx={{ marginY: 2 }}>
+              Submit
+            </Button>
           </Stack>
         </Box>
-        <Button onClick={onAddProduct} sx={{ marginY: 2 }}>
-          Add More
-        </Button>
       </Grid>
 
       <Box
@@ -440,6 +438,9 @@ export function EditInternalCompanyView() {
   const navigate = useNavigate();
   const { data } = useCompanyById(Number(id));
   const { mutate: updateCompany } = useUpdateCompany();
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | undefined>();
+  const [selectedMode, setSelectedMode] = React.useState<string | undefined>();
 
   // Category CRUD
   const { mutate: deleteCategory } = useDeleteCategoryItem(Number(id));
@@ -563,8 +564,9 @@ export function EditInternalCompanyView() {
     setCategory(e.target.value);
   };
 
-  const onClickDeleteCategory = async (categoryId: number) => {
-    deleteCategory(categoryId);
+  const onClickDeleteCategory = async () => {
+    if (selectedId) deleteCategory(selectedId);
+    setOpenRemoveModal(false);
   };
 
   const onClickEditCategory = async (value: string, categoryId: number) => {
@@ -609,6 +611,25 @@ export function EditInternalCompanyView() {
       id: productId,
       company_id: Number(id),
     });
+  };
+
+  const onClickRemove = (mode: string, itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+    setSelectedMode(mode);
+  };
+
+  const onRemove = () => {
+    if (selectedMode === 'category') {
+      deleteCategory(selectedId ?? 0);
+    }
+    if (selectedMode === 'product') {
+      deleteProduct(selectedId ?? 0);
+    }
+    if (selectedMode === 'status') {
+      deleteStatus(selectedId ?? 0);
+    }
+    setOpenRemoveModal(false);
   };
 
   React.useEffect(() => {
@@ -687,10 +708,17 @@ export function EditInternalCompanyView() {
               product={product}
               onChangeProductNew={onChangeProductNew}
               onAddProduct={onAddProduct}
+              onClickRemove={onClickRemove}
             />
           )}
         </Form>
       </Grid>
+
+      <RemoveAction
+        onRemove={onRemove}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

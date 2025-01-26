@@ -252,7 +252,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                         label="Chip"
                       />
                     }
-                    renderValue={(selected) => (
+                    renderValue={() => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                         {watch('internal_id').map((value: any) => (
                           <Chip
