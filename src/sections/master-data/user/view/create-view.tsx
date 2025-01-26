@@ -238,7 +238,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                   <Select
                     label="Internal Company"
                     labelId="demo-simple-select-outlined-label-type"
-                    error={watch('internal_id')?.length === 0}
+                    error={Boolean(formState?.errors?.internal_id)}
                     id="internal_id"
                     {...register('internal_id', {
                       required: 'Internal Company must be filled out',
@@ -276,8 +276,10 @@ export function CreateUserView({ type }: CreateUserProps) {
                       ))}
                   </Select>
                 </FormControl>
-                {watch('internal_id')?.length === 0 && (
-                  <FormHelperText sx={{ color: 'error.main' }}>Required</FormHelperText>
+                {formState?.errors?.internal_id && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.internal_id?.message)}
+                  </FormHelperText>
                 )}
               </Grid>
               {/* ) : null} */}
