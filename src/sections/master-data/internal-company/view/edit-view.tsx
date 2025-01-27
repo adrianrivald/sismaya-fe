@@ -283,7 +283,7 @@ function EditForm({
               }}
             >
               <Button variant="contained" color="primary" onClick={onAddStatus} sx={{ marginY: 2 }}>
-                Submit
+                Save
               </Button>
             </Box>
           </Stack>
@@ -346,7 +346,7 @@ function EditForm({
             />
 
             <Button variant="contained" color="primary" onClick={onAddCategory} sx={{ marginY: 2 }}>
-              Submit
+              Save
             </Button>
           </Stack>
         </Box>
@@ -411,7 +411,7 @@ function EditForm({
             />
 
             <Button variant="contained" color="primary" onClick={onAddProduct} sx={{ marginY: 2 }}>
-              Submit
+              Save
             </Button>
           </Stack>
         </Box>
@@ -649,6 +649,7 @@ export function EditInternalCompanyView() {
       ...formData,
       id: Number(id),
       type: 'internal',
+      cito_quota: data?.cito_quota,
     };
     if (defaultValues?.image) {
       Object.assign(payload, {
