@@ -13,13 +13,10 @@ export function fetchRequestList(params: Partial<any>, assignee_company_id: stri
     endpointUrl.searchParams.append('assignee_company_id', assignee_company_id);
   }
 
-  if (params.active) {
-    endpointUrl.searchParams.append('active', params.active);
+  if (params.status) {
+    endpointUrl.searchParams.append('status', params.status);
   }
 
-  if (params.platform) {
-    endpointUrl.searchParams.append('platform', params.platform);
-  }
 
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
@@ -36,7 +33,7 @@ export function fetchRequestList(params: Partial<any>, assignee_company_id: stri
 export function useRequestList(params: Partial<any>, assignee_company_id: string
   ) {
   return usePaginationQuery(
-    ['request', params.keyword, params.active, params.order, params.platform, assignee_company_id],
+    ['request', params.keyword, params.status, assignee_company_id],
     (paginationState) => fetchRequestList({ ...params, ...paginationState }, assignee_company_id)
   );
 }
