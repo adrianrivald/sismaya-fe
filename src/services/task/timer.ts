@@ -25,25 +25,46 @@ const stateMap = {
   stop: 'stopped',
 } satisfies Record<TimerAction, TimerState>;
 
+const storageKey = 'task-timer';
+
 const initialStore = {
   timer: 0, // seconds
   state: 'idle' as TimerState,
-  request: '',
   activity: '',
+  request: '',
   taskId: 0,
 };
 
 const store = createStore({
   context: initialStore,
   on: {
-    transition: (context, event: { nextState: TimerState }) => ({
-      state: event.nextState,
-    }),
-    start: (context, event: EventStart) => ({
-      ...event,
-      timer: 0,
-      state: 'running' as TimerState,
-    }),
+    transition: (context, event: { nextState: TimerState }) => {
+      if (event.nextState === 'idle' || event.nextState === 'stopped') {
+        window.localStorage.removeItem(storageKey);
+      }
+
+      return {
+        state: event.nextState,
+      };
+    },
+    start: (context, event: Partial<EventStart>) => {
+      const storedData = window.localStorage.getItem(storageKey);
+      const parsedData = storedData ? JSON.parse(storedData) : null;
+
+      if (event.activity && event.request) {
+        window.localStorage.setItem(storageKey, JSON.stringify(event));
+      }
+
+      const getItem = (key: keyof typeof event) => event[key] || parsedData?.[key] || context[key];
+
+      return {
+        timer: 0,
+        state: 'running' as TimerState,
+        activity: getItem('activity'),
+        request: getItem('request'),
+        taskId: getItem('taskId'),
+      };
+    },
   },
 });
 
@@ -89,8 +110,8 @@ export function useCheckTimer() {
         return;
       }
 
-      const isEnded = activity.ended_at !== null;
-      const isPaused = activity.is_pause === true;
+      const isEnded = activity?.ended_at !== null;
+      const isPaused = activity?.is_pause === true;
 
       let state: TimerState = 'idle';
 
@@ -99,7 +120,13 @@ export function useCheckTimer() {
       if (!isEnded && !isPaused) state = 'running';
 
       if (state === 'running') {
-        store.send({ type: 'start', activity: 'test', request: 'test', taskId: 1 });
+        store.send({
+          type: 'start',
+          activity: activity?.task?.name,
+          request: activity?.task?.request?.name,
+          taskId: activity?.task_id,
+        });
+
         return;
       }
 
@@ -117,7 +144,6 @@ export function useTimerAction() {
     // store next state to store immediately before tell the server
     onMutate: ({ action, ...rest }) => {
       if (action === 'start') {
-        // @ts-expect-error: `rest` is valid `EventStart`
         store.send({ type: 'start', ...rest });
         return;
       }

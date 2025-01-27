@@ -2,7 +2,13 @@ import { Iconify } from 'src/components/iconify';
 import { Stack, IconButton, Typography } from '@mui/material';
 import { useTimer, useTimerStore, useTimerAction } from 'src/services/task/timer';
 
-export function TimerActionButton({ taskId }: { taskId: number }) {
+type TimerActionButtonProps = {
+  activity?: string;
+  request?: string;
+  taskId: number;
+};
+
+export function TimerActionButton({ taskId, activity, request }: TimerActionButtonProps) {
   const { state } = useTimerStore();
   const mutation = useTimerAction();
 
@@ -11,7 +17,7 @@ export function TimerActionButton({ taskId }: { taskId: number }) {
       aria-label="start"
       size="small"
       sx={{ bgcolor: 'success.main', color: 'white' }}
-      onClick={() => mutation.mutate({ action: 'start', taskId })}
+      onClick={() => mutation.mutate({ action: 'start', taskId, activity, request })}
     >
       <Iconify icon="solar:play-bold" />
     </IconButton>
