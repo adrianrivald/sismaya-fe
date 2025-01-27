@@ -187,7 +187,7 @@ function EditForm({
               onClick={onAddDepartment}
               sx={{ marginY: 2 }}
             >
-              Submit
+              Save
             </Button>
           </Stack>
         </Box>

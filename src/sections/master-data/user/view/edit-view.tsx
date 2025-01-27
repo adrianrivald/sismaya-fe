@@ -248,7 +248,7 @@ function EditForm({
                 onClick={onaddUserCompany}
                 sx={{ marginY: 2 }}
               >
-                Submit
+                Save
               </Button>
             </Box>
           </Stack>
