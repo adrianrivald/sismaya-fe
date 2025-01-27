@@ -49,6 +49,7 @@ import {
 import { User } from 'src/services/master-data/user/types';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
+import { RemoveAction } from './remove-action';
 
 interface UserValues {
   name: string | undefined;
@@ -81,6 +82,7 @@ interface EditFormProps {
   onaddUserCompany: () => void;
   onChangeUserCompany: (e: SelectChangeEvent<number>, itemId: number) => void;
   internalCompanies: Company[] | undefined;
+  onClickRemove: (id: number) => void;
 }
 
 function EditForm({
@@ -104,6 +106,7 @@ function EditForm({
   onChangeUserCompany,
   onClickDeleteUserCompany,
   internalCompanies,
+  onClickRemove,
 }: EditFormProps) {
   console.log(watch(), 'formwatch');
   useEffect(() => {
@@ -122,6 +125,18 @@ function EditForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divisions]);
+
+  const onChangePhone = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    setValuePhone: UseFormSetValue<any>,
+    watchPhone: UseFormWatch<any>
+  ) => {
+    const phoneValue = e.target.value;
+    const numRegex = /^\d+$/;
+    if (numRegex.test(phoneValue) || watchPhone('phone').length === 1) {
+      setValuePhone('phone', phoneValue);
+    }
+  };
 
   return (
     <Grid container spacing={3} xs={12}>
@@ -157,16 +172,16 @@ function EditForm({
 
       <Grid item xs={12} md={12}>
         <Typography variant="h4" color="primary" mb={2}>
-          User Company
+          Internal Company
         </Typography>
         <Box display="flex" flexDirection="column" gap={2}>
           {userCompanies?.map((item, index) => (
             <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
               <Box width="100%">
                 <FormControl fullWidth>
-                  <InputLabel id="type">User Company</InputLabel>
+                  <InputLabel id="type">Internal Company</InputLabel>
                   <Select
-                    label="User Company"
+                    label="Internal Company"
                     value={item?.company?.id}
                     onChange={(e: SelectChangeEvent<number>) => onChangeUserCompany(e, item?.id)}
                   >
@@ -191,10 +206,7 @@ function EditForm({
                   },
                 }}
               >
-                <MenuItem
-                  onClick={() => onClickDeleteUserCompany(item?.id)}
-                  sx={{ color: 'error.main' }}
-                >
+                <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
                   <Iconify icon="solar:trash-bin-trash-bold" />
                   Delete
                 </MenuItem>
@@ -204,9 +216,9 @@ function EditForm({
           <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
             <Box width="100%">
               <FormControl fullWidth>
-                <InputLabel id="userCompany">User Company</InputLabel>
+                <InputLabel id="userCompany">Internal Company</InputLabel>
                 <Select
-                  label="User Company"
+                  label="Internal Company"
                   value={userCompany}
                   onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
                 >
@@ -230,8 +242,13 @@ function EditForm({
                 },
               }}
             >
-              <Button onClick={onaddUserCompany} sx={{ marginY: 2 }}>
-                Add More
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={onaddUserCompany}
+                sx={{ marginY: 2 }}
+              >
+                Submit
               </Button>
             </Box>
           </Stack>
@@ -327,6 +344,8 @@ function EditForm({
           {...register('phone', {
             required: 'Phone Number must be filled out',
           })}
+          value={watch('phone')}
+          onChange={(e) => onChangePhone(e, setValue, watch)}
           autoComplete="off"
         />
         {formState?.errors?.phone && (
@@ -392,6 +411,8 @@ export function EditUserView({ type }: EditUserProps) {
   const { id } = useParams();
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | undefined>();
 
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
@@ -415,8 +436,6 @@ export function EditUserView({ type }: EditUserProps) {
     internal_id: user?.internal_companies?.map((item) => item?.id) ?? [],
   };
 
-  console.log(defaultValues, 'defaultValues');
-
   useEffect(() => {
     if (defaultValues?.company_id) {
       fetchDivision(defaultValues?.company_id);
@@ -435,6 +454,16 @@ export function EditUserView({ type }: EditUserProps) {
       })
     );
     return data;
+  };
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
+
+  const onRemove = () => {
+    deleteUserCompany(selectedId ?? 0);
+    setOpenRemoveModal(false);
   };
 
   const handleSubmit = (formData: UserClientUpdateDTO) => {
@@ -528,10 +557,17 @@ export function EditUserView({ type }: EditUserProps) {
               onChangeUserCompany={onChangeUserCompany}
               internalCompanies={internalCompanies}
               onClickDeleteUserCompany={onClickDeleteUserCompany}
+              onClickRemove={onClickRemove}
             />
           )}
         </Form>
       </Grid>
+
+      <RemoveAction
+        onRemove={onRemove}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

@@ -28,6 +28,7 @@ import { Iconify } from 'src/components/iconify';
 import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Company, Department } from 'src/services/master-data/company/types';
+import { RemoveAction } from './remove-action';
 
 interface ClientCompanyValues {
   name: string | undefined;
@@ -49,6 +50,7 @@ interface EditFormProps {
   department: string;
   departments: Department[];
   onAddDepartment: () => void;
+  onClickRemove: (id: number) => void;
 }
 
 function EditForm({
@@ -65,6 +67,7 @@ function EditForm({
   departments,
   data,
   onAddDepartment,
+  onClickRemove,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -120,6 +123,7 @@ function EditForm({
             control,
           }}
           defaultImage={defaultValues?.image}
+          maxSize={5000000}
         />
       </Grid>
 
@@ -161,7 +165,7 @@ function EditForm({
                   <Iconify icon="solar:pen-bold" />
                   Edit
                 </MenuItem>
-                <MenuItem onClick={() => onClickDelete(item?.id)} sx={{ color: 'error.main' }}>
+                <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
                   <Iconify icon="solar:trash-bin-trash-bold" />
                   Delete
                 </MenuItem>
@@ -177,11 +181,16 @@ function EditForm({
               value={department}
               onChange={onChangeDivisionNew}
             />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={onAddDepartment}
+              sx={{ marginY: 2 }}
+            >
+              Submit
+            </Button>
           </Stack>
         </Box>
-        <Button onClick={onAddDepartment} sx={{ marginY: 2 }}>
-          Add More
-        </Button>
       </Grid>
 
       <Box
@@ -207,6 +216,10 @@ export function EditClientCompanyView() {
   const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
   const { mutate: addDivision } = useAddDivision();
   const { mutate: updateDivision } = useUpdateDivision();
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | undefined>();
+
+  // Division
   const [departments, setDepartments] = React.useState(data?.department ?? []);
   const [department, setDepartment] = React.useState('');
 
@@ -223,6 +236,17 @@ export function EditClientCompanyView() {
       company_id: data?.id,
     });
     setDepartment('');
+  };
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
+
+  const onRemove = () => {
+    deleteDivision(selectedId ?? 0);
+
+    setOpenRemoveModal(false);
   };
 
   const handleSubmit = (formData: CompanyDTO) => {
@@ -305,10 +329,17 @@ export function EditClientCompanyView() {
               onChangeDivisionNew={onChangeDivisionNew}
               onClickDelete={onClickDelete}
               onClickEdit={onClickEdit}
+              onClickRemove={onClickRemove}
             />
           )}
         </Form>
       </Grid>
+
+      <RemoveAction
+        onRemove={onRemove}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

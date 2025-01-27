@@ -29,7 +29,6 @@ interface LoginCredentialsDTO {
 
 export function AuthProvider(props: React.PropsWithChildren) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [accessToken, setAccessToken] = React.useState<string | null>(() =>
     sessionService.getSession()
   );

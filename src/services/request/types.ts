@@ -135,3 +135,25 @@ export interface Attachment {
     id: number;
     updated_at: string;
 }
+
+export interface RequestStatus {
+    id: number;
+    name: string;
+    sort: number;
+    company: Company;
+    step: string;
+}
+
+export interface RequestSummary {
+    active: number;
+    done: number;
+    in_progress: number;
+    pending: number;
+    rejected: number;
+}
+
+export interface RequestStatusSummary {
+    count: number;
+    id: number;
+    name: string
+}

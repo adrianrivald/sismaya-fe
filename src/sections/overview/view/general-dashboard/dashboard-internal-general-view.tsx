@@ -126,8 +126,8 @@ export function DashboardInternalView() {
     data: filtered?.map((item: any) => item?.new_request),
   }))[0];
 
-  const convertedDataToChart = [doneValue, inProgressValue, newRequestValue];
-
+  const convertedDataToChart = [newRequestValue, inProgressValue, doneValue];
+  console.log(convertedDataToChart, 'convertedDataToChart');
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -171,49 +171,35 @@ export function DashboardInternalView() {
       <Grid container spacing={2}>
         <Grid xs={12} sm={6} md={4} spacing={2}>
           <Stack spacing={2}>
-            <Stack spacing={2} direction={{ xs: 'column', xl: 'row' }}>
-              <Box width="100%">
-                <RequestSummaryCard
-                  title="Open Request"
-                  total={requestSummary?.to_do}
-                  color="primary.main"
-                />
-              </Box>
-              <Box width="100%">
-                <RequestSummaryCard
-                  title="Unassigned"
-                  total={requestSummary?.pending}
-                  color="#FF6C40"
-                />
-              </Box>
+            <Stack spacing={2} direction="row">
+              <RequestSummaryCard
+                title="Open Request"
+                total={requestSummary?.to_do}
+                color="primary.main"
+              />
+              <RequestSummaryCard
+                title="Unassigned"
+                total={requestSummary?.pending}
+                color="#FF6C40"
+              />
             </Stack>
-            <Stack spacing={2} direction={{ xs: 'column', xl: 'row' }}>
-              <Box width="100%">
-                <RequestSummaryCard
-                  title="On Progress"
-                  total={requestSummary?.in_progress}
-                  color="#FFE16A"
-                />
-              </Box>
-              <Box width="100%">
-                <RequestSummaryCard
-                  title="Due Today"
-                  total={requestSummary?.due_today}
-                  color="#FF6C40"
-                />
-              </Box>
+            <Stack spacing={2} direction="row">
+              <RequestSummaryCard
+                title="On Progress"
+                total={requestSummary?.in_progress}
+                color="#FFE16A"
+              />
+
+              <RequestSummaryCard
+                title="Due Today"
+                total={requestSummary?.due_today}
+                color="#FF6C40"
+              />
             </Stack>{' '}
-            <Stack spacing={2} direction={{ xs: 'column', xl: 'row' }}>
-              <Box width="100%">
-                <RequestSummaryCard title="Solved" total={requestSummary?.done} color="#2CD9C5" />
-              </Box>
-              <Box width="100%">
-                <RequestSummaryCard
-                  title="Overdue"
-                  total={requestSummary?.overdue}
-                  color="#FF6C40"
-                />
-              </Box>
+            <Stack spacing={2} direction="row">
+              <RequestSummaryCard title="Solved" total={requestSummary?.done} color="#2CD9C5" />
+
+              <RequestSummaryCard title="Overdue" total={requestSummary?.overdue} color="#FF6C40" />
             </Stack>
           </Stack>
         </Grid>
@@ -231,6 +217,7 @@ export function DashboardInternalView() {
             chart={{
               categories: requestStats?.map((item) => item?.month),
               series: convertedDataToChart,
+              colors: ['#005B7F', '#FFE700', '#2CD9C5'],
               // series:
             }}
           />
