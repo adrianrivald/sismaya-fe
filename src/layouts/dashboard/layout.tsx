@@ -39,6 +39,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const { user } = useAuth();
   const userType = user?.user_info?.user_type as 'internal' | 'client';
+  const roleId = user?.user_info?.role_id;
   const internalCompaniesDashboard = user?.internal_companies?.map((item) => ({
     heading: item?.company?.name,
     path: `/${item?.company?.name.toLowerCase()}/dashboard`,
@@ -81,7 +82,12 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  menus={menus(userType, internalCompaniesDashboard, internalCompaniesRequest)}
+                  menus={menus(
+                    userType,
+                    internalCompaniesDashboard,
+                    internalCompaniesRequest,
+                    roleId
+                  )}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   workspaces={_workspaces}
@@ -121,7 +127,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        *************************************** */
       sidebarSection={
         <NavDesktop
-          menus={menus(userType, internalCompaniesDashboard, internalCompaniesRequest)}
+          menus={menus(userType, internalCompaniesDashboard, internalCompaniesRequest, roleId)}
           layoutQuery={layoutQuery}
           workspaces={_workspaces}
           slots={{
