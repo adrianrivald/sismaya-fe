@@ -115,9 +115,20 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const role = user?.user_info?.role_id;
+  const userType = user?.user_info?.user_type;
   const currentMenu = window.location.href.split('/')[3];
-  const accessibleMenus = role === 1 ? ['master-data'] : ['request', 'dashboard'];
-
+  // const accessibleMenus =
+  //   role === 1 ? ['master-data'] : ['request', 'dashboard', 'task-management'];
+  const accessibleMenus = [
+    {
+      type: 'internal',
+      menus: ['request', 'dashboard'],
+    },
+    {
+      type: 'client',
+      menus: ['request', 'dashboard', 'task-management'],
+    },
+  ];
   const onClickParentAccordion = (path?: string) => {
     console.log('parent clicked');
     if (path) {
@@ -134,7 +145,8 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
       <Scrollbar fillContent>
         {menus?.map((menu) => (
           <Fragment key={menu?.id}>
-            {menu?.isAccordion ? (
+            <>
+              {/* {menu?.isShownInRole?.includes(role) ? ( */}
               <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
                 <Box
                   color="var(--layout-nav-item-color)"
@@ -151,154 +163,145 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                 </Box>
                 <Box component="ul" gap={0.5} display="flex" flexDirection="column">
                   {menu?.list
-                    ?.filter((item: any) => accessibleMenus?.includes(item?.id))
-                    .map((childMenu: any, index: number) => (
-                      <Accordion key={index} defaultExpanded={childMenu?.path === currentMenu}>
-                        <AccordionSummary
-                          // expandIcon={<ExpandMoreIcon />}
-                          sx={{
-                            p: 0,
-                          }}
-                          aria-controls="panel-content"
-                          id=""
-                        >
-                          <ListItem disableGutters disablePadding key="request">
-                            <ListItemButton
-                              disableGutters
-                              sx={{
-                                pl: 2,
-                                py: 1,
-                                gap: 2,
-                                pr: 1.5,
-                                borderRadius: 0.75,
-                                typography: 'body2',
-                                fontWeight: 'fontWeightMedium',
-                                color: 'var(--layout-nav-item-color)',
-                                minHeight: 'var(--layout-nav-item-height)',
-                              }}
-                              onClick={() => onClickParentAccordion(menu?.path)}
-                            >
-                              <Box component="span" sx={{ width: 24, height: 24 }}>
-                                {childMenu?.icon}
-                              </Box>
-
-                              <Box component="span" flexGrow={1}>
-                                {childMenu?.heading}
-                              </Box>
-
-                              {/* {item.info && item.info} */}
-                            </ListItemButton>
-                          </ListItem>
-                        </AccordionSummary>
-
-                        <AccordionDetails>
-                          {childMenu?.list.map((item: any, childIndex: number) => {
-                            const isActived = pathname.includes(item.path);
-                            return (
-                              <ListItem disableGutters disablePadding key={childIndex}>
-                                <ListItemButton
-                                  disableGutters
-                                  component={RouterLink}
-                                  href={item.path}
-                                  sx={{
-                                    pl: 2,
-                                    py: 1,
-                                    gap: 2,
-                                    pr: 1.5,
-                                    borderRadius: 0.75,
-                                    typography: 'body2',
-                                    fontWeight: 'fontWeightMedium',
-                                    color: 'var(--layout-nav-item-color)',
-                                    minHeight: 'var(--layout-nav-item-height)',
-                                    ...(isActived && {
-                                      fontWeight: 'fontWeightSemiBold',
-                                      bgcolor: 'var(--layout-nav-item-active-bg)',
-                                      color: 'var(--layout-nav-item-active-color)',
-                                      '&:hover': {
-                                        bgcolor: 'var(--layout-nav-item-hover-bg)',
-                                      },
-                                    }),
-                                  }}
-                                >
-                                  <Box component="span" flexGrow={1}>
-                                    {item.heading}
-                                  </Box>
-
-                                  {item.info && item.info}
-                                </ListItemButton>
-                              </ListItem>
-                            );
-                          })}
-                        </AccordionDetails>
-                      </Accordion>
-                    ))}
-                </Box>
-              </Box>
-            ) : (
-              <>
-                {/* {menu?.isShownInRole?.includes(role) ? ( */}
-                <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
-                  <Box
-                    color="var(--layout-nav-item-color)"
-                    fontWeight="bold"
-                    mt={4}
-                    sx={{
-                      pl: 2,
-                      py: 1,
-                      gap: 2,
-                    }}
-                    component="span"
-                  >
-                    {menu?.heading}
-                  </Box>
-                  <Box component="ul" gap={0.5} display="flex" flexDirection="column">
-                    {menu?.list.map((item: any, index: number) => {
-                      const isActived = item.path === pathname;
+                    ?.filter((item: any) =>
+                      role !== 1
+                        ? accessibleMenus
+                            ?.find((accessibleMenu) => accessibleMenu?.type === userType)
+                            ?.menus?.includes(item?.id)
+                        : ['dashboard', 'master-data'].includes(item?.id)
+                    )
+                    .map((childMenu: any, index: number) => {
+                      const isActived = childMenu.path === pathname;
 
                       return (
-                        <ListItem disableGutters disablePadding key={index}>
-                          <ListItemButton
-                            disableGutters
-                            component={RouterLink}
-                            href={item.path}
-                            sx={{
-                              pl: 2,
-                              py: 1,
-                              gap: 2,
-                              pr: 1.5,
-                              borderRadius: 0.75,
-                              typography: 'body2',
-                              fontWeight: 'fontWeightMedium',
-                              color: 'var(--layout-nav-item-color)',
-                              minHeight: 'var(--layout-nav-item-height)',
-                              ...(isActived && {
-                                fontWeight: 'fontWeightSemiBold',
-                                bgcolor: 'var(--layout-nav-item-active-bg)',
-                                color: 'var(--layout-nav-item-active-color)',
-                                '&:hover': {
-                                  bgcolor: 'var(--layout-nav-item-hover-bg)',
-                                },
-                              }),
-                            }}
-                          >
-                            <Box component="span" sx={{ width: 24, height: 24 }}>
-                              {item.icon}
-                            </Box>
+                        <>
+                          {childMenu?.isAccordion ? (
+                            <Accordion
+                              key={index}
+                              defaultExpanded={childMenu?.path === currentMenu}
+                            >
+                              <AccordionSummary
+                                // expandIcon={<ExpandMoreIcon />}
+                                sx={{
+                                  p: 0,
+                                }}
+                                aria-controls="panel-content"
+                                id=""
+                              >
+                                <ListItem disableGutters disablePadding key="request">
+                                  <ListItemButton
+                                    disableGutters
+                                    sx={{
+                                      pl: 2,
+                                      py: 1,
+                                      gap: 2,
+                                      pr: 1.5,
+                                      borderRadius: 0.75,
+                                      typography: 'body2',
+                                      fontWeight: 'fontWeightMedium',
+                                      color: 'var(--layout-nav-item-color)',
+                                      minHeight: 'var(--layout-nav-item-height)',
+                                    }}
+                                    onClick={() => onClickParentAccordion(menu?.path)}
+                                  >
+                                    <Box component="span" sx={{ width: 24, height: 24 }}>
+                                      {childMenu?.icon}
+                                    </Box>
 
-                            <Box component="span" flexGrow={1}>
-                              {item.heading}
-                            </Box>
+                                    <Box component="span" flexGrow={1}>
+                                      {childMenu?.heading}
+                                    </Box>
 
-                            {item.info && item.info}
-                          </ListItemButton>
-                        </ListItem>
+                                    {/* {item.info && item.info} */}
+                                  </ListItemButton>
+                                </ListItem>
+                              </AccordionSummary>
+
+                              <AccordionDetails>
+                                {childMenu?.list.map((item: any, childIndex: number) => {
+                                  const isMenuActived = pathname.includes(item.path);
+                                  return (
+                                    <ListItem disableGutters disablePadding key={childIndex}>
+                                      <ListItemButton
+                                        disableGutters
+                                        component={RouterLink}
+                                        href={item.path}
+                                        sx={{
+                                          pl: 2,
+                                          py: 1,
+                                          gap: 2,
+                                          pr: 1.5,
+                                          borderRadius: 0.75,
+                                          typography: 'body2',
+                                          fontWeight: 'fontWeightMedium',
+                                          color: 'var(--layout-nav-item-color)',
+                                          minHeight: 'var(--layout-nav-item-height)',
+                                          ...(isMenuActived && {
+                                            fontWeight: 'fontWeightSemiBold',
+                                            bgcolor: 'var(--layout-nav-item-active-bg)',
+                                            color: 'var(--layout-nav-item-active-color)',
+                                            '&:hover': {
+                                              bgcolor: 'var(--layout-nav-item-hover-bg)',
+                                            },
+                                          }),
+                                        }}
+                                      >
+                                        <Box component="span" flexGrow={1}>
+                                          {item.heading}
+                                        </Box>
+
+                                        {item.info && item.info}
+                                      </ListItemButton>
+                                    </ListItem>
+                                  );
+                                })}
+                              </AccordionDetails>
+                            </Accordion>
+                          ) : (
+                            <ListItem disableGutters disablePadding key={index}>
+                              <ListItemButton
+                                disableGutters
+                                component={RouterLink}
+                                href={childMenu.path}
+                                sx={{
+                                  pl: 2,
+                                  py: 1,
+                                  gap: 2,
+                                  pr: 1.5,
+                                  borderRadius: 0.75,
+                                  typography: 'body2',
+                                  fontWeight: 'fontWeightMedium',
+                                  color: 'var(--layout-nav-item-color)',
+                                  minHeight: 'var(--layout-nav-item-height)',
+                                  ...(isActived && {
+                                    fontWeight: 'fontWeightSemiBold',
+                                    bgcolor: 'var(--layout-nav-item-active-bg)',
+                                    color: 'var(--layout-nav-item-active-color)',
+                                    '&:hover': {
+                                      bgcolor: 'var(--layout-nav-item-hover-bg)',
+                                    },
+                                  }),
+                                }}
+                              >
+                                <Box component="span" sx={{ width: 24, height: 24 }}>
+                                  {childMenu.icon}
+                                </Box>
+
+                                <Box component="span" flexGrow={1}>
+                                  {childMenu.heading}
+                                </Box>
+
+                                {childMenu.info && childMenu.info}
+                              </ListItemButton>
+                            </ListItem>
+                          )}
+                        </>
                       );
                     })}
-                  </Box>
                 </Box>
-                {/* ) : null} */}
-              </>
-            )}
+              </Box>
+              {/* ) : null} */}
+            </>
           </Fragment>
         ))}
       </Scrollbar>

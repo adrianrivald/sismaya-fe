@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, capitalize } from '@mui/material';
@@ -161,8 +161,9 @@ export function RequestView() {
   const assigneeCompanyId = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
-  console.log(assigneeCompanyId, 'assigneeCompanyId');
-  const { getDataTableProps } = useRequestList({}, String(assigneeCompanyId));
+  const [filter, setFilter] = useState<any>({});
+  const [totalData, setTotalData] = useState(0);
+  const { getDataTableProps } = useRequestList(filter, String(assigneeCompanyId));
   const { data: requestSummary } = useRequestSummary(String(assigneeCompanyId));
   const { data: requestStatusSummary } = useRequestStatusSummary(String(assigneeCompanyId));
   const { mutate: deleteRequestById } = useDeleteRequestById();
@@ -185,6 +186,26 @@ export function RequestView() {
 
     return { handleEdit, handleDelete };
   };
+
+  const onFilterByStatus = (statusId: number) => {
+    setFilter({
+      ...filter,
+      status: statusId,
+    });
+  };
+
+  const onRemoveFilter = () => {
+    const { status, ...rest } = filter;
+    setFilter({
+      ...rest,
+    });
+  };
+
+  useEffect(() => {
+    if (filter?.status === undefined) {
+      setTotalData(getDataTableProps().total);
+    }
+  }, [filter, getDataTableProps]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -243,11 +264,13 @@ export function RequestView() {
               alignItems="center"
               gap={1}
               sx={{
-                borderBottomWidth: 2,
+                borderBottomWidth: filter?.status !== undefined ? 0 : 2,
                 pb: 1,
                 borderBottomColor: 'primary.main',
                 borderBottomStyle: 'solid',
+                cursor: 'pointer',
               }}
+              onClick={onRemoveFilter}
             >
               <Typography color="primary.main">All</Typography>
               <Box
@@ -259,7 +282,7 @@ export function RequestView() {
                   fontWeight: 'bold',
                 }}
               >
-                {getDataTableProps().total}
+                {totalData === 0 ? getDataTableProps().total : totalData}
               </Box>
             </Box>
             {requestStatusSummary?.map((item) => (
@@ -269,11 +292,13 @@ export function RequestView() {
                 id={item?.id.toString()}
                 gap={1}
                 sx={{
-                  borderBottomWidth: 0,
+                  borderBottomWidth: filter?.status === item?.id ? 2 : 0,
                   pb: 1,
                   borderBottomColor: 'primary.main',
                   borderBottomStyle: 'solid',
+                  cursor: 'pointer',
                 }}
+                onClick={() => onFilterByStatus(item?.id)}
               >
                 <Typography color="grey.600">{capitalize(item?.name)}</Typography>
                 <Box
