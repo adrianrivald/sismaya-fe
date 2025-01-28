@@ -33,7 +33,8 @@ interface InternalCompanyMenus {
 export const menus = (
   type: 'internal' | 'client',
   internalCompaniesDashboard?: InternalCompanyMenus[],
-  internalCompaniesRequest?: InternalCompanyMenus[]
+  internalCompaniesRequest?: InternalCompanyMenus[],
+  roleId?: number
 ) => [
   {
     isAccordion: type === 'internal',
@@ -46,6 +47,7 @@ export const menus = (
         path: '/',
         id: 'dashboard',
         icon: icon('ic-analytics'),
+        isAccordion: type === 'internal' && roleId !== 1,
         list: internalCompaniesDashboard,
       },
       {
@@ -56,17 +58,25 @@ export const menus = (
     ],
   },
   {
-    isAccordion: true,
     heading: 'MANAGEMENT',
     id: 'management',
     list: [
       {
+        isAccordion: true,
         heading: 'Request',
         id: 'request',
         icon: icon('ic-chat'),
         list: internalCompaniesRequest,
       },
       {
+        isAccordion: false,
+        heading: 'Task Management',
+        id: 'task-management',
+        path: '/task',
+        icon: icon('ic-user'),
+      },
+      {
+        isAccordion: true,
         heading: 'Master Data',
         id: 'master-data',
         icon: <Iconify icon="solar:database-bold" />,
