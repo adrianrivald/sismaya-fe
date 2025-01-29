@@ -14,6 +14,7 @@ import { downloadFile } from 'src/utils/download';
 // import { RequestPriority } from 'src/sections/request/request-priority';
 // import { TaskStatus } from 'src/sections/request/task/task-status';
 import { CardActivity } from 'src/sections/task/activity';
+// import { TaskForm } from 'src/sections/task/form';
 
 // ----------------------------------------------------------------------
 
@@ -72,7 +73,9 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          <Button variant="outlined">Edit Task</Button>
+          {/* <TaskForm task={task}>
+            <Button variant="outlined">Edit Task</Button>
+          </TaskForm> */}
         </Box>
 
         {/* <Box

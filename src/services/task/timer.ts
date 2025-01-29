@@ -29,7 +29,7 @@ const stateMap = {
 const storageKey = 'task-timer';
 
 const initialStore = {
-  timer: 0, // seconds
+  timer: 0, // in seconds
   state: 'idle' as TimerState,
   activity: '',
   request: '',
@@ -66,12 +66,16 @@ const store = createStore({
       // Update context either from event or from local storage
       const getItem = (key: keyof typeof event) => event[key] || parsedData?.[key] || context[key];
 
+      // If there is running timer, set timer to initial value
+      // Otherwise, set timer to the value from local storage
+      const timer = context.state === 'running' ? initialStore.timer : getItem('timer');
+
       return {
         state: 'running' as TimerState,
         activity: getItem('activity'),
         request: getItem('request'),
         taskId: getItem('taskId'),
-        timer: getItem('timer'),
+        timer,
       };
     },
     countup: (context) => ({
@@ -81,15 +85,19 @@ const store = createStore({
 });
 
 export function useTimerStore() {
-  return useSelector(store, (state) => state.context);
+  const state = useSelector(store, (s) => s.context);
+  return state;
 }
 
-export function useTimer() {
+export function useTimer(taskId?: number) {
   const { timer, state } = useTimerStore();
+  const { taskId: storeTaskId } = useTimerStore();
+  const isPip = !taskId;
+  const isCurrentTimer = isPip ? true : storeTaskId === taskId;
 
-  const isRunning = state === 'running';
+  const isCounting = state === 'running'; // && isCurrentTimer;
   useEffect(() => {
-    if (!isRunning) {
+    if (isCounting === false) {
       return;
     }
 
@@ -101,9 +109,9 @@ export function useTimer() {
     return () => {
       clearInterval(interval);
     };
-  }, [isRunning, timer]);
+  }, [isCounting]);
 
-  return formatSecondToTime(timer);
+  return formatSecondToTime(isCurrentTimer ? timer : 0);
 }
 
 export function useCheckTimer() {
