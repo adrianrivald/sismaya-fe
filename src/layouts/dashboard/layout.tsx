@@ -48,6 +48,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     heading: item?.company?.name,
     path: `/${item?.company?.name.toLowerCase()}/request`,
   }));
+  const internalCompaniesTask = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/task`,
+  }));
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
 
@@ -86,6 +90,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     userType,
                     internalCompaniesDashboard,
                     internalCompaniesRequest,
+                    internalCompaniesTask,
                     roleId
                   )}
                   open={navOpen}
@@ -127,7 +132,13 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        *************************************** */
       sidebarSection={
         <NavDesktop
-          menus={menus(userType, internalCompaniesDashboard, internalCompaniesRequest, roleId)}
+          menus={menus(
+            userType,
+            internalCompaniesDashboard,
+            internalCompaniesRequest,
+            internalCompaniesTask,
+            roleId
+          )}
           layoutQuery={layoutQuery}
           workspaces={_workspaces}
           slots={{
