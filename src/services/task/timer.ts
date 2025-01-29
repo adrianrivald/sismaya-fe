@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { createStore } from '@xstate/store';
 import { useSelector } from '@xstate/store/react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
@@ -48,6 +48,11 @@ const store = createStore({
       return {
         state: event.nextState,
       };
+    },
+    stop: () => {
+      window.localStorage.removeItem(storageKey);
+
+      return initialStore;
     },
     start: (context, event: Partial<EventStart>) => {
       const storedData = window.localStorage.getItem(storageKey);
@@ -132,6 +137,12 @@ export function useCheckTimer() {
         return;
       }
 
+      if (state === 'stopped') {
+        store.send({ type: 'stop' });
+
+        return;
+      }
+
       store.send({ type: 'transition', nextState: state });
     }
 
@@ -147,6 +158,11 @@ export function useTimerAction() {
     onMutate: ({ action, ...rest }) => {
       if (action === 'start') {
         store.send({ type: 'start', ...rest });
+        return;
+      }
+
+      if (action === 'stop') {
+        store.send({ type: 'stop' });
         return;
       }
 
