@@ -6,7 +6,7 @@ export function TimerPip() {
   useCheckTimer();
   const store = useTimerStore();
 
-  if (store.state === 'idle') {
+  if (store.state === 'idle' || store.state === 'stopped') {
     return null;
   }
 
@@ -22,6 +22,7 @@ export function TimerPip() {
         px={1.5}
         py={2}
         boxShadow="-20px 20px 40px -4px rgba(145, 158, 171, 0.24)"
+        width="320px"
       >
         <Typography
           color="rgba(99, 115, 129, 1)"
@@ -40,7 +41,7 @@ export function TimerPip() {
           </Typography>
 
           <Stack spacing={1.5} direction="row" alignItems="center">
-            <TimerCountdown variant="small" />
+            <TimerCountdown size="small" />
             <TimerActionButton taskId={store.taskId} />
           </Stack>
         </Box>

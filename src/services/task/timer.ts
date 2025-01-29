@@ -1,14 +1,15 @@
 import dayjs from 'dayjs';
 import { createStore } from '@xstate/store';
 import { useSelector } from '@xstate/store/react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
+import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 
 type TimerAction = 'start' | 'pause' | 'stop';
 type TimerState = 'idle' | 'running' | 'paused' | 'stopped';
 
-type EventStart = Omit<typeof initialStore, 'state' | 'timer'>;
+type EventStart = Omit<typeof initialStore, 'state'>;
 
 type TimerActionPayload =
   | (EventStart & {
@@ -25,24 +26,56 @@ const stateMap = {
   stop: 'stopped',
 } satisfies Record<TimerAction, TimerState>;
 
+const storageKey = 'task-timer';
+
 const initialStore = {
   timer: 0, // seconds
   state: 'idle' as TimerState,
-  request: '',
   activity: '',
+  request: '',
   taskId: 0,
 };
 
 const store = createStore({
   context: initialStore,
   on: {
-    transition: (context, event: { nextState: TimerState }) => ({
-      state: event.nextState,
-    }),
-    start: (context, event: EventStart) => ({
-      ...event,
-      timer: 0,
-      state: 'running' as TimerState,
+    transition: (_context, event: { nextState: TimerState }) => {
+      // Remove local storage when timer is idle or stopped
+      if (event.nextState === 'idle' || event.nextState === 'stopped') {
+        window.localStorage.removeItem(storageKey);
+      }
+
+      return {
+        state: event.nextState,
+      };
+    },
+    stop: () => {
+      window.localStorage.removeItem(storageKey);
+
+      return initialStore;
+    },
+    start: (context, event: Partial<EventStart>) => {
+      const storedData = window.localStorage.getItem(storageKey);
+      const parsedData = storedData ? JSON.parse(storedData) : null;
+
+      // Prevent start timer when activity and request is not provided
+      if (event.activity && event.request) {
+        window.localStorage.setItem(storageKey, JSON.stringify(event));
+      }
+
+      // Update context either from event or from local storage
+      const getItem = (key: keyof typeof event) => event[key] || parsedData?.[key] || context[key];
+
+      return {
+        state: 'running' as TimerState,
+        activity: getItem('activity'),
+        request: getItem('request'),
+        taskId: getItem('taskId'),
+        timer: getItem('timer'),
+      };
+    },
+    countup: (context) => ({
+      timer: context.timer + 1,
     }),
   },
 });
@@ -53,7 +86,6 @@ export function useTimerStore() {
 
 export function useTimer() {
   const { timer, state } = useTimerStore();
-  const [time, setTime] = useState(timer);
 
   const isRunning = state === 'running';
   useEffect(() => {
@@ -62,21 +94,16 @@ export function useTimer() {
     }
 
     const interval = setInterval(() => {
-      setTime((prev) => prev + 1);
+      store.send({ type: 'countup' });
     }, 1_000);
 
     // eslint-disable-next-line consistent-return
     return () => {
       clearInterval(interval);
     };
-  }, [isRunning]);
+  }, [isRunning, timer]);
 
-  const hours = Math.floor(time / 3600);
-  const minutes = Math.floor((time % 3600) / 60);
-  const seconds = time % 60;
-  const text = [hours, minutes, seconds].map((t) => t.toString().padStart(2, '0')).join(':');
-
-  return text;
+  return formatSecondToTime(timer);
 }
 
 export function useCheckTimer() {
@@ -89,8 +116,8 @@ export function useCheckTimer() {
         return;
       }
 
-      const isEnded = activity.ended_at !== null;
-      const isPaused = activity.is_pause === true;
+      const isEnded = activity?.ended_at !== null;
+      const isPaused = activity?.is_pause === true;
 
       let state: TimerState = 'idle';
 
@@ -99,7 +126,20 @@ export function useCheckTimer() {
       if (!isEnded && !isPaused) state = 'running';
 
       if (state === 'running') {
-        store.send({ type: 'start', activity: 'test', request: 'test', taskId: 1 });
+        store.send({
+          type: 'start',
+          activity: activity?.task?.name,
+          request: activity?.task?.request?.name,
+          taskId: activity?.task_id,
+          timer: dayjs().diff(dayjs(activity?.started_at), 'second'),
+        });
+
+        return;
+      }
+
+      if (state === 'stopped') {
+        store.send({ type: 'stop' });
+
         return;
       }
 
@@ -117,8 +157,12 @@ export function useTimerAction() {
     // store next state to store immediately before tell the server
     onMutate: ({ action, ...rest }) => {
       if (action === 'start') {
-        // @ts-expect-error: `rest` is valid `EventStart`
         store.send({ type: 'start', ...rest });
+        return;
+      }
+
+      if (action === 'stop') {
+        store.send({ type: 'stop' });
         return;
       }
 
@@ -127,7 +171,7 @@ export function useTimerAction() {
   });
 }
 
-type ActivitiesParams = {
+export type ActivitiesParams = {
   page: number;
   page_size: number;
 
@@ -157,8 +201,8 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
 
   return {
     name: activity?.task?.name,
-    data: activity?.created_at,
-    time: [activity?.started_at, activity?.ended_at].join(' - '),
-    diff: activity?.ended_at ? dayjs(activity?.ended_at).diff(activity?.started_at, 'second') : 0,
+    data: fDate(activity?.created_at, 'DD MMMM YYYY'),
+    time: [fTime(activity?.started_at), fTime(activity?.ended_at)].join(' - '),
+    diff: formatSecondToTime(dayjs(activity?.ended_at).diff(activity?.started_at, 'second')),
   };
 }

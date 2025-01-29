@@ -1,7 +1,14 @@
 import { Suspense, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
-import { Link, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+  useParams,
+} from 'react-router-dom';
 import {
   Box,
   Stack,
@@ -23,8 +30,9 @@ import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 export default function TaskLayout() {
   const navigate = useNavigate();
   const lastPath = useLocation().pathname.split('/').pop();
-  const currentTab = lastPath === 'task' ? 'list' : lastPath || 'kanban';
+  const currentTab = lastPath === 'task' ? 'kanban' : lastPath;
   const [searchParams, setSearchParams] = useSearchParams();
+  const { vendor } = useParams();
 
   const { user } = useAuth();
   const { data: products = [] } = useProductByCompanyId(user?.user_info?.company_id);
@@ -66,9 +74,9 @@ export default function TaskLayout() {
 
           <Box width="30%">
             <Tab.Root
-              defaultValue="list"
+              defaultValue={currentTab}
               value={currentTab}
-              onChange={(_, value) => navigate(`/task/${value}`, { replace: true })}
+              onChange={(_, value) => navigate(`/${vendor}/task/${value}`, { replace: true })}
             >
               <Tab.List>
                 <Tab.Item value="kanban">Kanban View</Tab.Item>

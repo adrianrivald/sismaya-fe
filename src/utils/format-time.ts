@@ -1,5 +1,4 @@
 import type { Dayjs } from 'dayjs';
-
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -102,4 +101,23 @@ export function fToNow(date: DatePickerFormat) {
   const isValid = dayjs(date).isValid();
 
   return isValid ? dayjs(date).toNow(true) : 'Invalid time value';
+}
+
+/**
+ * Format seconds to time
+ * @example
+ * formatSecondToTime(3600) // "01:00:00"
+ * formatSecondToTime(60) // "01:00"
+ * formatSecondToTime(1) // "00:01"
+ */
+export function formatSecondToTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  const text =
+    hours > 0
+      ? [hours, minutes, remainingSeconds]
+      : [minutes, remainingSeconds].map((t) => t.toString().padStart(2, '0')).join(':');
+
+  return text;
 }
