@@ -141,3 +141,16 @@ export function useInternalTopStaff(internalCompanyId: number, dateFrom: string,
 
   return data;
 }
+
+// Top Staff Hour
+async function fetchInternalTopStaffbyHour(internalCompanyId: number,  dateFrom: string, dateTo: string) {
+  const { data } = await http<{ data: TopStaff[] }>(`dashboard-internal/top-staff-hour/${internalCompanyId}?from=${dateFrom}&to=${dateTo}`);
+
+  return data;
+}
+
+export function useInternalTopStaffbyHour(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const data = useQuery(['internal-top-staff-hour', internalCompanyId, dateFrom], () => fetchInternalTopStaffbyHour(internalCompanyId, dateFrom, dateTo));
+
+  return data;
+}

@@ -122,11 +122,11 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
   const accessibleMenus = [
     {
       type: 'internal',
-      menus: ['request', 'dashboard'],
+      menus: ['request', 'dashboard', 'task-management'],
     },
     {
       type: 'client',
-      menus: ['request', 'dashboard', 'task-management'],
+      menus: ['request', 'dashboard'],
     },
   ];
   const onClickParentAccordion = (path?: string) => {
