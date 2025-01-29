@@ -6,6 +6,8 @@ import dayjs from 'dayjs';
 import { http } from 'src/utils/http';
 import { taskStatusMap, priorityColorMap } from 'src/constants/status';
 import type { Assignee } from 'src/components/form/field/assignee';
+import { useAuth } from 'src/sections/auth/providers/auth';
+import { useParams } from 'react-router-dom';
 
 export interface RequestProduct {
   id: number;
@@ -104,6 +106,7 @@ export interface TaskManagementParams {
   status: Task['status'];
   productId: number;
   companyId: number;
+  assigneeCompanyId: number;
 }
 
 export type TaskManagementFilter = Partial<Omit<TaskManagementParams, 'page' | 'page_size'>>;
@@ -119,7 +122,8 @@ async function getTaskManagement(filter: Partial<TaskManagementParams>) {
       step: filter.status,
       search: filter.search,
       product_id: productId,
-      assignee_company_id: filter.companyId,
+      // company_id: filter.companyId,
+      assignee_company_id: filter.assigneeCompanyId,
     },
   });
 }
@@ -247,12 +251,35 @@ export function useKanbanChangeStatus() {
   });
 }
 
-export function useTaskDetail(id: number) {
+export function useTaskDetail(id: number, assigneeCompanyId?: number) {
   return useQuery<TaskManagement>({
     queryKey: ['task', `task-detail=${id}`],
     queryFn: async () => {
-      const response = await http(`/tasks/${id}`);
+      const response = await http(`/tasks/${id}`, {
+        params: {
+          assignee_company_id: assigneeCompanyId,
+        },
+      });
       return TaskManagement.fromJson(response.data);
     },
   });
+}
+
+export function useAssigneeCompanyId() {
+  const { user } = useAuth();
+  const { vendor } = useParams();
+
+  if (!vendor) {
+    throw new Error('Vendor not found');
+  }
+
+  const assigneeCompanyId = user?.internal_companies?.find(
+    (c) => c?.company?.name?.toLowerCase() === vendor
+  )?.company_id;
+
+  if (!assigneeCompanyId) {
+    throw new Error('Assignee company not found');
+  }
+
+  return assigneeCompanyId;
 }

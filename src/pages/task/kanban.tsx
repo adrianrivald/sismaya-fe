@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Box, Stack, Typography } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
@@ -8,6 +8,7 @@ import {
   TaskManagement,
   type Task,
   type KanbanColumn,
+  useAssigneeCompanyId,
 } from 'src/services/task/task-management';
 import { Iconify } from 'src/components/iconify';
 import { RequestPriority } from 'src/sections/request/request-priority';
@@ -56,12 +57,14 @@ function BoardColumnHeader({ label, count }: KanbanColumn['meta']) {
 }
 
 function BoardItem({ item, index }: { item: TaskManagement; index: number }) {
+  const { vendor } = useParams();
+
   return (
     <Draggable draggableId={item.task.id.toString()} index={index}>
       {(provided) => (
         <Stack
           component={Link}
-          to={`/task/${item.task.id}`}
+          to={`/${vendor}/task/${item.task.id}`}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -116,9 +119,11 @@ function BoardItem({ item, index }: { item: TaskManagement; index: number }) {
 
 function BoardColumn({ column }: { column: Task['status'] }) {
   const [searchParams] = useSearchParams();
+  const assigneeCompanyId = useAssigneeCompanyId();
   const { data } = useKanbanColumn(column, {
     search: searchParams.get('search') || '',
     productId: Number(searchParams.get('productId')) || 0,
+    assigneeCompanyId,
   });
 
   if (!data) return null;

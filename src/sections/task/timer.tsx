@@ -70,10 +70,10 @@ export function TimerActionButton({ taskId, activity, request }: TimerActionButt
   return null;
 }
 
-export function TimerCountdown({ variant }: { variant: 'large' | 'small' }) {
+export function TimerCountdown({ size }: { size: 'large' | 'small' }) {
   const text = useTimer();
 
-  if (variant === 'small') {
+  if (size === 'small') {
     return (
       <Typography
         color="rgba(33, 43, 54, 1)"
@@ -84,7 +84,7 @@ export function TimerCountdown({ variant }: { variant: 'large' | 'small' }) {
     );
   }
 
-  if (variant === 'large') {
+  if (size === 'large') {
     return (
       <Typography color="rgba(33, 43, 54, 1)" variant="h4">
         {text}

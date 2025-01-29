@@ -1,21 +1,26 @@
 import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
 import { Link, useParams } from 'react-router-dom';
-import { Box, Stack, Typography, ButtonGroup, Button, Divider, Paper } from '@mui/material';
+import { Box, Stack, Typography, /* ButtonGroup, */ Button, Divider, Paper } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
-import { TaskManagement, useTaskDetail } from 'src/services/task/task-management';
+import {
+  TaskManagement,
+  useTaskDetail,
+  useAssigneeCompanyId,
+} from 'src/services/task/task-management';
 import { AssigneeList } from 'src/components/form/field/assignee';
 import { downloadFile } from 'src/utils/download';
-import { RequestPriority } from 'src/sections/request/request-priority';
-import { TaskStatus } from 'src/sections/request/task/task-status';
+// import { RequestPriority } from 'src/sections/request/request-priority';
+// import { TaskStatus } from 'src/sections/request/task/task-status';
 import { CardActivity } from 'src/sections/task/activity';
 
 // ----------------------------------------------------------------------
 
 export default function TaskDetailPage() {
   const { taskId } = useParams();
-  const { data, error } = useTaskDetail(Number(taskId));
+  const assigneeCompanyId = useAssigneeCompanyId();
+  const { data, error } = useTaskDetail(Number(taskId), assigneeCompanyId);
 
   if (!data || error) {
     return null;
@@ -24,13 +29,13 @@ export default function TaskDetailPage() {
   const { task, request } = data;
   const title = task.name;
 
-  const getButtonProgressProps = (progress: number) =>
-    ({
-      variant: task.progress === progress ? 'contained' : 'outlined',
-      onClick: () => {
-        console.log('👾 ~ TaskDetailPage ~ changeProgress ~ progress:', progress);
-      },
-    }) as const;
+  // const getButtonProgressProps = (progress: number) =>
+  //   ({
+  //     variant: task.progress === progress ? 'contained' : 'outlined',
+  //     onClick: () => {
+  //       console.log('👾 ~ TaskDetailPage ~ changeProgress ~ progress:', progress);
+  //     },
+  //   }) as const;
 
   return (
     <DashboardContent maxWidth="xl">
@@ -70,7 +75,7 @@ export default function TaskDetailPage() {
           <Button variant="outlined">Edit Task</Button>
         </Box>
 
-        <Box
+        {/* <Box
           display="flex"
           justifyContent="space-between"
           alignItems="center"
@@ -92,7 +97,7 @@ export default function TaskDetailPage() {
               <Button {...getButtonProgressProps(100)}>100%</Button>
             </ButtonGroup>
           </Stack>
-        </Box>
+        </Box> */}
 
         <Box
           display="flex"
@@ -194,7 +199,7 @@ export default function TaskDetailPage() {
             </Paper>
           </Stack>
 
-          <CardActivity taskId={Number(taskId)} />
+          <CardActivity taskId={Number(taskId)} requestName={request.name} taskName={task.name} />
         </Stack>
       </Stack>
     </DashboardContent>

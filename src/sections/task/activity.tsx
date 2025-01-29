@@ -1,8 +1,6 @@
-import { Link } from 'react-router-dom';
-import { Box, Stack, Typography, Button, Paper } from '@mui/material';
-import { fTime } from 'src/utils/format-time';
+// import { Link } from 'react-router-dom';
+import { Box, Stack, Typography, /* Button, */ Paper } from '@mui/material';
 import { useTimerStore, useLastActivity } from 'src/services/task/timer';
-import { useTaskDetail } from 'src/services/task/task-management';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 function LastActivity({ taskId }: { taskId: number }) {
@@ -55,7 +53,7 @@ function LastActivity({ taskId }: { taskId: number }) {
             color="rgba(33, 43, 54, 1)"
             sx={{ fontWeight: 700, fontSize: '14px', lineHeight: '20px' }}
           >
-            {fTime(activity.diff)}
+            {activity.diff}
           </Typography>
         </Stack>
       </Box>
@@ -63,16 +61,23 @@ function LastActivity({ taskId }: { taskId: number }) {
   );
 }
 
-export function CardActivity({ taskId }: { taskId: number }) {
+export function CardActivity({
+  taskId,
+  requestName,
+  taskName,
+}: {
+  taskId: number;
+  requestName: string;
+  taskName: string;
+}) {
   const store = useTimerStore();
-  const { data } = useTaskDetail(Number(taskId));
 
   return (
     <Paper component={Stack} spacing={2} elevation={3} p={3} width="50%">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">Activities</Typography>
 
-        <Button
+        {/* <Button
           size="small"
           variant="text"
           color="inherit"
@@ -80,7 +85,7 @@ export function CardActivity({ taskId }: { taskId: number }) {
           to={`/task/${taskId}/activities`}
         >
           View all
-        </Button>
+        </Button> */}
       </Box>
 
       <Stack
@@ -92,21 +97,17 @@ export function CardActivity({ taskId }: { taskId: number }) {
       >
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography color="rgba(145, 158, 171, 1)" variant="subtitle2">
-            {store.request || data?.request?.name}
+            {store.request || requestName}
           </Typography>
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {store.activity || data?.task?.name}
+          {store.activity || taskName}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <TimerCountdown variant="large" />
-          <TimerActionButton
-            activity={data?.task?.name}
-            request={data?.request?.name}
-            taskId={taskId}
-          />
+          <TimerCountdown size="large" />
+          <TimerActionButton activity={taskName} request={requestName} taskId={taskId} />
         </Box>
       </Stack>
 

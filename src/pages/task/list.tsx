@@ -1,7 +1,11 @@
 import { Button } from '@mui/material';
 import { createColumnHelper } from '@tanstack/react-table';
-import { Link, useSearchParams } from 'react-router-dom';
-import { TaskManagement, useTaskList } from 'src/services/task/task-management';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import {
+  TaskManagement,
+  useTaskList,
+  useAssigneeCompanyId,
+} from 'src/services/task/task-management';
 import { DataTable } from 'src/components/table/data-tables';
 import { RequestPriority } from 'src/sections/request/request-priority';
 
@@ -37,24 +41,31 @@ const columns = [
 
   columnHelper.display({
     id: 'actions',
-    cell: (info) => (
-      <Button
-        component={Link}
-        to={`/task/${info.row.original.task.id}`}
-        variant="outlined"
-        size="small"
-      >
-        View Detail
-      </Button>
-    ),
+    cell: (info) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a react component
+      const { vendor } = useParams();
+
+      return (
+        <Button
+          component={Link}
+          to={`/${vendor}/task/${info.row.original.task.id}`}
+          variant="outlined"
+          size="small"
+        >
+          View Detail
+        </Button>
+      );
+    },
   }),
 ];
 
 export default function TaskListPage() {
   const [searchParams] = useSearchParams();
+  const assigneeCompanyId = useAssigneeCompanyId();
   const { isEmpty, getDataTableProps } = useTaskList({
     search: searchParams.get('search') || '',
     productId: Number(searchParams.get('productId')) || 0,
+    assigneeCompanyId,
   });
 
   if (isEmpty) {
