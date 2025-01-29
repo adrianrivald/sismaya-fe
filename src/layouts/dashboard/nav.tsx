@@ -137,7 +137,7 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
   };
 
   return (
-    <>
+    <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />
 
       {slots?.topArea}
@@ -307,6 +307,6 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
       </Scrollbar>
 
       {slots?.bottomArea}
-    </>
+    </Box>
   );
 }
