@@ -13,6 +13,7 @@ import {
   useUnresolvedCitoInternal,
   useInternalTopRequester,
   useInternalTopStaff,
+  useInternalTopStaffbyHour,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -108,6 +109,7 @@ export function DashboardInternalCompanyView({
   const { data: requestDue } = useRequestDueInternal(idCompany, requestDueDate);
   const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
+  const { data: topStaffbyHour } = useInternalTopStaffbyHour(idCompany, dateFromTopStaff, dateNow);
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -425,8 +427,19 @@ export function DashboardInternalCompanyView({
             <TopStaffChart
               title="Top 5 Staff"
               chart={{
-                categories: topStaff?.map((item) => item?.staff_name),
-                series: [{ name: 'Task', data: topStaff?.map((item) => item?.task_count) ?? [] }],
+                categories:
+                  staffState === 'quantity'
+                    ? topStaff?.map((item) => item?.staff_name)
+                    : topStaffbyHour?.map((item) => item?.staff_name),
+                series: [
+                  {
+                    name: 'Task',
+                    data:
+                      staffState === 'quantity'
+                        ? (topStaff?.map((item) => item?.task_count) ?? [])
+                        : (topStaffbyHour?.map((item) => item?.task_count) ?? []),
+                  },
+                ],
                 colors: ['#FF6C40'],
               }}
               sx={{ mt: 2 }}

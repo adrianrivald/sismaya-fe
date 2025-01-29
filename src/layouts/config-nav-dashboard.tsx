@@ -34,6 +34,7 @@ export const menus = (
   type: 'internal' | 'client',
   internalCompaniesDashboard?: InternalCompanyMenus[],
   internalCompaniesRequest?: InternalCompanyMenus[],
+  internalCompaniesTask?: InternalCompanyMenus[],
   roleId?: number
 ) => [
   {
@@ -69,11 +70,12 @@ export const menus = (
         list: internalCompaniesRequest,
       },
       {
-        isAccordion: false,
+        isAccordion: true,
         heading: 'Task Management',
         id: 'task-management',
         path: '/task',
-        icon: icon('ic-user'),
+        icon: icon('ic-book'),
+        list: internalCompaniesTask,
       },
       {
         isAccordion: true,
