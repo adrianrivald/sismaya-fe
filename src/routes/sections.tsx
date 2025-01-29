@@ -137,6 +137,22 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
     { path: '/:vendor/dashboard', element: <DashboardInternalCompanyPage /> },
+
+    // Task Management
+    {
+      path: '/:vendor/task',
+      element: <TaskLayout />,
+      children: [
+        { index: true, element: <TaskKanbanPage /> },
+        { path: '/:vendor/task/list', element: <TaskListPage /> },
+        { path: '/:vendor/task/kanban', element: <TaskKanbanPage /> },
+      ],
+    },
+
+    {
+      path: '/:vendor/task/:taskId',
+      element: <TaskDetailPage />,
+    },
   ],
 };
 
@@ -156,22 +172,6 @@ const clientRoutes: NonIndexRouteObject = {
     },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
-
-    // Task Management
-    {
-      path: '/task',
-      element: <TaskLayout />,
-      children: [
-        { index: true, element: <TaskKanbanPage /> },
-        { path: 'list', element: <TaskListPage /> },
-        { path: 'kanban', element: <TaskKanbanPage /> },
-      ],
-    },
-
-    {
-      path: '/task/:taskId',
-      element: <TaskDetailPage />,
-    },
   ],
 };
 
