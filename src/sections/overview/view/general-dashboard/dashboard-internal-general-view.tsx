@@ -9,6 +9,7 @@ import {
   menuItemClasses,
   MenuList,
   Select,
+  SelectChangeEvent,
   Stack,
 } from '@mui/material';
 
@@ -90,6 +91,7 @@ const columns = () => [
 ];
 
 export function DashboardInternalView() {
+  const [periodFilter, setPeriodFilter] = React.useState('year');
   const { data: requestSummary } = useRequestSummary();
   const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({});
   const { data: requestStats } = useRequestStats();
@@ -103,13 +105,6 @@ export function DashboardInternalView() {
       }, {});
     return filterednya;
   });
-
-  // const convertedToChart = filtered?.map((item) => ({
-  //   name: Object.keys(item),
-  //   data: filtered?.map((item) => {
-  //     return item[Object.keys(item)];
-  //   }),
-  // }));
 
   const doneValue = filtered?.map(() => ({
     name: 'Done',
@@ -127,7 +122,12 @@ export function DashboardInternalView() {
   }))[0];
 
   const convertedDataToChart = [newRequestValue, inProgressValue, doneValue];
-  console.log(convertedDataToChart, 'convertedDataToChart');
+
+  const onChangePeriodFilter = (e: SelectChangeEvent<string>) => {
+    setPeriodFilter(e.target.value);
+    console.log(e.target.value, 'value eriod');
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -142,7 +142,7 @@ export function DashboardInternalView() {
             labelId="date-filter-label"
             id="date-filter"
             label="Filter"
-            onChange={() => {}}
+            onChange={onChangePeriodFilter}
             defaultValue="year"
             sx={{
               height: 28,
@@ -163,7 +163,15 @@ export function DashboardInternalView() {
             <MenuItem defaultChecked value="year">
               Year
             </MenuItem>
-            <MenuItem value="month">Month</MenuItem>
+            <MenuItem defaultChecked value="month">
+              Month
+            </MenuItem>
+            <MenuItem defaultChecked value="week">
+              Week
+            </MenuItem>
+            <MenuItem defaultChecked value="day">
+              Day
+            </MenuItem>
           </Select>
         </Box>
       </Box>
