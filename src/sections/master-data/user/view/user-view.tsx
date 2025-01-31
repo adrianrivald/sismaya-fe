@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
@@ -10,12 +10,14 @@ import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
 import { User } from 'src/services/master-data/user/types';
+import { RemoveAction } from './remove-action';
 
 // ----------------------------------------------------------------------
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  handleDelete: (id: number) => void;
+  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
+  setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
 const columnHelper = createColumnHelper<User>();
@@ -42,7 +44,12 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, handleDelete } = popoverProps;
+  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
   return (
     <MenuList
       disablePadding
@@ -64,7 +71,7 @@ function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverP
         Edit
       </MenuItem>
 
-      <MenuItem onClick={() => handleDelete(companyId)} sx={{ color: 'error.main' }}>
+      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
       </MenuItem>
@@ -77,13 +84,12 @@ interface UserViewProps {
 }
 
 export function UserView({ type }: UserViewProps) {
-  const { isEmpty, getDataTableProps } = useUserList({ type });
-  // const clientData = data?.items?.filter((item) => item?.user_info?.company_id !== null);
-  // const internalData = data?.items?.filter((item) => item?.user_info?.company_id === null);
+  const { getDataTableProps } = useUserList({ type });
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const { mutate: deleteUserById } = useDeleteUserById();
-
-  console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
+
   const onClickAddNew = () => {
     navigate('create');
   };
@@ -93,8 +99,9 @@ export function UserView({ type }: UserViewProps) {
       navigate(`${id}/edit`);
     };
 
-    const handleDelete = (id: number) => {
-      deleteUserById(id);
+    const handleDelete = () => {
+      deleteUserById(Number(selectedId));
+      setOpenRemoveModal(false);
     };
 
     return { handleEdit, handleDelete };
@@ -122,9 +129,18 @@ export function UserView({ type }: UserViewProps) {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
+          <DataTable
+            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            {...getDataTableProps()}
+          />
         </Grid>
       </Grid>
+
+      <RemoveAction
+        onRemove={popoverFuncs().handleDelete}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

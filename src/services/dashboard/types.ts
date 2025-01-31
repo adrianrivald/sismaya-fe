@@ -60,6 +60,6 @@ export type RequestSummaryCompany = RequestSummary & {company_name: string}
 export interface RequestStats {
     done: number;
     in_progress: number;
-    month: string;
+    time: string;
     new_request: number;
 }
