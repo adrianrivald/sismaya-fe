@@ -148,7 +148,7 @@ function BoardColumn({ column }: { column: Task['status'] }) {
             backgroundColor: '#F4F6F8',
             borderRadius: 2,
             padding: 2,
-            width: 335,
+            minWidth: 335,
           }}
         >
           <BoardColumnHeader {...data.meta} />
@@ -193,7 +193,7 @@ export default function TaskKanbanPage() {
   };
 
   return (
-    <Stack direction="row" spacing={3}>
+    <Stack direction="row" spacing={3} overflow="scroll">
       <DragDropContext onDragEnd={onDragEnd}>
         <BoardColumn column="to-do" />
         <BoardColumn column="in-progress" />
