@@ -92,9 +92,11 @@ const columns = () => [
 
 export function DashboardInternalView() {
   const [periodFilter, setPeriodFilter] = React.useState('year');
-  const { data: requestSummary } = useRequestSummary();
-  const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({});
-  const { data: requestStats } = useRequestStats();
+  const { data: requestSummary } = useRequestSummary(periodFilter);
+  const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({
+    period: periodFilter,
+  });
+  const { data: requestStats } = useRequestStats(periodFilter);
 
   const filtered = requestStats?.map((item: any) => {
     const filterednya = Object.keys(item)
