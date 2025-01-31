@@ -1,9 +1,8 @@
-import { PickersOutlinedInput } from '@mui/x-date-pickers';
 import { useQuery } from '@tanstack/react-query';
 import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
 import { http } from 'src/utils/http'
-import { WithPagination } from 'src/utils/types';
+import type { WithPagination } from 'src/utils/types';
 import type { RequestStats, RequestSummary, RequestSummaryCompany } from '../types';
 
 // Total Request
