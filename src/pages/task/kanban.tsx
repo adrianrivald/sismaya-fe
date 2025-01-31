@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography /* IconButton */ } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import {
@@ -12,6 +12,7 @@ import {
 } from 'src/services/task/task-management';
 import { Iconify } from 'src/components/iconify';
 import { RequestPriority } from 'src/sections/request/request-priority';
+// import { TaskForm } from 'src/sections/task/form';
 
 // const reorder = (list: any, startIndex: number, endIndex: number) => {
 //   const result = Array.from(list);
@@ -37,21 +38,29 @@ import { RequestPriority } from 'src/sections/request/request-priority';
 
 function BoardColumnHeader({ label, count }: KanbanColumn['meta']) {
   return (
-    <Stack direction="row" alignItems="center" spacing={1.5}>
-      <Box
-        borderRadius="50%"
-        bgcolor="#DFE3E8"
-        width={24}
-        height={24}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Typography color="#637381">{count}</Typography>
-      </Box>
-      <Typography color="#1C252E" variant="h6">
-        {label}
-      </Typography>
+    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
+      <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Box
+          borderRadius="50%"
+          bgcolor="#DFE3E8"
+          width={24}
+          height={24}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Typography color="#637381">{count}</Typography>
+        </Box>
+        <Typography color="#1C252E" variant="h6">
+          {label}
+        </Typography>
+      </Stack>
+
+      {/* <TaskForm>
+        <IconButton aria-label="Create Task" size="small">
+          <Iconify icon="mdi:plus" />
+        </IconButton>
+      </TaskForm> */}
     </Stack>
   );
 }
