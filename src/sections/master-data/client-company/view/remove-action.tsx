@@ -43,8 +43,8 @@ export function RemoveAction({ openRemoveModal, setOpenRemoveModal, onRemove }: 
               paddingY: 0.5,
               border: 1,
               borderRadius: 1.5,
-              backgroundColor: 'primary.main',
-              borderColor: 'primary.main',
+              backgroundColor: 'error.main',
+              borderColor: 'error.main',
               color: 'white',
             }}
           >
