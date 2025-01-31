@@ -3,9 +3,7 @@ import { Box, Stack, Typography, /* Button, */ Paper } from '@mui/material';
 import { useTimerStore, useLastActivity } from 'src/services/task/timer';
 import { TimerActionButton, TimerCountdown } from './timer';
 
-function LastActivity({ taskId }: { taskId: number }) {
-  const activity = useLastActivity({ taskId });
-
+function LastActivity({ activity }: { activity: ReturnType<typeof useLastActivity> }) {
   if (!activity) {
     return null;
   }
@@ -63,14 +61,19 @@ function LastActivity({ taskId }: { taskId: number }) {
 
 export function CardActivity({
   taskId,
-  requestName,
-  taskName,
+  taskName: task,
+  requestName: request,
 }: {
   taskId: number;
   requestName: string;
   taskName: string;
 }) {
+  const lastActivity = useLastActivity({ taskId });
+
   const store = useTimerStore();
+  const isCurrentTimer = store.taskId === taskId;
+  const requestName = isCurrentTimer ? store.request : request;
+  const taskName = isCurrentTimer ? store.activity : task;
 
   return (
     <Paper component={Stack} spacing={2} elevation={3} p={3} width="50%">
@@ -97,21 +100,21 @@ export function CardActivity({
       >
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography color="rgba(145, 158, 171, 1)" variant="subtitle2">
-            {store.request || requestName}
+            {requestName}
           </Typography>
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {store.activity || taskName}
+          {taskName}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <TimerCountdown size="large" />
+          <TimerCountdown size="large" taskId={taskId} />
           <TimerActionButton activity={taskName} request={requestName} taskId={taskId} />
         </Box>
       </Stack>
 
-      <LastActivity taskId={taskId} />
+      {lastActivity ? <LastActivity activity={lastActivity} /> : null}
     </Paper>
   );
 }

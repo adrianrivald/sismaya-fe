@@ -9,8 +9,9 @@ type TimerActionButtonProps = {
 };
 
 export function TimerActionButton({ taskId, activity, request }: TimerActionButtonProps) {
-  const { state } = useTimerStore();
   const mutation = useTimerAction();
+  const { state, taskId: storeTaskId } = useTimerStore();
+  const isCurrentTimer = storeTaskId === taskId;
 
   const btnStart = (
     <IconButton
@@ -45,7 +46,7 @@ export function TimerActionButton({ taskId, activity, request }: TimerActionButt
     </IconButton>
   );
 
-  if (state === 'idle' || state === 'stopped') {
+  if (state === 'idle' || state === 'stopped' || isCurrentTimer === false) {
     return btnStart;
   }
 
@@ -70,8 +71,8 @@ export function TimerActionButton({ taskId, activity, request }: TimerActionButt
   return null;
 }
 
-export function TimerCountdown({ size }: { size: 'large' | 'small' }) {
-  const text = useTimer();
+export function TimerCountdown({ size, taskId }: { size: 'large' | 'small'; taskId?: number }) {
+  const text = useTimer(taskId);
 
   if (size === 'small') {
     return (
