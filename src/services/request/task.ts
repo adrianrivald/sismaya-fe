@@ -173,8 +173,12 @@ export function useCreateOrUpdateTask(
   return [form, onSubmit] as const;
 }
 
-export function useDeleteTask(requestId: RequestTask['requestId']) {
+export function useDeleteTask(
+  requestId: RequestTask['requestId'],
+  options: UseMutationOptions<any, any, any> = {}
+) {
   const mutation = useMutation<RequestTask, Error, Pick<RequestTask, 'taskId'>>({
+    ...options,
     mutationKey: RequestTask.queryKeys(requestId),
     mutationFn: async ({ taskId }) => http(`/tasks/${taskId}`, { method: 'DELETE' }),
   });
