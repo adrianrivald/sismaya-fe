@@ -1,16 +1,8 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import {
-  Box,
-  Button,
-  Card,
-  MenuItem,
-  menuItemClasses,
-  MenuList,
-  Select,
-  Stack,
-} from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
+import { Box, Button, Card, MenuItem, Select, Stack } from '@mui/material';
 
 import {
   useRequestStats,
@@ -20,13 +12,12 @@ import {
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper } from '@tanstack/react-table';
-import { _posts, _tasks, _timeline } from 'src/_mock';
+import dayjs from 'dayjs';
 import { SvgColor } from 'src/components/svg-color';
-import { RequestSummaryCompany } from 'src/services/dashboard/types';
+import type { RequestSummaryCompany } from 'src/services/dashboard/types';
 import { RequestSummaryCard } from '../../request-summary-card';
 import { RequestStatsChart } from '../../request-stats-chart';
 import { TimeSummaryCard } from '../../time-summary-card';
-import { RequestDueChart } from '../../request-due-chart';
 import { SlaComplianceChart } from '../../sla-compliance-chart';
 
 const columnHelper = createColumnHelper<RequestSummaryCompany>();
@@ -90,9 +81,12 @@ const columns = () => [
 ];
 
 export function DashboardInternalView() {
-  const { data: requestSummary } = useRequestSummary();
-  const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({});
-  const { data: requestStats } = useRequestStats();
+  const [periodFilter, setPeriodFilter] = React.useState('year');
+  const { data: requestSummary } = useRequestSummary(periodFilter);
+  const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({
+    period: periodFilter,
+  });
+  const { data: requestStats } = useRequestStats(periodFilter);
 
   const filtered = requestStats?.map((item: any) => {
     const filterednya = Object.keys(item)
@@ -103,13 +97,6 @@ export function DashboardInternalView() {
       }, {});
     return filterednya;
   });
-
-  // const convertedToChart = filtered?.map((item) => ({
-  //   name: Object.keys(item),
-  //   data: filtered?.map((item) => {
-  //     return item[Object.keys(item)];
-  //   }),
-  // }));
 
   const doneValue = filtered?.map(() => ({
     name: 'Done',
@@ -127,7 +114,24 @@ export function DashboardInternalView() {
   }))[0];
 
   const convertedDataToChart = [newRequestValue, inProgressValue, doneValue];
-  console.log(convertedDataToChart, 'convertedDataToChart');
+
+  const onChangePeriodFilter = (e: SelectChangeEvent<string>) => {
+    setPeriodFilter(e.target.value);
+  };
+
+  const renderTime = (timeValue: string) => {
+    switch (periodFilter) {
+      case 'year':
+        return timeValue;
+      case 'month':
+        return dayjs(timeValue).format('D');
+      case 'week':
+        return dayjs(timeValue).format('dd');
+      default:
+        return dayjs(timeValue).format('D');
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -142,7 +146,7 @@ export function DashboardInternalView() {
             labelId="date-filter-label"
             id="date-filter"
             label="Filter"
-            onChange={() => {}}
+            onChange={onChangePeriodFilter}
             defaultValue="year"
             sx={{
               height: 28,
@@ -163,7 +167,15 @@ export function DashboardInternalView() {
             <MenuItem defaultChecked value="year">
               Year
             </MenuItem>
-            <MenuItem value="month">Month</MenuItem>
+            <MenuItem defaultChecked value="month">
+              Month
+            </MenuItem>
+            <MenuItem defaultChecked value="week">
+              Week
+            </MenuItem>
+            <MenuItem defaultChecked value="day">
+              Day
+            </MenuItem>
           </Select>
         </Box>
       </Box>
@@ -215,7 +227,7 @@ export function DashboardInternalView() {
         <Grid xs={12} md={12} lg={12}>
           <RequestStatsChart
             chart={{
-              categories: requestStats?.map((item) => item?.month),
+              categories: requestStats?.map((item) => renderTime(item?.time)),
               series: convertedDataToChart,
               colors: ['#005B7F', '#FFE700', '#2CD9C5'],
               // series:
