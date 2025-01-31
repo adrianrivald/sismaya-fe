@@ -98,46 +98,6 @@ export class TaskManagement {
   static formatAttachmentDate(createdAt: string) {
     return fDateTime(createdAt, 'DD MMMM YYYY HH:mm');
   }
-
-  static async filesToAttachments(files?: Array<File>) {
-    if (!files || files.length < 1) {
-      return [];
-    }
-
-    const formData = new FormData();
-
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-
-    const uploadedFiles = await uploads(formData);
-
-    if (!uploadedFiles.data || uploadedFiles.data.length < 1) {
-      return [];
-    }
-
-    const attachments = uploadedFiles.data.map((file) => ({
-      file_path: file.path,
-      file_name: file.filename,
-    }));
-
-    return attachments;
-  }
-
-  static formSchema = z.object({
-    request_id: z.number().optional(),
-    title: z.string().min(1, 'Required'),
-    dueDate: z.string().min(1, 'Required'),
-    description: z.string().min(1, 'Required'),
-    status: z.enum(['to-do', 'in-progress', 'completed'], {
-      required_error: 'Required',
-      invalid_type_error: 'Invalid status',
-    }),
-    assignees: z
-      .array(z.object({ id: z.number() }).transform((assignee) => ({ assignee_id: assignee.id })))
-      .min(1, 'Required'),
-    files: z.array(z.custom<File>()).optional(),
-  });
 }
 
 export interface TaskManagementParams {

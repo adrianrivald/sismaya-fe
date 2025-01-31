@@ -193,7 +193,7 @@ export default function TaskKanbanPage() {
   };
 
   return (
-    <Stack direction="row" spacing={3} overflow="scroll">
+    <Stack direction="row" spacing={3} sx={{ overflowX: 'auto' }}>
       <DragDropContext onDragEnd={onDragEnd}>
         <BoardColumn column="to-do" />
         <BoardColumn column="in-progress" />
