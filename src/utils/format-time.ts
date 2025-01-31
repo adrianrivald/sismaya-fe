@@ -117,7 +117,7 @@ export function formatSecondToTime(seconds: number) {
   const text =
     hours > 0
       ? [hours, minutes, remainingSeconds]
-      : [minutes, remainingSeconds].map((t) => t.toString().padStart(2, '0')).join(':');
+      : [minutes, remainingSeconds].map((t) => Math.floor(t).toString().padStart(2, '0')).join(':');
 
   return text;
 }

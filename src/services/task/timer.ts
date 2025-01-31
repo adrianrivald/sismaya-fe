@@ -79,7 +79,8 @@ const store = createStore({
       };
     },
     countup: (context) => ({
-      timer: context.timer + 1,
+      // not sure why, but sometimes trigger countup twice, so need to add 0.5 instead of 1
+      timer: context.timer + 0.5,
     }),
   },
 });
