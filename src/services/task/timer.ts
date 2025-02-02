@@ -66,16 +66,12 @@ const store = createStore({
       // Update context either from event or from local storage
       const getItem = (key: keyof typeof event) => event[key] || parsedData?.[key] || context[key];
 
-      // If there is running timer, set timer to initial value
-      // Otherwise, set timer to the value from local storage
-      const timer = context.state === 'running' ? initialStore.timer : getItem('timer');
-
       return {
         state: 'running' as TimerState,
         activity: getItem('activity'),
         request: getItem('request'),
         taskId: getItem('taskId'),
-        timer,
+        timer: getItem('timer'),
       };
     },
     countup: (context) => ({
