@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
@@ -9,7 +8,6 @@ import { taskStatusMap, priorityColorMap } from 'src/constants/status';
 import type { Assignee } from 'src/components/form/field/assignee';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { useParams } from 'react-router-dom';
-import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
 
 export interface RequestProduct {
   id: number;
@@ -38,6 +36,7 @@ export interface Task {
     url: string;
     createdAt: string;
   }>;
+  lastTimer: number; // in seconds
 }
 
 export class TaskManagement {
@@ -86,6 +85,7 @@ export class TaskManagement {
           url: [attachment.file_path, attachment.file_name].join('/'),
           createdAt: attachment.created_at,
         })) ?? [],
+      lastTimer: json?.current_timer_duration || 0,
     } satisfies Task;
 
     return new TaskManagement(request, task);
@@ -262,6 +262,7 @@ export function useTaskDetail(id: number, assigneeCompanyId?: number) {
           assignee_company_id: assigneeCompanyId,
         },
       });
+
       return TaskManagement.fromJson(response.data);
     },
   });
