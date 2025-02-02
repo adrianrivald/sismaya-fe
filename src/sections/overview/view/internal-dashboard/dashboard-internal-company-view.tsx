@@ -14,6 +14,7 @@ import {
   useInternalTopRequester,
   useInternalTopStaff,
   useInternalTopStaffbyHour,
+  useRequestHandlingTime,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -88,6 +89,7 @@ export function DashboardInternalCompanyView({
   );
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const [staffState, setStaffState] = React.useState<'quantity' | 'hour'>('quantity');
+  const [dateFilter, setDateFilter] = React.useState(7);
   const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
   const dateNow = dayjs().format('YYYY-MM-DD');
   const { data: internalTotalRequest } = useInternalTotalRequestByCompany(
@@ -110,6 +112,9 @@ export function DashboardInternalCompanyView({
   const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
   const { data: topStaffbyHour } = useInternalTopStaffbyHour(idCompany, dateFromTopStaff, dateNow);
+  const { data: requestHandlingTime } = useRequestHandlingTime(idCompany, dateFrom, dateNow);
+
+  console.log(requestHandlingTime, 'requestHandlingTime');
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -126,6 +131,7 @@ export function DashboardInternalCompanyView({
       .subtract(filterValue as number, 'day')
       .format('YYYY-MM-DD');
     setDateFrom(dateFromValue);
+    setDateFilter(Number(filterValue));
   };
 
   const handleChangeRequestDueDateFilter = (e: SelectChangeEvent<string>) => {
@@ -205,6 +211,20 @@ export function DashboardInternalCompanyView({
         </Box>
       );
     }) ?? [];
+
+  const renderDateFilter = () => {
+    switch (dateFilter) {
+      case 0:
+        return 'Today';
+      case 7:
+        return '7';
+      case 30:
+        return '30';
+
+      default:
+        return '';
+    }
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -308,7 +328,9 @@ export function DashboardInternalCompanyView({
                   }}
                 >
                   <Typography fontSize={14}>Total Request</Typography>
-                  <Typography fontSize={12}>for the last 7 days</Typography>
+                  <Typography fontSize={12}>
+                    {dateFilter !== 0 ? `for the last ${renderDateFilter()} days` : `Today`}{' '}
+                  </Typography>
                   <Typography fontSize={36} fontWeight="bold">
                     {internalTotalRequest?.total_request}
                   </Typography>
@@ -319,7 +341,9 @@ export function DashboardInternalCompanyView({
                     </Typography>
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
-                    than previous 7 days
+                    {dateFilter !== 0
+                      ? `than previous ${renderDateFilter()} days`
+                      : `than yesterday`}
                   </Typography>
                 </Box>
                 <Card
@@ -392,7 +416,7 @@ export function DashboardInternalCompanyView({
               <DataTable
                 withPagination={false}
                 withViewAll
-                viewAllHref="/unresolved-cito"
+                viewAllHref={`/${vendor}/request/unresolved-cito`}
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}
@@ -552,10 +576,10 @@ export function DashboardInternalCompanyView({
               alignItems="center"
             >
               <Typography fontSize="36px" fontWeight="bold" sx={{ mb: 2 }}>
-                56m
+                {requestHandlingTime?.converted}
               </Typography>
               <Typography>Average Handling Time</Typography>
-              <Box display="flex" alignItems="center" gap={1} mt={3}>
+              {/* <Box display="flex" alignItems="center" gap={1} mt={3}>
                 <SvgColor color="error.dark" src="/assets/icons/ic-grow.svg" />
                 <Typography>
                   <Typography color="error.dark" component="span">
@@ -563,7 +587,7 @@ export function DashboardInternalCompanyView({
                   </Typography>{' '}
                   than last month
                 </Typography>
-              </Box>
+              </Box> */}
               <Box
                 display="flex"
                 justifyContent="space-between"

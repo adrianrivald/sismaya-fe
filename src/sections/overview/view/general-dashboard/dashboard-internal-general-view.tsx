@@ -15,9 +15,9 @@ import { createColumnHelper } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { SvgColor } from 'src/components/svg-color';
 import type { RequestSummaryCompany } from 'src/services/dashboard/types';
+import { useNavigate } from 'react-router-dom';
 import { RequestSummaryCard } from '../../request-summary-card';
 import { RequestStatsChart } from '../../request-stats-chart';
-import { TimeSummaryCard } from '../../time-summary-card';
 import { SlaComplianceChart } from '../../sla-compliance-chart';
 
 const columnHelper = createColumnHelper<RequestSummaryCompany>();
@@ -81,6 +81,7 @@ const columns = () => [
 ];
 
 export function DashboardInternalView() {
+  const navigate = useNavigate();
   const [periodFilter, setPeriodFilter] = React.useState('year');
   const { data: requestSummary } = useRequestSummary(periodFilter);
   const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({
@@ -234,15 +235,7 @@ export function DashboardInternalView() {
             }}
           />
         </Grid>
-        <Grid xs={12} sm={12} md={2} spacing={2} mt={4}>
-          <Stack spacing={2}>
-            <TimeSummaryCard title="First Response Time" value="1hrs" color="primary.main" />
-            <TimeSummaryCard title="Response Time" value="1hrs" color="#FFE16A" />
-            <TimeSummaryCard title="Resolution Time" value="1hrs" color="#2CD9C5" />
-            <TimeSummaryCard title="Total Time Done" value="1hrs" color="#FF6C40" />
-          </Stack>
-        </Grid>
-        <Grid xs={12} sm={12} md={5}>
+        <Grid xs={12} sm={12} md={6}>
           <Card
             sx={{
               width: '100%',
@@ -368,7 +361,7 @@ export function DashboardInternalView() {
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={12} md={5}>
+        <Grid xs={12} sm={12} md={6}>
           <Card
             sx={{
               width: '100%',
@@ -436,6 +429,7 @@ export function DashboardInternalView() {
                   <Typography color="warning.600">Resolved CITO : 4</Typography>
                 </Box>
                 <Button
+                  onClick={() => navigate(`/request/resolved-cito`)}
                   sx={{
                     borderWidth: 1,
                     borderStyle: 'solid',
