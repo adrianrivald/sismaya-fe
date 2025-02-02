@@ -163,12 +163,7 @@ export default function TaskDetailPage() {
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h6">Attachments</Typography>
 
-                <Button
-                  size="small"
-                  variant="contained"
-                  component={Link}
-                  to={`/task/${taskId}/activities`}
-                >
+                <Button size="small" variant="contained">
                   Add
                 </Button>
               </Box>
@@ -202,7 +197,12 @@ export default function TaskDetailPage() {
             </Paper>
           </Stack>
 
-          <CardActivity taskId={Number(taskId)} requestName={request.name} taskName={task.name} />
+          <CardActivity
+            taskId={Number(taskId)}
+            requestName={request.name}
+            taskName={task.name}
+            lastTimer={task.lastTimer}
+          />
         </Stack>
       </Stack>
     </DashboardContent>
