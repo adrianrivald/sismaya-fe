@@ -15,6 +15,7 @@ import { downloadFile } from 'src/utils/download';
 // import { TaskStatus } from 'src/sections/request/task/task-status';
 import { CardActivity } from 'src/sections/task/activity';
 import { TaskForm } from 'src/sections/task/form';
+import AddAttachment from 'src/sections/task/add-attachment';
 
 // ----------------------------------------------------------------------
 
@@ -162,10 +163,7 @@ export default function TaskDetailPage() {
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h6">Attachments</Typography>
-
-                <Button size="small" variant="contained">
-                  Add
-                </Button>
+                <AddAttachment />
               </Box>
 
               <Stack spacing={2}>
