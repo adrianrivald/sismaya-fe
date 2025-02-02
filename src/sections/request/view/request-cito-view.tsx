@@ -9,13 +9,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper, type CellContext } from '@tanstack/react-table';
-import {
-  useDeleteRequestById,
-  useRequestList,
-  useRequestStatusSummary,
-  useRequestSummary,
-} from 'src/services/request';
-import { RequestSummaryCard } from 'src/sections/overview/request-summary-card';
+import { useDeleteRequestById, useRequestList } from 'src/services/request';
+import { useUnresolvedCitoInternal } from 'src/services/dashboard';
 import { StatusBadge } from '../status-badge';
 
 // ----------------------------------------------------------------------
@@ -27,7 +22,7 @@ interface PopoverProps {
 
 const columnHelper = createColumnHelper<Request & { isCenter?: boolean }>();
 
-const columns = (popoverProps: PopoverProps) => [
+const columns = (popoverProps: PopoverProps, vendor: string) => [
   columnHelper.accessor('number', {
     header: 'Request ID',
   }),
@@ -94,20 +89,23 @@ const columns = (popoverProps: PopoverProps) => [
   columnHelper.display({
     header: 'Action',
     id: 'actions-[center]',
-    cell: (info) => ButtonActions(info, popoverProps),
+    cell: (info) => ButtonActions(info, popoverProps, vendor),
   }),
 ];
 
-function ButtonActions(props: CellContext<Request, unknown>, popoverProps: PopoverProps) {
+function ButtonActions(
+  props: CellContext<Request, unknown>,
+  popoverProps: PopoverProps,
+  vendor: string
+) {
   const { user } = useAuth();
   const userType = user?.user_info?.user_type;
   const { row } = props;
   const navigate = useNavigate();
   const requestId = row.original.id;
   const step = row?.original?.step;
-  console.log(requestId, 'requestId');
   const onClickDetail = () => {
-    navigate(`${requestId}`);
+    navigate(`/${vendor}/request/${requestId}`);
   };
   return userType === 'internal' ? (
     <Box display="flex" justifyContent="center">
@@ -155,25 +153,21 @@ function ButtonActions(props: CellContext<Request, unknown>, popoverProps: Popov
   );
 }
 
-export function RequestView() {
+export function RequestCitoView({ type, step }: { type: string; step: string }) {
   const { user } = useAuth();
   const { vendor } = useParams();
   const assigneeCompanyId = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
-  const [filter, setFilter] = useState<any>({});
-  const [totalData, setTotalData] = useState(0);
-  const { getDataTableProps } = useRequestList(filter, String(assigneeCompanyId));
-  const { data: requestSummary } = useRequestSummary(String(assigneeCompanyId));
-  const { data: requestStatusSummary } = useRequestStatusSummary(String(assigneeCompanyId));
+  const { getDataTableProps } = useRequestList(
+    { cito: '1', step },
+    String(type === 'internal' && step !== 'done' ? assigneeCompanyId : '')
+  );
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
   const currentCompany = location?.pathname?.split('/request')[0].replace('/', '');
 
   const navigate = useNavigate();
-  const onClickAddNew = () => {
-    navigate('create');
-  };
 
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
@@ -187,139 +181,26 @@ export function RequestView() {
     return { handleEdit, handleDelete };
   };
 
-  const onFilterByStatus = (statusId: number) => {
-    setFilter({
-      ...filter,
-      status: statusId,
-    });
-  };
-
-  const onRemoveFilter = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { status, ...rest } = filter;
-    setFilter({
-      ...rest,
-    });
-  };
-
-  useEffect(() => {
-    if (filter?.status === undefined) {
-      setTotalData(getDataTableProps().total);
-    }
-  }, [filter, getDataTableProps]);
+  const modeTitle = step === 'done' ? 'Resolved' : 'Unresolved';
 
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            {currentCompany?.toUpperCase()} Request Management
+            {modeTitle} CITO Requests: Last 7 Days
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
-            <Typography>Request</Typography>
+            <Typography>Dashboard {currentCompany?.toUpperCase()}</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">
-              {currentCompany?.toUpperCase()} Request Management
-            </Typography>
+            <Typography color="grey.500">{modeTitle} CITO Requests</Typography>
           </Box>
-        </Box>
-        <Box>
-          <Button onClick={onClickAddNew} variant="contained" color="primary">
-            Create New Request
-          </Button>
         </Box>
       </Box>
 
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} lg={12 / 5}>
-          <RequestSummaryCard
-            title="Total Active Project"
-            total={requestSummary?.active}
-            color="#005B7F"
-          />
-        </Grid>
-        <Grid xs={12} sm={6} lg={12 / 5}>
-          <RequestSummaryCard
-            title="In Progress"
-            total={requestSummary?.in_progress}
-            color="#FFE16A"
-          />
-        </Grid>
-        <Grid xs={12} sm={6} lg={12 / 5}>
-          <RequestSummaryCard
-            title="Pending Approvals"
-            total={requestSummary?.pending}
-            color="#2CD9C5"
-          />
-        </Grid>
-        <Grid xs={12} sm={6} lg={12 / 5}>
-          <RequestSummaryCard title="Completed" total={requestSummary?.done} color="#2CD9C5" />
-        </Grid>
-        <Grid xs={12} sm={6} lg={12 / 5}>
-          <RequestSummaryCard title="Canceled" total={requestSummary?.rejected} color="#FF6C40" />
-        </Grid>
         <Grid xs={12}>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Box
-              display="flex"
-              alignItems="center"
-              gap={1}
-              sx={{
-                borderBottomWidth: filter?.status !== undefined ? 0 : 2,
-                pb: 1,
-                borderBottomColor: 'primary.main',
-                borderBottomStyle: 'solid',
-                cursor: 'pointer',
-              }}
-              onClick={onRemoveFilter}
-            >
-              <Typography color="primary.main">All</Typography>
-              <Box
-                sx={{
-                  px: 1.5,
-                  py: 0.25,
-                  backgroundColor: '#B3B3B3',
-                  borderRadius: '6px',
-                  fontWeight: 'bold',
-                }}
-              >
-                {totalData === 0 ? getDataTableProps().total : totalData}
-              </Box>
-            </Box>
-            {requestStatusSummary?.map((item) => (
-              <Box
-                display="flex"
-                alignItems="center"
-                id={item?.id.toString()}
-                gap={1}
-                sx={{
-                  borderBottomWidth: filter?.status === item?.id ? 2 : 0,
-                  pb: 1,
-                  borderBottomColor: 'primary.main',
-                  borderBottomStyle: 'solid',
-                  cursor: 'pointer',
-                }}
-                onClick={() => onFilterByStatus(item?.id)}
-              >
-                <Typography color="grey.600">{capitalize(item?.name)}</Typography>
-                <Box
-                  sx={{
-                    px: 1.5,
-                    py: 0.25,
-                    backgroundColor: '#B3B3B3',
-                    borderRadius: '6px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {item?.count}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </Grid>
-
-        <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
+          <DataTable columns={columns(popoverFuncs(), vendor ?? '')} {...getDataTableProps()} />
         </Grid>
       </Grid>
     </DashboardContent>

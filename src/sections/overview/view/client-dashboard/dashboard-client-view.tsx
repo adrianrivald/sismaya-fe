@@ -27,7 +27,7 @@ import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
-import { UnresolvedCito } from 'src/services/dashboard/types';
+import type { UnresolvedCito } from 'src/services/dashboard/types';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
@@ -57,10 +57,7 @@ const columns = () => [
 
   columnHelper.accessor((row) => row, {
     header: 'Project Deadline',
-    cell: (info) => {
-      const value = info.getValue();
-      return '-';
-    },
+    cell: (info) => '-',
   }),
 ];
 
@@ -346,7 +343,7 @@ export function DashboardClientView() {
               <DataTable
                 withPagination={false}
                 withViewAll
-                viewAllHref="/unresolved-cito"
+                viewAllHref="/request/unresolved-cito"
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}

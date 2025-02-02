@@ -32,6 +32,7 @@ import {
 } from 'src/services/request';
 import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 import { SvgColor } from 'src/components/svg-color';
+import { Bounce, toast } from 'react-toastify';
 
 export function EditRequestView() {
   const { user } = useAuth();
@@ -85,16 +86,29 @@ export function EditRequestView() {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Convert FileList to an array and update state
-    console.log(e.target.files, 'e.target.files');
-    const selectedFiles = Array.from(e.target.files as ArrayLike<File>);
-    const mergedFiles = [...files, ...selectedFiles];
     if (e.target.files) {
-      setFiles(e.target.files);
+      const size = e.target.files[0]?.size;
+
+      if (size > 5000000) {
+        const reason = `File is larger than ${Math.round(5000000 / 1000000)} mb`;
+        toast.error(reason, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        });
+      } else {
+        addAttachment({
+          request_id: Number(id),
+          files: e.target.files,
+        });
+      }
     }
-    addAttachment({
-      request_id: Number(id),
-      files: e.target.files,
-    });
   };
 
   const onDeleteAttachment = (attachmentId: number) => {
@@ -346,6 +360,7 @@ export function EditRequestView() {
                     hidden
                     onChange={handleFileChange}
                     multiple
+                    max={5000000}
                   />
                   <Button
                     type="button"
