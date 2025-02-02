@@ -154,3 +154,16 @@ export function useInternalTopStaffbyHour(internalCompanyId: number, dateFrom: s
 
   return data;
 }
+
+// Request Handling Time
+async function fetchRequestHandlingTime(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const { data } = await http<{ data: any }>(`dashboard-internal/request-handling-time/${internalCompanyId}?from=${dateFrom}&to=${dateTo}`);
+
+  return data;
+}
+
+export function useRequestHandlingTime(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const data = useQuery(['internal-request-handling-time', internalCompanyId], () => fetchRequestHandlingTime(internalCompanyId, dateFrom, dateTo));
+
+  return data;
+}

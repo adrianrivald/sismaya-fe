@@ -17,6 +17,14 @@ export function fetchRequestList(params: Partial<any>, assignee_company_id: stri
     endpointUrl.searchParams.append('status', params.status);
   }
 
+  if (params.cito) {
+    endpointUrl.searchParams.append('cito', params.cito);
+  }
+
+  if (params.step) {
+    endpointUrl.searchParams.append('step', params.step);
+  }
+
 
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
@@ -33,7 +41,7 @@ export function fetchRequestList(params: Partial<any>, assignee_company_id: stri
 export function useRequestList(params: Partial<any>, assignee_company_id: string
   ) {
   return usePaginationQuery(
-    ['request', params.keyword, params.status, assignee_company_id],
+    ['request', params.keyword, params.status,params.cito, params.step, assignee_company_id],
     (paginationState) => fetchRequestList({ ...params, ...paginationState }, assignee_company_id)
   );
 }

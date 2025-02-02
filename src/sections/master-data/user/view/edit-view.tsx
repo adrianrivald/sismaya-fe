@@ -149,6 +149,7 @@ function EditForm({
             control,
           }}
           defaultImage={defaultValues?.profile_picture}
+          maxSize={5000000}
         />
       </Grid>
       <Grid item xs={12} md={12}>
