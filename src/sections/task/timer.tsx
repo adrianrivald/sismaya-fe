@@ -1,4 +1,5 @@
 import { Iconify } from 'src/components/iconify';
+import * as Dialog from 'src/components/disclosure/modal';
 import { Stack, IconButton, Typography } from '@mui/material';
 import { useTimer, useTimerStore, useTimerAction, type TimerState } from 'src/services/task/timer';
 
@@ -50,15 +51,23 @@ export function TimerActionButton({
 
   // TODO: add confirmation dialog
   const btnStop = (
-    <IconButton
-      aria-label="stop"
-      size="small"
-      disabled={isDisabled}
-      sx={{ bgcolor: 'error.main', color: 'white' }}
-      onClick={() => mutation.mutate({ action: 'stop', taskId })}
-    >
-      <Iconify icon="solar:stop-bold" />
-    </IconButton>
+    <Dialog.Root>
+      <Dialog.OpenButton>
+        <IconButton
+          aria-label="stop"
+          size="small"
+          disabled={isDisabled}
+          sx={{ bgcolor: 'error.main', color: 'white' }}
+        >
+          <Iconify icon="solar:stop-bold" />
+        </IconButton>
+      </Dialog.OpenButton>
+
+      <Dialog.AlertConfirmation
+        message="Are you sure you want to stop the timer? This action cannot be undone."
+        onConfirm={() => mutation.mutate({ action: 'stop', taskId })}
+      />
+    </Dialog.Root>
   );
 
   if (state === 'idle' || state === 'stopped' || isCurrentTimer === false) {

@@ -1,4 +1,4 @@
-import { Dialog, type DialogProps } from '@mui/material';
+import { Dialog, type DialogProps, Typography, Stack, Button } from '@mui/material';
 import { useDisclosure } from './base';
 
 export { Root, OpenButton, DismissButton, useDisclosure } from './base';
@@ -11,5 +11,47 @@ export function Content(props: ContentProps) {
   return (
     // eslint-disable-next-line react/destructuring-assignment
     <Dialog {...props} open={isOpen} onClose={onClose} sx={{ borderRadius: 4, ...props.sx }} />
+  );
+}
+
+interface AlertConfirmationProps extends ContentProps {
+  message: React.ReactNode;
+  onConfirm: () => void;
+  onCancel?: () => void;
+}
+
+export function AlertConfirmation({
+  message,
+  onCancel,
+  onConfirm,
+  ...props
+}: AlertConfirmationProps) {
+  const { onClose } = useDisclosure();
+
+  const handleCancel = () => {
+    onClose();
+    onCancel?.();
+  };
+
+  const handleConfirm = () => {
+    onClose();
+    onConfirm();
+  };
+
+  return (
+    <Content {...props}>
+      <Stack spacing={2} p={3}>
+        <Typography>{message}</Typography>
+
+        <Stack direction="row" spacing={2} justifyContent="flex-end">
+          <Button type="button" variant="outlined" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="contained" onClick={handleConfirm}>
+            Confirm
+          </Button>
+        </Stack>
+      </Stack>
+    </Content>
   );
 }
