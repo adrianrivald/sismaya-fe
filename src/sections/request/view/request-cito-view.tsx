@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, capitalize } from '@mui/material';
@@ -10,7 +10,7 @@ import { useRequestCito } from 'src/services/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper, type CellContext } from '@tanstack/react-table';
-import { useDeleteRequestById, useRequestList } from 'src/services/request';
+import { useDeleteRequestById } from 'src/services/request';
 import { StatusBadge } from '../status-badge';
 
 // ----------------------------------------------------------------------
@@ -51,10 +51,7 @@ const columns = (popoverProps: PopoverProps, vendor: string) => [
 
   columnHelper.accessor((row) => row, {
     header: 'Project Deadline',
-    cell: (info) => {
-      const value = info.getValue();
-      return '-';
-    },
+    cell: (info) => '-',
   }),
 
   columnHelper.accessor((row) => row, {
@@ -154,13 +151,9 @@ function ButtonActions(
 }
 
 export function RequestCitoView() {
-  const { user } = useAuth();
   const { vendor } = useParams();
   const [searchParams] = useSearchParams();
   const periodFilter = searchParams.get('period');
-  const assigneeCompanyId = user?.internal_companies?.find(
-    (item) => item?.company?.name?.toLowerCase() === vendor
-  )?.company?.id;
 
   const { getDataTableProps } = useRequestCito({
     period: periodFilter,

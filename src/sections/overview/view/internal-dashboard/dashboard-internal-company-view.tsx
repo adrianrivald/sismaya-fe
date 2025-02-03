@@ -34,11 +34,11 @@ const columns = () => [
   columnHelper.accessor('id', {
     header: 'ID',
   }),
-  columnHelper.accessor('category', {
+  columnHelper.accessor('category.name', {
     header: 'Category',
   }),
 
-  columnHelper.accessor('requester', {
+  columnHelper.accessor('requester.name', {
     header: 'Requester',
   }),
 
