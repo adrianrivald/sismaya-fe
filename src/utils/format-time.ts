@@ -114,10 +114,9 @@ export function formatSecondToTime(seconds: number) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
-  const text =
-    hours > 0
-      ? [hours, minutes, remainingSeconds]
-      : [minutes, remainingSeconds].map((t) => t.toString().padStart(2, '0')).join(':');
+
+  const timer = hours > 0 ? [hours, minutes, remainingSeconds] : [minutes, remainingSeconds];
+  const text = timer.map((t) => Math.floor(t).toString().padStart(2, '0')).join(':');
 
   return text;
 }

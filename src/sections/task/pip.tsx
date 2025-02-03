@@ -6,7 +6,7 @@ export function TimerPip() {
   useCheckTimer();
   const store = useTimerStore();
 
-  if (store.state === 'idle' || store.state === 'stopped') {
+  if (store.taskId === 0 || store.state === 'idle' || store.state === 'stopped') {
     return null;
   }
 
