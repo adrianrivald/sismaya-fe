@@ -9,6 +9,10 @@ import {
   TextField,
   MenuList,
   menuItemClasses,
+  FormControl,
+  InputLabel,
+  Select,
+  SelectChangeEvent,
 } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
@@ -51,6 +55,9 @@ interface EditFormProps {
   departments: Department[];
   onAddDepartment: () => void;
   onClickRemove: (id: number) => void;
+  onChangeDivisionType: (e: SelectChangeEvent<string>, itemId: number, type: string) => void;
+  onChangeDivisionTypeNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  divisionType: string;
 }
 
 function EditForm({
@@ -68,6 +75,9 @@ function EditForm({
   data,
   onAddDepartment,
   onClickRemove,
+  onChangeDivisionType,
+  onChangeDivisionTypeNew,
+  divisionType,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -134,18 +144,36 @@ function EditForm({
         <Box display="flex" flexDirection="column" gap={2}>
           {data?.department?.map((item, index) => (
             <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-              <TextField
-                sx={{
-                  width: '100%',
-                }}
-                label="Division"
-                value={item.name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeDivision(e, item?.id)}
-                // InputProps={{
-                //   readOnly: true,
-                // }}
-              />
-
+              <Box width="50%">
+                <TextField
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Division"
+                  value={item.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChangeDivision(e, item?.id)
+                  }
+                  // InputProps={{
+                  //   readOnly: true,
+                  // }}
+                />
+              </Box>
+              <Box width="50%">
+                <FormControl fullWidth>
+                  <InputLabel id="type">Show Type</InputLabel>
+                  <Select
+                    label="Type"
+                    value={item?.divisionType}
+                    onChange={(e: SelectChangeEvent<string>) =>
+                      onChangeDivisionType(e, item?.id, 'divisionType')
+                    }
+                  >
+                    <MenuItem value="1">Shown in All</MenuItem>
+                    <MenuItem value="0">Not Shown</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
               <MenuList
                 disablePadding
                 sx={{
@@ -173,14 +201,32 @@ function EditForm({
             </Stack>
           ))}
           <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-            <TextField
-              sx={{
-                width: '100%',
-              }}
-              label="Division"
-              value={department}
-              onChange={onChangeDivisionNew}
-            />
+            <Box width="50%">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Division"
+                value={department}
+                onChange={onChangeDivisionNew}
+              />
+            </Box>
+
+            <Box width="50%">
+              <FormControl fullWidth>
+                <InputLabel id="type">Show Type</InputLabel>
+                <Select
+                  label="Type"
+                  value={divisionType}
+                  onChange={(e: SelectChangeEvent<string>) =>
+                    onChangeDivisionTypeNew(e, 'divisionType')
+                  }
+                >
+                  <MenuItem value="1">Shown in All</MenuItem>
+                  <MenuItem value="0">Not Shown</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
             <Button
               variant="contained"
               color="primary"
@@ -222,6 +268,8 @@ export function EditClientCompanyView() {
   // Division
   const [departments, setDepartments] = React.useState(data?.department ?? []);
   const [department, setDepartment] = React.useState('');
+  const [departmentTypes, setDepartmentTypes] = React.useState([]);
+  const [departmentType, setDepartmentType] = React.useState('');
 
   const defaultValues: ClientCompanyValues = {
     name: data?.name,
@@ -293,6 +341,10 @@ export function EditClientCompanyView() {
     });
   };
 
+  const onChangeDivisionType = (divType: string) => {
+    setDepartmentType(divType);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -330,6 +382,7 @@ export function EditClientCompanyView() {
               onClickDelete={onClickDelete}
               onClickEdit={onClickEdit}
               onClickRemove={onClickRemove}
+              onChangeDivisionType={onChangeDivisionType}
             />
           )}
         </Form>
