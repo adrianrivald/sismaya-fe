@@ -63,10 +63,12 @@ export function CardActivity({
   taskId,
   taskName: task,
   requestName: request,
+  lastTimer,
 }: {
   taskId: number;
   requestName: string;
   taskName: string;
+  lastTimer: number;
 }) {
   const lastActivity = useLastActivity({ taskId });
 
@@ -109,8 +111,14 @@ export function CardActivity({
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <TimerCountdown size="large" taskId={taskId} />
-          <TimerActionButton activity={taskName} request={requestName} taskId={taskId} />
+          <TimerCountdown size="large" taskId={taskId} lastTimer={lastTimer} />
+          <TimerActionButton
+            activity={taskName}
+            request={requestName}
+            taskId={taskId}
+            state={lastActivity?.state}
+            lastTimer={lastTimer}
+          />
         </Box>
       </Stack>
 

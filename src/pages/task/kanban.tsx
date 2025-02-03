@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Box, Stack, Typography /* IconButton */ } from '@mui/material';
+import { Box, Stack, Typography, IconButton } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import {
@@ -12,7 +12,7 @@ import {
 } from 'src/services/task/task-management';
 import { Iconify } from 'src/components/iconify';
 import { RequestPriority } from 'src/sections/request/request-priority';
-// import { TaskForm } from 'src/sections/task/form';
+import { TaskForm } from 'src/sections/task/form';
 
 // const reorder = (list: any, startIndex: number, endIndex: number) => {
 //   const result = Array.from(list);
@@ -36,7 +36,11 @@ import { RequestPriority } from 'src/sections/request/request-priority';
 //   return result;
 // };
 
-function BoardColumnHeader({ label, count }: KanbanColumn['meta']) {
+function BoardColumnHeader({
+  label,
+  count,
+  requestId,
+}: KanbanColumn['meta'] & { requestId: number }) {
   return (
     <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
       <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -56,11 +60,11 @@ function BoardColumnHeader({ label, count }: KanbanColumn['meta']) {
         </Typography>
       </Stack>
 
-      {/* <TaskForm>
+      <TaskForm requestId={requestId}>
         <IconButton aria-label="Create Task" size="small">
           <Iconify icon="mdi:plus" />
         </IconButton>
-      </TaskForm> */}
+      </TaskForm>
     </Stack>
   );
 }
@@ -137,6 +141,8 @@ function BoardColumn({ column }: { column: Task['status'] }) {
 
   if (!data) return null;
 
+  const requestId = data.items?.[0]?.request?.id ?? 0;
+
   return (
     <Droppable droppableId={column}>
       {(provided) => (
@@ -148,10 +154,10 @@ function BoardColumn({ column }: { column: Task['status'] }) {
             backgroundColor: '#F4F6F8',
             borderRadius: 2,
             padding: 2,
-            width: 335,
+            minWidth: 335,
           }}
         >
-          <BoardColumnHeader {...data.meta} />
+          <BoardColumnHeader requestId={requestId} {...data.meta} />
 
           {data.items.map((json, index) => {
             const item = TaskManagement.fromJson(json);
@@ -193,7 +199,7 @@ export default function TaskKanbanPage() {
   };
 
   return (
-    <Stack direction="row" spacing={3}>
+    <Stack direction="row" spacing={3} sx={{ overflowX: 'auto' }}>
       <DragDropContext onDragEnd={onDragEnd}>
         <BoardColumn column="to-do" />
         <BoardColumn column="in-progress" />

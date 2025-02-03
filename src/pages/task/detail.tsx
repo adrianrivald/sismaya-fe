@@ -15,6 +15,7 @@ import { downloadFile } from 'src/utils/download';
 // import { TaskStatus } from 'src/sections/request/task/task-status';
 import { CardActivity } from 'src/sections/task/activity';
 import { TaskForm } from 'src/sections/task/form';
+import AddAttachment from 'src/sections/task/add-attachment';
 
 // ----------------------------------------------------------------------
 
@@ -73,7 +74,7 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          <TaskForm requestId={request.id} task={task}>
+          <TaskForm requestId={request.id} requestName={request.name} task={task}>
             <Button variant="outlined">Edit Task</Button>
           </TaskForm>
         </Box>
@@ -162,15 +163,7 @@ export default function TaskDetailPage() {
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h6">Attachments</Typography>
-
-                <Button
-                  size="small"
-                  variant="contained"
-                  component={Link}
-                  to={`/task/${taskId}/activities`}
-                >
-                  Add
-                </Button>
+                <AddAttachment />
               </Box>
 
               <Stack spacing={2}>
@@ -202,7 +195,12 @@ export default function TaskDetailPage() {
             </Paper>
           </Stack>
 
-          <CardActivity taskId={Number(taskId)} requestName={request.name} taskName={task.name} />
+          <CardActivity
+            taskId={Number(taskId)}
+            requestName={request.name}
+            taskName={task.name}
+            lastTimer={task.lastTimer}
+          />
         </Stack>
       </Stack>
     </DashboardContent>

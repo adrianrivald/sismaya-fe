@@ -26,12 +26,13 @@ import { taskStatusMap } from 'src/constants/status';
 interface TaskFormProps {
   children: React.ReactElement;
   requestId: number;
+  requestName?: string;
   task?: Task;
 }
 
 interface FormProps extends Omit<TaskFormProps, 'children'> {}
 
-function Form({ requestId, task }: FormProps) {
+function Form({ requestId, requestName, task }: FormProps) {
   const { onClose } = Drawer.useDisclosure();
   const [_, assigneeFn] = useMutationAssignee(requestId);
   const [isUploadingOrDeletingFile, uploadOrDeleteFileFn] = useMutationAttachment(requestId);
@@ -49,7 +50,10 @@ function Form({ requestId, task }: FormProps) {
   });
 
   useEffect(() => {
-    form.reset(task);
+    form.reset({
+      ...task,
+      title: task?.name,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
 
@@ -65,7 +69,7 @@ function Form({ requestId, task }: FormProps) {
       >
         <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
           <Typography color="#919EAB" fontWeight="bold" textAlign="center">
-            Task Detail
+            {task?.id ? 'Task Detail' : 'Create Task'}
           </Typography>
 
           {task?.id ? (
@@ -83,7 +87,16 @@ function Form({ requestId, task }: FormProps) {
         <Divider />
 
         <Stack p={2} spacing={3} flexGrow={1}>
-          <TextField label="Request" {...formUtils.getTextProps(form, 'title')} />
+          {/* TODO: when `task.id` is not provided: get request list and enable select */}
+          <TextField
+            label="Request"
+            {...formUtils.getTextProps(form, 'title')}
+            select
+            disabled
+            defaultValue={0}
+          >
+            <option value="0">{requestName}</option>
+          </TextField>
 
           <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
 

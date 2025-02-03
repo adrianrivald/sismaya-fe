@@ -1,24 +1,37 @@
 import { Iconify } from 'src/components/iconify';
+import * as Dialog from 'src/components/disclosure/modal';
 import { Stack, IconButton, Typography } from '@mui/material';
-import { useTimer, useTimerStore, useTimerAction } from 'src/services/task/timer';
+import { useTimer, useTimerStore, useTimerAction, type TimerState } from 'src/services/task/timer';
 
 type TimerActionButtonProps = {
   activity?: string;
   request?: string;
   taskId: number;
+  lastTimer?: number;
+  state?: TimerState;
 };
 
-export function TimerActionButton({ taskId, activity, request }: TimerActionButtonProps) {
+export function TimerActionButton({
+  taskId,
+  activity,
+  request,
+  lastTimer = 0,
+  state: defaultState = 'idle',
+}: TimerActionButtonProps) {
   const mutation = useTimerAction();
   const { state, taskId: storeTaskId } = useTimerStore();
   const isCurrentTimer = storeTaskId === taskId;
+  const isDisabled = defaultState === 'stopped';
 
   const btnStart = (
     <IconButton
       aria-label="start"
       size="small"
+      disabled={isDisabled}
       sx={{ bgcolor: 'success.main', color: 'white' }}
-      onClick={() => mutation.mutate({ action: 'start', taskId, activity, request })}
+      onClick={() =>
+        mutation.mutate({ action: 'start', taskId, activity, request, timer: lastTimer })
+      }
     >
       <Iconify icon="solar:play-bold" />
     </IconButton>
@@ -28,6 +41,7 @@ export function TimerActionButton({ taskId, activity, request }: TimerActionButt
     <IconButton
       aria-label="pause"
       size="small"
+      disabled={isDisabled}
       sx={{ bgcolor: 'warning.main', color: 'white' }}
       onClick={() => mutation.mutate({ action: 'pause', taskId })}
     >
@@ -35,15 +49,25 @@ export function TimerActionButton({ taskId, activity, request }: TimerActionButt
     </IconButton>
   );
 
+  // TODO: add confirmation dialog
   const btnStop = (
-    <IconButton
-      aria-label="stop"
-      size="small"
-      sx={{ bgcolor: 'error.main', color: 'white' }}
-      onClick={() => mutation.mutate({ action: 'stop', taskId })}
-    >
-      <Iconify icon="solar:stop-bold" />
-    </IconButton>
+    <Dialog.Root>
+      <Dialog.OpenButton>
+        <IconButton
+          aria-label="stop"
+          size="small"
+          disabled={isDisabled}
+          sx={{ bgcolor: 'error.main', color: 'white' }}
+        >
+          <Iconify icon="solar:stop-bold" />
+        </IconButton>
+      </Dialog.OpenButton>
+
+      <Dialog.AlertConfirmation
+        message="Are you sure you want to stop the timer? This action cannot be undone."
+        onConfirm={() => mutation.mutate({ action: 'stop', taskId })}
+      />
+    </Dialog.Root>
   );
 
   if (state === 'idle' || state === 'stopped' || isCurrentTimer === false) {
@@ -71,8 +95,16 @@ export function TimerActionButton({ taskId, activity, request }: TimerActionButt
   return null;
 }
 
-export function TimerCountdown({ size, taskId }: { size: 'large' | 'small'; taskId?: number }) {
-  const text = useTimer(taskId);
+export function TimerCountdown({
+  size,
+  taskId,
+  lastTimer = 0,
+}: {
+  size: 'large' | 'small';
+  taskId?: number;
+  lastTimer?: number;
+}) {
+  const text = useTimer(taskId, lastTimer);
 
   if (size === 'small') {
     return (
