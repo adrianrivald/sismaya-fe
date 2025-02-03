@@ -28,6 +28,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
 import type { UnresolvedCito } from 'src/services/dashboard/types';
+import { useNavigate } from 'react-router-dom';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { RequestSuccessRate } from '../../request-success-rate';
@@ -38,11 +39,11 @@ const columns = () => [
   columnHelper.accessor('id', {
     header: 'ID',
   }),
-  columnHelper.accessor('category', {
+  columnHelper.accessor('category.name', {
     header: 'Category',
   }),
 
-  columnHelper.accessor('requester', {
+  columnHelper.accessor('requester.name', {
     header: 'Requester',
   }),
 
@@ -62,6 +63,7 @@ const columns = () => [
 ];
 
 export function DashboardClientView() {
+  const navigate = useNavigate();
   const [dateFrom, setDateFrom] = React.useState<string>(
     dayjs()
       .subtract(7 as number, 'day')
@@ -73,8 +75,12 @@ export function DashboardClientView() {
       .format('YYYY-MM-DD')
   );
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
-  const { getDataTableProps, data } = useUnresolvedCito({});
+  const [dateFilter, setDateFilter] = React.useState(7);
   const dateNow = dayjs().format('YYYY-MM-DD');
+  const { getDataTableProps, data } = useUnresolvedCito({
+    from: dateFrom,
+    to: dateNow,
+  });
   const { data: clientTotalRequest } = useClientTotalRequest(dateFrom, dateNow);
   const { data: clientTotalRequestByState } = useClientTotalRequestByState(dateFrom, dateNow);
   const { data: pendingRequest } = usePendingRequest();
@@ -95,6 +101,7 @@ export function DashboardClientView() {
       .subtract(filterValue as number, 'day')
       .format('YYYY-MM-DD');
     setDateFrom(dateFromValue);
+    setDateFilter(Number(filterValue));
   };
 
   const handleChangeRequestDueDateFilter = (e: SelectChangeEvent<string>) => {
@@ -157,6 +164,32 @@ export function DashboardClientView() {
       );
     }) ?? [];
 
+  const renderDateFilter = () => {
+    switch (dateFilter) {
+      case 0:
+        return {
+          label: 'Today',
+          value: 'day',
+        };
+      case 7:
+        return {
+          label: '7',
+          value: 'week',
+        };
+      case 30:
+        return {
+          label: '30',
+          value: 'year',
+        };
+
+      default:
+        return {
+          label: '',
+          value: '',
+        };
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -185,6 +218,7 @@ export function DashboardClientView() {
             </Typography>
           </Box>
           <Button
+            onClick={() => navigate(`/request/pending`)}
             sx={{
               borderWidth: 1,
               borderStyle: 'solid',
@@ -259,7 +293,9 @@ export function DashboardClientView() {
                   }}
                 >
                   <Typography fontSize={14}>Total Request</Typography>
-                  <Typography fontSize={12}>for the last 7 days</Typography>
+                  <Typography fontSize={12}>
+                    {dateFilter !== 0 ? `for the last ${renderDateFilter().label} days` : `Today`}{' '}
+                  </Typography>{' '}
                   <Typography fontSize={36} fontWeight="bold">
                     {clientTotalRequest?.total_request}
                   </Typography>
@@ -270,7 +306,9 @@ export function DashboardClientView() {
                     </Typography>
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
-                    than previous 7 days
+                    {dateFilter !== 0
+                      ? `than previous ${renderDateFilter().label} days`
+                      : `than yesterday`}
                   </Typography>
                 </Box>
                 <Card
@@ -343,7 +381,7 @@ export function DashboardClientView() {
               <DataTable
                 withPagination={false}
                 withViewAll
-                viewAllHref="/request/unresolved-cito"
+                viewAllHref={`/request/unresolved-cito?from=${dateFrom}&to=${dateNow}`}
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}

@@ -5,6 +5,7 @@ import type { SelectChangeEvent } from '@mui/material';
 import { Box, Button, Card, MenuItem, Select, Stack } from '@mui/material';
 
 import {
+  useRequestCito,
   useRequestStats,
   useRequestSummary,
   useRequestSummaryCompany,
@@ -87,6 +88,11 @@ export function DashboardInternalView() {
   const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({
     period: periodFilter,
   });
+  const { data: requestCito } = useRequestCito({
+    period: periodFilter,
+  });
+  const totalRequestCito = requestCito?.meta?.total;
+
   const { data: requestStats } = useRequestStats(periodFilter);
 
   const filtered = requestStats?.map((item: any) => {
@@ -132,6 +138,20 @@ export function DashboardInternalView() {
         return dayjs(timeValue).format('D');
     }
   };
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'April',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   return (
     <DashboardContent maxWidth="xl">
@@ -228,7 +248,12 @@ export function DashboardInternalView() {
         <Grid xs={12} md={12} lg={12}>
           <RequestStatsChart
             chart={{
-              categories: requestStats?.map((item) => renderTime(item?.time)),
+              categories:
+                periodFilter === 'year'
+                  ? requestStats
+                      ?.sort((a, b) => months.indexOf(a.time) - months.indexOf(b.time))
+                      ?.map((item) => renderTime(item?.time))
+                  : requestStats?.map((item) => renderTime(item?.time)),
               series: convertedDataToChart,
               colors: ['#005B7F', '#FFE700', '#2CD9C5'],
               // series:
@@ -426,7 +451,7 @@ export function DashboardInternalView() {
               >
                 <Box display="flex" alignItems="center" gap={2}>
                   <SvgColor color="#FFC107" src="/assets/icons/ic-alert.svg" />
-                  <Typography color="warning.600">Request CITO : 4</Typography>
+                  <Typography color="warning.600">Request CITO : {totalRequestCito}</Typography>
                 </Box>
                 <Button
                   onClick={() => navigate(`/request/cito?period=${periodFilter}`)}

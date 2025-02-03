@@ -21,7 +21,7 @@ export default function CitoListPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <RequestCitoView type={userType} step="all" />
+      <RequestCitoView />
     </>
   );
 }
