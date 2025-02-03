@@ -132,6 +132,20 @@ export function DashboardInternalView() {
         return dayjs(timeValue).format('D');
     }
   };
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'April',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   return (
     <DashboardContent maxWidth="xl">
@@ -228,7 +242,12 @@ export function DashboardInternalView() {
         <Grid xs={12} md={12} lg={12}>
           <RequestStatsChart
             chart={{
-              categories: requestStats?.map((item) => renderTime(item?.time)),
+              categories:
+                periodFilter === 'year'
+                  ? requestStats
+                      ?.sort((a, b) => months.indexOf(a.time) - months.indexOf(b.time))
+                      ?.map((item) => renderTime(item?.time))
+                  : requestStats?.map((item) => renderTime(item?.time)),
               series: convertedDataToChart,
               colors: ['#005B7F', '#FFE700', '#2CD9C5'],
               // series:
