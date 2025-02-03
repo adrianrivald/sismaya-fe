@@ -6,7 +6,7 @@ export function TimerPip() {
   useCheckTimer();
   const store = useTimerStore();
 
-  if (store.state === 'idle' || store.state === 'stopped') {
+  if (store.taskId === 0 || store.state === 'idle' || store.state === 'stopped') {
     return null;
   }
 
@@ -14,7 +14,7 @@ export function TimerPip() {
     <Portal container={document.body}>
       <Box
         bgcolor="white"
-        position="absolute"
+        position="fixed"
         bottom="1rem"
         right="1rem"
         border="1px solid rgba(145, 158, 171, 0.16)"
@@ -23,6 +23,7 @@ export function TimerPip() {
         py={2}
         boxShadow="-20px 20px 40px -4px rgba(145, 158, 171, 0.24)"
         width="320px"
+        zIndex={9999}
       >
         <Typography
           color="rgba(99, 115, 129, 1)"

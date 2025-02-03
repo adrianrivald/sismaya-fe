@@ -7,7 +7,7 @@ import { http } from 'src/utils/http';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 
 type TimerAction = 'start' | 'pause' | 'stop';
-type TimerState = 'idle' | 'running' | 'paused' | 'stopped';
+export type TimerState = 'idle' | 'running' | 'paused' | 'stopped';
 
 type EventStart = Omit<typeof initialStore, 'state'>;
 
@@ -29,7 +29,7 @@ const stateMap = {
 const storageKey = 'task-timer';
 
 const initialStore = {
-  timer: 0, // seconds
+  timer: 0, // in seconds
   state: 'idle' as TimerState,
   activity: '',
   request: '',
@@ -75,35 +75,40 @@ const store = createStore({
       };
     },
     countup: (context) => ({
-      timer: context.timer + 1,
+      // not sure why, but sometimes trigger countup twice, so need to add 0.5 instead of 1
+      timer: context.timer + 0.5,
     }),
   },
 });
 
 export function useTimerStore() {
-  return useSelector(store, (state) => state.context);
+  const state = useSelector(store, (s) => s.context);
+  return state;
 }
 
-export function useTimer() {
+export function useTimer(taskId?: number, lastTimer = 0) {
   const { timer, state } = useTimerStore();
+  const { taskId: storeTaskId } = useTimerStore();
+  const isPip = !taskId;
+  const isCurrentTimer = isPip ? true : storeTaskId === taskId;
 
-  const isRunning = state === 'running';
+  const isCounting = state === 'running'; // && isCurrentTimer;
   useEffect(() => {
-    if (!isRunning) {
+    if (isCounting === false) {
       return;
     }
 
-    const interval = setInterval(() => {
+    const timeId = setInterval(() => {
       store.send({ type: 'countup' });
     }, 1_000);
 
     // eslint-disable-next-line consistent-return
     return () => {
-      clearInterval(interval);
+      clearInterval(timeId);
     };
-  }, [isRunning, timer]);
+  }, [isCounting]);
 
-  return formatSecondToTime(timer);
+  return formatSecondToTime(isCurrentTimer ? timer : lastTimer);
 }
 
 export function useCheckTimer() {
@@ -113,6 +118,7 @@ export function useCheckTimer() {
       const activity = response?.data?.running_timer;
 
       if (!activity || activity?.id === 0) {
+        store.send({ type: 'transition', nextState: 'idle' });
         return;
       }
 
@@ -126,12 +132,14 @@ export function useCheckTimer() {
       if (!isEnded && !isPaused) state = 'running';
 
       if (state === 'running') {
+        const lastTimer = activity?.task?.current_timer_duration || 0;
+
         store.send({
           type: 'start',
           activity: activity?.task?.name,
           request: activity?.task?.request?.name,
           taskId: activity?.task_id,
-          timer: dayjs().diff(dayjs(activity?.started_at), 'second'),
+          timer: dayjs().diff(dayjs(activity?.started_at), 'second') + lastTimer,
         });
 
         return;
@@ -152,7 +160,7 @@ export function useCheckTimer() {
 
 export function useTimerAction() {
   return useMutation<unknown, Error, TimerActionPayload>({
-    mutationKey: ['task', 'timer'],
+    mutationKey: ['task', 'activity'],
     mutationFn: async ({ action, taskId }) => http(`/tasks/${taskId}/${action}-timer`),
     // store next state to store immediately before tell the server
     onMutate: ({ action, ...rest }) => {
@@ -199,7 +207,14 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
     return null;
   }
 
+  let state: TimerState = 'idle';
+
+  if (activity?.is_pause) state = 'paused';
+  else if (activity?.ended_at !== null) state = 'stopped';
+  else state = 'idle';
+
   return {
+    state,
     name: activity?.task?.name,
     data: fDate(activity?.created_at, 'DD MMMM YYYY'),
     time: [fTime(activity?.started_at), fTime(activity?.ended_at)].join(' - '),

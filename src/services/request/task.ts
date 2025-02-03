@@ -145,7 +145,7 @@ export function useCreateOrUpdateTask(
 
   const mutation = useMutation<RequestTask, Error, RequestTask>({
     ...options,
-    mutationKey: RequestTask.queryKeys(requestId),
+    mutationKey: ['task'],
     mutationFn: async (task) => {
       const formData = await RequestTask.toJson({ ...task, requestId });
 
@@ -173,9 +173,13 @@ export function useCreateOrUpdateTask(
   return [form, onSubmit] as const;
 }
 
-export function useDeleteTask(requestId: RequestTask['requestId']) {
+export function useDeleteTask(
+  requestId: RequestTask['requestId'],
+  options: UseMutationOptions<any, any, any> = {}
+) {
   const mutation = useMutation<RequestTask, Error, Pick<RequestTask, 'taskId'>>({
-    mutationKey: RequestTask.queryKeys(requestId),
+    ...options,
+    mutationKey: ['task'],
     mutationFn: async ({ taskId }) => http(`/tasks/${taskId}`, { method: 'DELETE' }),
   });
 
@@ -202,7 +206,7 @@ export type UseMutationAssigneePayload =
 
 export function useMutationAssignee(requestId: RequestTask['requestId']) {
   const { isLoading, mutateAsync } = useMutation<RequestTask, Error, UseMutationAssigneePayload>({
-    mutationKey: RequestTask.queryKeys(requestId),
+    mutationKey: ['task'],
     mutationFn: async (payload) => {
       if (payload.kind === 'unassign') {
         return http(`/task-assignee/${payload.assigneeId}`, { method: 'DELETE' });
@@ -234,7 +238,7 @@ export type UseMutationAttachmentPayload =
 
 export function useMutationAttachment(requestId: RequestTask['requestId']) {
   const { isLoading, mutateAsync } = useMutation<RequestTask, Error, UseMutationAttachmentPayload>({
-    mutationKey: RequestTask.queryKeys(requestId),
+    mutationKey: ['task'],
     mutationFn: async (payload) => {
       if (payload.kind === 'delete') {
         return http(`/task-attachment/${payload.fileId}`, { method: 'DELETE' });
