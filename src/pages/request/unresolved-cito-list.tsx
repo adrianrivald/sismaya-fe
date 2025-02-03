@@ -3,7 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
-import { RequestUnresolvedCitoView } from 'src/sections/request/view';
+import {
+  RequestUnresolvedCitoClientView,
+  RequestUnresolvedCitoInternalView,
+} from 'src/sections/request/view';
 
 // ----------------------------------------------------------------------
 
@@ -21,7 +24,11 @@ export default function UnresolvedCitoListPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <RequestUnresolvedCitoView />
+      {userType === 'internal' ? (
+        <RequestUnresolvedCitoInternalView />
+      ) : (
+        <RequestUnresolvedCitoClientView />
+      )}
     </>
   );
 }

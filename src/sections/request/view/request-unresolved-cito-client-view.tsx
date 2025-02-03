@@ -6,7 +6,7 @@ import type { Request } from 'src/services/request/types';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useRequestCito } from 'src/services/dashboard';
+import { useUnresolvedCito, useUnresolvedCitoInternal } from 'src/services/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper, type CellContext } from '@tanstack/react-table';
@@ -68,7 +68,7 @@ const columns = (popoverProps: PopoverProps, vendor: string) => [
 
   columnHelper.accessor((row) => row, {
     header: 'Priority',
-    cell: (info) => <StatusBadge label="CITO" type="danger" />,
+    cell: () => <StatusBadge label="CITO" type="danger" />,
   }),
 
   columnHelper.display({
@@ -89,8 +89,9 @@ function ButtonActions(
   const navigate = useNavigate();
   const requestId = row.original.id;
   const step = row?.original?.step;
+  const company = row?.original?.company;
   const onClickDetail = () => {
-    navigate(`/${vendor}/request/${requestId}`);
+    navigate(`/${company?.name.toLowerCase()}/request/${requestId}`);
   };
   return userType === 'internal' ? (
     <Box display="flex" justifyContent="center">
@@ -138,13 +139,14 @@ function ButtonActions(
   );
 }
 
-export function RequestCitoView() {
+export function RequestUnresolvedCitoClientView() {
   const { vendor } = useParams();
   const [searchParams] = useSearchParams();
-  const periodFilter = searchParams.get('period');
-
-  const { getDataTableProps } = useRequestCito({
-    period: periodFilter,
+  const dateFrom = searchParams.get('from');
+  const dateTo = searchParams.get('to');
+  const { getDataTableProps } = useUnresolvedCito({
+    from: dateFrom,
+    to: dateTo,
   });
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
@@ -169,13 +171,12 @@ export function RequestCitoView() {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            CITO Requests:{' '}
-            {periodFilter !== 'day' ? `This ${capitalize(periodFilter ?? '')}` : 'Today'}
+            Unresolved CITO Requests
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Dashboard {currentCompany?.toUpperCase()}</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">CITO Requests</Typography>
+            <Typography color="grey.500">Unresolved CITO Requests</Typography>
           </Box>
         </Box>
       </Box>
