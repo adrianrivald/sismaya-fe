@@ -152,17 +152,15 @@ function ButtonActions(
   );
 }
 
-export function RequestCitoView({ type, step }: { type: string; step: string }) {
+export function RequestPendingView({ type }: { type: string }) {
   const { user } = useAuth();
   const { vendor } = useParams();
-  const [searchParams] = useSearchParams();
-  const periodFilter = searchParams.get('period');
   const assigneeCompanyId = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   const { getDataTableProps } = useRequestList(
-    { cito: '1', step: step !== 'all' ? step : '' },
-    String(type === 'internal' && step !== 'all' ? assigneeCompanyId : '')
+    { step: 'pending' },
+    String(type === 'internal' ? assigneeCompanyId : '')
   );
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
@@ -182,19 +180,17 @@ export function RequestCitoView({ type, step }: { type: string; step: string }) 
     return { handleEdit, handleDelete };
   };
 
-  const modeTitle = step === 'all' ? '' : 'Unresolved';
-
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            {modeTitle} CITO Requests: Last {capitalize(periodFilter ?? '')}
+            Pending Requests
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Dashboard {currentCompany?.toUpperCase()}</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">{modeTitle} CITO Requests</Typography>
+            <Typography color="grey.500">Pending Requests</Typography>
           </Box>
         </Box>
       </Box>
