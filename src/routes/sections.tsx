@@ -170,7 +170,7 @@ const clientRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
     { path: '/request/cito', element: <CitoListPage /> },
-    { path: '/:vendor/request/pending', element: <PendingListPage /> },
+    { path: '/request/pending', element: <PendingListPage /> },
     {
       path: '/:vendor/request/:id',
       element: <RequestDetailLayout />,

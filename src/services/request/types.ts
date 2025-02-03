@@ -1,4 +1,5 @@
 import { StringValidation } from "zod";
+import type { Companies } from "src/sections/master-data/internal-company/view/types";
 import { InternalCompany } from "../master-data/company/types";
 import { UserInfo } from "../master-data/user/types";
 
@@ -76,6 +77,7 @@ export interface Request {
     is_cito: boolean;
     requester: UserInfo;
     step: string;
+    company: Companies
 }
 
 export interface Assignees {

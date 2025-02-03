@@ -68,19 +68,7 @@ const columns = (popoverProps: PopoverProps, vendor: string) => [
 
   columnHelper.accessor((row) => row, {
     header: 'Priority',
-    cell: (info) => {
-      const value = info.getValue()?.priority;
-      const isCito = info.getValue()?.is_cito;
-      return !isCito ? (
-        value !== null ? (
-          <StatusBadge label={capitalize(`${value}`)} type="info" />
-        ) : (
-          '-'
-        )
-      ) : (
-        <StatusBadge label="CITO" type="danger" />
-      );
-    },
+    cell: () => <StatusBadge label="CITO" type="danger" />,
   }),
 
   columnHelper.display({
@@ -101,8 +89,9 @@ function ButtonActions(
   const navigate = useNavigate();
   const requestId = row.original.id;
   const step = row?.original?.step;
+  const company = row?.original?.company;
   const onClickDetail = () => {
-    navigate(`/${vendor}/request/${requestId}`);
+    navigate(`/${company?.name.toLowerCase()}/request/${requestId}`);
   };
   return userType === 'internal' ? (
     <Box display="flex" justifyContent="center">
@@ -150,7 +139,7 @@ function ButtonActions(
   );
 }
 
-export function RequestUnresolvedCitoView() {
+export function RequestUnresolvedCitoInternalView() {
   const { user } = useAuth();
   const { vendor } = useParams();
   const [searchParams] = useSearchParams();
