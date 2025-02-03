@@ -1,3 +1,6 @@
+import { UserInfo } from "../master-data/user/types";
+import { Categories, Products, Status } from "../request/types";
+
 export interface ClientTotalRequest { 
     percentage : number;
     previous_total_request: number;
@@ -24,11 +27,16 @@ export interface RequestOvertime {
 }
 
 export interface UnresolvedCito {
-    category: string;
+    category: Categories;
     created_at: string;
+    creator: UserInfo;
+    product: Products;
+    progress_status: Status;
+    requester: UserInfo;
     id: number;
     number: string;
-    requester : string;
+    start_date: string;
+    step: string;
 }
 
 export interface RequestDue {

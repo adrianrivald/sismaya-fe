@@ -46,31 +46,36 @@ async function fetchPendingRequestInternal(internalCompanyId: number,) {
     return data;
   }
 
-  // Unresolved CITO
-
-
-export function fetchUnresolvedCitoInternal(params: Partial<any>, internalCompanyId: number,) {
-  const baseUrl = window.location.origin;
-  const endpointUrl = new URL(`/dashboard-internal/unresolved-cito/${internalCompanyId}`, baseUrl);
-
-  dataTableParamsBuilder({
-    searchParams: endpointUrl.searchParams,
-    filterValues: [params.order],
-    ...params,
-  });
-
-
-  return http<WithPagination<any>>(
-    endpointUrl.toString().replace(baseUrl, '')
-  );
-}
-
-export function useUnresolvedCitoInternal(params: Partial<any>, internalCompanyId: number ) {
-  return usePaginationQuery(
-    ['unresolved-cito', params.keyword],
-    (paginationState) => fetchUnresolvedCitoInternal({ ...params, ...paginationState }, internalCompanyId)
-  );
-}
+  export function fetchUnresolvedCitoInternal(params: Partial<any>) {
+    const baseUrl = window.location.origin;
+    const endpointUrl = new URL(`/dashboard-internal/unresolved-cito/${params.internalCompanyId}`, baseUrl);
+  
+  
+    if (params.from) {
+      endpointUrl.searchParams.append('from', params.from);
+    }
+    if (params.to) {
+      endpointUrl.searchParams.append('to', params.to);
+    }
+  
+    dataTableParamsBuilder({
+      searchParams: endpointUrl.searchParams,
+      filterValues: [params.order],
+      ...params,
+    });
+  
+  
+    return http<WithPagination<any>>(
+      endpointUrl.toString().replace(baseUrl, '')
+    );
+  }
+  
+  export function useUnresolvedCitoInternal(params: Partial<any> ) {
+    return usePaginationQuery(
+      ['unresolved-cito-internal', params.internalCompanyId, params.from, params.to],
+      (paginationState) => fetchUnresolvedCitoInternal({ ...params, ...paginationState })
+    );
+  }
   
 
 // Total Request Overtime

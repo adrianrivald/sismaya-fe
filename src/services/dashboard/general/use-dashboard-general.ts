@@ -61,3 +61,34 @@ export function useRequestStats(period: string) {
 
   return data;
 }
+
+
+// Total Request
+
+export function fetchRequestCito(params: Partial<any>) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL('/dashboard-general/request-cito', baseUrl);
+
+
+  if (params.period) {
+    endpointUrl.searchParams.append('period', params.period);
+  }
+  
+  dataTableParamsBuilder({
+    searchParams: endpointUrl.searchParams,
+    filterValues: [params.order],
+    ...params,
+  });
+
+
+  return http<WithPagination<any>>(
+    endpointUrl.toString().replace(baseUrl, '')
+  );
+}
+
+export function useRequestCito(params: Partial<any> ) {
+  return usePaginationQuery(
+    ['request-cito', params.period],
+    (paginationState) => fetchRequestCito({ ...params, ...paginationState })
+  );
+}
