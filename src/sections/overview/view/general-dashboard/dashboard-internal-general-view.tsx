@@ -426,10 +426,10 @@ export function DashboardInternalView() {
               >
                 <Box display="flex" alignItems="center" gap={2}>
                   <SvgColor color="#FFC107" src="/assets/icons/ic-alert.svg" />
-                  <Typography color="warning.600">Resolved CITO : 4</Typography>
+                  <Typography color="warning.600">Request CITO : 4</Typography>
                 </Box>
                 <Button
-                  onClick={() => navigate(`/request/resolved-cito`)}
+                  onClick={() => navigate(`/request/cito?period=${periodFilter}`)}
                   sx={{
                     borderWidth: 1,
                     borderStyle: 'solid',
