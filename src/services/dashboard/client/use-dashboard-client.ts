@@ -52,6 +52,14 @@ export function fetchUnresolvedCito(params: Partial<any>) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/dashboard-client/unresolved-cito', baseUrl);
 
+
+  if (params.from) {
+    endpointUrl.searchParams.append('from', params.from);
+  }
+  if (params.to) {
+    endpointUrl.searchParams.append('to', params.to);
+  }
+
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
     filterValues: [params.order],
@@ -66,7 +74,7 @@ export function fetchUnresolvedCito(params: Partial<any>) {
 
 export function useUnresolvedCito(params: Partial<any> ) {
   return usePaginationQuery(
-    ['unresolved-cito', params.keyword],
+    ['unresolved-cito', params.keyword, params.from, params.to],
     (paginationState) => fetchUnresolvedCito({ ...params, ...paginationState })
   );
 }

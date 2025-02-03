@@ -88,8 +88,12 @@ export function DashboardInternalCompanyView({
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const [staffState, setStaffState] = React.useState<'quantity' | 'hour'>('quantity');
   const [dateFilter, setDateFilter] = React.useState(7);
-  const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
   const dateNow = dayjs().format('YYYY-MM-DD');
+  const { getDataTableProps, data } = useUnresolvedCitoInternal({
+    from: dateFrom,
+    to: dateNow,
+    internalCompanyId: idCompany,
+  });
   const { data: internalTotalRequest } = useInternalTotalRequestByCompany(
     idCompany,
     dateFrom,
@@ -425,7 +429,7 @@ export function DashboardInternalCompanyView({
               <DataTable
                 withPagination={false}
                 withViewAll
-                viewAllHref={`/${vendor}/request/unresolved-cito?period=${renderDateFilter().value}`}
+                viewAllHref={`/${vendor}/request/unresolved-cito?from=${dateFrom}&to=${dateNow}`}
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}

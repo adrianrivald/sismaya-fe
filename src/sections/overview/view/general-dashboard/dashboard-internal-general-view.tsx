@@ -5,6 +5,7 @@ import type { SelectChangeEvent } from '@mui/material';
 import { Box, Button, Card, MenuItem, Select, Stack } from '@mui/material';
 
 import {
+  useRequestCito,
   useRequestStats,
   useRequestSummary,
   useRequestSummaryCompany,
@@ -87,6 +88,11 @@ export function DashboardInternalView() {
   const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({
     period: periodFilter,
   });
+  const { data: requestCito } = useRequestCito({
+    period: periodFilter,
+  });
+  const totalRequestCito = requestCito?.meta?.total;
+
   const { data: requestStats } = useRequestStats(periodFilter);
 
   const filtered = requestStats?.map((item: any) => {
@@ -445,7 +451,7 @@ export function DashboardInternalView() {
               >
                 <Box display="flex" alignItems="center" gap={2}>
                   <SvgColor color="#FFC107" src="/assets/icons/ic-alert.svg" />
-                  <Typography color="warning.600">Request CITO : 4</Typography>
+                  <Typography color="warning.600">Request CITO : {totalRequestCito}</Typography>
                 </Box>
                 <Button
                   onClick={() => navigate(`/request/cito?period=${periodFilter}`)}
