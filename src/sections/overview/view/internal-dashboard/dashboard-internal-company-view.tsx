@@ -14,15 +14,16 @@ import {
   useInternalTopRequester,
   useInternalTopStaff,
   useInternalTopStaffbyHour,
+  useRequestHandlingTime,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
 import type { UnresolvedCito } from 'src/services/dashboard/types';
+import { useNavigate } from 'react-router-dom';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
-import { RequestSuccessRate } from '../../request-success-rate';
 import { TopRequesterChart } from '../../top-requester-chart';
 import { TopStaffChart } from '../../top-staff-chart';
 import { HappinessRatingChart } from '../../happiness-rating-chart';
@@ -52,10 +53,7 @@ const columns = () => [
 
   columnHelper.accessor((row) => row, {
     header: 'Project Deadline',
-    cell: (info) => {
-      const value = info.getValue();
-      return '-';
-    },
+    cell: (info) => '-',
   }),
 ];
 
@@ -66,6 +64,7 @@ export function DashboardInternalCompanyView({
   idCompany: number;
   vendor: string;
 }) {
+  const navigate = useNavigate();
   const [dateFrom, setDateFrom] = React.useState<string>(
     dayjs()
       .subtract(7 as number, 'day')
@@ -88,6 +87,7 @@ export function DashboardInternalCompanyView({
   );
   const [requestState, setRequestState] = React.useState<'priority' | 'status'>('priority');
   const [staffState, setStaffState] = React.useState<'quantity' | 'hour'>('quantity');
+  const [dateFilter, setDateFilter] = React.useState(7);
   const { getDataTableProps, data } = useUnresolvedCitoInternal({}, idCompany);
   const dateNow = dayjs().format('YYYY-MM-DD');
   const { data: internalTotalRequest } = useInternalTotalRequestByCompany(
@@ -110,6 +110,7 @@ export function DashboardInternalCompanyView({
   const { data: topRequester } = useInternalTopRequester(idCompany, dateFromTopRequester, dateNow);
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
   const { data: topStaffbyHour } = useInternalTopStaffbyHour(idCompany, dateFromTopStaff, dateNow);
+  const { data: requestHandlingTime } = useRequestHandlingTime(idCompany, dateFrom, dateNow);
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -126,6 +127,7 @@ export function DashboardInternalCompanyView({
       .subtract(filterValue as number, 'day')
       .format('YYYY-MM-DD');
     setDateFrom(dateFromValue);
+    setDateFilter(Number(filterValue));
   };
 
   const handleChangeRequestDueDateFilter = (e: SelectChangeEvent<string>) => {
@@ -206,6 +208,32 @@ export function DashboardInternalCompanyView({
       );
     }) ?? [];
 
+  const renderDateFilter = () => {
+    switch (dateFilter) {
+      case 0:
+        return {
+          label: 'Today',
+          value: 'day',
+        };
+      case 7:
+        return {
+          label: '7',
+          value: 'week',
+        };
+      case 30:
+        return {
+          label: '30',
+          value: 'year',
+        };
+
+      default:
+        return {
+          label: '',
+          value: '',
+        };
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -234,6 +262,7 @@ export function DashboardInternalCompanyView({
             </Typography>
           </Box>
           <Button
+            onClick={() => navigate(`/${vendor}/request/pending`)}
             sx={{
               borderWidth: 1,
               borderStyle: 'solid',
@@ -308,7 +337,9 @@ export function DashboardInternalCompanyView({
                   }}
                 >
                   <Typography fontSize={14}>Total Request</Typography>
-                  <Typography fontSize={12}>for the last 7 days</Typography>
+                  <Typography fontSize={12}>
+                    {dateFilter !== 0 ? `for the last ${renderDateFilter().label} days` : `Today`}{' '}
+                  </Typography>
                   <Typography fontSize={36} fontWeight="bold">
                     {internalTotalRequest?.total_request}
                   </Typography>
@@ -319,7 +350,9 @@ export function DashboardInternalCompanyView({
                     </Typography>
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
-                    than previous 7 days
+                    {dateFilter !== 0
+                      ? `than previous ${renderDateFilter().label} days`
+                      : `than yesterday`}
                   </Typography>
                 </Box>
                 <Card
@@ -392,7 +425,7 @@ export function DashboardInternalCompanyView({
               <DataTable
                 withPagination={false}
                 withViewAll
-                viewAllHref="/unresolved-cito"
+                viewAllHref={`/${vendor}/request/unresolved-cito?period=${renderDateFilter().value}`}
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}
@@ -552,10 +585,10 @@ export function DashboardInternalCompanyView({
               alignItems="center"
             >
               <Typography fontSize="36px" fontWeight="bold" sx={{ mb: 2 }}>
-                56m
+                {requestHandlingTime?.converted}
               </Typography>
               <Typography>Average Handling Time</Typography>
-              <Box display="flex" alignItems="center" gap={1} mt={3}>
+              {/* <Box display="flex" alignItems="center" gap={1} mt={3}>
                 <SvgColor color="error.dark" src="/assets/icons/ic-grow.svg" />
                 <Typography>
                   <Typography color="error.dark" component="span">
@@ -563,7 +596,7 @@ export function DashboardInternalCompanyView({
                   </Typography>{' '}
                   than last month
                 </Typography>
-              </Box>
+              </Box> */}
               <Box
                 display="flex"
                 justifyContent="space-between"

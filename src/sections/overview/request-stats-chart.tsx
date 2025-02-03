@@ -46,7 +46,7 @@ export function RequestStatsChart({ chart, ...other }: Props) {
     },
     tooltip: {
       y: {
-        formatter: (value: number) => `${value} visits`,
+        formatter: (value: number) => `${value} ${value > 1 ? 'requests' : 'request'}`,
       },
     },
     ...chart.options,

@@ -1,32 +1,25 @@
-import React, { useId } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import {
-  Box,
-  Button,
-  IconButton,
-  MenuItem,
-  menuItemClasses,
-  MenuList,
-  Popover,
-  TableCell,
-} from '@mui/material';
+import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
 
-import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
+import type { CellContext } from '@tanstack/react-table';
+import { createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
 import { useCompanyList } from 'src/services/master-data/company/use-company-list';
 import { useDeleteCompanyById } from 'src/services/master-data/company';
-import { Companies } from './types';
+import type { Companies } from './types';
+import { RemoveAction } from './remove-action';
 
 // ----------------------------------------------------------------------
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  handleDelete: (id: number) => void;
+  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
+  setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
 const columnHelper = createColumnHelper<Companies>();
@@ -53,8 +46,12 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, handleDelete } = popoverProps;
-  const formId = useId();
+  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
   // const { mutateAsync: deleteBanner } = useDeleteBanner();
   return (
     <MenuList
@@ -77,7 +74,7 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
         Edit
       </MenuItem>
 
-      <MenuItem onClick={() => handleDelete(companyId)} sx={{ color: 'error.main' }}>
+      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
       </MenuItem>
@@ -85,19 +82,11 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
   );
 }
 
-// const columns = [
-//   { id: 'name', label: 'Name' },
-//   { id: 'desc', label: 'Description' },
-//   { id: 'picture', label: 'Picture' },
-//   { id: 'status', label: 'Status' },
-//   { id: 'category', label: 'Category' },
-//   { id: 'product', label: 'Product' },
-//   { id: '', label: 'Action' },
-// ];
-
 export function ClientCompanyView() {
-  const { isEmpty, getDataTableProps } = useCompanyList({}, 'holding');
+  const { getDataTableProps } = useCompanyList({}, 'holding');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | null>(null);
 
   const navigate = useNavigate();
   const onClickAddNew = () => {
@@ -109,8 +98,9 @@ export function ClientCompanyView() {
       navigate(`${id}/edit`);
     };
 
-    const handleDelete = (id: number) => {
-      deleteCompanyById(id);
+    const handleDelete = () => {
+      deleteCompanyById(Number(selectedId));
+      setOpenRemoveModal(false);
     };
 
     return { handleEdit, handleDelete };
@@ -138,9 +128,18 @@ export function ClientCompanyView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
+          <DataTable
+            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            {...getDataTableProps()}
+          />
         </Grid>
       </Grid>
+
+      <RemoveAction
+        onRemove={popoverFuncs().handleDelete}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }
