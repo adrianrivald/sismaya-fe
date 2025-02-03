@@ -132,7 +132,7 @@ export function useCheckTimer() {
       if (!isEnded && !isPaused) state = 'running';
 
       if (state === 'running') {
-        const lastTimer = activity?.task?.current_timer_duration || 0;
+        const lastTimer = response?.data?.current_timer_duration || 0;
 
         store.send({
           type: 'start',
