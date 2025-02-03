@@ -21,9 +21,9 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
 import type { UnresolvedCito } from 'src/services/dashboard/types';
+import { useNavigate } from 'react-router-dom';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
-import { RequestSuccessRate } from '../../request-success-rate';
 import { TopRequesterChart } from '../../top-requester-chart';
 import { TopStaffChart } from '../../top-staff-chart';
 import { HappinessRatingChart } from '../../happiness-rating-chart';
@@ -53,10 +53,7 @@ const columns = () => [
 
   columnHelper.accessor((row) => row, {
     header: 'Project Deadline',
-    cell: (info) => {
-      const value = info.getValue();
-      return '-';
-    },
+    cell: (info) => '-',
   }),
 ];
 
@@ -67,6 +64,7 @@ export function DashboardInternalCompanyView({
   idCompany: number;
   vendor: string;
 }) {
+  const navigate = useNavigate();
   const [dateFrom, setDateFrom] = React.useState<string>(
     dayjs()
       .subtract(7 as number, 'day')
@@ -113,8 +111,6 @@ export function DashboardInternalCompanyView({
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
   const { data: topStaffbyHour } = useInternalTopStaffbyHour(idCompany, dateFromTopStaff, dateNow);
   const { data: requestHandlingTime } = useRequestHandlingTime(idCompany, dateFrom, dateNow);
-
-  console.log(requestHandlingTime, 'requestHandlingTime');
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -215,14 +211,26 @@ export function DashboardInternalCompanyView({
   const renderDateFilter = () => {
     switch (dateFilter) {
       case 0:
-        return 'Today';
+        return {
+          label: 'Today',
+          value: 'day',
+        };
       case 7:
-        return '7';
+        return {
+          label: '7',
+          value: 'week',
+        };
       case 30:
-        return '30';
+        return {
+          label: '30',
+          value: 'year',
+        };
 
       default:
-        return '';
+        return {
+          label: '',
+          value: '',
+        };
     }
   };
 
@@ -254,6 +262,7 @@ export function DashboardInternalCompanyView({
             </Typography>
           </Box>
           <Button
+            onClick={() => navigate(`/${vendor}/request/pending`)}
             sx={{
               borderWidth: 1,
               borderStyle: 'solid',
@@ -329,7 +338,7 @@ export function DashboardInternalCompanyView({
                 >
                   <Typography fontSize={14}>Total Request</Typography>
                   <Typography fontSize={12}>
-                    {dateFilter !== 0 ? `for the last ${renderDateFilter()} days` : `Today`}{' '}
+                    {dateFilter !== 0 ? `for the last ${renderDateFilter().label} days` : `Today`}{' '}
                   </Typography>
                   <Typography fontSize={36} fontWeight="bold">
                     {internalTotalRequest?.total_request}
@@ -342,7 +351,7 @@ export function DashboardInternalCompanyView({
                   </Box>
                   <Typography sx={{ color: '#80ADBF' }} fontSize={14}>
                     {dateFilter !== 0
-                      ? `than previous ${renderDateFilter()} days`
+                      ? `than previous ${renderDateFilter().label} days`
                       : `than yesterday`}
                   </Typography>
                 </Box>
@@ -416,7 +425,7 @@ export function DashboardInternalCompanyView({
               <DataTable
                 withPagination={false}
                 withViewAll
-                viewAllHref={`/${vendor}/request/unresolved-cito`}
+                viewAllHref={`/${vendor}/request/unresolved-cito?period=${renderDateFilter().value}`}
                 columns={columns()}
                 {...getDataTableProps()}
                 data={data?.items?.slice(0, 5)}
