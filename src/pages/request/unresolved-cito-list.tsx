@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
-import { RequestCitoView } from 'src/sections/request/view';
+import { RequestUnresolvedCitoView } from 'src/sections/request/view';
 
 // ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ export default function UnresolvedCitoListPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <RequestCitoView type={userType} step="to_do,in_progress" />
+      <RequestUnresolvedCitoView />
     </>
   );
 }
