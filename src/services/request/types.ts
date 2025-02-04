@@ -78,6 +78,7 @@ export interface Request {
     requester: UserInfo;
     step: string;
     company: Companies
+    internal_company: Companies
 }
 
 export interface Assignees {
