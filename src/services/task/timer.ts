@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 type TimerAction = 'start' | 'pause' | 'stop';
 export type TimerState = 'idle' | 'running' | 'paused' | 'stopped';
@@ -112,9 +113,16 @@ export function useTimer(taskId?: number, lastTimer = 0) {
 }
 
 export function useCheckTimer() {
+  const { isAuth } = useAuth();
+
   useEffect(() => {
+    const abortController = new AbortController();
+
     async function checkTimer() {
-      const response = await http('/tasks/get-running-timer');
+      const response = await http('/tasks/get-running-timer', {
+        signal: abortController.signal,
+      });
+
       const activity = response?.data?.running_timer;
 
       if (!activity || activity?.id === 0) {
@@ -132,7 +140,7 @@ export function useCheckTimer() {
       if (!isEnded && !isPaused) state = 'running';
 
       if (state === 'running') {
-        const lastTimer = activity?.task?.current_timer_duration || 0;
+        const lastTimer = response?.data?.current_timer_duration || 0;
 
         store.send({
           type: 'start',
@@ -154,8 +162,14 @@ export function useCheckTimer() {
       store.send({ type: 'transition', nextState: state });
     }
 
-    checkTimer();
-  }, []);
+    if (isAuth) {
+      checkTimer();
+    }
+
+    return () => {
+      abortController.abort();
+    };
+  }, [isAuth]);
 }
 
 export function useTimerAction() {
