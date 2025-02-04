@@ -39,16 +39,16 @@ import { RejectAction } from '../reject-action';
 
 const priorities = [
   {
-    name: 'High',
-    id: 'high',
-  },
-  {
     name: 'Low',
     id: 'low',
   },
   {
     name: 'Medium',
     id: 'medium',
+  },
+  {
+    name: 'High',
+    id: 'high',
   },
 ];
 
