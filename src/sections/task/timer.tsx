@@ -49,7 +49,6 @@ export function TimerActionButton({
     </IconButton>
   );
 
-  // TODO: add confirmation dialog
   const btnStop = (
     <Dialog.Root>
       <Dialog.OpenButton>
