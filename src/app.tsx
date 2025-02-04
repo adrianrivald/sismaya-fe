@@ -1,9 +1,10 @@
 import 'src/global.css';
 
+import * as React from 'react';
 import { Router } from 'src/routes/sections';
-import { TimerPip } from 'src/sections/task/pip';
-
 import { useScrollToTop } from 'src/utils/hooks/use-scroll-to-top';
+
+const FloatingTimer = React.lazy(() => import('src/sections/task/pip'));
 
 // ----------------------------------------------------------------------
 
@@ -13,7 +14,10 @@ export default function App() {
   return (
     <>
       <Router />
-      <TimerPip />
+
+      <React.Suspense fallback={null}>
+        <FloatingTimer />
+      </React.Suspense>
     </>
   );
 }
