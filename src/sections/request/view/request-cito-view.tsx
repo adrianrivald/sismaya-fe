@@ -89,9 +89,9 @@ function ButtonActions(
   const navigate = useNavigate();
   const requestId = row.original.id;
   const step = row?.original?.step;
-  const company = row?.original?.company;
+  const internalCompany = row?.original?.internal_company;
   const onClickDetail = () => {
-    navigate(`/${company?.name?.toLowerCase()}/request/${requestId}`);
+    navigate(`/${internalCompany?.name?.toLowerCase()}/request/${requestId}`);
   };
   return userType === 'internal' ? (
     <Box display="flex" justifyContent="center">
