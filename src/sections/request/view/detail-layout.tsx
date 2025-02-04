@@ -173,7 +173,7 @@ export default function RequestDetailLayout() {
                       });
                     }}
                   >
-                    {['high', 'medium', 'low']?.map((value) => (
+                    {['low', 'medium', 'high']?.map((value) => (
                       <MenuItem value={value}>{capitalize(`${value}`)}</MenuItem>
                     ))}
                   </Select>
