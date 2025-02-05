@@ -173,7 +173,7 @@ export default function RequestDetailLayout() {
                       });
                     }}
                   >
-                    {['high', 'medium', 'low']?.map((value) => (
+                    {['low', 'medium', 'high']?.map((value) => (
                       <MenuItem value={value}>{capitalize(`${value}`)}</MenuItem>
                     ))}
                   </Select>
@@ -195,7 +195,11 @@ export default function RequestDetailLayout() {
                 Status
                 <Select
                   value={currentStatus}
-                  disabled={requestDetail?.step === 'done' || requestDetail?.step === 'pending'}
+                  disabled={
+                    requestDetail?.step === 'done' ||
+                    requestDetail?.step === 'pending' ||
+                    userType === 'client'
+                  }
                   sx={{
                     fontWeight: 'bold',
                     height: 40,
