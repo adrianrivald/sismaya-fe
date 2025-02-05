@@ -4,8 +4,9 @@ import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
 export type StoreDeparment = {
-  name:string;
+  name?:string;
   company_id?: number
+  is_show_all?: boolean
 };
 
 export function useAddDivision() {
@@ -13,13 +14,14 @@ export function useAddDivision() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreDeparment) => {
-        const { name, company_id } = formData;
+        const { name, company_id, is_show_all } = formData;
   
   
         return http(`departments`, {
           data: {
             name,
-            company_id
+            company_id,
+            is_show_all
           },
         });
       },
