@@ -476,7 +476,6 @@ export function EditInternalCompanyView() {
   };
   // Status
   const onAddStatus = () => {
-    console.log(status, 'status sekarang');
     addStatus({
       name: status?.name,
       company_id: data?.id,

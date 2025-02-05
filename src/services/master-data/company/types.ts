@@ -26,6 +26,7 @@ export interface Department {
     id: number;
     name: string;
     company_id: number
+    is_show_all: boolean
 }
 export interface Categories {
     id: number;
