@@ -46,18 +46,22 @@ interface EditFormProps {
   control: Control<CompanyDTO>;
   setValue: UseFormSetValue<CompanyDTO>;
   defaultValues: ClientCompanyValues;
-  onChangeDivision: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
-  onClickEdit: (value: string, divisionId: number) => void;
+  onChangeDivision: (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    itemId: number,
+    type: string
+  ) => void;
+  onClickEdit: (value: string, type: boolean, divisionId: number) => void;
   onClickDelete: (divisionId: number) => void;
-  onChangeDivisionNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeDivisionNew: (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    type: string
+  ) => void;
   data: Company | undefined;
-  department: string;
+  department: Partial<Department>;
   departments: Department[];
   onAddDepartment: () => void;
   onClickRemove: (id: number) => void;
-  onChangeDivisionType: (e: SelectChangeEvent<string>, itemId: number, type: string) => void;
-  onChangeDivisionTypeNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  divisionType: string;
 }
 
 function EditForm({
@@ -75,9 +79,6 @@ function EditForm({
   data,
   onAddDepartment,
   onClickRemove,
-  onChangeDivisionType,
-  onChangeDivisionTypeNew,
-  divisionType,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -152,7 +153,7 @@ function EditForm({
                   label="Division"
                   value={item.name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onChangeDivision(e, item?.id)
+                    onChangeDivision(e, item?.id, 'name')
                   }
                   // InputProps={{
                   //   readOnly: true,
@@ -164,13 +165,13 @@ function EditForm({
                   <InputLabel id="type">Show Type</InputLabel>
                   <Select
                     label="Type"
-                    value={item?.divisionType}
-                    onChange={(e: SelectChangeEvent<string>) =>
-                      onChangeDivisionType(e, item?.id, 'divisionType')
+                    value={item?.is_show_all}
+                    onChange={(e: SelectChangeEvent<boolean>) =>
+                      onChangeDivision(e, item?.id, 'type')
                     }
                   >
-                    <MenuItem value="1">Shown in All</MenuItem>
-                    <MenuItem value="0">Not Shown</MenuItem>
+                    <MenuItem value="true">Show all division</MenuItem>
+                    <MenuItem value="false">Only show this division</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -189,7 +190,11 @@ function EditForm({
                   },
                 }}
               >
-                <MenuItem onClick={() => onClickEdit(departments[index].name, item?.id)}>
+                <MenuItem
+                  onClick={() =>
+                    onClickEdit(departments[index].name, departments[index].is_show_all, item?.id)
+                  }
+                >
                   <Iconify icon="solar:pen-bold" />
                   Edit
                 </MenuItem>
@@ -207,8 +212,10 @@ function EditForm({
                   width: '100%',
                 }}
                 label="Division"
-                value={department}
-                onChange={onChangeDivisionNew}
+                value={department?.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChangeDivisionNew(e, 'name')
+                }
               />
             </Box>
 
@@ -217,13 +224,11 @@ function EditForm({
                 <InputLabel id="type">Show Type</InputLabel>
                 <Select
                   label="Type"
-                  value={divisionType}
-                  onChange={(e: SelectChangeEvent<string>) =>
-                    onChangeDivisionTypeNew(e, 'divisionType')
-                  }
+                  value={department?.is_show_all}
+                  onChange={(e: SelectChangeEvent<boolean>) => onChangeDivisionNew(e, 'type')}
                 >
-                  <MenuItem value="1">Shown in All</MenuItem>
-                  <MenuItem value="0">Not Shown</MenuItem>
+                  <MenuItem value="true">Show all division</MenuItem>
+                  <MenuItem value="false">Only show this division</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -267,9 +272,10 @@ export function EditClientCompanyView() {
 
   // Division
   const [departments, setDepartments] = React.useState(data?.department ?? []);
-  const [department, setDepartment] = React.useState('');
-  const [departmentTypes, setDepartmentTypes] = React.useState([]);
-  const [departmentType, setDepartmentType] = React.useState('');
+  const [department, setDepartment] = React.useState<Partial<Department>>({
+    name: '',
+    is_show_all: false,
+  });
 
   const defaultValues: ClientCompanyValues = {
     name: data?.name,
@@ -280,10 +286,14 @@ export function EditClientCompanyView() {
 
   const onAddDepartment = () => {
     addDivision({
-      name: department,
+      name: department?.name,
+      is_show_all: department?.is_show_all,
       company_id: data?.id,
     });
-    setDepartment('');
+    setDepartment({
+      name: '',
+      is_show_all: false,
+    });
   };
 
   const onClickRemove = (itemId?: number) => {
@@ -315,34 +325,58 @@ export function EditClientCompanyView() {
     setDepartments(data?.department ?? []);
   }, [data]);
 
-  const onChangeDivision = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
-    setDepartments((prevDepartments) => {
-      const updatedDeparments = [...prevDepartments];
-      // Update the string at the specified index
-      const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
-      updatedDeparments[index].name = e.target.value;
-      return updatedDeparments;
-    });
+  const onChangeDivision = (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    itemId: number,
+    type: string
+  ) => {
+    if (type === 'name') {
+      setDepartments((prevDepartments) => {
+        const updatedDeparments = [...prevDepartments];
+        // Update the string at the specified index
+        const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
+        updatedDeparments[index].name = e.target.value as string;
+        return updatedDeparments;
+      });
+    } else {
+      setDepartments((prevDepartments) => {
+        const updatedDeparments = [...prevDepartments];
+        // Update the string at the specified index
+        const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
+        updatedDeparments[index].is_show_all = e.target.value as boolean;
+        return updatedDeparments;
+      });
+    }
   };
 
-  const onChangeDivisionNew = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDepartment(e.target.value);
+  const onChangeDivisionNew = (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    type: string
+  ) => {
+    if (type === 'name') {
+      setDepartment({
+        ...department,
+        name: e.target.value as string,
+      });
+    } else {
+      setDepartment({
+        ...department,
+        is_show_all: e.target.value as boolean,
+      });
+    }
   };
 
   const onClickDelete = async (divisionId: number) => {
     deleteDivision(divisionId);
   };
 
-  const onClickEdit = async (value: string, divisionId: number) => {
+  const onClickEdit = async (value: string, type: boolean, divisionId: number) => {
     updateDivision({
       name: value,
       id: divisionId,
       company_id: Number(id),
+      is_show_all: type,
     });
-  };
-
-  const onChangeDivisionType = (divType: string) => {
-    setDepartmentType(divType);
   };
 
   return (
@@ -382,7 +416,6 @@ export function EditClientCompanyView() {
               onClickDelete={onClickDelete}
               onClickEdit={onClickEdit}
               onClickRemove={onClickRemove}
-              onChangeDivisionType={onChangeDivisionType}
             />
           )}
         </Form>
