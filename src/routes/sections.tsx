@@ -78,6 +78,8 @@ export const UserClientCreatePage = lazy(
 );
 export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/client-user/edit'));
 
+export const MonitorPersonalLoadPage = lazy(() => import('src/pages/monitor-personal-load/index'));
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
@@ -158,6 +160,13 @@ const internalRoutes: NonIndexRouteObject = {
     {
       path: '/:vendor/task/:taskId',
       element: <TaskDetailPage />,
+    },
+
+    // Monitor Personal Load
+
+    {
+      path: '/monitor-personal-load',
+      element: <MonitorPersonalLoadPage />,
     },
   ],
 };

@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
-import { _langs, _notifications } from 'src/_mock';
+import { _notifications } from 'src/_mock';
 
 import { Iconify } from 'src/components/iconify';
 import { useAuth } from 'src/sections/auth/providers/auth';
@@ -22,7 +22,6 @@ import { MenuButton } from '../components/menu-button';
 import { LayoutSection } from '../core/layout-section';
 import { HeaderSection } from '../core/header-section';
 import { AccountPopover } from '../components/account-popover';
-import { LanguagePopover } from '../components/language-popover';
 import { NotificationsPopover } from '../components/notifications-popover';
 
 // ----------------------------------------------------------------------
