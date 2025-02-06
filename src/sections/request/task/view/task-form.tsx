@@ -9,6 +9,7 @@ import {
   Button,
   IconButton,
 } from '@mui/material';
+import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AssigneeChooserField, MultipleDropzoneField } from 'src/components/form';
@@ -78,14 +79,18 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
           </Box>
 
           {task?.taskId ? (
-            <IconButton
-              aria-label="delete task"
-              color="error"
-              onClick={() => deleteFn({ taskId: task?.taskId })}
-              disabled={isDeleting}
-            >
-              <Iconify icon="solar:trash-bin-trash-bold" />
-            </IconButton>
+            <Dialog.Root>
+              <Dialog.OpenButton>
+                <IconButton aria-label="delete task" color="error" disabled={isDeleting}>
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                </IconButton>
+              </Dialog.OpenButton>
+              <Dialog.AlertConfirmation
+                message="Are you sure you want to delete this task?"
+                onConfirm={() => deleteFn({ taskId: task?.taskId })}
+                disabledAction={isDeleting}
+              />
+            </Dialog.Root>
           ) : null}
         </Box>
 

@@ -81,14 +81,18 @@ function Form({ requestId, requestName, task }: FormProps) {
           </Typography>
 
           {taskId ? (
-            <IconButton
-              aria-label="delete task"
-              color="error"
-              disabled={isDeleting}
-              onClick={() => deleteFn({ taskId })}
-            >
-              <Iconify icon="solar:trash-bin-trash-bold" />
-            </IconButton>
+            <Dialog.Root>
+              <Dialog.OpenButton>
+                <IconButton aria-label="delete task" color="error" disabled={isDeleting}>
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                </IconButton>
+              </Dialog.OpenButton>
+              <Dialog.AlertConfirmation
+                message="Are you sure you want to delete this task?"
+                onConfirm={() => deleteFn({ taskId })}
+                disabledAction={isDeleting}
+              />
+            </Dialog.Root>
           ) : null}
         </Box>
 
