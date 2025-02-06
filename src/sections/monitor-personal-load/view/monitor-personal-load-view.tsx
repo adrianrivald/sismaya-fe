@@ -181,9 +181,13 @@ export function MonitorPersonalLoadView() {
                       color: renderedColors().color,
                     }}
                   >
-                    <Typography textTransform="capitalize">{label.replaceAll('_', '-')}</Typography>
+                    <Typography textTransform="capitalize" fontWeight="bold">
+                      {label.replaceAll('_', '-')}
+                    </Typography>
                     <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-                      <Typography variant="h4">{item[`${getKey(item)}`]}</Typography>
+                      <Typography variant="h4" fontWeight="bold">
+                        {item[`${getKey(item)}`]}
+                      </Typography>
                       <Typography>Tasks</Typography>
                     </Box>
                     <Box
