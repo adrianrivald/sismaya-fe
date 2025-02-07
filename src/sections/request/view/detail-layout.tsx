@@ -22,6 +22,8 @@ import {
 } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
+import { store } from 'src/services/request/task';
+import { useSelector } from '@xstate/store/react';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
@@ -46,6 +48,10 @@ export default function RequestDetailLayout() {
   const statusStepEnum =
     requestStatuses && requestStatuses?.find((item) => item?.id === currentStatus);
   const [openCompleteRequest, setOpenCompleteRequest] = useState(false);
+
+  const tasks = useSelector(store, (state) => state.context.tasks);
+  const tasksStatus = tasks?.map((task) => task?.status);
+  const isTasksHasBeenCompleted = tasksStatus?.every((item) => item === 'completed');
 
   const priorityEnum = () => {
     if (currentPriority === 'low') return 'low';
@@ -253,6 +259,7 @@ export default function RequestDetailLayout() {
         onCompleteRequest={onCompleteRequest}
         openCompleteRequest={openCompleteRequest}
         setOpenCompleteRequest={setOpenCompleteRequest}
+        isUncompleted={!isTasksHasBeenCompleted}
       />
     </DashboardContent>
   );

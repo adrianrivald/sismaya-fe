@@ -8,6 +8,7 @@ import { fDate } from 'src/utils/format-time';
 import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
 import type { Assignee } from 'src/components/form/field/assignee';
 import { taskStatusMap } from 'src/constants/status';
+import { createStore } from '@xstate/store';
 
 export class RequestTask {
   static queryKeys(requestId: number) {
@@ -113,15 +114,30 @@ export class RequestTask {
     files: z.array(z.custom<File>()).optional(),
   });
 }
+const initialStore = {
+  tasks: [] as RequestTask[]
+}
+export const store = createStore({
+  context: initialStore,
+  on: {
+    storeTask: (context, event: {newTask: RequestTask[]}) => ({
+      tasks: event?.newTask
+    })
+  }
+})
 
 export function useTaskByRequest(requestId: RequestTask['requestId']) {
+ 
   return useQuery({
     queryKey: RequestTask.queryKeys(requestId),
     queryFn: async () => {
       const response = await http('/tasks', { params: { request_id: requestId } });
       const items = response.data ?? [];
       const transformed: Array<RequestTask> = items.map((item: any) => RequestTask.fromJson(item));
-
+      store.send({
+        type: "storeTask",
+        newTask: transformed
+      })
       return transformed;
     },
   });
