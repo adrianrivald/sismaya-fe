@@ -1,6 +1,5 @@
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
-import { InternalCompany } from 'src/services/master-data/company/types';
 
 // ----------------------------------------------------------------------
 
@@ -12,14 +11,6 @@ export interface Menus {
   icon?: React.ReactNode;
   list: any[];
   path?: string;
-}
-
-interface MenuList {
-  id?: string;
-  path: string;
-  heading: string;
-  icon?: React.ReactNode;
-  info?: React.ReactNode;
 }
 
 export const icon = (name: string) => (
@@ -100,6 +91,13 @@ export const menus = (
             path: '/client-user',
           },
         ],
+      },
+      {
+        isAccordion: false,
+        heading: 'Monitor Personal Load',
+        id: 'monitor-personal-load',
+        icon: icon('ic-person'),
+        path: '/monitor-personal-load',
       },
     ],
   },
