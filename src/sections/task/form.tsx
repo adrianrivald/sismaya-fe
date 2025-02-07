@@ -25,6 +25,7 @@ import {
 } from 'src/services/task/task-management';
 import { taskStatusMap } from 'src/constants/status';
 import dayjs from 'dayjs';
+import { useRequestList } from 'src/services/request/use-request-list';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -62,7 +63,8 @@ function Form({ request, task }: FormProps) {
     },
   });
   const taskId = form.getValues('taskId') ?? 0;
-  const requests = [{ id: 0, name: request?.name }];
+  const { data } = useRequestList({ page: 1, page_size: 100 }, request?.assignee_company_id ?? 0);
+  const requests = taskId ? [{ id: 0, name: request?.name }] : (data?.items ?? []);
 
   const [_, assigneeFn] = useMutationAssignee(requestId);
 
@@ -121,14 +123,14 @@ function Form({ request, task }: FormProps) {
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
           <TextField
             label="Request"
-            {...formUtils.getTextProps(form, 'requestId')}
             select
-            disabled
             defaultValue={0}
+            disabled={taskId ? true : requests.length === 0}
+            {...formUtils.getTextProps(form, 'requestId')}
           >
             {requests.map((r) => (
               <MenuItem key={r.id} value={r.id}>
-                {r.name}
+                {r?.name || `REQ#${r.id}`}
               </MenuItem>
             ))}
           </TextField>
@@ -152,7 +154,7 @@ function Form({ request, task }: FormProps) {
 
           <TextField
             label="Status"
-            defaultValue={task?.status}
+            defaultValue={task?.status ?? 'to-do'}
             disabled={taskId === undefined || taskId === 0}
             {...formUtils.getSelectProps(form, 'status')}
           >

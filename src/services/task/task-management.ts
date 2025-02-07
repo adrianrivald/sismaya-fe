@@ -22,6 +22,7 @@ export interface Request {
   product: RequestProduct;
   priority: keyof typeof priorityColorMap;
   end_date: string;
+  assignee_company_id: number;
 }
 
 export interface Task {
@@ -53,7 +54,6 @@ export class TaskManagement {
   ) {}
 
   static fromJson(json: any) {
-    console.log('👾 ~ TaskManagement ~ fromJson ~ json::', json);
     const request = {
       id: json.request?.id,
       name: json.request?.name || `REQ#${json.request?.id}` || '-',
@@ -63,6 +63,7 @@ export class TaskManagement {
       },
       priority: json.request?.priority || 'medium',
       end_date: json.request?.end_date || '',
+      assignee_company_id: json.request?.assignee_company_id || 0,
     } satisfies Request;
 
     const task = {
