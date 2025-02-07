@@ -20,7 +20,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
-import { Menus } from '../config-nav-dashboard';
+import type { Menus } from '../config-nav-dashboard';
 
 // ----------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
   const accessibleMenus = [
     {
       type: 'internal',
-      menus: ['request', 'dashboard', 'task-management'],
+      menus: ['request', 'dashboard', 'task-management', 'monitor-personal-load'],
     },
     {
       type: 'client',
