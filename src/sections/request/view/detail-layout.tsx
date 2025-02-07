@@ -55,6 +55,8 @@ export default function RequestDetailLayout() {
     return 'low';
   };
 
+  console.log(statusStepEnum, 'statusStepEnum');
+
   useEffect(() => {
     if (requestDetail?.priority) {
       setCurrentPriority(requestDetail?.priority);
@@ -234,7 +236,9 @@ export default function RequestDetailLayout() {
 
             {userType === 'internal' && (
               <RequestTaskForm requestId={Number(id)}>
-                <Button variant="contained">Create Task</Button>
+                <Button variant="contained" disabled={requestDetail?.step === 'done'}>
+                  Create Task
+                </Button>
               </RequestTaskForm>
             )}
           </Stack>
