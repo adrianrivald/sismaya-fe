@@ -386,7 +386,11 @@ export function RequestDetailView() {
                         >
                           <Box component="img" src="/assets/icons/file.png" />
                           <Box>
-                            <Typography fontWeight="bold">{file?.file_name}</Typography>
+                            <Typography fontWeight="bold">
+                              {file?.file_name?.length > 15
+                                ? `${file?.file_name?.substring(0, 15)}...`
+                                : file?.file_name}
+                            </Typography>
                           </Box>
                           <SvgColor
                             sx={{ cursor: 'pointer' }}
