@@ -204,26 +204,28 @@ export function RequestDetailView() {
           Edit Detail
         </Button>
       </Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{
-          backgroundColor: 'blue.150',
-          py: 1.5,
-          px: 2,
-          my: 3,
-          color: 'grey.600',
-          borderRadius: 2,
-        }}
-      >
-        <Typography>
-          {requestDetail?.task_count ? 'Tasks have been created' : 'No tasks have been created'}
-        </Typography>
-        <Link to="task">
-          <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
-        </Link>
-      </Box>
+      {userType === 'internal' && (
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{
+            backgroundColor: 'blue.150',
+            py: 1.5,
+            px: 2,
+            my: 3,
+            color: 'grey.600',
+            borderRadius: 2,
+          }}
+        >
+          <Typography>
+            {requestDetail?.task_count ? 'Tasks have been created' : 'No tasks have been created'}
+          </Typography>
+          <Link to="task">
+            <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
+          </Link>
+        </Box>
+      )}
       <TableContainer>
         <Table sx={{ marginTop: 2 }}>
           <TableBody>
@@ -386,7 +388,11 @@ export function RequestDetailView() {
                         >
                           <Box component="img" src="/assets/icons/file.png" />
                           <Box>
-                            <Typography fontWeight="bold">{file?.file_name}</Typography>
+                            <Typography fontWeight="bold">
+                              {file?.file_name?.length > 15
+                                ? `${file?.file_name?.substring(0, 15)}...`
+                                : file?.file_name}
+                            </Typography>
                           </Box>
                           <SvgColor
                             sx={{ cursor: 'pointer' }}
