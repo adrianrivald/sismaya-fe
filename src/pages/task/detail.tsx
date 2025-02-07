@@ -74,7 +74,7 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          <TaskForm requestId={request.id} requestName={request.name} task={task}>
+          <TaskForm request={request} task={task}>
             <Button variant="outlined">Edit Task</Button>
           </TaskForm>
         </Box>

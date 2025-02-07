@@ -11,29 +11,48 @@ import {
 } from '@mui/material';
 import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker, type DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import { AssigneeChooserField, MultipleDropzoneField } from 'src/components/form';
 import { Iconify } from 'src/components/iconify';
 import * as formUtils from 'src/utils/form';
 import {
   type Task,
+  type Request,
   useCreateOrUpdateTask,
   useDeleteTask,
   useMutationAssignee,
   useMutationAttachment,
 } from 'src/services/task/task-management';
 import { taskStatusMap } from 'src/constants/status';
+import dayjs from 'dayjs';
 
 interface TaskFormProps {
   children: React.ReactElement;
-  requestId: number;
-  requestName?: string;
+  request: Partial<Request>;
   task?: Task;
 }
 
 interface FormProps extends Omit<TaskFormProps, 'children'> {}
 
-function Form({ requestId, requestName, task }: FormProps) {
+export function DueDatePicker({
+  endDate,
+  ...props
+}: { endDate?: string } & DatePickerProps<any, any>) {
+  const date = dayjs(endDate);
+  return (
+    <DatePicker
+      {...props}
+      disablePast
+      label="Due date"
+      shouldDisableDate={(day) => day.isAfter(date)}
+      shouldDisableMonth={(month) => month.isAfter(date)}
+      shouldDisableYear={(year) => year.isAfter(date)}
+    />
+  );
+}
+
+function Form({ request, task }: FormProps) {
+  const requestId = request?.id ?? 0;
   const { onClose } = Drawer.useDisclosure();
 
   const [form, createOrUpdateFn] = useCreateOrUpdateTask(requestId, {
@@ -43,7 +62,7 @@ function Form({ requestId, requestName, task }: FormProps) {
     },
   });
   const taskId = form.getValues('taskId') ?? 0;
-  const requests = [{ id: 0, name: requestName }];
+  const requests = [{ id: 0, name: request?.name }];
 
   const [_, assigneeFn] = useMutationAssignee(requestId);
 
@@ -107,9 +126,9 @@ function Form({ requestId, requestName, task }: FormProps) {
             disabled
             defaultValue={0}
           >
-            {requests.map((request) => (
-              <MenuItem key={request.id} value={request.id}>
-                {request.name}
+            {requests.map((r) => (
+              <MenuItem key={r.id} value={r.id}>
+                {r.name}
               </MenuItem>
             ))}
           </TextField>
@@ -126,9 +145,8 @@ function Form({ requestId, requestName, task }: FormProps) {
             onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.id })}
           />
 
-          <DatePicker
-            disablePast
-            label="Due date"
+          <DueDatePicker
+            endDate={request?.end_date}
             {...formUtils.getDatePickerProps(form, 'dueDate')}
           />
 

@@ -6,9 +6,10 @@ import {
   useKanbanColumn,
   useKanbanChangeStatus,
   TaskManagement,
-  type Task,
-  type KanbanColumn,
   useAssigneeCompanyId,
+  type Task,
+  type Request,
+  type KanbanColumn,
 } from 'src/services/task/task-management';
 import { Iconify } from 'src/components/iconify';
 import { RequestPriority } from 'src/sections/request/request-priority';
@@ -39,8 +40,8 @@ import { TaskForm } from 'src/sections/task/form';
 function BoardColumnHeader({
   label,
   count,
-  requestId,
-}: KanbanColumn['meta'] & { requestId: number }) {
+  request,
+}: KanbanColumn['meta'] & { request: Partial<Request> }) {
   return (
     <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
       <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -60,7 +61,7 @@ function BoardColumnHeader({
         </Typography>
       </Stack>
 
-      <TaskForm requestId={requestId}>
+      <TaskForm request={request}>
         <IconButton aria-label="Create Task" size="small">
           <Iconify icon="mdi:plus" />
         </IconButton>
@@ -141,7 +142,7 @@ function BoardColumn({ column }: { column: Task['status'] }) {
 
   if (!data) return null;
 
-  const requestId = data.items?.[0]?.request?.id ?? 0;
+  const request = data.items?.[0]?.request;
 
   return (
     <Droppable droppableId={column}>
@@ -157,7 +158,7 @@ function BoardColumn({ column }: { column: Task['status'] }) {
             minWidth: 335,
           }}
         >
-          <BoardColumnHeader requestId={requestId} {...data.meta} />
+          <BoardColumnHeader request={request} {...data.meta} />
 
           {data.items.map((json, index) => {
             const item = TaskManagement.fromJson(json);
