@@ -55,8 +55,6 @@ export default function RequestDetailLayout() {
     return 'low';
   };
 
-  console.log(statusStepEnum, 'statusStepEnum');
-
   useEffect(() => {
     if (requestDetail?.priority) {
       setCurrentPriority(requestDetail?.priority);
