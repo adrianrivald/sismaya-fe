@@ -148,7 +148,7 @@ export function RequestDetailView() {
   };
   const handleApprove = (formData: any) => {
     const startDate = dayjs(dateValue).format('YYYY-MM-DD');
-    const endDate = dayjs(endDateValue).format('YYYY-MM-DD');
+    const endDate = dayjs(endDateValue).format('YYYY-MM-DD hh:mm');
     const payload = {
       ...formData,
       start_date: startDate,
@@ -158,6 +158,7 @@ export function RequestDetailView() {
         assignee_id: item?.id,
       })),
     };
+    console.log(payload, ',payload');
     if ((selectedPic ?? [])?.length > 0) {
       approveRequest(payload);
       setOpen(false);

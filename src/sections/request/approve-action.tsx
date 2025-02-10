@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { ChangeEvent, Dispatch, SetStateAction } from 'react';
@@ -125,7 +125,7 @@ export function ApproveAction({
                     </LocalizationProvider>
 
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
+                      <DateTimePicker
                         sx={{
                           width: '50%',
                         }}
