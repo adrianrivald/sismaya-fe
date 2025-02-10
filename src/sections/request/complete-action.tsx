@@ -5,12 +5,14 @@ interface CompleteActionProps {
   openCompleteRequest: boolean;
   setOpenCompleteRequest: Dispatch<SetStateAction<boolean>>;
   onCompleteRequest: () => void;
+  isUncompleted: boolean;
 }
 
 export function CompleteAction({
   openCompleteRequest,
   setOpenCompleteRequest,
   onCompleteRequest,
+  isUncompleted = false,
 }: CompleteActionProps) {
   return (
     <Dialog
@@ -24,7 +26,9 @@ export function CompleteAction({
 
       <Box px={3}>
         <Typography>
-          Are you sure want to complete request? This action can not be undone!
+          {isUncompleted
+            ? 'There are uncompleted tasks. Please make sure all of the tasks has been completed first!'
+            : 'Are you sure want to complete request? This action can not be undone!'}
         </Typography>
 
         <Box mt={3} pb={3} display="flex" justifyContent="flex-end" alignItems="center" gap={2}>
@@ -43,6 +47,7 @@ export function CompleteAction({
           <Button
             type="submit"
             onClick={onCompleteRequest}
+            disabled={isUncompleted}
             sx={{
               paddingY: 0.5,
               border: 1,

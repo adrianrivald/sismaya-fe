@@ -18,12 +18,14 @@ interface AlertConfirmationProps extends ContentProps {
   message: React.ReactNode;
   onConfirm: () => void;
   onCancel?: () => void;
+  disabledAction?: boolean;
 }
 
 export function AlertConfirmation({
   message,
   onCancel,
   onConfirm,
+  disabledAction = false,
   ...props
 }: AlertConfirmationProps) {
   const { onClose } = useDisclosure();
@@ -44,10 +46,15 @@ export function AlertConfirmation({
         <Typography>{message}</Typography>
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button type="button" variant="outlined" onClick={handleCancel}>
+          <Button type="button" variant="outlined" onClick={handleCancel} disabled={disabledAction}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained" onClick={handleConfirm}>
+          <Button
+            type="submit"
+            variant="contained"
+            onClick={handleConfirm}
+            disabled={disabledAction}
+          >
             Confirm
           </Button>
         </Stack>
