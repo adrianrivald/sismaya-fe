@@ -161,7 +161,7 @@ export function RequestPendingView({ type }: { type: string }) {
   )?.company?.id;
   const { getDataTableProps } = useRequestList(
     { step: 'pending' },
-    String(type === 'internal' ? assigneeCompanyId : '')
+    Number(type === 'internal' ? assigneeCompanyId : '')
   );
   const { mutate: deleteRequestById } = useDeleteRequestById();
   const location = useLocation();
