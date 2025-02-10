@@ -113,7 +113,7 @@ export function ApproveAction({
                     gap={2}
                   >
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
+                      <DateTimePicker
                         sx={{
                           width: '50%',
                         }}
