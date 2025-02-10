@@ -22,6 +22,7 @@ export class RequestTask {
     public taskId: number = 0,
     public title: string = '',
     public dueDate: string = new Date().toISOString(),
+    public endDate: string = new Date().toISOString(),
     public description: string = '',
     public status: keyof typeof RequestTask.statusMap = 'to-do',
     public assignees: Array<Assignee> = [],
@@ -38,6 +39,7 @@ export class RequestTask {
       json.id,
       json.name,
       json.due_date,
+      json.request?.end_date,
       json?.description,
       json.step,
       json?.assignees?.map((assignee: any) => ({

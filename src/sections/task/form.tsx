@@ -9,39 +9,67 @@ import {
   Button,
   IconButton,
 } from '@mui/material';
+import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker, type DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import { AssigneeChooserField, MultipleDropzoneField } from 'src/components/form';
 import { Iconify } from 'src/components/iconify';
 import * as formUtils from 'src/utils/form';
 import {
   type Task,
+  type Request,
   useCreateOrUpdateTask,
   useDeleteTask,
   useMutationAssignee,
   useMutationAttachment,
 } from 'src/services/task/task-management';
 import { taskStatusMap } from 'src/constants/status';
+import dayjs from 'dayjs';
+import { useRequestList } from 'src/services/request/use-request-list';
 
 interface TaskFormProps {
   children: React.ReactElement;
-  requestId: number;
-  requestName?: string;
+  request: Partial<Request>;
   task?: Task;
 }
 
 interface FormProps extends Omit<TaskFormProps, 'children'> {}
 
-function Form({ requestId, requestName, task }: FormProps) {
+export function DueDatePicker({
+  endDate,
+  ...props
+}: { endDate?: string } & DatePickerProps<any, any>) {
+  const date = dayjs(endDate);
+  return (
+    <DatePicker
+      {...props}
+      disablePast
+      label="Due date"
+      shouldDisableDate={(day) => day.isAfter(date)}
+      shouldDisableMonth={(month) => month.isAfter(date)}
+      shouldDisableYear={(year) => year.isAfter(date)}
+    />
+  );
+}
+
+function Form({ request, task }: FormProps) {
+  const requestId = request?.id ?? 0;
   const { onClose } = Drawer.useDisclosure();
-  const [_, assigneeFn] = useMutationAssignee(requestId);
-  const [isUploadingOrDeletingFile, uploadOrDeleteFileFn] = useMutationAttachment(requestId);
+
   const [form, createOrUpdateFn] = useCreateOrUpdateTask(requestId, {
     onSuccess: () => {
       onClose();
       form.reset({});
     },
   });
+  const taskId = form.getValues('taskId') ?? 0;
+  const { data } = useRequestList({ page: 1, page_size: 100 }, request?.assignee_company_id ?? 0);
+  const requests = taskId ? [{ id: 0, name: request?.name }] : (data?.items ?? []);
+
+  const [_, assigneeFn] = useMutationAssignee(requestId);
+
+  const [isUploadingOrDeletingFile, uploadOrDeleteFileFn] = useMutationAttachment(requestId);
+
   const [isDeleting, deleteFn] = useDeleteTask(requestId, {
     onSuccess: () => {
       onClose();
@@ -52,6 +80,7 @@ function Form({ requestId, requestName, task }: FormProps) {
   useEffect(() => {
     form.reset({
       ...task,
+      taskId: task?.id,
       title: task?.name,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,18 +98,22 @@ function Form({ requestId, requestName, task }: FormProps) {
       >
         <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
           <Typography color="#919EAB" fontWeight="bold" textAlign="center">
-            {task?.id ? 'Task Detail' : 'Create Task'}
+            {taskId ? 'Task Detail' : 'Create Task'}
           </Typography>
 
-          {task?.id ? (
-            <IconButton
-              aria-label="delete task"
-              color="error"
-              onClick={() => deleteFn({ taskId: task?.id })}
-              disabled={isDeleting}
-            >
-              <Iconify icon="solar:trash-bin-trash-bold" />
-            </IconButton>
+          {taskId ? (
+            <Dialog.Root>
+              <Dialog.OpenButton>
+                <IconButton aria-label="delete task" color="error" disabled={isDeleting}>
+                  <Iconify icon="solar:trash-bin-trash-bold" />
+                </IconButton>
+              </Dialog.OpenButton>
+              <Dialog.AlertConfirmation
+                message="Are you sure you want to delete this task?"
+                onConfirm={() => deleteFn({ taskId })}
+                disabledAction={isDeleting}
+              />
+            </Dialog.Root>
           ) : null}
         </Box>
 
@@ -90,12 +123,16 @@ function Form({ requestId, requestName, task }: FormProps) {
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
           <TextField
             label="Request"
-            {...formUtils.getTextProps(form, 'title')}
             select
-            disabled
             defaultValue={0}
+            disabled={taskId ? true : requests.length === 0}
+            {...formUtils.getTextProps(form, 'requestId')}
           >
-            <option value="0">{requestName}</option>
+            {requests.map((r) => (
+              <MenuItem key={r.id} value={r.id}>
+                {r?.name || `REQ#${r.id}`}
+              </MenuItem>
+            ))}
           </TextField>
 
           <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
@@ -106,22 +143,19 @@ function Form({ requestId, requestName, task }: FormProps) {
             control={form.control}
             requestId={requestId}
             assignees={task?.assignees ?? []}
-            onAssign={(assignee) =>
-              assigneeFn({ kind: 'assign', taskId: task?.id ?? 0, assigneeId: assignee.id })
-            }
+            onAssign={(assignee) => assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.id })}
             onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.id })}
           />
 
-          <DatePicker
-            disablePast
-            label="Due date"
+          <DueDatePicker
+            endDate={request?.end_date}
             {...formUtils.getDatePickerProps(form, 'dueDate')}
           />
 
           <TextField
             label="Status"
-            defaultValue={task?.status}
-            disabled={task?.id === undefined || task?.id === 0}
+            defaultValue={task?.status ?? 'to-do'}
+            disabled={taskId === undefined || taskId === 0}
             {...formUtils.getSelectProps(form, 'status')}
           >
             {Object.entries(taskStatusMap).map(([key, value]) => (
@@ -140,11 +174,11 @@ function Form({ requestId, requestName, task }: FormProps) {
             label="Attachment"
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
-              if (!task?.id) return;
-              uploadOrDeleteFileFn({ kind: 'create', taskId: task?.id, files });
+              if (!taskId) return;
+              uploadOrDeleteFileFn({ kind: 'create', taskId, files });
             }}
             onRemove={(fileId) => {
-              if (!task?.id) return;
+              if (!taskId) return;
               uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
             }}
             {...formUtils.getMultipleDropzoneProps(form, 'files')}
@@ -164,7 +198,7 @@ function Form({ requestId, requestName, task }: FormProps) {
             type="submit"
             disabled={isDeleting || form.formState.isSubmitting}
           >
-            {task?.id ? 'Update' : 'Create'}
+            {taskId ? 'Update' : 'Create'}
           </Button>
         </Stack>
       </Box>

@@ -251,7 +251,7 @@ export default function RequestDetailLayout() {
           </Box>
         </Grid>
         <Grid item xs={12} md={4}>
-          <RequestMessenger />
+          <RequestMessenger requestId={Number(id)} />
         </Grid>
       </Grid>
 
