@@ -147,8 +147,8 @@ export function RequestDetailView() {
     });
   };
   const handleApprove = (formData: any) => {
-    const startDate = dayjs(dateValue).format('YYYY-MM-DD');
-    const endDate = dayjs(endDateValue).format('YYYY-MM-DD');
+    const startDate = dayjs(dateValue).format('YYYY-MM-DD hh:mm:ss');
+    const endDate = dayjs(endDateValue).format('YYYY-MM-DD hh:mm:ss');
     const payload = {
       ...formData,
       start_date: startDate,

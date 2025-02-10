@@ -163,7 +163,7 @@ export function RequestView() {
   )?.company?.id;
   const [filter, setFilter] = useState<any>({});
   const [totalData, setTotalData] = useState(0);
-  const { getDataTableProps } = useRequestList(filter, String(assigneeCompanyId));
+  const { getDataTableProps } = useRequestList(filter, Number(assigneeCompanyId));
   const { data: requestSummary } = useRequestSummary(String(assigneeCompanyId));
   const { data: requestStatusSummary } = useRequestStatusSummary(String(assigneeCompanyId));
   const { mutate: deleteRequestById } = useDeleteRequestById();
