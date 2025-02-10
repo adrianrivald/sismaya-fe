@@ -74,7 +74,7 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          <TaskForm requestId={request.id} requestName={request.name} task={task}>
+          <TaskForm request={request} task={task}>
             <Button variant="outlined">Edit Task</Button>
           </TaskForm>
         </Box>
@@ -163,7 +163,7 @@ export default function TaskDetailPage() {
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h6">Attachments</Typography>
-                <AddAttachment />
+                <AddAttachment taskId={Number(taskId)} />
               </Box>
 
               <Stack spacing={2}>

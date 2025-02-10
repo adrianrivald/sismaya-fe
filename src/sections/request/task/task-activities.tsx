@@ -61,11 +61,11 @@ export function TaskActivities(props: TaskActivitiesProps) {
         },
       }}
     >
-      {activities.map((activity) => (
+      {activities.map((activity, index) => (
         <TimelineItem key={activity.id}>
           <TimelineSeparator>
             <TimelineDot color="success" />
-            <TimelineConnector />
+            {index !== activities.length - 1 && <TimelineConnector />}
           </TimelineSeparator>
           <TimelineContent>
             <ActivityItem {...activity} />
@@ -76,7 +76,10 @@ export function TaskActivities(props: TaskActivitiesProps) {
   );
 }
 
-export default function Messenger({ children }: React.PropsWithChildren<TaskActivitiesProps>) {
+export default function Messenger({
+  children,
+  requestId,
+}: React.PropsWithChildren<TaskActivitiesProps>) {
   return (
     <Box sx={{ border: 1, borderRadius: 3, borderColor: 'grey.300' }}>
       <Tab.Root defaultValue="activity">
@@ -89,7 +92,7 @@ export default function Messenger({ children }: React.PropsWithChildren<TaskActi
 
         <Box overflow="auto" height={400}>
           <Tab.Panel value="activity">
-            <TaskActivities requestId={0} />
+            <TaskActivities requestId={requestId} />
           </Tab.Panel>
 
           <Tab.Panel value="chat">{children}</Tab.Panel>

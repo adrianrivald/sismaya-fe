@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Stack, Typography, Portal } from '@mui/material';
 import { useTimerStore, useCheckTimer } from 'src/services/task/timer';
+import { Iconify } from 'src/components/iconify';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 export default function FloatingTimer() {
@@ -33,14 +34,20 @@ export default function FloatingTimer() {
       >
         <Box
           {...getDragableProps()}
-          width="1rem"
           sx={{
+            width: '1rem',
             cursor: 'move',
             borderTopLeftRadius: 16,
             borderBottomLeftRadius: 16,
             backgroundColor: 'rgba(0, 91, 127, 0.08)',
+            color: 'rgba(0, 91, 127, 1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
+        >
+          <Iconify icon="carbon:draggable" />
+        </Box>
 
         <Box
           display="flex"
