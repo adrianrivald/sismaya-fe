@@ -11,6 +11,11 @@ function fetchUserList(params: Partial<any>) {
     endpointUrl.searchParams.append('type', params.type);
   }
 
+  if(params.internal_company){
+    endpointUrl.searchParams.append('internal_company', params.internal_company);
+
+  }
+
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
     filterValues: [params.order],
@@ -21,7 +26,7 @@ function fetchUserList(params: Partial<any>) {
 }
 
 export function useUserList(params: Partial<any>) {
-  return usePaginationQuery(['user', params.type, params.keyword], (paginationState) =>
+  return usePaginationQuery(['user', params.type, params.keyword, params.internal_company], (paginationState) =>
     fetchUserList({ ...params, ...paginationState })
   );
 }

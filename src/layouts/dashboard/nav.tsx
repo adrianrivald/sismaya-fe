@@ -168,7 +168,7 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                         ? accessibleMenus
                             ?.find((accessibleMenu) => accessibleMenu?.type === userType)
                             ?.menus?.includes(item?.id)
-                        : ['dashboard', 'master-data'].includes(item?.id)
+                        : ['dashboard', 'master-data', 'access-control'].includes(item?.id)
                     )
                     .map((childMenu: any, index: number) => {
                       const isActived = childMenu.path === pathname;

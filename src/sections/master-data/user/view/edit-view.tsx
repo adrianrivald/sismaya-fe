@@ -473,7 +473,6 @@ export function EditUserView({ type }: EditUserProps) {
       id: Number(id),
       user_type: type,
     };
-    console.log(payload, 'payload');
     if (defaultValues?.profile_picture) {
       Object.assign(payload, {
         profile_picture: defaultValues?.profile_picture,

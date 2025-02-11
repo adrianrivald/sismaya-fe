@@ -78,7 +78,17 @@ export const UserClientCreatePage = lazy(
 );
 export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/client-user/edit'));
 
+// Monitor Personal Load
 export const MonitorPersonalLoadPage = lazy(() => import('src/pages/monitor-personal-load/index'));
+
+// Access Control
+export const AccessControlListPage = lazy(() => import('src/pages/access-control/list'));
+export const AccessControlUserListEditPage = lazy(
+  () => import('src/pages/access-control/user-list/edit')
+);
+export const AccessControlUserListCreatePage = lazy(
+  () => import('src/pages/access-control/user-list/create')
+);
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -122,6 +132,11 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'client-user', element: <UserClientListPage /> },
     { path: 'client-user/create', element: <UserClientCreatePage /> },
     { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
+
+    // Access Control
+    { path: 'access-control', element: <AccessControlListPage /> },
+    { path: 'access-control/user-list/:id/edit', element: <AccessControlUserListEditPage /> },
+    { path: 'access-control/user-list/create', element: <AccessControlUserListCreatePage /> },
   ],
 };
 
