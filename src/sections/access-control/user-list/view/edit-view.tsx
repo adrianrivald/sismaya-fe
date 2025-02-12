@@ -21,9 +21,17 @@ import { Form } from 'src/components/form/form';
 import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect } from 'react';
-import { useAddUserCompany, useUpdateUser, useUserById } from 'src/services/master-data/user';
+import {
+  useAddUserCompany,
+  useUpdateUser,
+  useUpdateUserPassword,
+  useUserById,
+} from 'src/services/master-data/user';
 import { type Role, useRole } from 'src/services/master-data/role';
-import type { UserInternalUpdateDTO } from 'src/services/master-data/user/schemas/user-schema';
+import type {
+  UserAccessControlUpdateDTO,
+  UserInternalUpdateDTO,
+} from 'src/services/master-data/user/schemas/user-schema';
 import { userInternalUpdateSchema } from 'src/services/master-data/user/schemas/user-schema';
 import { useClientCompanies, useInternalCompanies } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
@@ -369,6 +377,7 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
   const { mutate: updateUser } = useUpdateUser();
+  const { mutate: updatePassword } = useUpdateUserPassword();
   const { data: clientCompanies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
   // const { data: userCompaniesData } = useUserCompanyById(Number(id));
@@ -407,7 +416,7 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
     return data;
   };
 
-  const handleSubmit = (formData: UserInternalUpdateDTO) => {
+  const handleSubmit = (formData: UserAccessControlUpdateDTO) => {
     const payload = {
       ...formData,
       id: Number(id),
@@ -448,8 +457,12 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
     setIsShowResetPasswordPopup(true);
   };
 
-  const onSubmitResetPassword = () => {
+  const onSubmitResetPassword = (formData: { password: string }) => {
     // TODO : reset password
+    updatePassword({
+      password: formData?.password,
+      id: Number(id),
+    });
   };
 
   React.useEffect(() => {
@@ -545,7 +558,7 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
       <ResetPasswordAction
         isShowResetPasswordPopup={isShowResetPasswordPopup}
         setIsShowResetPasswordPopup={setIsShowResetPasswordPopup}
-        onSubmit={onSubmitResetPassword}
+        onSubmitResetPassword={onSubmitResetPassword}
       />
     </DashboardContent>
   );
