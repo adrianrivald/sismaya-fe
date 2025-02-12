@@ -130,7 +130,6 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
     },
   ];
   const onClickParentAccordion = (path?: string) => {
-    console.log('parent clicked');
     if (path) {
       navigate(`${path}`);
     }

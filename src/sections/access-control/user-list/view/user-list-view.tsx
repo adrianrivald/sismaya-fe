@@ -12,39 +12,26 @@ import {
   MenuList,
   OutlinedInput,
   Select,
+  Typography,
 } from '@mui/material';
-import type { Company } from 'src/services/master-data/company/types';
 import { SvgColor } from 'src/components/svg-color';
 import { DataTable } from 'src/components/table/data-tables';
 import type { Dispatch, SetStateAction } from 'react';
-import { createColumnHelper, type CellContext, type PaginationState } from '@tanstack/react-table';
+import { createColumnHelper, type CellContext } from '@tanstack/react-table';
 import type { User } from 'src/services/master-data/user/types';
-import type { UseMutateFunction } from '@tanstack/react-query';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { RemoveAction } from '../../view/remove-action';
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useRole } from 'src/services/master-data/role';
+import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { useInternalCompanies } from 'src/services/master-data/company';
+import { RemoveAction } from '../../remove-action';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
   setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
+  setSelectedUser: Dispatch<SetStateAction<string>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
-}
-
-interface AccessControlUserListViewProps {
-  handleChangeCompanyFilter: (e: SelectChangeEvent<number>) => void;
-  internalCompanies: Company[] | undefined;
-  setOpenRemoveModal: React.Dispatch<SetStateAction<boolean>>;
-  deleteUserById: UseMutateFunction<void, unknown, number, unknown>;
-  getDataTableProps: () => {
-    data: any[];
-    total: number;
-    pagination: {
-      pageIndex: number;
-      pageSize: number;
-    };
-    onPaginationChange: React.Dispatch<Partial<PaginationState>>;
-  };
-  openRemoveModal: boolean;
 }
 
 const columnHelper = createColumnHelper<User>();
@@ -58,8 +45,49 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Email',
   }),
 
-  columnHelper.accessor('phone', {
-    header: 'Phone Number',
+  columnHelper.accessor('internal_companies', {
+    header: 'Company',
+    cell: (info) => {
+      const companies = info.getValue();
+      return (
+        <Box display="flex" gap={2}>
+          {companies?.map((company) => (
+            <Box
+              sx={{
+                backgroundColor: '#D6F3F9',
+                color: 'info.dark',
+                px: 1,
+                py: 0.5,
+                borderRadius: '8px',
+              }}
+            >
+              <Typography fontWeight="500">{company?.company?.name}</Typography>
+            </Box>
+          ))}
+        </Box>
+      );
+    },
+  }),
+
+  columnHelper.accessor('user_info.role_id', {
+    header: 'User Group',
+    cell: (info) => {
+      const value = info.getValue();
+      return (
+        <Box
+          sx={{
+            backgroundColor: '#D6F3F9',
+            color: 'info.dark',
+            px: 1,
+            py: 0.5,
+            borderRadius: '8px',
+            display: 'inline-block',
+          }}
+        >
+          <Typography fontWeight="500">{value}</Typography>
+        </Box>
+      );
+    },
   }),
 
   columnHelper.display({
@@ -71,10 +99,12 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
+  const userName = row.original.user_info?.name;
+  const { handleEdit, setSelectedId, setOpenRemoveModal, setSelectedUser } = popoverProps;
 
-  const onClickRemove = (itemId?: number) => {
-    if (itemId) setSelectedId(itemId);
+  const onClickRemove = () => {
+    setSelectedId(companyId);
+    setSelectedUser(userName);
     setOpenRemoveModal(true);
   };
   return (
@@ -103,7 +133,7 @@ function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverP
 
       <Button
         variant="outlined"
-        onClick={() => onClickRemove(companyId)}
+        onClick={onClickRemove}
         sx={{ color: 'black', borderColor: 'grey.500', fontWeight: 'normal' }}
       >
         Delete
@@ -112,16 +142,36 @@ function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverP
   );
 }
 
-export function AccessControlUserListView({
-  handleChangeCompanyFilter,
-  internalCompanies,
-  setOpenRemoveModal,
-  getDataTableProps,
-  openRemoveModal,
-  deleteUserById,
-}: AccessControlUserListViewProps) {
-  const [selectedId, setSelectedId] = React.useState<number | null>(null);
+export function AccessControlUserListView() {
+  const location = useLocation();
+  const pathname = location.pathname?.split('/')[2];
+  const mode = pathname === 'user-list' ? 'user-list' : 'user-group';
+  const [roleFilter, setRoleFilter] = React.useState<number | null>(null);
+  const [companyFilter, setCompanyFilter] = React.useState<number | null>(null);
+  const { getDataTableProps } = useUserList({
+    internal_company: companyFilter,
+    role_id: roleFilter,
+  });
+  const { data: internalCompanies } = useInternalCompanies();
+  const { data: roles } = useRole();
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const { mutate: deleteUserById } = useDeleteUserById();
   const navigate = useNavigate();
+
+  const onClickAddNew = () => {
+    navigate('/access-control/user-list/create');
+  };
+
+  const handleChangeCompanyFilter = (e: SelectChangeEvent<number>) => {
+    setCompanyFilter(Number(e.target.value));
+  };
+
+  const handleChangeRoleFilter = (e: SelectChangeEvent<number>) => {
+    setRoleFilter(Number(e.target.value));
+  };
+  const [selectedId, setSelectedId] = React.useState<number | null>(null);
+  const [selectedUser, setSelectedUser] = React.useState<string>('');
+
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
       navigate(`/access-control/user-list/${id}/edit`);
@@ -135,7 +185,49 @@ export function AccessControlUserListView({
     return { handleEdit, handleDelete };
   };
   return (
-    <>
+    <DashboardContent maxWidth="xl">
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
+            Access Control
+          </Typography>
+
+          <Box
+            display="flex"
+            gap={1}
+            alignItems="center"
+            sx={{ backgroundColor: 'grey.200', padding: 1, borderRadius: 1, mb: 2 }}
+          >
+            <Box
+              onClick={() => navigate('/access-control/user-list')}
+              sx={{
+                cursor: 'pointer',
+                backgroundColor: mode === 'user-list' ? 'common.white' : '',
+                padding: 1,
+                borderRadius: 1,
+              }}
+            >
+              <Typography>User List</Typography>
+            </Box>
+            <Box
+              onClick={() => navigate('/access-control/user-group')}
+              sx={{
+                cursor: 'pointer',
+                backgroundColor: mode === 'user-group' ? 'common.white' : '',
+                padding: 1,
+                borderRadius: 1,
+              }}
+            >
+              <Typography>User Group</Typography>
+            </Box>
+          </Box>
+        </Box>
+        <Box>
+          <Button onClick={onClickAddNew} variant="contained" color="primary">
+            Create New User
+          </Button>
+        </Box>
+      </Box>
       <Grid container spacing={3}>
         <Grid xs={12}>
           <Card
@@ -155,9 +247,14 @@ export function AccessControlUserListView({
                 }}
               >
                 <FormControl fullWidth>
-                  <InputLabel id="select-category">User Group</InputLabel>
-                  <Select labelId="select-category" label="Product">
+                  <InputLabel id="select-role">User Group</InputLabel>
+                  <Select
+                    labelId="select-company"
+                    label="Company"
+                    onChange={handleChangeRoleFilter}
+                  >
                     <MenuItem value="">All</MenuItem>
+                    {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Box>
@@ -167,9 +264,9 @@ export function AccessControlUserListView({
                 }}
               >
                 <FormControl fullWidth>
-                  <InputLabel id="select-category">Company</InputLabel>
+                  <InputLabel id="select-company">Company</InputLabel>
                   <Select
-                    labelId="select-category"
+                    labelId="select-company"
                     label="Company"
                     onChange={handleChangeCompanyFilter}
                   >
@@ -205,18 +302,24 @@ export function AccessControlUserListView({
             </Box>
 
             <DataTable
-              columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+              columns={columns({
+                ...popoverFuncs(),
+                setOpenRemoveModal,
+                setSelectedId,
+                setSelectedUser,
+              })}
               {...getDataTableProps()}
             />
           </Card>
         </Grid>
       </Grid>
-
       <RemoveAction
         onRemove={popoverFuncs().handleDelete}
         openRemoveModal={openRemoveModal}
         setOpenRemoveModal={setOpenRemoveModal}
+        selectedUser={selectedUser}
+        setSelectedUser={setSelectedUser}
       />
-    </>
+    </DashboardContent>
   );
 }

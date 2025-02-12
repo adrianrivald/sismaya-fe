@@ -12,7 +12,6 @@ export function useUpdateUser() {
     return useMutation(
       async (formData: UpdateUser) => {
         const {cover,id, ...form} = formData;
-        console.log(formData,'formDataformData')
         const payload = {
           ...form
         }

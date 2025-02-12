@@ -46,7 +46,6 @@ const MenuProps = {
 };
 
 function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
-  console.log(selectedInternalCompanies, 'selectedComp');
   return {
     fontWeight:
       selectedInternalCompanies.indexOf(id) === -1
@@ -54,11 +53,8 @@ function getStyles(id: number, selectedInternalCompanies: readonly number[], the
         : theme.typography.fontWeightMedium,
   };
 }
-interface CreateUserProps {
-  type: 'client' | 'internal';
-}
 
-export function CreateAccessControlUserView({ type }: CreateUserProps) {
+export function CreateAccessControlUserView() {
   const theme = useTheme();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -76,7 +72,7 @@ export function CreateAccessControlUserView({ type }: CreateUserProps) {
     try {
       addUser({
         ...formData,
-        user_type: type,
+        user_type: 'internal',
       });
       setIsLoading(false);
     } catch (error) {

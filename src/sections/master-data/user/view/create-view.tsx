@@ -56,7 +56,6 @@ const MenuProps = {
 };
 
 function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
-  console.log(selectedInternalCompanies, 'selectedComp');
   return {
     fontWeight:
       selectedInternalCompanies.indexOf(id) === -1
@@ -89,7 +88,6 @@ export function CreateUserView({ type }: CreateUserProps) {
       },
     }).then((res) =>
       res.json().then((value) => {
-        console.log(value?.data, 'value?.data');
         setDivisions(value?.data);
       })
     );

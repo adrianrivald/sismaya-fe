@@ -6,7 +6,6 @@ import { SignInView } from '../sign-in-view';
 export function withAuth(WrappedApp: React.ComponentType) {
   function AppWithAuth() {
     const { isAuth } = useAuth();
-    console.log(isAuth, 'isAuth');
 
     return isAuth ? (
       <WrappedApp />

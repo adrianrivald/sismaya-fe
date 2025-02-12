@@ -38,7 +38,7 @@ import type {
 } from 'react-hook-form';
 import type { User } from 'src/services/master-data/user/types';
 import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
-import { ResetPasswordAction } from '../../view/reset-password-action';
+import { ResetPasswordAction } from '../../reset-password-action';
 
 interface UserValues {
   name: string | undefined;
@@ -115,20 +115,17 @@ function EditForm({
   theme,
   onShowResetPasswordPopup,
 }: EditFormProps) {
-  console.log(watch(), 'formwatch');
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('email', defaultValues?.email);
     setValue('phone', defaultValues?.phone);
     setValue('role_id', defaultValues?.role_id);
     setValue('internal_id', defaultValues?.internal_id);
-    console.log(defaultValues, 'watchchc');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleDelete = (companyId: number | undefined, setValueCompany: UseFormSetValue<any>) => {
     if (companyId) {
-      console.log('delete item');
       setValueCompany('internal_id', []);
     }
   };
@@ -411,7 +408,6 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
   };
 
   const handleSubmit = (formData: UserInternalUpdateDTO) => {
-    console.log('we');
     const payload = {
       ...formData,
       id: Number(id),

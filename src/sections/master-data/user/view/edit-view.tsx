@@ -108,7 +108,6 @@ function EditForm({
   internalCompanies,
   onClickRemove,
 }: EditFormProps) {
-  console.log(watch(), 'formwatch');
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('email', defaultValues?.email);

@@ -65,7 +65,6 @@ export function CreateRequestView() {
       };
     }
     addRequest(payload);
-    console.log(payload, 'test');
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -200,7 +199,6 @@ export function CreateRequestView() {
                           width: '100%',
                         }}
                         onChange={(_event: any, newValue: any) => {
-                          console.log(newValue, 'newValue');
                           setValue('user_id', newValue?.id);
                           setValue('company_id', newValue?.company_id);
                           setValue('department_id', newValue?.department_id);
