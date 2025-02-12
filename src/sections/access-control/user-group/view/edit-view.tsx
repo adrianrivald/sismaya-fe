@@ -421,9 +421,13 @@ export function EditAccessControlUserGroupView() {
                                         child?.id
                                       )
                                     }
-                                    checked={child?.subChilds
-                                      ?.map((item) => item?.id)
-                                      ?.every((item) => selectedPermissions?.includes(item))}
+                                    checked={
+                                      !child?.id
+                                        ? child?.subChilds
+                                            ?.map((item) => item?.id)
+                                            ?.every((item) => selectedPermissions?.includes(item))
+                                        : selectedPermissions?.includes(child?.id)
+                                    }
                                   />{' '}
                                   <Typography
                                     sx={{ cursor: 'pointer' }}
