@@ -77,7 +77,6 @@ export function MonitorPersonalLoadView() {
   const { getDataTableProps, data: incompleteTask } = useIncompleteTask({});
 
   const { data: totalTaskCompleted } = useTotalTaskCompleted();
-  console.log(totalTaskCompleted, 'totalTaskCompleted');
   const filtered = totalTaskCompleted?.map((item: any) => {
     const filterednya = Object.keys(item)
       .filter((key) => key !== 'month')
@@ -102,11 +101,6 @@ export function MonitorPersonalLoadView() {
     'Nov',
     'Dec',
   ];
-
-  console.log(
-    totalTaskCompleted?.map((item) => item),
-    'totalTaskCompleted?.map((item) => item)'
-  );
 
   return (
     <DashboardContent maxWidth="xl">

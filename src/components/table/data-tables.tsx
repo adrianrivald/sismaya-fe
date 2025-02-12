@@ -68,7 +68,6 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
   });
 
   const onChangePage = (event: unknown, newPage: number) => {
-    console.log(newPage, 'newPage');
     table.setPageIndex(newPage);
   };
 
@@ -76,13 +75,10 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     table.setPageIndex(0);
   };
 
-  console.log(table.getRowCount(), 'getRowCount()');
-
   const onChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     table.setPageSize(Number(event.target.value));
     // onResetPage();
   };
-  console.log(total, 'total()');
 
   //   const notFound = !dataFiltered.length && !!filterName;
   return (

@@ -153,8 +153,6 @@ export function DashboardInternalView() {
     'Dec',
   ];
 
-  console.log(convertedDataToChart, 'convertedDataToChart');
-
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">

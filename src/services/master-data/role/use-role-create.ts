@@ -1,37 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
+import type { RoleDTO } from "./schemas/role-schema";
 
-export type StoreStatus = {
-  name?:string;
-  company_id?: number
-  step?: string;
-  sort: number
-};
+export type StoreRole = RoleDTO
 
-export function useAddStatus() {
-    const queryClient = useQueryClient();
+export function useAddRole() {
     const navigate = useNavigate()
     return useMutation(
-      async (formData: StoreStatus) => {
-        const { name, company_id, step, sort } = formData;
-  
-  
-        return http(`progress-status`, {
-          data: {
-            name,
-            company_id,
-            step,
-            sort
-          },
+      async (formData: StoreRole) => {
+        const payload = {
+          ...formData,
+        }
+        return http(`roles`, {
+          data: payload
         });
       },
       {
-          onSuccess: (res: any) => {
-          const companyId = res?.data?.company_id
-          queryClient.invalidateQueries({queryKey: ['company-items', companyId]});
-          queryClient.invalidateQueries(['status-items', companyId]);
+          onSuccess: () => {
           toast.success('Data added successfully', {
             position: 'top-right',
             autoClose: 5000,
@@ -43,6 +30,8 @@ export function useAddStatus() {
             theme: 'light',
             transition: Bounce,
           });
+          navigate('/access-control/user-group')
+
         },
         onError: (error) => {
           const reason =
@@ -63,3 +52,4 @@ export function useAddStatus() {
       }
     );
   }
+  

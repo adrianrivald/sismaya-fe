@@ -57,93 +57,89 @@ export function CreateClientCompanyView() {
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit}>
-          {({ register, watch, formState, setValue, control }) => {
-            console.log(formState.errors, 'formstate');
-            console.log(watch(), 'watch');
-            return (
-              <Grid container spacing={3} xs={12}>
-                <Grid item xs={12} md={12}>
-                  <TextField
-                    error={Boolean(formState?.errors?.name)}
-                    sx={{
-                      width: '100%',
-                    }}
-                    label="Client Name"
-                    {...register('name', {
-                      required: 'Client Name must be filled out',
-                    })}
-                    autoComplete="off"
-                  />
-                  {formState?.errors?.name && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.name?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid item xs={12} md={12}>
-                  <TextField
-                    error={Boolean(formState?.errors?.abbreviation)}
-                    multiline
-                    sx={{
-                      width: '100%',
-                    }}
-                    label="Client Description"
-                    rows={4}
-                    {...register('abbreviation', {
-                      required: 'Client Description must be filled out',
-                    })}
-                  />
-                  {formState?.errors?.abbreviation && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.abbreviation?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <FieldDropzone
-                    label="Upload Picture"
-                    helperText="Picture maximum 5mb size"
-                    controller={{
-                      name: 'cover',
-                      control,
-                      // rules: {
-                      //   required: {
-                      //     value: true,
-                      //     message: 'Picture must be uploaded',
-                      //   },
-                      // },
-                    }}
-                    error={formState.errors?.cover}
-                    maxSize={5000000}
-                  />
-                </Grid>
-
-                <Box
-                  display="flex"
-                  justifyContent="end"
-                  width="100%"
+          {({ register, watch, formState, setValue, control }) => (
+            <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.name)}
                   sx={{
-                    mt: 8,
+                    width: '100%',
+                  }}
+                  label="Client Name"
+                  {...register('name', {
+                    required: 'Client Name must be filled out',
+                  })}
+                  autoComplete="off"
+                />
+                {formState?.errors?.name && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.name?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.abbreviation)}
+                  multiline
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Client Description"
+                  rows={4}
+                  {...register('abbreviation', {
+                    required: 'Client Description must be filled out',
+                  })}
+                />
+                {formState?.errors?.abbreviation && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.abbreviation?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                    // rules: {
+                    //   required: {
+                    //     value: true,
+                    //     message: 'Picture must be uploaded',
+                    //   },
+                    // },
+                  }}
+                  error={formState.errors?.cover}
+                  maxSize={5000000}
+                />
+              </Grid>
+
+              <Box
+                display="flex"
+                justifyContent="end"
+                width="100%"
+                sx={{
+                  mt: 8,
+                }}
+              >
+                <LoadingButton
+                  size="small"
+                  loading={isLoading}
+                  loadingIndicator="Submitting..."
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    width: 120,
                   }}
                 >
-                  <LoadingButton
-                    size="small"
-                    loading={isLoading}
-                    loadingIndicator="Submitting..."
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      width: 120,
-                    }}
-                  >
-                    Submit
-                  </LoadingButton>
-                </Box>
-              </Grid>
-            );
-          }}
+                  Submit
+                </LoadingButton>
+              </Box>
+            </Grid>
+          )}
         </Form>
       </Grid>
     </DashboardContent>

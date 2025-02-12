@@ -105,7 +105,6 @@ function ButtonActions(props: CellContext<Request, unknown>, popoverProps: Popov
   const navigate = useNavigate();
   const requestId = row.original.id;
   const step = row?.original?.step;
-  console.log(requestId, 'requestId');
   const onClickDetail = () => {
     navigate(`${requestId}`);
   };

@@ -42,7 +42,6 @@ export function useAddCompany() {
       {
         // onSuccess: (res: {data: StoreCompany}) => {
           onSuccess: (res: any) => {
-          console.log(res,'res')
           queryClient.invalidateQueries(['company']);
   
           toast.success('Data added successfully', {

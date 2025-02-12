@@ -78,7 +78,25 @@ export const UserClientCreatePage = lazy(
 );
 export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/client-user/edit'));
 
+// Monitor Personal Load
 export const MonitorPersonalLoadPage = lazy(() => import('src/pages/monitor-personal-load/index'));
+
+// Access Control
+export const AccessControlUserListPage = lazy(() => import('src/pages/access-control/user-list'));
+export const AccessControlUserListEditPage = lazy(
+  () => import('src/pages/access-control/user-list/edit')
+);
+export const AccessControlUserListCreatePage = lazy(
+  () => import('src/pages/access-control/user-list/create')
+);
+
+export const AccessControlUserGroupPage = lazy(() => import('src/pages/access-control/user-group'));
+export const AccessControlUserGroupCreatePage = lazy(
+  () => import('src/pages/access-control/user-group/create')
+);
+export const AccessControlUserGroupEditPage = lazy(
+  () => import('src/pages/access-control/user-group/edit')
+);
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -122,6 +140,15 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'client-user', element: <UserClientListPage /> },
     { path: 'client-user/create', element: <UserClientCreatePage /> },
     { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
+
+    // Access Control User List
+    { path: 'access-control/user-list', element: <AccessControlUserListPage /> },
+    { path: 'access-control/user-list/:id/edit', element: <AccessControlUserListEditPage /> },
+    { path: 'access-control/user-list/create', element: <AccessControlUserListCreatePage /> },
+
+    { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
+    { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
+    { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
   ],
 };
 

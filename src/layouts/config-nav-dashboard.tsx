@@ -101,4 +101,17 @@ export const menus = (
       },
     ],
   },
+  {
+    heading: 'SETTINGS',
+    id: 'settings',
+    list: [
+      {
+        isAccordion: false,
+        heading: 'Access Control',
+        id: 'access-control',
+        path: '/access-control',
+        icon: icon('ic-authenticator'),
+      },
+    ],
+  },
 ];

@@ -1,42 +1,27 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
-import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { RequestDTO } from "./schemas/request-schema";
-import { Attachment } from "./types";
+import type { RoleDTO } from "./schemas/role-schema";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
+export type UpdateRole = RoleDTO & {id: number};
 
-export function useUpdateRequest(internalCompany: string) {
-    const queryClient = useQueryClient();
+export function useUpdateRole() {
     const navigate = useNavigate()
     return useMutation(
-      async (formData: UpdateRequest) => {
-        const { files, id, ...form } = formData;
-        const payload =  {
+      async (formData: UpdateRole) => {
+        const {id, ...form} = formData;
+        const payload = {
           ...form
         }
-
-        // if ((form?.attachments ?? [])?.length > 0) {
-        //   Object.assign(payload, {
-        //     attachments: form?.attachments?.map(item => ({
-        //         file_path: item?.file_path,
-        //         file_name: item?.file_name
-        //     }))
-        //   });
-        // } 
         
-        
-        return http(`requests/${id}`, {
+        return http(`roles/${id}`, {
+          method: "PUT",
           data: payload,
-          method: "PUT"
         });
       },
       {
-          onSuccess: (res: any) => {
-          queryClient.invalidateQueries(['request']);
-  
+          onSuccess: () => {
           toast.success('Data updated successfully', {
             position: 'top-right',
             autoClose: 5000,
@@ -48,7 +33,8 @@ export function useUpdateRequest(internalCompany: string) {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`/${internalCompany}/request`)
+          navigate('/access-control/user-group')
+
         },
         onError: (error) => {
           const reason =
