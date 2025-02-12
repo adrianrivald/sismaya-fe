@@ -78,7 +78,69 @@ export function EditAccessControlUserGroupView() {
 
   const onCheckAllGeneral = () => {
     const newArr = selectedPermissions?.concat(generalChilds?.map((item) => item?.id));
-    setSelectedPermissions(newArr);
+    const generalChildsArr = generalChilds?.map((item) => item?.id);
+    const hasAllPermissions = generalChilds
+      ?.map((item) => item?.id)
+      .every((permission) => selectedPermissions.includes(permission));
+    if (!hasAllPermissions) {
+      setSelectedPermissions(newArr);
+    } else {
+      const arr = selectedPermissions?.filter((item) =>
+        generalChildsArr?.every((childItem) => item !== childItem)
+      );
+      setSelectedPermissions(arr);
+    }
+  };
+
+  const onCheckAllManagement = () => {
+    const idArray = managementChilds.reduce((acc: string[], item) => {
+      // If the main object has an "id", add it
+      if (item.id) acc.push(item.id);
+
+      // If it has "subChilds", extract their "id" values
+      if (item.subChilds) {
+        acc.push(...item.subChilds.map((sub) => sub.id));
+      }
+
+      return acc;
+    }, []);
+
+    const hasAllPermissions = idArray
+      ?.map((item) => item)
+      .every((permission) => selectedPermissions.includes(permission));
+    if (!hasAllPermissions) {
+      setSelectedPermissions((prev) => [...prev, ...idArray]);
+    } else {
+      const newArr = selectedPermissions?.filter((item) =>
+        idArray?.every((childItem) => item !== childItem)
+      );
+      setSelectedPermissions(newArr);
+    }
+  };
+
+  const onCheckAllSettings = () => {
+    const idArray = settingChilds.reduce((acc: string[], item: any) => {
+      // If the main object has an "id", add it
+      if (item.id) acc.push(item.id);
+
+      // If it has "subChilds", extract their "id" values
+      if (item.subChilds) {
+        acc.push(...item.subChilds.map((sub: any) => sub.id));
+      }
+
+      return acc;
+    }, []);
+    const hasAllPermissions = idArray
+      ?.map((item) => item)
+      .every((permission) => selectedPermissions.includes(permission));
+    if (!hasAllPermissions) {
+      setSelectedPermissions((prev) => [...prev, ...idArray]);
+    } else {
+      const newArr = selectedPermissions?.filter((item) =>
+        idArray?.every((childItem) => item !== childItem)
+      );
+      setSelectedPermissions(newArr);
+    }
   };
 
   const handleSubmit = (formData: RoleDTO) => {
@@ -252,12 +314,12 @@ export function EditAccessControlUserGroupView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-        Create User
+        Edit User Group
       </Typography>
       <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
         <Typography>Access Control</Typography>
         <Typography color="grey.500">•</Typography>
-        <Typography color="grey.500">Create User</Typography>
+        <Typography color="grey.500">Edit User Group</Typography>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
@@ -392,7 +454,7 @@ export function EditAccessControlUserGroupView() {
                                     )
                                     ?.includes(false)
                                 }
-                                onChange={onCheckAllGeneral}
+                                onChange={onCheckAllManagement}
                               />{' '}
                               Management
                             </Box>
@@ -493,7 +555,7 @@ export function EditAccessControlUserGroupView() {
                                     )
                                     ?.includes(false)
                                 }
-                                onChange={onCheckAllGeneral}
+                                onChange={onCheckAllSettings}
                               />{' '}
                               Settings
                             </Box>
