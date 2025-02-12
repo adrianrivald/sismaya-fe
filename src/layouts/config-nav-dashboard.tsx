@@ -109,7 +109,7 @@ export const menus = (
         isAccordion: false,
         heading: 'Access Control',
         id: 'access-control',
-        path: '/access-control',
+        path: '/access-control/user-list',
         icon: icon('ic-authenticator'),
       },
     ],
