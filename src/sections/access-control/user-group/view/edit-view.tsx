@@ -53,6 +53,29 @@ export function EditAccessControlUserGroupView() {
     permissions: roles?.permissions,
   };
 
+  const onCheckAllParent = (ids?: string[], permissionId?: string) => {
+    const hasAllPermissions = ids?.every((permission) => selectedPermissions.includes(permission));
+
+    if (ids) {
+      if (!hasAllPermissions) {
+        const newArr = ids?.filter((item) => !selectedPermissions?.includes(item));
+        setSelectedPermissions((prev) => [...prev, ...newArr]);
+      } else {
+        const newArr = selectedPermissions?.filter((item) =>
+          ids?.every((childItem) => item !== childItem)
+        );
+        setSelectedPermissions(newArr);
+      }
+    } else if (permissionId) {
+      if (!selectedPermissions?.includes(permissionId)) {
+        setSelectedPermissions((prev) => [...prev, permissionId]);
+      } else {
+        const newArr = selectedPermissions?.filter((item) => item !== permissionId);
+        setSelectedPermissions(newArr);
+      }
+    }
+  };
+
   const onCheckAllGeneral = () => {
     const newArr = selectedPermissions?.concat(generalChilds?.map((item) => item?.id));
     setSelectedPermissions(newArr);
@@ -392,7 +415,12 @@ export function EditAccessControlUserGroupView() {
                                 >
                                   <Checkbox
                                     id={`item-${child?.name}`}
-                                    onChange={() => onChangePermission(child?.id)}
+                                    onChange={() =>
+                                      onCheckAllParent(
+                                        child?.subChilds?.map((item) => item?.id),
+                                        child?.id
+                                      )
+                                    }
                                     checked={child?.subChilds
                                       ?.map((item) => item?.id)
                                       ?.every((item) => selectedPermissions?.includes(item))}
@@ -484,7 +512,9 @@ export function EditAccessControlUserGroupView() {
                                 >
                                   <Checkbox
                                     id={`item-${child?.name}`}
-                                    onChange={() => onChangePermission(child?.name)}
+                                    onChange={() =>
+                                      onCheckAllParent(child?.subChilds?.map((item) => item?.id))
+                                    }
                                     checked={child?.subChilds
                                       ?.map((item) => item?.id)
                                       ?.every((item) => selectedPermissions?.includes(item))}

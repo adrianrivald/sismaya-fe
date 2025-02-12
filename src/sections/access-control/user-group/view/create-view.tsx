@@ -23,13 +23,177 @@ import { SvgColor } from 'src/components/svg-color';
 import { useAddRole, usePermissions } from 'src/services/master-data/role';
 import { roleSchema, type RoleDTO } from 'src/services/master-data/role/schemas/role-schema';
 
+const generalChilds = [
+  {
+    id: 'dashboard',
+    name: 'Dashboard',
+  },
+  {
+    id: 'report',
+    name: 'Report',
+  },
+];
+
+const managementChilds = [
+  {
+    name: 'Request',
+    subChilds: [
+      {
+        id: 'request:create',
+        name: 'Create',
+      },
+      {
+        id: 'request:read',
+        name: 'Read',
+      },
+      {
+        id: 'request:update',
+        name: 'Update',
+      },
+      {
+        id: 'request:approve/reject',
+        name: 'Approve/Reject',
+      },
+      {
+        id: 'request:change status',
+        name: 'Change Status',
+      },
+      {
+        id: 'request:assign',
+        name: 'Assign',
+      },
+    ],
+  },
+  {
+    name: 'Request Attachment - Purchase Order',
+    subChilds: [
+      {
+        id: 'request attachment:create',
+        name: 'Create',
+      },
+      {
+        id: 'request attachment:read',
+        name: 'Read',
+      },
+      {
+        id: 'request attachment:update',
+        name: 'Update',
+      },
+      {
+        id: 'request attachment:delete',
+        name: 'Delete',
+      },
+    ],
+  },
+  {
+    id: 'chat',
+    name: 'Chat',
+  },
+
+  {
+    name: 'Task',
+    subChilds: [
+      {
+        id: 'task:create',
+        name: 'Create',
+      },
+      {
+        id: 'task:read',
+        name: 'Read',
+      },
+      {
+        id: 'task:update',
+        name: 'Update',
+      },
+      {
+        id: 'task:delete',
+        name: 'Delete',
+      },
+    ],
+  },
+];
+
+const settingChilds = [
+  {
+    name: 'Access Control - User List',
+    subChilds: [
+      {
+        id: 'user list:create',
+        name: 'Create',
+      },
+      {
+        id: 'user list:read',
+        name: 'Read',
+      },
+      {
+        id: 'user list:update',
+        name: 'Update',
+      },
+      {
+        id: 'user list:delete',
+        name: 'Delete',
+      },
+    ],
+  },
+  {
+    name: 'Access Control - User Group',
+    subChilds: [
+      {
+        id: 'user group:create',
+        name: 'Create',
+      },
+      {
+        id: 'user group:read',
+        name: 'Read',
+      },
+      {
+        id: 'user group:update',
+        name: 'Update',
+      },
+      {
+        id: 'user group:delete',
+        name: 'Delete',
+      },
+    ],
+  },
+];
+
 export function CreateAccessControlUserGroupView() {
   const [isLoading, setIsLoading] = React.useState(false);
   const { data: permissions } = usePermissions();
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const { mutate: addRole } = useAddRole();
+
   const onChangePermission = (permissionId?: string) => {
     if (permissionId) {
+      if (!selectedPermissions?.includes(permissionId)) {
+        setSelectedPermissions((prev) => [...prev, permissionId]);
+      } else {
+        const newArr = selectedPermissions?.filter((item) => item !== permissionId);
+        setSelectedPermissions(newArr);
+      }
+    }
+  };
+
+  useEffect(() => {
+    console.log(selectedPermissions, 'selectedPermissions');
+  }, [selectedPermissions]);
+
+  const onCheckAllParent = (ids?: string[], permissionId?: string) => {
+    console.log(permissionId, 'id');
+    const hasAllPermissions = ids?.every((permission) => selectedPermissions.includes(permission));
+
+    if (ids) {
+      if (!hasAllPermissions) {
+        const newArr = ids?.filter((item) => !selectedPermissions?.includes(item));
+        setSelectedPermissions((prev) => [...prev, ...newArr]);
+      } else {
+        const newArr = selectedPermissions?.filter((item) =>
+          ids?.every((childItem) => item !== childItem)
+        );
+        setSelectedPermissions(newArr);
+      }
+    } else if (permissionId) {
       if (!selectedPermissions?.includes(permissionId)) {
         setSelectedPermissions((prev) => [...prev, permissionId]);
       } else {
@@ -75,141 +239,6 @@ export function CreateAccessControlUserGroupView() {
       backgroundColor: 'unset',
     },
   }));
-
-  const generalChilds = [
-    {
-      id: 'dashboard',
-      name: 'Dashboard',
-    },
-    {
-      id: 'report',
-      name: 'Report',
-    },
-  ];
-
-  const managementChilds = [
-    {
-      name: 'Request',
-      subChilds: [
-        {
-          id: 'request:create',
-          name: 'Create',
-        },
-        {
-          id: 'request:read',
-          name: 'Read',
-        },
-        {
-          id: 'request:update',
-          name: 'Update',
-        },
-        {
-          id: 'request:approve/reject',
-          name: 'Approve/Reject',
-        },
-        {
-          id: 'request:change status',
-          name: 'Change Status',
-        },
-        {
-          id: 'request:assign',
-          name: 'Assign',
-        },
-      ],
-    },
-    {
-      name: 'Request Attachment - Purchase Order',
-      subChilds: [
-        {
-          id: 'request attachment:create',
-          name: 'Create',
-        },
-        {
-          id: 'request attachment:read',
-          name: 'Read',
-        },
-        {
-          id: 'request attachment:update',
-          name: 'Update',
-        },
-        {
-          id: 'request attachment:delete',
-          name: 'Delete',
-        },
-      ],
-    },
-    {
-      id: 'chat',
-      name: 'Chat',
-    },
-
-    {
-      name: 'Task',
-      subChilds: [
-        {
-          id: 'task:create',
-          name: 'Create',
-        },
-        {
-          id: 'task:read',
-          name: 'Read',
-        },
-        {
-          id: 'task:update',
-          name: 'Update',
-        },
-        {
-          id: 'task:delete',
-          name: 'Delete',
-        },
-      ],
-    },
-  ];
-
-  const settingChilds = [
-    {
-      name: 'Access Control - User List',
-      subChilds: [
-        {
-          id: 'user list:create',
-          name: 'Create',
-        },
-        {
-          id: 'user list:read',
-          name: 'Read',
-        },
-        {
-          id: 'user list:update',
-          name: 'Update',
-        },
-        {
-          id: 'user list:delete',
-          name: 'Delete',
-        },
-      ],
-    },
-    {
-      name: 'Access Control - User Group',
-      subChilds: [
-        {
-          id: 'user group:create',
-          name: 'Create',
-        },
-        {
-          id: 'user group:read',
-          name: 'Read',
-        },
-        {
-          id: 'user group:update',
-          name: 'Update',
-        },
-        {
-          id: 'user group:delete',
-          name: 'Delete',
-        },
-      ],
-    },
-  ];
 
   return (
     <DashboardContent maxWidth="xl">
@@ -365,7 +394,12 @@ export function CreateAccessControlUserGroupView() {
                                 >
                                   <Checkbox
                                     id={`item-${child?.name}`}
-                                    onChange={() => onChangePermission(child?.id)}
+                                    onChange={() =>
+                                      onCheckAllParent(
+                                        child?.subChilds?.map((item) => item?.id),
+                                        child?.id
+                                      )
+                                    }
                                     checked={child?.subChilds
                                       ?.map((item) => item?.id)
                                       ?.every((item) => selectedPermissions?.includes(item))}
@@ -457,7 +491,9 @@ export function CreateAccessControlUserGroupView() {
                                 >
                                   <Checkbox
                                     id={`item-${child?.name}`}
-                                    onChange={() => onChangePermission(child?.name)}
+                                    onChange={() =>
+                                      onCheckAllParent(child?.subChilds?.map((item) => item?.id))
+                                    }
                                     checked={child?.subChilds
                                       ?.map((item) => item?.id)
                                       ?.every((item) => selectedPermissions?.includes(item))}
