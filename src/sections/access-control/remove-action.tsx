@@ -8,6 +8,7 @@ interface RemoveActionProps {
   onRemove: () => void;
   selectedUser: string;
   setSelectedUser: Dispatch<SetStateAction<string>>;
+  mode: 'user-list' | 'user-group';
 }
 
 export function RemoveAction({
@@ -16,6 +17,7 @@ export function RemoveAction({
   onRemove,
   selectedUser,
   setSelectedUser,
+  mode,
 }: RemoveActionProps) {
   return (
     <Dialog
@@ -42,7 +44,7 @@ export function RemoveAction({
           fontSize={24}
           variant="h4"
         >
-          Delete User {selectedUser}
+          Delete {mode === 'user-list' ? 'User' : 'User Group'} {selectedUser}
         </Typography>
 
         <Typography textAlign="center" mt={2} px={12}>
@@ -78,7 +80,7 @@ export function RemoveAction({
               width: '100%',
             }}
           >
-            Delete User
+            Delete {mode === 'user-list' ? 'User' : 'User Group'}
           </Button>
         </Box>
       </Box>

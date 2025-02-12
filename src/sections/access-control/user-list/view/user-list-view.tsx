@@ -314,6 +314,7 @@ export function AccessControlUserListView() {
         </Grid>
       </Grid>
       <RemoveAction
+        mode={mode}
         onRemove={popoverFuncs().handleDelete}
         openRemoveModal={openRemoveModal}
         setOpenRemoveModal={setOpenRemoveModal}

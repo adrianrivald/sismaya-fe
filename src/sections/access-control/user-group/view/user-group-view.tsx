@@ -1,4 +1,3 @@
-import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
@@ -6,25 +5,20 @@ import {
   FormControl,
   Grid,
   InputAdornment,
-  InputLabel,
-  MenuItem,
   menuItemClasses,
   MenuList,
   OutlinedInput,
-  Select,
   Typography,
 } from '@mui/material';
 import { SvgColor } from 'src/components/svg-color';
 import { DataTable } from 'src/components/table/data-tables';
 import type { Dispatch, SetStateAction } from 'react';
 import { createColumnHelper, type CellContext } from '@tanstack/react-table';
-import type { User } from 'src/services/master-data/user/types';
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Role, useRole, useRoleList } from 'src/services/master-data/role';
-import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
+import type { Role } from 'src/services/master-data/role';
+import { useDeleteRoleById, useRoleList } from 'src/services/master-data/role';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useInternalCompanies } from 'src/services/master-data/company';
 import { RemoveAction } from '../../remove-action';
 
 interface PopoverProps {
@@ -122,7 +116,7 @@ export function AccessControlUserGroupView() {
   const mode = pathname === 'user-list' ? 'user-list' : 'user-group';
   const { getDataTableProps } = useRoleList({});
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
-  const { mutate: deleteUserById } = useDeleteUserById();
+  const { mutate: deleteRoleById } = useDeleteRoleById();
   const navigate = useNavigate();
 
   const onClickAddNew = () => {
@@ -138,7 +132,7 @@ export function AccessControlUserGroupView() {
     };
 
     const handleDelete = () => {
-      deleteUserById(Number(selectedId));
+      deleteRoleById(Number(selectedId));
       setOpenRemoveModal(false);
     };
 
@@ -159,7 +153,7 @@ export function AccessControlUserGroupView() {
             sx={{ backgroundColor: 'grey.200', padding: 1, borderRadius: 1, mb: 2 }}
           >
             <Box
-              onClick={() => navigate('/access-control/user-group')}
+              onClick={() => navigate('/access-control/user-list')}
               sx={{
                 cursor: 'pointer',
                 backgroundColor: mode === 'user-list' ? 'common.white' : '',
@@ -237,6 +231,7 @@ export function AccessControlUserGroupView() {
         </Grid>
       </Grid>
       <RemoveAction
+        mode={mode}
         onRemove={popoverFuncs().handleDelete}
         openRemoveModal={openRemoveModal}
         setOpenRemoveModal={setOpenRemoveModal}
