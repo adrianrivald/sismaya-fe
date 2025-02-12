@@ -27,7 +27,6 @@ export function useAddRequest() {
           const {data} = await uploadFilesBulk(
             filesData
           );
-            console.log(data,'datan')
           Object.assign(payload, {
             attachments: data?.map(item => ({
                 file_path: item?.path,

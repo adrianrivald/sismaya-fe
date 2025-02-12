@@ -18,29 +18,19 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React, { ChangeEvent, ChangeEventHandler } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useUserById, useUsers } from 'src/services/master-data/user';
+import type { RequestDTO } from 'src/services/request/schemas/request-schema';
+import { useUsers } from 'src/services/master-data/user';
 import { useAddRequest } from 'src/services/request';
-import {
-  useCategoryByCompanyId,
-  useClientCompanies,
-  useProductByCompanyId,
-} from 'src/services/master-data/company';
-import { Department } from 'src/services/master-data/company/types';
-import { API_URL } from 'src/constants';
-import { getSession } from 'src/sections/auth/session/session';
-import { useRole } from 'src/services/master-data/role';
-import { User } from 'src/services/master-data/user/types';
+import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 import { Bounce, toast } from 'react-toastify';
 
 export function CreateRequestView() {
   const { user } = useAuth();
-  const { data } = useUserById(user?.id);
-  const location = useLocation();
   const { vendor } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
@@ -48,8 +38,6 @@ export function CreateRequestView() {
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
-  const [divisions, setDivisions] = React.useState<Department[] | []>([]);
-  const { data: companies } = useClientCompanies();
   const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
   const { mutate: addRequest } = useAddRequest();
 
@@ -77,21 +65,6 @@ export function CreateRequestView() {
       };
     }
     addRequest(payload);
-    console.log(payload, 'test');
-  };
-
-  const fetchDivision = async (companyId: number) => {
-    const departmentData = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
-      headers: {
-        Authorization: `Bearer ${getSession()}`,
-      },
-    }).then((res) =>
-      res.json().then((value) => {
-        console.log(value?.data, 'value?.data');
-        setDivisions(value?.data);
-      })
-    );
-    return departmentData;
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -226,7 +199,6 @@ export function CreateRequestView() {
                           width: '100%',
                         }}
                         onChange={(_event: any, newValue: any) => {
-                          console.log(newValue, 'newValue');
                           setValue('user_id', newValue?.id);
                           setValue('company_id', newValue?.company_id);
                           setValue('department_id', newValue?.department_id);

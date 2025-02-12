@@ -76,7 +76,6 @@ export function EditRequestView() {
       id: Number(id),
     };
     updateRequest(payload);
-    console.log(payload, 'test');
     // setTimeout(() => {
     //   navigate('/request/test');
     //   setIsLoading(false);

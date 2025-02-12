@@ -25,11 +25,9 @@ export function SignInView() {
 
   const handleSubmit = useCallback(
     async (formData: any) => {
-      console.log(formData, 'value');
       try {
         await login({ email: formData?.email, password: formData?.password });
       } catch (error) {
-        console.log(error, 'er');
         toast.error(error?.message, {
           position: 'top-right',
           autoClose: 5000,
