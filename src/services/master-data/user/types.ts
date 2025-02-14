@@ -1,5 +1,4 @@
 import { Company, Department, InternalCompany } from "../company/types";
-import { Role } from "../role/types";
 
 export interface User {
     id: number;
@@ -9,6 +8,15 @@ export interface User {
     internal_companies?: InternalCompany[]
 }
 
+interface Role {
+    id: number;
+    name: string;
+    permissions: Permissions[]
+}
+interface Permissions {
+    id: number;
+    name: string
+}
 export interface UserInfo {
     company: Company;
     company_id: number;

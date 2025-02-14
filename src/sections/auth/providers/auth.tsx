@@ -26,27 +26,27 @@ interface LoginCredentialsDTO {
   password: string;
 }
 
+const initialStore = {
+  permissions: [] as string[],
+};
+export const permissionStore = createStore({
+  context: initialStore,
+  on: {
+    storePermissions: (context, event: { newPermissions: string[] }) => ({
+      permissions: event?.newPermissions,
+    }),
+    flushPermissions: () => ({
+      permissions: [],
+    }),
+  },
+});
+
 export function AuthProvider(props: React.PropsWithChildren) {
   const navigate = useNavigate();
   const [accessToken, setAccessToken] = React.useState<string | null>(() =>
     sessionService.getSession()
   );
   const [userInfo, setUserInfo] = React.useState<string | null>(() => sessionService.getUser());
-
-  const initialStore = {
-    permissions: [] as string[],
-  };
-  const store = createStore({
-    context: initialStore,
-    on: {
-      storePermissions: (context, event: { newPermissions: string[] }) => ({
-        permissions: event?.newPermissions,
-      }),
-      flushPermissions: () => ({
-        permissions: [],
-      }),
-    },
-  });
 
   async function login(formField: LoginCredentialsDTO) {
     const { data } = await loginUser(formField);
@@ -55,9 +55,9 @@ export function AuthProvider(props: React.PropsWithChildren) {
     sessionService.setSession(token, user);
     setAccessToken(token);
     setUserInfo(JSON.stringify(user));
-    store.send({
+    permissionStore.send({
       type: 'storePermissions',
-      newPermissions: user?.user_info?.role?.permissions?.map((item) => item),
+      newPermissions: user?.user_info?.role?.permissions?.map((item) => item?.name),
     });
     // Redirect as client user who has internal companies
     if ((user?.internal_companies ?? [])?.length > 0 && user?.user_info?.role_id !== 1) {
@@ -71,7 +71,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
     sessionService.flushSession();
     setAccessToken(null);
     setAccessToken(null);
-    store.send({
+    permissionStore.send({
       type: 'flushPermissions',
     });
     navigate('/');

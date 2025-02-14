@@ -1,4 +1,3 @@
-import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -11,107 +10,75 @@ export interface Menus {
   icon?: React.ReactNode;
   list: any[];
   path?: string;
+  permissionId?: number;
 }
 
 export const icon = (name: string) => (
   <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
 );
-interface InternalCompanyMenus {
+interface ChildMenus {
   heading: string;
   path: string;
 }
 
-export const menus = (
-  type: 'internal' | 'client',
-  internalCompaniesDashboard?: InternalCompanyMenus[],
-  internalCompaniesRequest?: InternalCompanyMenus[],
-  internalCompaniesTask?: InternalCompanyMenus[],
-  roleId?: number
+export const generalMenus = (internalCompaniesDashboard?: ChildMenus[], userType?: string) => [
+  {
+    heading: 'Dashboard',
+    id: 'dashboard',
+    path: '/',
+    icon: icon('ic-analytics'),
+    list: userType === 'internal' ? internalCompaniesDashboard : [],
+  },
+];
+
+export const managementMenus = (
+  internalCompaniesRequest?: ChildMenus[],
+  internalCompaniesTask?: ChildMenus[]
 ) => [
   {
-    isAccordion: type === 'internal',
+    heading: 'Request',
+    id: 'request:read',
+    icon: icon('ic-chat'),
+    list: internalCompaniesRequest,
+  },
+  {
+    heading: 'Task Management',
+    id: 'task:read',
+    icon: icon('ic-book'),
+    list: internalCompaniesTask,
+  },
+];
+
+export const rbacMenus = () => [
+  {
+    heading: 'Access Control',
+    id: 'user group:read',
+    path: '/access-control/user-list',
+    icon: icon('ic-authenticator'),
+    list: [],
+  },
+];
+
+export const menuItems = (
+  internalCompaniesDashboard?: ChildMenus[],
+  internalCompaniesRequest?: ChildMenus[],
+  internalCompaniesTask?: ChildMenus[],
+  userType?: string
+) => [
+  {
     heading: 'GENERAL',
     id: 'general',
-    path: '/',
-    list: [
-      {
-        heading: 'Dashboard',
-        path: '/',
-        id: 'dashboard',
-        icon: icon('ic-analytics'),
-        isAccordion: type === 'internal' && roleId !== 1,
-        list: internalCompaniesDashboard,
-      },
-      {
-        heading: 'Reports',
-        path: '/reports',
-        icon: icon('ic-user'),
-      },
-    ],
+    list: generalMenus(internalCompaniesDashboard, userType),
   },
   {
     heading: 'MANAGEMENT',
     id: 'management',
-    list: [
-      {
-        isAccordion: true,
-        heading: 'Request',
-        id: 'request',
-        icon: icon('ic-chat'),
-        list: internalCompaniesRequest,
-      },
-      {
-        isAccordion: true,
-        heading: 'Task Management',
-        id: 'task-management',
-        path: '/task',
-        icon: icon('ic-book'),
-        list: internalCompaniesTask,
-      },
-      {
-        isAccordion: true,
-        heading: 'Master Data',
-        id: 'master-data',
-        icon: <Iconify icon="solar:database-bold" />,
-        list: [
-          {
-            heading: 'Internal Company',
-            path: '/internal-company',
-          },
-          {
-            heading: 'Client Company',
-            path: '/client-company',
-          },
-          {
-            heading: 'Internal User',
-            path: '/internal-user',
-          },
-          {
-            heading: 'Client User',
-            path: '/client-user',
-          },
-        ],
-      },
-      {
-        isAccordion: false,
-        heading: 'Monitor Personal Load',
-        id: 'monitor-personal-load',
-        icon: icon('ic-person'),
-        path: '/monitor-personal-load',
-      },
-    ],
+    list: managementMenus(internalCompaniesRequest, internalCompaniesTask),
   },
+
   {
     heading: 'SETTINGS',
-    id: 'settings',
-    list: [
-      {
-        isAccordion: false,
-        heading: 'Access Control',
-        id: 'access-control',
-        path: '/access-control/user-list',
-        icon: icon('ic-authenticator'),
-      },
-    ],
+    id: 'management',
+    list: rbacMenus(),
   },
 ];

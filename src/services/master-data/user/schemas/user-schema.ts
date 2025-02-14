@@ -66,3 +66,17 @@ export const userClientUpdateSchema = z
   .partial();
 
 export type UserClientUpdateDTO = z.infer<typeof userClientUpdateSchema>;
+
+
+export const userAccessControlUpdateSchema = z
+  .object({
+    email: z.string().min(1, 'Required'),
+    name: z.string().min(1, 'Required'),
+    role_id: z.number().min(1, 'Required'),
+    cover: z.any().optional(),
+    profile_picture: z.string().optional(),
+    internal_id: z.number().array().optional()
+  })
+  .partial();
+
+export type UserAccessControlUpdateDTO = z.infer<typeof userAccessControlUpdateSchema>;
