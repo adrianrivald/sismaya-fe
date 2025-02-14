@@ -15,7 +15,6 @@ import { Avatar, IconButton, Typography } from '@mui/material';
 import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
-import { menus } from '../config-nav-dashboard';
 import { Searchbar } from '../components/searchbar';
 import { _workspaces } from '../config-nav-workspace';
 import { MenuButton } from '../components/menu-button';
@@ -37,20 +36,6 @@ export type DashboardLayoutProps = {
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
   const theme = useTheme();
   const { user } = useAuth();
-  const userType = user?.user_info?.user_type as 'internal' | 'client';
-  const roleId = user?.user_info?.role_id;
-  const internalCompaniesDashboard = user?.internal_companies?.map((item) => ({
-    heading: item?.company?.name,
-    path: `/${item?.company?.name.toLowerCase()}/dashboard`,
-  }));
-  const internalCompaniesRequest = user?.internal_companies?.map((item) => ({
-    heading: item?.company?.name,
-    path: `/${item?.company?.name.toLowerCase()}/request`,
-  }));
-  const internalCompaniesTask = user?.internal_companies?.map((item) => ({
-    heading: item?.company?.name,
-    path: `/${item?.company?.name.toLowerCase()}/task`,
-  }));
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
 
@@ -85,13 +70,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  menus={menus(
-                    userType,
-                    internalCompaniesDashboard,
-                    internalCompaniesRequest,
-                    internalCompaniesTask,
-                    roleId
-                  )}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   workspaces={_workspaces}
@@ -131,13 +109,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        *************************************** */
       sidebarSection={
         <NavDesktop
-          menus={menus(
-            userType,
-            internalCompaniesDashboard,
-            internalCompaniesRequest,
-            internalCompaniesTask,
-            roleId
-          )}
           layoutQuery={layoutQuery}
           workspaces={_workspaces}
           slots={{
