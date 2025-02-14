@@ -69,7 +69,7 @@ const columns = (popoverProps: PopoverProps) => [
     },
   }),
 
-  columnHelper.accessor('user_info.role_id', {
+  columnHelper.accessor('user_info.role.name', {
     header: 'User Group',
     cell: (info) => {
       const value = info.getValue();

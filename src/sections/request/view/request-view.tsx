@@ -56,10 +56,7 @@ const columns = (popoverProps: PopoverProps) => [
 
   columnHelper.accessor((row) => row, {
     header: 'Project Deadline',
-    cell: (info) => {
-      const value = info.getValue();
-      return '-';
-    },
+    cell: (info) => '-',
   }),
 
   columnHelper.accessor((row) => row, {
