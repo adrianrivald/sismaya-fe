@@ -20,27 +20,32 @@ const Messenger = React.lazy(() => import('./task/task-activities'));
 interface RequestChatProps {
   chats: Messaging[];
   request_id: number;
+  onSuccess: (newData: any) => void;
+  isFetchingChat: boolean;
 }
 
-function RequestChat({ chats, request_id }: RequestChatProps) {
+function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestChatProps) {
   const [inputContent, setInputContent] = React.useState('');
   const { user } = useAuth();
   const [file, setFile] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState('');
-  const chatRef = React.useRef<HTMLDivElement | null>(null);
-  const { mutate: sendChat } = useMessagePost();
+  // const chatRef = React.useRef<HTMLDivElement | null>(null);
+  const { mutate: sendChat } = useMessagePost(onSuccess);
 
   React.useEffect(() => {
     scrollToBottom();
-  }, [chats]);
+  }, []);
 
   const scrollToBottom = () => {
-    if (chatRef.current) {
-      chatRef.current.scrollIntoView({
+    const element = document.getElementById('bottomChatBox');
+
+    if (element) {
+      element.scrollIntoView({
         block: 'end',
       });
     }
   };
+
   const onResetField = () => {
     setInputContent('');
     setPreview('');
@@ -112,6 +117,11 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
         height={400}
         sx={{ p: 2 }}
       >
+        {isFetchingChat && (
+          <Box display="flex" justifyContent="center">
+            <Loader />
+          </Box>
+        )}
         {chats?.length > 0 ? (
           <>
             {chats
@@ -168,7 +178,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                 );
               })
               .reverse()}
-            <Box ref={chatRef} />
+            <Box id="bottomChatBox" />
           </>
         ) : (
           <Box
@@ -257,31 +267,53 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
   );
 }
 
-export function RequestMessenger({ requestId, chats }: { requestId: number; chats: Messaging[] }) {
+export function RequestMessenger({
+  requestId,
+  chats,
+  onSuccess,
+  isFetchingChat,
+}: {
+  requestId: number;
+  chats: Messaging[];
+  onSuccess: (newData: any) => void;
+  isFetchingChat: boolean;
+}) {
   const isTask = window.location.pathname.includes('/task');
 
   if (isTask) {
     return (
       <React.Suspense fallback={<Loader />}>
         <Messenger requestId={requestId}>
-          <RequestChat request_id={requestId} chats={chats} />
+          <RequestChat
+            isFetchingChat={isFetchingChat}
+            onSuccess={onSuccess}
+            request_id={requestId}
+            chats={chats}
+          />
         </Messenger>
       </React.Suspense>
     );
   }
 
   return (
-    <Box sx={{ border: 1, borderRadius: 3, borderColor: 'grey.300' }}>
-      <Box
-        p={2}
-        sx={{
-          borderBottom: 1,
-          borderColor: 'grey.300',
-        }}
-      >
-        <Typography>Chat with Sismedika</Typography>
+    <React.Suspense fallback={<Loader />}>
+      <Box sx={{ border: 1, borderRadius: 3, borderColor: 'grey.300' }}>
+        <Box
+          p={2}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'grey.300',
+          }}
+        >
+          <Typography>Chat with Sismedika</Typography>
+        </Box>
+        <RequestChat
+          isFetchingChat={isFetchingChat}
+          onSuccess={onSuccess}
+          request_id={requestId}
+          chats={chats}
+        />
       </Box>
-      <RequestChat request_id={requestId} chats={chats} />
-    </Box>
+    </React.Suspense>
   );
 }

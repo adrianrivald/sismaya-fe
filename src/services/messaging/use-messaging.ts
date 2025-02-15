@@ -1,23 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bounce, toast } from "react-toastify";
-import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
+import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import type { Messaging } from "./types";
 
 export type StoreMessage = {request_id: number, content: string} & {file?: any};
 
-async function fetchMessage(request_id: number) {
-    const { data } = await http<{data : Messaging[]}>(
-      `messages?request_id=${request_id}`,
+async function fetchMessage({request_id, page}: {request_id: number, page: number}) {
+    const { data, meta } = await http<{data : Messaging[], meta: any}>(
+      `messages?request_id=${request_id}&page=${page}`,
     );
   
-    return data;
+    console.log(meta,'metameta')
+
+    return {messages: data, meta};
   }
   
-  export function useMessage(request_id: number) {
+  export function useMessage(request_id: number, page: number) {
     const data = useQuery(
-      ['messaging'],
-      () => fetchMessage(request_id)
+      ['messaging', page],
+      () => fetchMessage({request_id, page})
     );
   
     return data;
@@ -25,7 +27,7 @@ async function fetchMessage(request_id: number) {
 
 
 // Post Message
-export function useMessagePost() {
+export function useMessagePost(onSuccess: (newData: any)=>void) {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: StoreMessage) => {
@@ -53,8 +55,12 @@ export function useMessagePost() {
         });
       },
       {
-          onSuccess: () => {
-          queryClient.invalidateQueries(['messaging']);
+          onSuccess: (res) => {
+          queryClient.invalidateQueries({
+            queryKey: ['messaging', 1]
+          });
+          const newData = res?.data[0]
+          onSuccess(newData)
   
 
         },
