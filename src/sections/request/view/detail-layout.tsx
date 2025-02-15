@@ -24,6 +24,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { store } from 'src/services/request/task';
 import { useSelector } from '@xstate/store/react';
+import { useMessage } from 'src/services/messaging/use-messaging';
+import type { Messaging } from 'src/services/messaging/types';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
@@ -40,6 +42,7 @@ export default function RequestDetailLayout() {
   )?.company?.id;
   const { data: requestStatuses } = useRequestStatus(String(idCurrentCompany ?? ''));
   const { data: requestDetail } = useRequestById(id ?? '');
+  const { data: chats } = useMessage(Number(id));
   // const { mutate: completeRequest } = useCompleteRequest();
   const { mutate: updateStatus } = useUpdateRequestStatus();
   const { mutate: updatePriority } = useUpdateRequestPriority();
@@ -251,7 +254,7 @@ export default function RequestDetailLayout() {
           </Box>
         </Grid>
         <Grid item xs={12} md={4}>
-          <RequestMessenger requestId={Number(id)} />
+          <RequestMessenger requestId={Number(id)} chats={chats as Messaging[]} />
         </Grid>
       </Grid>
 
