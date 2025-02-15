@@ -27,7 +27,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState('');
   const chatRef = React.useRef<HTMLDivElement | null>(null);
-  const { mutate: sendChat, isSuccess } = useMessagePost();
+  const { mutate: sendChat } = useMessagePost();
 
   React.useEffect(() => {
     scrollToBottom();
@@ -93,6 +93,13 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
   const onRemoveFile = () => {
     setFile(null);
     setPreview('');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault(); // Prevents newline in textarea
+      handleSubmit();
+    }
   };
 
   console.log(file, 'filefile');
@@ -205,6 +212,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                 id="content"
                 onChange={onChangeContent}
                 sx={{ borderWidth: 0 }}
+                onKeyDown={handleKeyDown}
               />
               <Box component="img" src={preview} sx={{ width: '50%' }} onClick={onRemoveFile} />
             </Box>
