@@ -32,7 +32,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
 
   React.useEffect(() => {
     scrollToBottom();
-  }, [chats]);
+  }, []);
 
   const scrollToBottom = () => {
     if (chatRef.current) {
@@ -41,6 +41,31 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
       });
     }
   };
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (chatRef.current) {
+        const { scrollTop } = chatRef.current;
+        if (scrollTop === 0) {
+          console.log("You're at the top!");
+        } else {
+          console.log('Keep scrolling...');
+        }
+      }
+    };
+
+    const element = chatRef.current;
+    if (element) {
+      element.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
   const onResetField = () => {
     setInputContent('');
     setPreview('');
@@ -55,6 +80,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
           file,
         });
         onResetField();
+        scrollToBottom();
       } catch (error) {
         console.log(error);
       }
