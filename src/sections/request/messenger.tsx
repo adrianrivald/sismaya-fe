@@ -156,6 +156,10 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                         {chat?.file_path && (
                           <Box
                             mt={1}
+                            sx={{
+                              borderRadius: '8px',
+                              maxWidth: '75%',
+                            }}
                             component="img"
                             src={`${chat?.file_path}/${chat?.file_name}`}
                           />
