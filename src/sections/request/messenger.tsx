@@ -46,7 +46,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
     setFile(null);
   };
   const handleSubmit = () => {
-    if (inputContent !== '') {
+    if (inputContent !== '' || preview !== '') {
       try {
         sendChat({
           content: inputContent,
@@ -102,8 +102,6 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
     }
   };
 
-  console.log(file, 'filefile');
-  console.log(preview, 'previewpreview');
   return (
     <>
       <Box
@@ -134,7 +132,6 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                           src={chat?.creator?.profile_picture}
                         />
                       )}
-
                       <Box
                         display="flex"
                         flexDirection="column"
@@ -144,18 +141,25 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                         <Typography color="grey.600" fontSize={12}>
                           4:02pm
                         </Typography>
-                        <Box
-                          sx={{
-                            backgroundColor: !isMine ? '#CCDEE5' : 'grey.200',
-                            borderRadius: '8px',
-                            padding: 2,
-                          }}
-                        >
-                          {chat?.content} <br />
-                        </Box>
+
+                        {chat?.content !== '' && (
+                          <Box
+                            sx={{
+                              backgroundColor: !isMine ? '#CCDEE5' : 'grey.200',
+                              borderRadius: '8px',
+                              padding: 2,
+                            }}
+                          >
+                            {chat?.content} <br />
+                          </Box>
+                        )}
                         {chat?.file_path && (
                           <Box
                             mt={1}
+                            sx={{
+                              borderRadius: '8px',
+                              maxWidth: '75%',
+                            }}
                             component="img"
                             src={`${chat?.file_path}/${chat?.file_name}`}
                           />
