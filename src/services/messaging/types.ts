@@ -5,6 +5,7 @@ import type { Task } from "../task/task-management";
 export interface Messaging {
     content : string;
     creator: UserInfo
+    created_at: string;
     file_name: string;
     file_path: string;
     id: number;
