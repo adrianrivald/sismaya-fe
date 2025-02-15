@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
@@ -8,15 +8,18 @@ import { useDeleteCompanyById } from 'src/services/master-data/company';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
+import type { CellContext } from '@tanstack/react-table';
+import { createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
-import { Companies } from './types';
+import type { Companies } from './types';
+import { RemoveAction } from './remove-action';
 
 // ----------------------------------------------------------------------
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  handleDelete: (id: number) => void;
+  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
+  setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
 const columnHelper = createColumnHelper<Companies>();
@@ -43,7 +46,12 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, handleDelete } = popoverProps;
+  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
   return (
     <MenuList
       disablePadding
@@ -65,7 +73,7 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
         Edit
       </MenuItem>
 
-      <MenuItem onClick={() => handleDelete(companyId)} sx={{ color: 'error.main' }}>
+      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
       </MenuItem>
@@ -84,9 +92,10 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
 // ];
 
 export function InternalCompanyView() {
-  const { isEmpty, getDataTableProps } = useCompanyList({}, 'internal');
+  const { getDataTableProps } = useCompanyList({}, 'internal');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
-  const [openPopover, setOpenPopover] = React.useState<HTMLButtonElement | null>(null);
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | null>(null);
 
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
@@ -99,8 +108,9 @@ export function InternalCompanyView() {
       navigate(`${id}/edit`);
     };
 
-    const handleDelete = (id: number) => {
-      deleteCompanyById(id);
+    const handleDelete = () => {
+      deleteCompanyById(Number(selectedId));
+      setOpenRemoveModal(false);
     };
 
     return { handleEdit, handleDelete };
@@ -128,9 +138,18 @@ export function InternalCompanyView() {
 
       <Grid container spacing={3}>
         <Grid xs={12}>
-          <DataTable columns={columns(popoverFuncs())} {...getDataTableProps()} />
+          <DataTable
+            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            {...getDataTableProps()}
+          />
         </Grid>
       </Grid>
+
+      <RemoveAction
+        onRemove={popoverFuncs().handleDelete}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

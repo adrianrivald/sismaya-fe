@@ -27,7 +27,8 @@ export function useRequestAssignees(requestId: string) {
       if (assignees.length === 0) return [];
 
       return assignees.map((val: Assignees) => ({
-        id: val.assignee.user_info?.id,
+        id: val.assignee.id,
+        userId: val.assignee.user_info?.id,
         name: val.assignee.user_info?.name,
         avatar: val.assignee.user_info?.profile_picture,
       }));

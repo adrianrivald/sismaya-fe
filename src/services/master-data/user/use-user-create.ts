@@ -12,18 +12,24 @@ export function useAddUser() {
     return useMutation(
       async (formData: StoreUser) => {
         const {cover, ...form} = formData;
-        
-      const imageData = new FormData();
-      imageData.append('file', cover as unknown as File);
-      const { url } = await uploadImage(
-        imageData
-      );
+        const payload = {
+          ...form,
+        }
+        if (cover) {
+          const imageData = new FormData();
+          imageData.append('file', cover as unknown as File);
+          const { url } = await uploadImage(
+            imageData
+          );
+          
+          Object.assign(payload, {
+          
+          profile_picture: url,
+          });
+        }
 
         return http(`users`, {
-          data: {
-            ...form,
-            profile_picture: url
-          },
+          data: payload
         });
       },
       {

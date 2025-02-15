@@ -22,7 +22,6 @@ import {
   useAddRequestAssignee,
   useApproveRequest,
   useCitoById,
-  useCompleteRequest,
   useDeleteRequestAssigneeById,
   useRejectRequest,
   useRequestById,
@@ -40,16 +39,16 @@ import { RejectAction } from '../reject-action';
 
 const priorities = [
   {
-    name: 'High',
-    id: 'high',
-  },
-  {
     name: 'Low',
     id: 'low',
   },
   {
     name: 'Medium',
     id: 'medium',
+  },
+  {
+    name: 'High',
+    id: 'high',
   },
 ];
 
@@ -70,20 +69,17 @@ export function RequestDetailView() {
   const [open, setOpen] = useState(false);
   const [openApprove, setOpenApprove] = useState(false);
   const [openAssigneeModal, setOpenAssigneeModal] = useState(false);
-  const chats = [];
   const navigate = useNavigate();
   const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs());
   const [selectedPic, setSelectedPic] = React.useState<
     { id: number; picture: string; assignee_id?: number }[] | undefined
   >(
-    requestDetail?.assignees?.map(
-      (item) =>
-        ({
-          assignee_id: item?.assignee_id,
-          picture: item?.assignee?.user_info?.profile_picture,
-          id: item?.id,
-        }) ?? []
-    )
+    requestDetail?.assignees?.map((item) => ({
+      assignee_id: item?.assignee_id,
+      picture: item?.assignee?.user_info?.profile_picture,
+      id: item?.id,
+    }))
   );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
 
@@ -95,19 +91,20 @@ export function RequestDetailView() {
 
   useEffect(() => {
     setSelectedPic(
-      requestDetail?.assignees?.map(
-        (item) =>
-          ({
-            assignee_id: item?.assignee_id,
-            picture: item?.assignee?.user_info?.profile_picture,
-            id: item?.id,
-          }) ?? []
-      )
+      requestDetail?.assignees?.map((item) => ({
+        assignee_id: item?.assignee_id,
+        picture: item?.assignee?.user_info?.profile_picture,
+        id: item?.id,
+      }))
     );
   }, [requestDetail]);
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+  };
+
+  const handleChangeEndDate = (newValue: Dayjs | null) => {
+    setEndDateValue(newValue);
   };
 
   const onClickEdit = () => {
@@ -150,10 +147,12 @@ export function RequestDetailView() {
     });
   };
   const handleApprove = (formData: any) => {
-    const startDate = dayjs(dateValue).format('YYYY-MM-DD');
+    const startDate = dayjs(dateValue).format('YYYY-MM-DD hh:mm:ss');
+    const endDate = dayjs(endDateValue).format('YYYY-MM-DD hh:mm:ss');
     const payload = {
       ...formData,
       start_date: startDate,
+      end_date: endDate,
       id: Number(id),
       assignees: selectedPic?.map((item) => ({
         assignee_id: item?.id,
@@ -205,26 +204,28 @@ export function RequestDetailView() {
           Edit Detail
         </Button>
       </Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{
-          backgroundColor: 'blue.150',
-          py: 1.5,
-          px: 2,
-          my: 3,
-          color: 'grey.600',
-          borderRadius: 2,
-        }}
-      >
-        <Typography>
-          {requestDetail?.task_count ? 'Tasks have been created' : 'No tasks have been created'}
-        </Typography>
-        <Link to="task">
-          <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
-        </Link>
-      </Box>
+      {userType === 'internal' && (
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{
+            backgroundColor: 'blue.150',
+            py: 1.5,
+            px: 2,
+            my: 3,
+            color: 'grey.600',
+            borderRadius: 2,
+          }}
+        >
+          <Typography>
+            {requestDetail?.task_count ? 'Tasks have been created' : 'No tasks have been created'}
+          </Typography>
+          <Link to="task">
+            <SvgColor width={8} height={9.4} src="/assets/icons/ic-chevron-right.svg" />
+          </Link>
+        </Box>
+      )}
       <TableContainer>
         <Table sx={{ marginTop: 2 }}>
           <TableBody>
@@ -258,7 +259,7 @@ export function RequestDetailView() {
               </TableCell>
               <TableCell size="small">{requestDetail?.category?.name}</TableCell>
             </TableRow>
-            {requestDetail?.step === 'to-do' && (
+            {requestDetail?.step !== 'pending' && requestDetail?.step !== 'rejected' && (
               <TableRow>
                 <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                   PIC
@@ -290,7 +291,7 @@ export function RequestDetailView() {
                         </Box>
                       ))}
                     </Box>
-                    {userType === 'internal' && (
+                    {userType === 'internal' && requestDetail?.step !== 'done' && (
                       <ModalDialog
                         open={openAssigneeModal}
                         setOpen={setOpenAssigneeModal}
@@ -341,13 +342,23 @@ export function RequestDetailView() {
                 </TableCell>
               </TableRow>
             )}
-            {requestDetail?.step === 'to-do' && (
+            {requestDetail?.step !== 'pending' && requestDetail?.step !== 'rejected' && (
               <TableRow>
                 <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                   Start Date
                 </TableCell>
                 <TableCell size="small">
                   {dayjs(requestDetail?.start_date).format('YYYY-MM-DD')}
+                </TableCell>
+              </TableRow>
+            )}
+            {requestDetail?.step !== 'pending' && requestDetail?.step !== 'rejected' && (
+              <TableRow>
+                <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
+                  End Date
+                </TableCell>
+                <TableCell size="small">
+                  {dayjs(requestDetail?.end_date).format('YYYY-MM-DD')}
                 </TableCell>
               </TableRow>
             )}
@@ -377,7 +388,11 @@ export function RequestDetailView() {
                         >
                           <Box component="img" src="/assets/icons/file.png" />
                           <Box>
-                            <Typography fontWeight="bold">{file?.file_name}</Typography>
+                            <Typography fontWeight="bold">
+                              {file?.file_name?.length > 15
+                                ? `${file?.file_name?.substring(0, 15)}...`
+                                : file?.file_name}
+                            </Typography>
                           </Box>
                           <SvgColor
                             sx={{ cursor: 'pointer' }}
@@ -402,9 +417,11 @@ export function RequestDetailView() {
           <ApproveAction
             internalUsers={filteredInternalUser}
             dateValue={dateValue}
+            endDateValue={endDateValue}
             handleAddPicItem={handleAddPicItem}
             handleApprove={handleApprove}
             handleChangeDate={handleChangeDate}
+            handleChangeEndDate={handleChangeEndDate}
             openApprove={openApprove}
             openAssigneeModal={openAssigneeModal}
             priorities={priorities}

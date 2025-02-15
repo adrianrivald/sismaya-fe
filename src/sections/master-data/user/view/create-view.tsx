@@ -42,6 +42,7 @@ import {
   userClientSchema,
   userInternalSchema,
 } from 'src/services/master-data/user/schemas/user-schema';
+import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -55,7 +56,6 @@ const MenuProps = {
 };
 
 function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
-  console.log(selectedInternalCompanies, 'selectedComp');
   return {
     fontWeight:
       selectedInternalCompanies.indexOf(id) === -1
@@ -88,7 +88,6 @@ export function CreateUserView({ type }: CreateUserProps) {
       },
     }).then((res) =>
       res.json().then((value) => {
-        console.log(value?.data, 'value?.data');
         setDivisions(value?.data);
       })
     );
@@ -108,6 +107,19 @@ export function CreateUserView({ type }: CreateUserProps) {
       setIsLoading(false);
     }
   };
+
+  const onChangePhone = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    setValuePhone: UseFormSetValue<any>,
+    watchPhone: UseFormWatch<any>
+  ) => {
+    const phoneValue = e.target.value;
+    const numRegex = /^\d+$/;
+    if (numRegex.test(phoneValue) || watchPhone('phone').length === 1) {
+      setValuePhone('phone', phoneValue);
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -130,7 +142,7 @@ export function CreateUserView({ type }: CreateUserProps) {
             },
           }}
         >
-          {({ register, control, watch, formState }) => (
+          {({ register, control, watch, formState, setValue }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <FieldDropzone
@@ -224,14 +236,21 @@ export function CreateUserView({ type }: CreateUserProps) {
                   <Select
                     label="Internal Company"
                     labelId="demo-simple-select-outlined-label-type"
+                    error={Boolean(formState?.errors?.internal_id)}
                     id="internal_id"
                     {...register('internal_id', {
                       required: 'Internal Company must be filled out',
                     })}
                     multiple
                     value={watch('internal_id')}
-                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                    renderValue={(selected) => (
+                    input={
+                      <OutlinedInput
+                        error={Boolean(formState?.errors?.internal_id)}
+                        id="select-multiple-chip"
+                        label="Chip"
+                      />
+                    }
+                    renderValue={() => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                         {watch('internal_id').map((value: any) => (
                           <Chip
@@ -296,6 +315,8 @@ export function CreateUserView({ type }: CreateUserProps) {
                   {...register('phone', {
                     required: 'Phone Number must be filled out',
                   })}
+                  value={watch('phone')}
+                  onChange={(e) => onChangePhone(e, setValue, watch)}
                   autoComplete="off"
                 />
                 {formState?.errors?.phone && (

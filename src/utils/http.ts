@@ -98,7 +98,7 @@ export function http<TData = any>(
       return responseData as TData;
     }
 
-    if (response.status === 401 && !response.url.includes('auth/login')) {
+    if (response.status === 401 && !response.url.includes('login')) {
       flushStorage();
       window.location.href= "/"
       // window.location.reload();

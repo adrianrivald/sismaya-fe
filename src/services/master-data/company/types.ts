@@ -10,6 +10,8 @@ export interface Company {
     progress_statuses: Status[]
     department: Department[]
     image: string
+    cito_quota: number;
+    cito_used: number
 }
 
 export interface Status {
@@ -24,6 +26,7 @@ export interface Department {
     id: number;
     name: string;
     company_id: number
+    is_show_all: boolean
 }
 export interface Categories {
     id: number;

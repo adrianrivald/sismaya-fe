@@ -1,33 +1,19 @@
-import { Box, Stack, AvatarGroup, Avatar, Divider, Typography } from '@mui/material';
-import { type Task } from 'src/services/request/task';
+import { Stack, Divider, Typography } from '@mui/material';
+import type { RequestTask } from 'src/services/request/task';
+import { AssigneeList } from 'src/components/form/field/assignee';
 import { TaskAttachment } from './task-attachment';
+import { TaskStatus } from './task-status';
 
-function TaskStatus({ bg, color, label }: ReturnType<Task['transformStatus']>) {
-  return (
-    <Box bgcolor={bg} color={color} borderRadius={0.5} px={1} py="1px">
-      <Typography fontWeight={600} fontSize={12} lineHeight="20px">
-        {label}
-      </Typography>
-    </Box>
-  );
-}
-
-function TaskAssignees({ assignees }: Pick<Task, 'assignees'>) {
+function TaskAssignees({ assignees }: Pick<RequestTask, 'assignees'>) {
   if (!assignees || assignees.length < 1) {
     return null;
   }
 
-  return (
-    <AvatarGroup total={assignees.length}>
-      {assignees.map((assignee) => (
-        <Avatar key={assignee.id} title={assignee.name} alt={assignee.name} src={assignee.avatar} />
-      ))}
-    </AvatarGroup>
-  );
+  return <AssigneeList assignees={assignees} />;
 }
 
 interface TaskItemProps {
-  task: Task;
+  task: RequestTask;
   onClick?: () => void;
 }
 
@@ -57,11 +43,11 @@ export function TaskItem({ task, onClick }: TaskItemProps) {
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Stack direction="row" alignItems="center" flexGrow={1} spacing={1}>
-          <TaskAssignees assignees={task.assignees} />
+          {!!task.assignees && <TaskAssignees assignees={task.assignees} />}
 
           <Divider orientation="vertical" flexItem />
 
-          <TaskStatus {...task.transformStatus()} />
+          <TaskStatus status={task.status} />
         </Stack>
 
         <TaskAttachment files={task.files} />

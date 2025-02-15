@@ -15,7 +15,6 @@ export function useAddStatus() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreStatus) => {
-        console.log(formData,'formDataformData')
         const { name, company_id, step, sort } = formData;
   
   

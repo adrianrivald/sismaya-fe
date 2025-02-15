@@ -39,7 +39,6 @@ export function useUpdateCompany() {
       {
         // onSuccess: (res: {data: UpdateCompany}) => {
           onSuccess: (res: any) => {
-          console.log(res,'res')
           queryClient.invalidateQueries(['company']);
   
           toast.success('Data updated successfully', {

@@ -1,5 +1,4 @@
 import type { Dayjs } from 'dayjs';
-
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -17,15 +16,15 @@ export type DatePickerFormat = Dayjs | Date | string | number | null | undefined
  * Docs: https://day.js.org/docs/en/display/format
  */
 export const formatStr = {
-  dateTime: 'DD MMM YYYY h:mm a', // 17 Apr 2022 12:00 am
+  dateTime: 'DD MMM YYYY hh:mm', // 17 Apr 2022 12:00
   date: 'DD MMM YYYY', // 17 Apr 2022
-  time: 'h:mm a', // 12:00 am
+  time: 'hh:mm', // 12:00
   split: {
-    dateTime: 'DD/MM/YYYY h:mm a', // 17/04/2022 12:00 am
+    dateTime: 'DD/MM/YYYY hh:mm', // 17/04/2022 12:00
     date: 'DD/MM/YYYY', // 17/04/2022
   },
   paramCase: {
-    dateTime: 'DD-MM-YYYY h:mm a', // 17-04-2022 12:00 am
+    dateTime: 'DD-MM-YYYY hh:mm', // 17-04-2022 12:00
     date: 'DD-MM-YYYY', // 17-04-2022
   },
 };
@@ -36,7 +35,7 @@ export function today(format?: string) {
 
 // ----------------------------------------------------------------------
 
-/** output: 17 Apr 2022 12:00 am
+/** output: 17 Apr 2022 12:00
  */
 export function fDateTime(date: DatePickerFormat, format?: string) {
   if (!date) {
@@ -64,7 +63,7 @@ export function fDate(date: DatePickerFormat, format?: string) {
 
 // ----------------------------------------------------------------------
 
-/** output: 12:00 am
+/** output: 12:00
  */
 export function fTime(date: DatePickerFormat, format?: string) {
   if (!date) {
@@ -102,4 +101,22 @@ export function fToNow(date: DatePickerFormat) {
   const isValid = dayjs(date).isValid();
 
   return isValid ? dayjs(date).toNow(true) : 'Invalid time value';
+}
+
+/**
+ * Format seconds to time
+ * @example
+ * formatSecondToTime(3600) // "01:00:00"
+ * formatSecondToTime(60) // "01:00"
+ * formatSecondToTime(1) // "00:01"
+ */
+export function formatSecondToTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  const timer = hours > 0 ? [hours, minutes, remainingSeconds] : [minutes, remainingSeconds];
+  const text = timer.map((t) => Math.floor(t).toString().padStart(2, '0')).join(':');
+
+  return text;
 }

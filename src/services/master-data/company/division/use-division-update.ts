@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
@@ -7,20 +6,22 @@ export type UpdateDepartment = {
   name:string;
   id: number;
   company_id: number
+  is_show_all: boolean;
 };
 
 export function useUpdateDivision() {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: UpdateDepartment) => {
-        const { name, id, company_id } = formData;
+        const { name, id, company_id, is_show_all } = formData;
   
   
         return http(`departments/${id}`, {
         method: "PUT",
           data: {
             name,
-            company_id
+            company_id,
+            is_show_all
           },
         });
       },

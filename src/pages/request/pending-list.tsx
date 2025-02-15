@@ -1,16 +1,19 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
-import { DashboardView } from 'src/sections/overview/view';
+import { RequestPendingView } from 'src/sections/request/view';
 
 // ----------------------------------------------------------------------
 
-export default function Page() {
+export default function PendingListPage() {
+  const { user } = useAuth();
+  const userType = user?.user_info?.user_type;
   return (
     <>
       <Helmet>
-        <title> {`Dashboard - ${CONFIG.appName}`}</title>
+        <title> {`Request CITO List - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -18,7 +21,7 @@ export default function Page() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <DashboardView />
+      <RequestPendingView type={userType} />
     </>
   );
 }

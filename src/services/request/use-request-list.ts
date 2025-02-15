@@ -1,24 +1,26 @@
-
 import { dataTableParamsBuilder } from 'src/utils/data-table-params-builder';
 import { usePaginationQuery } from 'src/utils/hooks/use-pagination-query';
 import { http } from 'src/utils/http';
-import { WithPagination } from 'src/utils/types';
+import type { WithPagination } from 'src/utils/types';
 
-
-export function fetchRequestList(params: Partial<any>, assignee_company_id: string) {
+export function fetchRequestList(params: Partial<any>, assignee_company_id: number) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/requests', baseUrl);
 
   if (assignee_company_id) {
-    endpointUrl.searchParams.append('assignee_company_id', assignee_company_id);
+    endpointUrl.searchParams.append('assignee_company_id', assignee_company_id.toString());
   }
 
-  if (params.active) {
-    endpointUrl.searchParams.append('active', params.active);
+  if (params.status) {
+    endpointUrl.searchParams.append('status', params.status);
   }
 
-  if (params.platform) {
-    endpointUrl.searchParams.append('platform', params.platform);
+  if (params.cito) {
+    endpointUrl.searchParams.append('cito', params.cito);
+  }
+
+  if (params.step) {
+    endpointUrl.searchParams.append('step', params.step);
   }
 
   dataTableParamsBuilder({
@@ -27,16 +29,12 @@ export function fetchRequestList(params: Partial<any>, assignee_company_id: stri
     ...params,
   });
 
-
-  return http<WithPagination<any>>(
-    endpointUrl.toString().replace(baseUrl, '')
-  );
+  return http<WithPagination<any>>(endpointUrl.toString().replace(baseUrl, ''));
 }
 
-export function useRequestList(params: Partial<any>, assignee_company_id: string
-  ) {
+export function useRequestList(params: Partial<any>, assignee_company_id: number) {
   return usePaginationQuery(
-    ['request', params.keyword, params.active, params.order, params.platform, assignee_company_id],
+    ['request', params.keyword, params.status, params.cito, params.step, assignee_company_id],
     (paginationState) => fetchRequestList({ ...params, ...paginationState }, assignee_company_id)
   );
 }

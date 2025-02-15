@@ -9,6 +9,10 @@ import {
   TextField,
   MenuList,
   menuItemClasses,
+  FormControl,
+  InputLabel,
+  Select,
+  SelectChangeEvent,
 } from '@mui/material';
 
 import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
@@ -28,6 +32,7 @@ import { Iconify } from 'src/components/iconify';
 import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Company, Department } from 'src/services/master-data/company/types';
+import { RemoveAction } from './remove-action';
 
 interface ClientCompanyValues {
   name: string | undefined;
@@ -41,14 +46,22 @@ interface EditFormProps {
   control: Control<CompanyDTO>;
   setValue: UseFormSetValue<CompanyDTO>;
   defaultValues: ClientCompanyValues;
-  onChangeDivision: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
-  onClickEdit: (value: string, divisionId: number) => void;
+  onChangeDivision: (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    itemId: number,
+    type: string
+  ) => void;
+  onClickEdit: (value: string, type: boolean, divisionId: number) => void;
   onClickDelete: (divisionId: number) => void;
-  onChangeDivisionNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeDivisionNew: (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    type: string
+  ) => void;
   data: Company | undefined;
-  department: string;
+  department: Partial<Department>;
   departments: Department[];
   onAddDepartment: () => void;
+  onClickRemove: (id: number) => void;
 }
 
 function EditForm({
@@ -65,6 +78,7 @@ function EditForm({
   departments,
   data,
   onAddDepartment,
+  onClickRemove,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -120,6 +134,7 @@ function EditForm({
             control,
           }}
           defaultImage={defaultValues?.image}
+          maxSize={5000000}
         />
       </Grid>
 
@@ -130,18 +145,36 @@ function EditForm({
         <Box display="flex" flexDirection="column" gap={2}>
           {data?.department?.map((item, index) => (
             <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-              <TextField
-                sx={{
-                  width: '100%',
-                }}
-                label="Division"
-                value={item.name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeDivision(e, item?.id)}
-                // InputProps={{
-                //   readOnly: true,
-                // }}
-              />
-
+              <Box width="50%">
+                <TextField
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Division"
+                  value={item.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChangeDivision(e, item?.id, 'name')
+                  }
+                  // InputProps={{
+                  //   readOnly: true,
+                  // }}
+                />
+              </Box>
+              <Box width="50%">
+                <FormControl fullWidth>
+                  <InputLabel id="type">Show Type</InputLabel>
+                  <Select
+                    label="Type"
+                    value={item?.is_show_all}
+                    onChange={(e: SelectChangeEvent<boolean>) =>
+                      onChangeDivision(e, item?.id, 'type')
+                    }
+                  >
+                    <MenuItem value="true">Show all division</MenuItem>
+                    <MenuItem value="false">Only show this division</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
               <MenuList
                 disablePadding
                 sx={{
@@ -157,11 +190,15 @@ function EditForm({
                   },
                 }}
               >
-                <MenuItem onClick={() => onClickEdit(departments[index].name, item?.id)}>
+                <MenuItem
+                  onClick={() =>
+                    onClickEdit(departments[index].name, departments[index].is_show_all, item?.id)
+                  }
+                >
                   <Iconify icon="solar:pen-bold" />
                   Edit
                 </MenuItem>
-                <MenuItem onClick={() => onClickDelete(item?.id)} sx={{ color: 'error.main' }}>
+                <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
                   <Iconify icon="solar:trash-bin-trash-bold" />
                   Delete
                 </MenuItem>
@@ -169,19 +206,42 @@ function EditForm({
             </Stack>
           ))}
           <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-            <TextField
-              sx={{
-                width: '100%',
-              }}
-              label="Division"
-              value={department}
-              onChange={onChangeDivisionNew}
-            />
+            <Box width="50%">
+              <TextField
+                sx={{
+                  width: '100%',
+                }}
+                label="Division"
+                value={department?.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChangeDivisionNew(e, 'name')
+                }
+              />
+            </Box>
+
+            <Box width="50%">
+              <FormControl fullWidth>
+                <InputLabel id="type">Show Type</InputLabel>
+                <Select
+                  label="Type"
+                  value={department?.is_show_all}
+                  onChange={(e: SelectChangeEvent<boolean>) => onChangeDivisionNew(e, 'type')}
+                >
+                  <MenuItem value="true">Show all division</MenuItem>
+                  <MenuItem value="false">Only show this division</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={onAddDepartment}
+              sx={{ marginY: 2 }}
+            >
+              Save
+            </Button>
           </Stack>
         </Box>
-        <Button onClick={onAddDepartment} sx={{ marginY: 2 }}>
-          Add More
-        </Button>
       </Grid>
 
       <Box
@@ -207,8 +267,15 @@ export function EditClientCompanyView() {
   const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
   const { mutate: addDivision } = useAddDivision();
   const { mutate: updateDivision } = useUpdateDivision();
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | undefined>();
+
+  // Division
   const [departments, setDepartments] = React.useState(data?.department ?? []);
-  const [department, setDepartment] = React.useState('');
+  const [department, setDepartment] = React.useState<Partial<Department>>({
+    name: '',
+    is_show_all: false,
+  });
 
   const defaultValues: ClientCompanyValues = {
     name: data?.name,
@@ -219,10 +286,25 @@ export function EditClientCompanyView() {
 
   const onAddDepartment = () => {
     addDivision({
-      name: department,
+      name: department?.name,
+      is_show_all: department?.is_show_all,
       company_id: data?.id,
     });
-    setDepartment('');
+    setDepartment({
+      name: '',
+      is_show_all: false,
+    });
+  };
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
+
+  const onRemove = () => {
+    deleteDivision(selectedId ?? 0);
+
+    setOpenRemoveModal(false);
   };
 
   const handleSubmit = (formData: CompanyDTO) => {
@@ -243,29 +325,57 @@ export function EditClientCompanyView() {
     setDepartments(data?.department ?? []);
   }, [data]);
 
-  const onChangeDivision = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
-    setDepartments((prevDepartments) => {
-      const updatedDeparments = [...prevDepartments];
-      // Update the string at the specified index
-      const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
-      updatedDeparments[index].name = e.target.value;
-      return updatedDeparments;
-    });
+  const onChangeDivision = (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    itemId: number,
+    type: string
+  ) => {
+    if (type === 'name') {
+      setDepartments((prevDepartments) => {
+        const updatedDeparments = [...prevDepartments];
+        // Update the string at the specified index
+        const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
+        updatedDeparments[index].name = e.target.value as string;
+        return updatedDeparments;
+      });
+    } else {
+      setDepartments((prevDepartments) => {
+        const updatedDeparments = [...prevDepartments];
+        // Update the string at the specified index
+        const index = updatedDeparments?.findIndex((item) => item?.id === itemId);
+        updatedDeparments[index].is_show_all = e.target.value as boolean;
+        return updatedDeparments;
+      });
+    }
   };
 
-  const onChangeDivisionNew = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDepartment(e.target.value);
+  const onChangeDivisionNew = (
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    type: string
+  ) => {
+    if (type === 'name') {
+      setDepartment({
+        ...department,
+        name: e.target.value as string,
+      });
+    } else {
+      setDepartment({
+        ...department,
+        is_show_all: e.target.value as boolean,
+      });
+    }
   };
 
   const onClickDelete = async (divisionId: number) => {
     deleteDivision(divisionId);
   };
 
-  const onClickEdit = async (value: string, divisionId: number) => {
+  const onClickEdit = async (value: string, type: boolean, divisionId: number) => {
     updateDivision({
       name: value,
       id: divisionId,
       company_id: Number(id),
+      is_show_all: type,
     });
   };
 
@@ -305,10 +415,17 @@ export function EditClientCompanyView() {
               onChangeDivisionNew={onChangeDivisionNew}
               onClickDelete={onClickDelete}
               onClickEdit={onClickEdit}
+              onClickRemove={onClickRemove}
             />
           )}
         </Form>
       </Grid>
+
+      <RemoveAction
+        onRemove={onRemove}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

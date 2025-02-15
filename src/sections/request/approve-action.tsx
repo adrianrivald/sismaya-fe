@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { ChangeEvent, Dispatch, SetStateAction } from 'react';
@@ -36,7 +36,9 @@ interface ApproveActionProps {
   handleApprove: (formData: any) => void;
   priorities: Priority[];
   dateValue: dayjs.Dayjs | null;
+  endDateValue: dayjs.Dayjs | null;
   handleChangeDate: (newValue: Dayjs | null) => void;
+  handleChangeEndDate: (newValue: Dayjs | null) => void;
   selectedPic: SelectedPic[] | undefined;
   selectedPicWarning: boolean;
   openAssigneeModal: boolean;
@@ -54,7 +56,9 @@ export function ApproveAction({
   handleApprove,
   priorities,
   dateValue,
+  endDateValue,
   handleChangeDate,
+  handleChangeEndDate,
   selectedPic,
   selectedPicWarning,
   openAssigneeModal,
@@ -109,7 +113,7 @@ export function ApproveAction({
                     gap={2}
                   >
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
+                      <DateTimePicker
                         sx={{
                           width: '50%',
                         }}
@@ -119,19 +123,18 @@ export function ApproveAction({
                         // renderInput={(params: any) => <TextField {...params} />}
                       />
                     </LocalizationProvider>
-                    <TextField
-                      error={Boolean(formState?.errors?.estimated_duration)}
-                      sx={{
-                        width: '50%',
-                      }}
-                      type="number"
-                      label="Estimated Duration"
-                      {...register('estimated_duration', {
-                        valueAsNumber: true,
 
-                        // required: 'Estimated Duration must be filled out',
-                      })}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DateTimePicker
+                        sx={{
+                          width: '50%',
+                        }}
+                        label="End Date"
+                        value={endDateValue}
+                        onChange={handleChangeEndDate}
+                        // renderInput={(params: any) => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
                     {formState?.errors?.estimated_duration && (
                       <FormHelperText sx={{ color: 'error.main' }}>
                         {String(formState?.errors?.estimated_duration?.message)}

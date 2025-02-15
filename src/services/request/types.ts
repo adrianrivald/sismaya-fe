@@ -1,4 +1,5 @@
 import { StringValidation } from "zod";
+import type { Companies } from "src/sections/master-data/internal-company/view/types";
 import { InternalCompany } from "../master-data/company/types";
 import { UserInfo } from "../master-data/user/types";
 
@@ -76,6 +77,8 @@ export interface Request {
     is_cito: boolean;
     requester: UserInfo;
     step: string;
+    company: Companies
+    internal_company: Companies
 }
 
 export interface Assignees {
@@ -119,6 +122,7 @@ export interface RequestDetail {
     requester: UserInfo
     step: string;
     start_date: string;
+    end_date: string;
     reject_reason: string
     task_count: number;
 }
@@ -133,4 +137,26 @@ export interface Attachment {
     file_path: string;
     id: number;
     updated_at: string;
+}
+
+export interface RequestStatus {
+    id: number;
+    name: string;
+    sort: number;
+    company: Company;
+    step: string;
+}
+
+export interface RequestSummary {
+    active: number;
+    done: number;
+    in_progress: number;
+    pending: number;
+    rejected: number;
+}
+
+export interface RequestStatusSummary {
+    count: number;
+    id: number;
+    name: string
 }

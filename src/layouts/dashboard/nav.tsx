@@ -1,4 +1,5 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 import { Fragment, useEffect } from 'react';
 
@@ -19,12 +20,11 @@ import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
-import { menuByRole, Menus } from '../config-nav-dashboard';
+import { menuItems } from '../config-nav-dashboard';
 
 // ----------------------------------------------------------------------
 
 export type NavContentProps = {
-  menus: Menus[];
   slots?: {
     topArea?: React.ReactNode;
     bottomArea?: React.ReactNode;
@@ -35,7 +35,6 @@ export type NavContentProps = {
 
 export function NavDesktop({
   sx,
-  menus,
   slots,
   workspaces,
   layoutQuery,
@@ -63,7 +62,7 @@ export function NavDesktop({
         ...sx,
       }}
     >
-      <NavContent menus={menus} slots={slots} workspaces={workspaces} />
+      <NavContent slots={slots} workspaces={workspaces} />
     </Box>
   );
 }
@@ -72,7 +71,7 @@ export function NavDesktop({
 
 export function NavMobile({
   sx,
-  menus,
+
   open,
   slots,
   onClose,
@@ -102,102 +101,180 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent menus={menus} slots={slots} workspaces={workspaces} />
+      <NavContent slots={slots} workspaces={workspaces} />
     </Drawer>
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
+export function NavContent({ slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const role = user?.user_info?.role_id;
+  const navigate = useNavigate();
+  const userRole = user?.user_info?.role_id;
+  const userType = user?.user_info?.user_type;
+  const userPermissions = user?.user_info?.role?.permissions?.map((item) => item?.name);
   const currentMenu = window.location.href.split('/')[3];
-  const accessibleMenus = role === 1 ? ['master-data'] : ['request'];
 
+  const onClickParentAccordion = (path?: string) => {
+    if (path) {
+      navigate(`${path}`);
+    }
+  };
+
+  const internalCompaniesDashboard = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/dashboard`,
+  }));
+
+  const internalCompaniesRequest = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/request`,
+  }));
+
+  const internalCompaniesTask = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/task`,
+  }));
+  console.log(userPermissions, 'userPermissions');
   return (
-    <>
+    <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />
 
       {slots?.topArea}
 
       <Scrollbar fillContent>
-        {menus?.map((menu) => (
-          <Fragment key={menu?.id}>
-            {menu?.isAccordion ? (
-              <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
-                <Box
-                  color="var(--layout-nav-item-color)"
-                  fontWeight="bold"
-                  mt={4}
-                  sx={{
-                    pl: 2,
-                    py: 1,
-                    gap: 2,
-                  }}
-                  component="span"
-                >
-                  {menu?.heading}
-                </Box>
-                <Box component="ul" gap={0.5} display="flex" flexDirection="column">
-                  {menu?.list
-                    ?.filter((item: any) => accessibleMenus?.includes(item?.id))
-                    .map((childMenu: any, index: number) => (
-                      <Accordion key={index} defaultExpanded={childMenu?.path === currentMenu}>
-                        <AccordionSummary
-                          // expandIcon={<ExpandMoreIcon />}
-                          sx={{
-                            p: 0,
-                          }}
-                          aria-controls="panel-content"
-                          id=""
-                        >
-                          <ListItem disableGutters disablePadding key="request">
-                            <ListItemButton
-                              disableGutters
-                              sx={{
-                                pl: 2,
-                                py: 1,
-                                gap: 2,
-                                pr: 1.5,
-                                borderRadius: 0.75,
-                                typography: 'body2',
-                                fontWeight: 'fontWeightMedium',
-                                color: 'var(--layout-nav-item-color)',
-                                minHeight: 'var(--layout-nav-item-height)',
-                                // ...(isActived && {
-                                //   fontWeight: 'fontWeightSemiBold',
-                                //   bgcolor: 'var(--layout-nav-item-active-bg)',
-                                //   color: 'var(--layout-nav-item-active-color)',
-                                //   '&:hover': {
-                                //     bgcolor: 'var(--layout-nav-item-hover-bg)',
-                                //   },
-                                // }),
-                              }}
-                            >
-                              <Box component="span" sx={{ width: 24, height: 24 }}>
-                                {childMenu?.icon}
-                              </Box>
+        {menuItems(
+          internalCompaniesDashboard,
+          internalCompaniesRequest,
+          internalCompaniesTask,
+          userType
+        )
+          ?.filter((item) =>
+            item?.list?.some((listItem) =>
+              userRole !== 1
+                ? userPermissions?.includes(listItem?.id)
+                : !userPermissions?.includes(listItem?.id)
+            )
+          )
+          .map((menu) => (
+            <Fragment key={menu?.id}>
+              <>
+                {/* {menu?.isShownInRole?.includes(role) ? ( */}
+                <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
+                  <Box
+                    color="var(--layout-nav-item-color)"
+                    fontWeight="bold"
+                    mt={4}
+                    sx={{
+                      pl: 2,
+                      py: 1,
+                      gap: 2,
+                    }}
+                    component="span"
+                  >
+                    {menu?.heading}
+                  </Box>
+                  <Box component="ul" gap={0.5} display="flex" flexDirection="column">
+                    {menu?.list
+                      ?.filter((item) =>
+                        userRole !== 1
+                          ? userPermissions?.includes(item?.id)
+                          : !userPermissions?.includes(item?.id)
+                      )
+                      .map((childMenu: any, index) => {
+                        const isActived = childMenu.path === pathname;
 
-                              <Box component="span" flexGrow={1}>
-                                {childMenu?.heading}
-                              </Box>
+                        return (
+                          <>
+                            {childMenu?.list?.length ? (
+                              <Accordion
+                                key={index}
+                                defaultExpanded={childMenu?.path === currentMenu}
+                              >
+                                <AccordionSummary
+                                  sx={{
+                                    p: 0,
+                                  }}
+                                  aria-controls="panel-content"
+                                  id=""
+                                >
+                                  <ListItem disableGutters disablePadding key="request">
+                                    <ListItemButton
+                                      disableGutters
+                                      sx={{
+                                        pl: 2,
+                                        py: 1,
+                                        gap: 2,
+                                        pr: 1.5,
+                                        borderRadius: 0.75,
+                                        typography: 'body2',
+                                        fontWeight: 'fontWeightMedium',
+                                        color: 'var(--layout-nav-item-color)',
+                                        minHeight: 'var(--layout-nav-item-height)',
+                                      }}
+                                      onClick={() => onClickParentAccordion(childMenu?.path)}
+                                    >
+                                      <Box component="span" sx={{ width: 24, height: 24 }}>
+                                        {childMenu?.icon}
+                                      </Box>
 
-                              {/* {item.info && item.info} */}
-                            </ListItemButton>
-                          </ListItem>
-                        </AccordionSummary>
+                                      <Box component="span" flexGrow={1}>
+                                        {childMenu?.heading}
+                                      </Box>
 
-                        <AccordionDetails>
-                          {childMenu?.list.map((item: any, childIndex: number) => {
-                            const isActived = pathname.includes(item.path);
-                            return (
-                              <ListItem disableGutters disablePadding key={childIndex}>
+                                      {/* {item.info && item.info} */}
+                                    </ListItemButton>
+                                  </ListItem>
+                                </AccordionSummary>
+
+                                <AccordionDetails>
+                                  {childMenu?.list?.map((item: any, childIndex: number) => {
+                                    const isMenuActived = pathname.includes(item.path);
+                                    return (
+                                      <ListItem disableGutters disablePadding key={childIndex}>
+                                        <ListItemButton
+                                          disableGutters
+                                          component={RouterLink}
+                                          href={item.path}
+                                          sx={{
+                                            pl: 2,
+                                            py: 1,
+                                            gap: 2,
+                                            pr: 1.5,
+                                            borderRadius: 0.75,
+                                            typography: 'body2',
+                                            fontWeight: 'fontWeightMedium',
+                                            color: 'var(--layout-nav-item-color)',
+                                            minHeight: 'var(--layout-nav-item-height)',
+                                            ...(isMenuActived && {
+                                              fontWeight: 'fontWeightSemiBold',
+                                              bgcolor: 'var(--layout-nav-item-active-bg)',
+                                              color: 'var(--layout-nav-item-active-color)',
+                                              '&:hover': {
+                                                bgcolor: 'var(--layout-nav-item-hover-bg)',
+                                              },
+                                            }),
+                                          }}
+                                        >
+                                          <Box component="span" flexGrow={1}>
+                                            {item.heading}
+                                          </Box>
+
+                                          {item.info && item.info}
+                                        </ListItemButton>
+                                      </ListItem>
+                                    );
+                                  })}
+                                </AccordionDetails>
+                              </Accordion>
+                            ) : (
+                              <ListItem disableGutters disablePadding key={index}>
                                 <ListItemButton
                                   disableGutters
                                   component={RouterLink}
-                                  href={item.path}
+                                  href={String(childMenu.path)}
                                   sx={{
                                     pl: 2,
                                     py: 1,
@@ -218,90 +295,28 @@ export function NavContent({ menus, slots, workspaces, sx }: NavContentProps) {
                                     }),
                                   }}
                                 >
-                                  <Box component="span" flexGrow={1}>
-                                    {item.heading}
+                                  <Box component="span" sx={{ width: 24, height: 24 }}>
+                                    {childMenu.icon}
                                   </Box>
 
-                                  {item.info && item.info}
+                                  <Box component="span" flexGrow={1}>
+                                    {childMenu.heading}
+                                  </Box>
                                 </ListItemButton>
                               </ListItem>
-                            );
-                          })}
-                        </AccordionDetails>
-                      </Accordion>
-                    ))}
-                </Box>
-              </Box>
-            ) : (
-              <>
-                {/* {menu?.isShownInRole?.includes(role) ? ( */}
-                <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
-                  <Box
-                    color="var(--layout-nav-item-color)"
-                    fontWeight="bold"
-                    mt={4}
-                    sx={{
-                      pl: 2,
-                      py: 1,
-                      gap: 2,
-                    }}
-                    component="span"
-                  >
-                    {menu?.heading}
-                  </Box>
-                  <Box component="ul" gap={0.5} display="flex" flexDirection="column">
-                    {menu?.list.map((item: any, index: number) => {
-                      const isActived = item.path === pathname;
-
-                      return (
-                        <ListItem disableGutters disablePadding key={index}>
-                          <ListItemButton
-                            disableGutters
-                            component={RouterLink}
-                            href={item.path}
-                            sx={{
-                              pl: 2,
-                              py: 1,
-                              gap: 2,
-                              pr: 1.5,
-                              borderRadius: 0.75,
-                              typography: 'body2',
-                              fontWeight: 'fontWeightMedium',
-                              color: 'var(--layout-nav-item-color)',
-                              minHeight: 'var(--layout-nav-item-height)',
-                              ...(isActived && {
-                                fontWeight: 'fontWeightSemiBold',
-                                bgcolor: 'var(--layout-nav-item-active-bg)',
-                                color: 'var(--layout-nav-item-active-color)',
-                                '&:hover': {
-                                  bgcolor: 'var(--layout-nav-item-hover-bg)',
-                                },
-                              }),
-                            }}
-                          >
-                            <Box component="span" sx={{ width: 24, height: 24 }}>
-                              {item.icon}
-                            </Box>
-
-                            <Box component="span" flexGrow={1}>
-                              {item.heading}
-                            </Box>
-
-                            {item.info && item.info}
-                          </ListItemButton>
-                        </ListItem>
-                      );
-                    })}
+                            )}
+                          </>
+                        );
+                      })}
                   </Box>
                 </Box>
                 {/* ) : null} */}
               </>
-            )}
-          </Fragment>
-        ))}
+            </Fragment>
+          ))}
       </Scrollbar>
 
       {slots?.bottomArea}
-    </>
+    </Box>
   );
 }

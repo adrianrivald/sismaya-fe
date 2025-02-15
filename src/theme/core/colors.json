@@ -37,7 +37,9 @@
     "main": "#FFF5D7",
     "dark": "#B78103",
     "darker": "#7A0C2E",
-    "contrastText": "#1C252E"
+    "contrastText": "#1C252E",
+    "200": "#FFF7CD",
+    "600": "#7A4F01"
   },
   "error": {
     "lighter": "#FFE2E1",
@@ -52,6 +54,7 @@
     "50": "#FCFDFD",
     "100": "#F9FAFB",
     "150": "#EFF0F3",
+    "175": "#D9DBDE",
     "200": "#F4F6F8",
     "250": "#D8E0E4",
     "300": "#DFE3E8",
@@ -73,5 +76,9 @@
   "common": {
     "black": "#000000",
     "white": "#FFFFFF"
+  },
+  "mint": {
+    "500" : "#A4F7CC",
+    "700" : "#80ADBF"
   }
 }
