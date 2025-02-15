@@ -28,7 +28,10 @@ export const generalMenus = (internalCompaniesDashboard?: ChildMenus[], userType
     id: 'dashboard',
     path: '/',
     icon: icon('ic-analytics'),
-    list: userType === 'internal' ? internalCompaniesDashboard : [],
+    list:
+      userType === 'internal'
+        ? internalCompaniesDashboard?.filter((item) => item?.heading !== undefined)
+        : [],
   },
 ];
 
