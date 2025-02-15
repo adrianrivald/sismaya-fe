@@ -12,6 +12,7 @@ import { Form } from 'src/components/form/form';
 import { useMessagePost } from 'src/services/messaging/use-messaging';
 import type { Messaging } from 'src/services/messaging/types';
 import { Bounce, toast } from 'react-toastify';
+import dayjs from 'dayjs';
 import { useAuth } from '../auth/providers/auth';
 
 const Messenger = React.lazy(() => import('./task/task-activities'));
@@ -53,9 +54,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
           request_id,
           file,
         });
-        // if (isSuccess) {
         onResetField();
-        // }
       } catch (error) {
         console.log(error);
       }
@@ -108,7 +107,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
         id="chatBox"
         display="flex"
         flexDirection="column"
-        gap={2}
+        gap={4}
         overflow="auto"
         height={400}
         sx={{ p: 2 }}
@@ -125,7 +124,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                     gap={1}
                     alignItems={!isMine ? 'flex-end' : 'flex-start'}
                   >
-                    <Box display="flex" gap={2}>
+                    <Box display="flex" gap={1}>
                       {isMine && (
                         <Avatar
                           sx={{ width: 32, height: 32 }}
@@ -139,7 +138,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                         alignItems={!isMine ? 'flex-end' : 'flex-start'}
                       >
                         <Typography color="grey.600" fontSize={12}>
-                          4:02pm
+                          {dayjs(chat?.created_at).format('h:mm a')}
                         </Typography>
 
                         {chat?.content !== '' && (
@@ -155,7 +154,6 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                         )}
                         {chat?.file_path && (
                           <Box
-                            mt={1}
                             sx={{
                               borderRadius: '8px',
                               maxWidth: '75%',
