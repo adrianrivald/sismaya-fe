@@ -35,6 +35,7 @@ export default function RequestDetailLayout() {
   const [chatPage, setChatPage] = useState(1);
   const [isShouldFetch, setIsShouldFetch] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
+  const [isFetchingChat, setIsFetchingChat] = useState(false);
   const { data } = useMessage(Number(id), chatPage);
   const [chatData, setChatData] = useState<Messaging[]>(data?.messages ?? []);
   const { mutate: updateStatus } = useUpdateRequestStatus();
@@ -57,7 +58,6 @@ export default function RequestDetailLayout() {
     return 'low';
   };
 
-  console.log(chatData, 'chatData');
   useEffect(() => {
     if (chatPage === 1) setChatData(data?.messages ?? []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,9 +71,11 @@ export default function RequestDetailLayout() {
 
   useEffect(() => {
     if (isShouldFetch && chatPage < data?.meta?.total_page && isCoolingDown) {
+      setIsFetchingChat(true);
       setTimeout(() => {
         setChatPage((prev) => prev + 1);
         setIsCoolingDown(false);
+        setIsFetchingChat(false);
       }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -313,6 +315,7 @@ export default function RequestDetailLayout() {
         </Grid>
         <Grid item xs={12} md={4}>
           <RequestMessenger
+            isFetchingChat={isFetchingChat}
             onSuccess={onSuccess}
             requestId={Number(id)}
             chats={chatData as Messaging[]}

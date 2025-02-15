@@ -21,9 +21,10 @@ interface RequestChatProps {
   chats: Messaging[];
   request_id: number;
   onSuccess: (newData: any) => void;
+  isFetchingChat: boolean;
 }
 
-function RequestChat({ chats, request_id, onSuccess }: RequestChatProps) {
+function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestChatProps) {
   const [inputContent, setInputContent] = React.useState('');
   const { user } = useAuth();
   const [file, setFile] = React.useState<File | null>(null);
@@ -116,6 +117,11 @@ function RequestChat({ chats, request_id, onSuccess }: RequestChatProps) {
         height={400}
         sx={{ p: 2 }}
       >
+        {isFetchingChat && (
+          <Box display="flex" justifyContent="center">
+            <Loader />
+          </Box>
+        )}
         {chats?.length > 0 ? (
           <>
             {chats
@@ -265,10 +271,12 @@ export function RequestMessenger({
   requestId,
   chats,
   onSuccess,
+  isFetchingChat,
 }: {
   requestId: number;
   chats: Messaging[];
   onSuccess: (newData: any) => void;
+  isFetchingChat: boolean;
 }) {
   const isTask = window.location.pathname.includes('/task');
 
@@ -276,7 +284,12 @@ export function RequestMessenger({
     return (
       <React.Suspense fallback={<Loader />}>
         <Messenger requestId={requestId}>
-          <RequestChat onSuccess={onSuccess} request_id={requestId} chats={chats} />
+          <RequestChat
+            isFetchingChat={isFetchingChat}
+            onSuccess={onSuccess}
+            request_id={requestId}
+            chats={chats}
+          />
         </Messenger>
       </React.Suspense>
     );
@@ -294,7 +307,12 @@ export function RequestMessenger({
         >
           <Typography>Chat with Sismedika</Typography>
         </Box>
-        <RequestChat onSuccess={onSuccess} request_id={requestId} chats={chats} />
+        <RequestChat
+          isFetchingChat={isFetchingChat}
+          onSuccess={onSuccess}
+          request_id={requestId}
+          chats={chats}
+        />
       </Box>
     </React.Suspense>
   );
