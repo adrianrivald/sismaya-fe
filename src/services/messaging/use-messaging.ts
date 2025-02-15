@@ -19,7 +19,10 @@ async function fetchMessage({request_id, page}: {request_id: number, page: numbe
   export function useMessage(request_id: number, page: number) {
     const data = useQuery(
       ['messaging', page],
-      () => fetchMessage({request_id, page})
+      () => fetchMessage({request_id, page}),
+      {
+        refetchOnWindowFocus: true, // Enables refetching when window regains focus
+      }
     );
   
     return data;
