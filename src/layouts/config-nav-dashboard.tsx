@@ -1,3 +1,4 @@
+import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -59,6 +60,32 @@ export const rbacMenus = () => [
   },
 ];
 
+export const masterDataMenus = () => [
+  {
+    heading: 'Master Data',
+    id: 'master-data',
+    icon: <Iconify icon="solar:database-bold" />,
+    list: [
+      {
+        heading: 'Internal Company',
+        path: '/internal-company',
+      },
+      {
+        heading: 'Client Company',
+        path: '/client-company',
+      },
+      {
+        heading: 'Internal User',
+        path: '/internal-user',
+      },
+      {
+        heading: 'Client User',
+        path: '/client-user',
+      },
+    ],
+  },
+];
+
 export const menuItems = (
   internalCompaniesDashboard?: ChildMenus[],
   internalCompaniesRequest?: ChildMenus[],
@@ -80,5 +107,11 @@ export const menuItems = (
     heading: 'SETTINGS',
     id: 'management',
     list: rbacMenus(),
+  },
+
+  {
+    heading: 'MASTER DATA',
+    id: 'master-data',
+    list: masterDataMenus(),
   },
 ];

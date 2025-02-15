@@ -112,10 +112,10 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const userRole = user?.user_info?.role_id;
   const userType = user?.user_info?.user_type;
   const userPermissions = user?.user_info?.role?.permissions?.map((item) => item?.name);
   const currentMenu = window.location.href.split('/')[3];
-  console.log(userPermissions, 'userPermissions');
 
   const onClickParentAccordion = (path?: string) => {
     if (path) {
@@ -152,7 +152,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           userType
         )
           ?.filter((item) =>
-            item?.list?.some((listItem) => userPermissions?.includes(listItem?.id))
+            item?.list?.some((listItem) =>
+              userRole !== 1
+                ? userPermissions?.includes(listItem?.id)
+                : !userPermissions?.includes(listItem?.id)
+            )
           )
           .map((menu) => (
             <Fragment key={menu?.id}>
@@ -174,7 +178,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                   </Box>
                   <Box component="ul" gap={0.5} display="flex" flexDirection="column">
                     {menu?.list
-                      ?.filter((item) => userPermissions?.includes(item?.id))
+                      ?.filter((item) =>
+                        userRole !== 1
+                          ? userPermissions?.includes(item?.id)
+                          : !userPermissions?.includes(item?.id)
+                      )
                       .map((childMenu: any, index) => {
                         const isActived = childMenu.path === pathname;
 
