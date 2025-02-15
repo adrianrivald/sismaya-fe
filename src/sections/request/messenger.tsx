@@ -20,51 +20,30 @@ const Messenger = React.lazy(() => import('./task/task-activities'));
 interface RequestChatProps {
   chats: Messaging[];
   request_id: number;
+  onSuccess: (newData: any) => void;
 }
 
-function RequestChat({ chats, request_id }: RequestChatProps) {
+function RequestChat({ chats, request_id, onSuccess }: RequestChatProps) {
   const [inputContent, setInputContent] = React.useState('');
   const { user } = useAuth();
   const [file, setFile] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState('');
-  const chatRef = React.useRef<HTMLDivElement | null>(null);
-  const { mutate: sendChat } = useMessagePost();
+  // const chatRef = React.useRef<HTMLDivElement | null>(null);
+  const { mutate: sendChat } = useMessagePost(onSuccess);
 
   React.useEffect(() => {
     scrollToBottom();
   }, []);
 
   const scrollToBottom = () => {
-    if (chatRef.current) {
-      chatRef.current.scrollIntoView({
+    const element = document.getElementById('bottomChatBox');
+
+    if (element) {
+      element.scrollIntoView({
         block: 'end',
       });
     }
   };
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      if (chatRef.current) {
-        const { scrollTop } = chatRef.current;
-        if (scrollTop === 0) {
-          console.log("You're at the top!");
-        } else {
-          console.log('Keep scrolling...');
-        }
-      }
-    };
-
-    const element = chatRef.current;
-    if (element) {
-      element.addEventListener('scroll', handleScroll);
-    }
-
-    return () => {
-      if (element) {
-        element.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []);
 
   const onResetField = () => {
     setInputContent('');
@@ -80,7 +59,6 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
           file,
         });
         onResetField();
-        scrollToBottom();
       } catch (error) {
         console.log(error);
       }
@@ -194,7 +172,7 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
                 );
               })
               .reverse()}
-            <Box ref={chatRef} />
+            <Box id="bottomChatBox" />
           </>
         ) : (
           <Box
@@ -283,31 +261,41 @@ function RequestChat({ chats, request_id }: RequestChatProps) {
   );
 }
 
-export function RequestMessenger({ requestId, chats }: { requestId: number; chats: Messaging[] }) {
+export function RequestMessenger({
+  requestId,
+  chats,
+  onSuccess,
+}: {
+  requestId: number;
+  chats: Messaging[];
+  onSuccess: (newData: any) => void;
+}) {
   const isTask = window.location.pathname.includes('/task');
 
   if (isTask) {
     return (
       <React.Suspense fallback={<Loader />}>
         <Messenger requestId={requestId}>
-          <RequestChat request_id={requestId} chats={chats} />
+          <RequestChat onSuccess={onSuccess} request_id={requestId} chats={chats} />
         </Messenger>
       </React.Suspense>
     );
   }
 
   return (
-    <Box sx={{ border: 1, borderRadius: 3, borderColor: 'grey.300' }}>
-      <Box
-        p={2}
-        sx={{
-          borderBottom: 1,
-          borderColor: 'grey.300',
-        }}
-      >
-        <Typography>Chat with Sismedika</Typography>
+    <React.Suspense fallback={<Loader />}>
+      <Box sx={{ border: 1, borderRadius: 3, borderColor: 'grey.300' }}>
+        <Box
+          p={2}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'grey.300',
+          }}
+        >
+          <Typography>Chat with Sismedika</Typography>
+        </Box>
+        <RequestChat onSuccess={onSuccess} request_id={requestId} chats={chats} />
       </Box>
-      <RequestChat request_id={requestId} chats={chats} />
-    </Box>
+    </React.Suspense>
   );
 }

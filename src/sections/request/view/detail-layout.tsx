@@ -33,6 +33,8 @@ export default function RequestDetailLayout() {
   const { data: requestStatuses } = useRequestStatus(String(idCurrentCompany ?? ''));
   const { data: requestDetail } = useRequestById(id ?? '');
   const [chatPage, setChatPage] = useState(1);
+  const [isShouldFetch, setIsShouldFetch] = useState(false);
+  const [isCoolingDown, setIsCoolingDown] = useState(false);
   const { data } = useMessage(Number(id), chatPage);
   const [chatData, setChatData] = useState<Messaging[]>(data?.messages ?? []);
   const { mutate: updateStatus } = useUpdateRequestStatus();
@@ -68,15 +70,31 @@ export default function RequestDetailLayout() {
   }, [chatPage]);
 
   useEffect(() => {
-    const element = document.getElementById('chatBox');
+    if (isShouldFetch && chatPage < data?.meta?.total_page && isCoolingDown) {
+      setTimeout(() => {
+        setChatPage((prev) => prev + 1);
+        setIsCoolingDown(false);
+      }, 1000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatPage, isShouldFetch, isCoolingDown]);
 
+  console.log(chatData, 'chatdata');
+  const bottomChatBoxElement = document.getElementById('bottomChatBox');
+
+  useEffect(() => {
+    const element = document.getElementById('chatBox');
     const handleScroll = () => {
       if (element) {
-        console.log(element.scrollTop, 'element.scrollTop');
+        console.log(
+          element.scrollTop === 0 && chatPage < data?.meta?.total_page,
+          'element.scrollTop'
+        );
         if (element.scrollTop === 0) {
-          setTimeout(() => {
-            setChatPage((prev) => prev + 1);
-          }, 1000);
+          setIsShouldFetch(true);
+        } else {
+          setIsShouldFetch(false);
+          setIsCoolingDown(true);
         }
       }
     };
@@ -90,7 +108,19 @@ export default function RequestDetailLayout() {
         element.removeEventListener('scroll', handleScroll);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onSuccess = (newData: any) => {
+    setChatData((prev) => [newData, ...prev]);
+    setTimeout(() => {
+      if (bottomChatBoxElement) {
+        bottomChatBoxElement.scrollIntoView({
+          block: 'end',
+        });
+      }
+    }, 100);
+  };
 
   useEffect(() => {
     if (requestDetail?.priority) {
@@ -282,7 +312,11 @@ export default function RequestDetailLayout() {
           </Box>
         </Grid>
         <Grid item xs={12} md={4}>
-          <RequestMessenger requestId={Number(id)} chats={chatData as Messaging[]} />
+          <RequestMessenger
+            onSuccess={onSuccess}
+            requestId={Number(id)}
+            chats={chatData as Messaging[]}
+          />
         </Grid>
       </Grid>
 

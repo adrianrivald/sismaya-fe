@@ -27,7 +27,7 @@ async function fetchMessage({request_id, page}: {request_id: number, page: numbe
 
 
 // Post Message
-export function useMessagePost() {
+export function useMessagePost(onSuccess: (newData: any)=>void) {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: StoreMessage) => {
@@ -55,13 +55,12 @@ export function useMessagePost() {
         });
       },
       {
-          onSuccess: () => {
+          onSuccess: (res) => {
           queryClient.invalidateQueries({
-            queryKey: ['messaging', {
-              request_id: 72,
-              page: 1
-            }]
+            queryKey: ['messaging', 1]
           });
+          const newData = res?.data[0]
+          onSuccess(newData)
   
 
         },
