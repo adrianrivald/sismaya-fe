@@ -106,8 +106,8 @@ export function http<TData = any>(
     }
 
     const reason = (responseData as HttpResponseError).message;
-    // const subReason = (responseData as HttpResponseError).error;
-    throw new HttpError(response.status, reason, responseData);
+    const subReason = (responseData as HttpResponseError).error;
+    throw new HttpError(response.status, `${reason} ~ ${subReason}`, responseData);
   });
 
   return Object.assign(fetcher, { cancel: abort });

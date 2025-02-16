@@ -26,7 +26,7 @@ export const generalMenus = (internalCompaniesDashboard?: ChildMenus[], userType
   {
     heading: 'Dashboard',
     id: 'dashboard',
-    path: '/',
+    path: '/dashboard',
     icon: icon('ic-analytics'),
     list:
       userType === 'internal'

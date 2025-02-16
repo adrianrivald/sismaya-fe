@@ -11,6 +11,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
+export const HomePage = lazy(() => import('src/pages/home'));
 
 export const DashboardInternalPage = lazy(() => import('src/pages/dashboard/dashboard-internal'));
 export const DashboardClientPage = lazy(() => import('src/pages/dashboard/dashboard-client'));
@@ -120,7 +121,8 @@ const renderFallback = (
 
 const superAdminRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardInternalPage />, index: true },
+    { element: <HomePage />, index: true },
+    { path: 'dashboard', element: <DashboardInternalPage /> },
 
     // Master Data
     // Internal Company
@@ -154,7 +156,8 @@ const superAdminRoutes: NonIndexRouteObject = {
 
 const internalRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardInternalPage />, index: true },
+    { element: <HomePage />, index: true },
+    { path: 'dashboard', element: <DashboardInternalPage /> },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
@@ -209,7 +212,8 @@ const internalRoutes: NonIndexRouteObject = {
 
 const clientRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardClientPage />, index: true },
+    { element: <HomePage />, index: true },
+    { path: 'dashboard', element: <DashboardClientPage /> },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },

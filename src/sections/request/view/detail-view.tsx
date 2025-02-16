@@ -60,7 +60,7 @@ export function RequestDetailView() {
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
-  const { data: cito } = useCitoById(String(idCurrentCompany) ?? '');
+  const { data: cito } = useCitoById(String(requestDetail?.company?.id) ?? '');
   const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();

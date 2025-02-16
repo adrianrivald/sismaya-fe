@@ -60,11 +60,13 @@ export function AuthProvider(props: React.PropsWithChildren) {
       newPermissions: user?.user_info?.role?.permissions?.map((item) => item?.name),
     });
     // Redirect as client user who has internal companies
-    if ((user?.internal_companies ?? [])?.length > 0 && user?.user_info?.role_id !== 1) {
-      navigate(`/${(user?.internal_companies ?? [])[0]?.company?.name?.toLowerCase()}/request`);
-    } else {
-      navigate('/');
-    }
+    // if ((user?.internal_companies ?? [])?.length > 0 && user?.user_info?.role_id !== 1) {
+    //   navigate(`/${(user?.internal_companies ?? [])[0]?.company?.name?.toLowerCase()}/request`);
+    // } else {
+    //   navigate('/');
+    // }
+
+    navigate('/');
   }
 
   async function logout() {
