@@ -6,7 +6,7 @@ import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
 import { Attachment } from "./types";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
+export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[], start_date: any, end_date: any};
 
 export function useUpdateRequest(internalCompany: string) {
     const queryClient = useQueryClient();

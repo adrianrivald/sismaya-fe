@@ -277,7 +277,7 @@ export function RequestDetailView() {
                         >
                           <Box
                             component="img"
-                            src={item?.picture}
+                            src={item?.picture !== '' ? item?.picture : '/assets/icons/user.png'}
                             sx={{
                               cursor: 'pointer',
                               borderRadius: 100,

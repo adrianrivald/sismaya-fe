@@ -52,7 +52,7 @@ export function AddAssigneeModal({
               src={
                 internalUser?.user_info?.profile_picture !== ''
                   ? internalUser?.user_info?.profile_picture
-                  : '/assets/icons/navbar/ic-user.svg'
+                  : '/assets/icons/user.png'
               }
               sx={{
                 borderRadius: 100,

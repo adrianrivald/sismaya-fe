@@ -63,8 +63,8 @@ export function EditRequestView() {
   );
   const [openAssigneeModal, setOpenAssigneeModal] = useState(false);
 
-  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
-  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs());
+  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs(requestDetail?.start_date));
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs(requestDetail?.end_date));
   const { mutate: updateRequest } = useUpdateRequest(vendor ?? '');
   const { mutate: addAttachment } = useAddAttachment();
   const { mutate: deleteAttachmentById } = useDeleteAttachmentById();
@@ -94,6 +94,17 @@ export function EditRequestView() {
       id: item?.id,
     }))
   );
+
+  useEffect(() => {
+    setSelectedPic(
+      requestDetail?.assignees?.map((item) => ({
+        assignee_id: item?.assignee_id,
+        picture: item?.assignee?.user_info?.profile_picture,
+        id: item?.id,
+      }))
+    );
+  }, [requestDetail]);
+
   const onSearchUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -107,6 +118,8 @@ export function EditRequestView() {
     const payload = {
       ...formData,
       id: Number(id),
+      start_date: dateValue,
+      end_date: endDateValue,
     };
     updateRequest(payload);
     // setTimeout(() => {
@@ -380,77 +393,80 @@ export function EditRequestView() {
                     />
                   </LocalizationProvider>
 
-                  <Box display="flex" gap={2} alignItems="center">
-                    <Box display="flex" alignItems="center">
-                      {selectedPic?.map((item) => (
+                  <Box display="flex" flexDirection="column">
+                    <Typography>PIC</Typography>
+                    <Box display="flex" gap={2} alignItems="center">
+                      <Box display="flex" alignItems="center">
+                        {selectedPic?.map((item) => (
+                          <Box
+                            width={36}
+                            height={36}
+                            sx={{
+                              marginRight: '-10px',
+                            }}
+                          >
+                            <Box
+                              component="img"
+                              src={item?.picture !== '' ? item?.picture : '/assets/icons/user.png'}
+                              sx={{
+                                cursor: 'pointer',
+                                borderRadius: 100,
+                                width: 36,
+                                height: 36,
+                                borderColor: 'white',
+                                borderWidth: 2,
+                                borderStyle: 'solid',
+                              }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                      <ModalDialog
+                        open={openAssigneeModal}
+                        setOpen={setOpenAssigneeModal}
+                        minWidth={600}
+                        title="Assignee"
+                        content={
+                          (
+                            <AddAssigneeModal
+                              internalUsers={filteredInternalUser}
+                              handleAddPicItem={handleAddPicItemFromDetail}
+                              selectedPic={selectedPic}
+                              handleDeletePicItem={handleDeletePicItemFromDetail}
+                              isDetail
+                              onSearchUser={onSearchUser}
+                              setOpenAssigneeModal={setOpenAssigneeModal}
+                            />
+                          ) as JSX.Element & string
+                        }
+                      >
                         <Box
-                          width={36}
-                          height={36}
+                          component="button"
+                          type="button"
+                          display="flex"
+                          justifyContent="center"
+                          alignItems="center"
                           sx={{
-                            marginRight: '-10px',
+                            width: 36,
+                            height: 36,
+                            cursor: 'pointer',
+                            paddingX: 1.5,
+                            paddingY: 1.5,
+                            border: 1,
+                            borderStyle: 'dashed',
+                            borderColor: 'grey.500',
+                            borderRadius: 100,
                           }}
                         >
-                          <Box
-                            component="img"
-                            src={item?.picture}
-                            sx={{
-                              cursor: 'pointer',
-                              borderRadius: 100,
-                              width: 36,
-                              height: 36,
-                              borderColor: 'white',
-                              borderWidth: 2,
-                              borderStyle: 'solid',
-                            }}
+                          <SvgColor
+                            color="#637381"
+                            width={12}
+                            height={12}
+                            src="/assets/icons/ic-plus.svg"
                           />
                         </Box>
-                      ))}
+                      </ModalDialog>
                     </Box>
-                    <ModalDialog
-                      open={openAssigneeModal}
-                      setOpen={setOpenAssigneeModal}
-                      minWidth={600}
-                      title="Assignee"
-                      content={
-                        (
-                          <AddAssigneeModal
-                            internalUsers={filteredInternalUser}
-                            handleAddPicItem={handleAddPicItemFromDetail}
-                            selectedPic={selectedPic}
-                            handleDeletePicItem={handleDeletePicItemFromDetail}
-                            isDetail
-                            onSearchUser={onSearchUser}
-                            setOpenAssigneeModal={setOpenAssigneeModal}
-                          />
-                        ) as JSX.Element & string
-                      }
-                    >
-                      <Box
-                        component="button"
-                        type="button"
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          cursor: 'pointer',
-                          paddingX: 1.5,
-                          paddingY: 1.5,
-                          border: 1,
-                          borderStyle: 'dashed',
-                          borderColor: 'grey.500',
-                          borderRadius: 100,
-                        }}
-                      >
-                        <SvgColor
-                          color="#637381"
-                          width={12}
-                          height={12}
-                          src="/assets/icons/ic-plus.svg"
-                        />
-                      </Box>
-                    </ModalDialog>
                   </Box>
                 </Box>
               </Grid>
