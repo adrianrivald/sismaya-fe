@@ -11,7 +11,8 @@ export interface RequestInitClient extends Omit<RequestInit, 'body'> {
 }
 
 interface HttpResponseError {
-  message: string;
+  error: string;
+  message:string;
   errors?: Record<string, string[]>;
 }
 
@@ -105,6 +106,7 @@ export function http<TData = any>(
     }
 
     const reason = (responseData as HttpResponseError).message;
+    // const subReason = (responseData as HttpResponseError).error;
     throw new HttpError(response.status, reason, responseData);
   });
 

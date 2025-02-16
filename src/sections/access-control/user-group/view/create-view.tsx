@@ -175,12 +175,7 @@ export function CreateAccessControlUserGroupView() {
     }
   };
 
-  useEffect(() => {
-    console.log(selectedPermissions, 'selectedPermissions');
-  }, [selectedPermissions]);
-
   const onCheckAllParent = (ids?: string[], permissionId?: string) => {
-    console.log(permissionId, 'id');
     const hasAllPermissions = ids?.every((permission) => selectedPermissions.includes(permission));
 
     if (ids) {
@@ -302,6 +297,52 @@ export function CreateAccessControlUserGroupView() {
     },
   }));
 
+  const generalArr = generalChilds?.map((item) => item?.id);
+  const managementArr = managementChilds?.map((item) =>
+    item?.subChilds?.map((childItem) => childItem?.id)
+  );
+  const settingsArr = settingChilds?.map((item) =>
+    item?.subChilds?.map((childItem) => childItem?.id)
+  );
+  const allPermissions = [
+    'dashboard',
+    'report',
+    'request:create',
+    'request:read',
+    'request:update',
+    'request:approve/reject',
+    'request:change status',
+    'request:assign',
+    'request attachment:create',
+    'request attachment:read',
+    'request attachment:update',
+    'request attachment:delete',
+    'chat',
+    'task:create',
+    'task:read',
+    'task:update',
+    'task:delete',
+    'user list:create',
+    'user list:read',
+    'user list:update',
+    'user list:delete',
+    'user group:create',
+    'user group:read',
+    'user group:update',
+    'user group:delete',
+  ];
+  const onCheckAll = () => {
+    const hasAllPermissions = allPermissions?.every((permission) =>
+      selectedPermissions.includes(permission)
+    );
+
+    if (hasAllPermissions) {
+      setSelectedPermissions([]);
+    } else {
+      setSelectedPermissions(allPermissions);
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -356,7 +397,22 @@ export function CreateAccessControlUserGroupView() {
                       <Typography mb={1} component="label" htmlFor="email">
                         Access Permissions
                       </Typography>
-
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Checkbox
+                          id="oncheck-all"
+                          onChange={onCheckAll}
+                          checked={allPermissions?.every((item) =>
+                            selectedPermissions?.includes(item)
+                          )}
+                        />{' '}
+                        <Typography
+                          sx={{ cursor: 'pointer' }}
+                          component="label"
+                          htmlFor="oncheck-all"
+                        >
+                          Permit all access
+                        </Typography>
+                      </Box>
                       <Card
                         sx={{
                           mt: 2,

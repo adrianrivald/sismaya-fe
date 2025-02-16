@@ -19,20 +19,28 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useUserById } from 'src/services/master-data/user';
+import { useUserById, useUsers } from 'src/services/master-data/user';
 import {
   useAddAttachment,
   useAddRequest,
+  useAddRequestAssignee,
   useDeleteAttachmentById,
+  useDeleteRequestAssigneeById,
   useRequestById,
   useUpdateRequest,
 } from 'src/services/request';
 import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 import { SvgColor } from 'src/components/svg-color';
 import { Bounce, toast } from 'react-toastify';
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import ModalDialog from 'src/components/modal/modal';
+import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
+import { AddAssigneeModal } from '../add-assignee';
 
 export function EditRequestView() {
   const { user } = useAuth();
@@ -42,11 +50,21 @@ export function EditRequestView() {
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
+  const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [isLoading, setIsLoading] = React.useState(false);
   const [files, setFiles] = React.useState<FileList | any>([]);
+  const [searchTerm, setSearchTerm] = useSearchDebounce();
+
+  const filteredInternalUser = internalUser?.filter((item) =>
+    item?.user_info?.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const [openAssigneeModal, setOpenAssigneeModal] = useState(false);
+
+  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs());
   const { mutate: updateRequest } = useUpdateRequest(vendor ?? '');
   const { mutate: addAttachment } = useAddAttachment();
   const { mutate: deleteAttachmentById } = useDeleteAttachmentById();
@@ -63,6 +81,21 @@ export function EditRequestView() {
     description: requestDetail?.description,
     product_id: requestDetail?.product?.id,
     is_cito: requestDetail?.is_cito,
+  };
+  const { mutate: addRequestAssignee } = useAddRequestAssignee();
+  const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
+
+  const [selectedPic, setSelectedPic] = React.useState<
+    { id: number; picture: string; assignee_id?: number }[] | undefined
+  >(
+    requestDetail?.assignees?.map((item) => ({
+      assignee_id: item?.assignee_id,
+      picture: item?.assignee?.user_info?.profile_picture,
+      id: item?.id,
+    }))
+  );
+  const onSearchUser = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
   const onBackToDetail = () => {
@@ -110,8 +143,26 @@ export function EditRequestView() {
     }
   };
 
+  const handleChangeDate = (newValue: Dayjs | null) => {
+    setDateValue(newValue);
+  };
+
+  const handleChangeEndDate = (newValue: Dayjs | null) => {
+    setEndDateValue(newValue);
+  };
+
   const onDeleteAttachment = (attachmentId: number) => {
     deleteAttachmentById(attachmentId);
+  };
+  const handleAddPicItemFromDetail = (userId: number) => {
+    addRequestAssignee({
+      assignee_id: userId,
+      request_id: Number(id),
+    });
+  };
+
+  const handleDeletePicItemFromDetail = (_userId: number, assigneeId?: number) => {
+    if (assigneeId) deleteRequestAssignee(assigneeId);
   };
 
   return (
@@ -302,6 +353,107 @@ export function EditRequestView() {
                   </FormHelperText>
                 )}
               </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Box mt={4} display="flex" alignItems="center" gap={2}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DateTimePicker
+                      sx={{
+                        width: '300px',
+                      }}
+                      label="Start Date"
+                      value={dateValue}
+                      onChange={handleChangeDate}
+                      // renderInput={(params: any) => <TextField {...params} />}
+                    />
+                  </LocalizationProvider>
+
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DateTimePicker
+                      sx={{
+                        width: '300px',
+                      }}
+                      label="End Date"
+                      value={endDateValue}
+                      onChange={handleChangeEndDate}
+                      // renderInput={(params: any) => <TextField {...params} />}
+                    />
+                  </LocalizationProvider>
+
+                  <Box display="flex" gap={2} alignItems="center">
+                    <Box display="flex" alignItems="center">
+                      {selectedPic?.map((item) => (
+                        <Box
+                          width={36}
+                          height={36}
+                          sx={{
+                            marginRight: '-10px',
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={item?.picture}
+                            sx={{
+                              cursor: 'pointer',
+                              borderRadius: 100,
+                              width: 36,
+                              height: 36,
+                              borderColor: 'white',
+                              borderWidth: 2,
+                              borderStyle: 'solid',
+                            }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                    <ModalDialog
+                      open={openAssigneeModal}
+                      setOpen={setOpenAssigneeModal}
+                      minWidth={600}
+                      title="Assignee"
+                      content={
+                        (
+                          <AddAssigneeModal
+                            internalUsers={filteredInternalUser}
+                            handleAddPicItem={handleAddPicItemFromDetail}
+                            selectedPic={selectedPic}
+                            handleDeletePicItem={handleDeletePicItemFromDetail}
+                            isDetail
+                            onSearchUser={onSearchUser}
+                            setOpenAssigneeModal={setOpenAssigneeModal}
+                          />
+                        ) as JSX.Element & string
+                      }
+                    >
+                      <Box
+                        component="button"
+                        type="button"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          cursor: 'pointer',
+                          paddingX: 1.5,
+                          paddingY: 1.5,
+                          border: 1,
+                          borderStyle: 'dashed',
+                          borderColor: 'grey.500',
+                          borderRadius: 100,
+                        }}
+                      >
+                        <SvgColor
+                          color="#637381"
+                          width={12}
+                          height={12}
+                          src="/assets/icons/ic-plus.svg"
+                        />
+                      </Box>
+                    </ModalDialog>
+                  </Box>
+                </Box>
+              </Grid>
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
@@ -339,15 +491,6 @@ export function EditRequestView() {
                               />
                             </Box>
                           </Box>
-                          {/* {Array.from(files)?.map((file: any) => (
-                        <Box display="flex" gap={1} alignItems="center">
-                          <Box component="img" src="/assets/icons/file.png" />
-                          <Box>
-                            <Typography fontWeight="bold">{file?.name}</Typography>
-                            {(file.size / (1024 * 1024)).toFixed(2)} Mb
-                          </Box>
-                        </Box>
-                      ))} */}
                         </Box>
                       ))}
                     </>

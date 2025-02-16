@@ -38,3 +38,40 @@ export function useRequestList(params: Partial<any>, assignee_company_id: number
     (paginationState) => fetchRequestList({ ...params, ...paginationState }, assignee_company_id)
   );
 }
+
+
+export function fetchTaskRequestList(params: Partial<any>, assignee_company_id: number) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL('/my-requests', baseUrl);
+
+  if (assignee_company_id) {
+    endpointUrl.searchParams.append('assignee_company_id', assignee_company_id.toString());
+  }
+
+  if (params.status) {
+    endpointUrl.searchParams.append('status', params.status);
+  }
+
+  if (params.cito) {
+    endpointUrl.searchParams.append('cito', params.cito);
+  }
+
+  if (params.step) {
+    endpointUrl.searchParams.append('step', params.step);
+  }
+
+  dataTableParamsBuilder({
+    searchParams: endpointUrl.searchParams,
+    filterValues: [params.order],
+    ...params,
+  });
+
+  return http<WithPagination<any>>(endpointUrl.toString().replace(baseUrl, ''));
+}
+
+export function useTaskRequestList(params: Partial<any>, assignee_company_id: number) {
+  return usePaginationQuery(
+    ['my-requests', params.keyword, params.status, params.cito, params.step, assignee_company_id],
+    (paginationState) => fetchTaskRequestList({ ...params, ...paginationState }, assignee_company_id)
+  );
+}

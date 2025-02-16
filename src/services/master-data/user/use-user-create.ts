@@ -52,7 +52,7 @@ export function useAddUser({isRbac = false} : {isRbac: boolean}) {
         onError: (error) => {
           const reason =
             error instanceof Error ? error.message : 'Something went wrong';
-  
+          
             toast.error(reason, {
               position: 'top-right',
               autoClose: 5000,
