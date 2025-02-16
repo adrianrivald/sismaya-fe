@@ -6,13 +6,13 @@ import { http } from "src/utils/http";
 import type { UserClientUpdateDTO } from "./schemas/user-schema";
 
 export type UpdateUser = UserClientUpdateDTO & {id: number, cover?: any, user_type: string};
-export type UpdateUserPassword =  {id: number, password: string};
+export type UpdateUserPassword =  {id: number, password: string, email: string};
 
-export function useUpdateUser() {
+export function useUpdateUser({isRbac = false} : {isRbac?: boolean}) {
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateUser) => {
-        const {cover,id, ...form} = formData;
+        const {cover,id , ...form} = formData;
         const payload = {
           ...form
         }
@@ -50,7 +50,7 @@ export function useUpdateUser() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`${isClient ? "/client-user" : "/internal-user"}`)
+          navigate(`${!isRbac ? isClient ? "/client-user" : "/internal-user" : "/access-control/user-list"}`)
 
         },
         onError: (error) => {
@@ -90,8 +90,7 @@ export function useUpdateUserPassword() {
       });
     },
     {
-        onSuccess: (res : any) => {
-          const isClient = res?.data?.user_info?.company_id !== null
+        onSuccess: () => {
         toast.success('Password has been changed successfully', {
           position: 'top-right',
           autoClose: 5000,
@@ -103,7 +102,7 @@ export function useUpdateUserPassword() {
           theme: 'light',
           transition: Bounce,
         });
-        navigate(`${isClient ? "/client-user" : "/internal-user"}`)
+        navigate(`/access-control/user-list`)
 
       },
       onError: (error) => {

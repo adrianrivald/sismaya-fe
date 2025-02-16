@@ -1,4 +1,5 @@
 import Typography from '@mui/material/Typography';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
@@ -12,10 +13,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  SelectChangeEvent,
 } from '@mui/material';
 
-import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import React, { useEffect } from 'react';
@@ -29,9 +28,9 @@ import {
   useUpdateDivision,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
-import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
-import { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
-import { Company, Department } from 'src/services/master-data/company/types';
+import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
+import type { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import type { Company, Department } from 'src/services/master-data/company/types';
 import { RemoveAction } from './remove-action';
 
 interface ClientCompanyValues {
@@ -310,6 +309,7 @@ export function EditClientCompanyView() {
   const handleSubmit = (formData: CompanyDTO) => {
     const payload = {
       ...formData,
+      cito_quota: data?.cito_quota,
       id: Number(id),
       type: 'holding',
     };

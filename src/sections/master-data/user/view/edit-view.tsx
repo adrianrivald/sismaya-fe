@@ -416,7 +416,7 @@ export function EditUserView({ type }: EditUserProps) {
 
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
-  const { mutate: updateUser } = useUpdateUser();
+  const { mutate: updateUser } = useUpdateUser({ isRbac: false });
   const { data: clientCompanies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
   // const { data: userCompaniesData } = useUserCompanyById(Number(id));

@@ -58,7 +58,7 @@ export function CreateAccessControlUserView() {
   const theme = useTheme();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const { mutate: addUser } = useAddUser();
+  const { mutate: addUser } = useAddUser({ isRbac: true });
   const { data: roles } = useRole();
   const { data: internalCompanies } = useInternalCompanies();
 

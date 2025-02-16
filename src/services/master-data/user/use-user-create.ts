@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { UserClientDTO } from "./schemas/user-schema";
+import type { UserClientDTO } from "./schemas/user-schema";
 
 export type StoreUser = UserClientDTO & {cover?: any, user_type: string};
 
-export function useAddUser() {
+export function useAddUser({isRbac = false} : {isRbac: boolean}) {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreUser) => {
@@ -46,7 +46,7 @@ export function useAddUser() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`${isClient ? "/client-user" : "/internal-user"}`)
+          navigate(`${!isRbac ? isClient ? "/client-user" : "/internal-user" : "/access-control/user-list"}`)
 
         },
         onError: (error) => {
