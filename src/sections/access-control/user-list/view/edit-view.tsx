@@ -45,13 +45,11 @@ import type {
   UseFormWatch,
 } from 'react-hook-form';
 import type { User } from 'src/services/master-data/user/types';
-import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
 import { ResetPasswordAction } from '../../reset-password-action';
 
 interface UserValues {
   name: string | undefined;
   email: string | undefined;
-  phone: string | undefined;
   role_id: number | undefined;
   profile_picture: string;
   company_id: number | undefined;
@@ -126,7 +124,6 @@ function EditForm({
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('email', defaultValues?.email);
-    setValue('phone', defaultValues?.phone);
     setValue('role_id', defaultValues?.role_id);
     setValue('internal_id', defaultValues?.internal_id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -376,7 +373,7 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
 
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
-  const { mutate: updateUser } = useUpdateUser();
+  const { mutate: updateUser } = useUpdateUser({ isRbac: true });
   const { mutate: updatePassword } = useUpdateUserPassword();
   const { data: clientCompanies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
@@ -388,7 +385,6 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
   const defaultValues = {
     name: user?.user_info?.name,
     email: user?.email,
-    phone: user?.phone,
     role_id: user?.user_info?.role_id,
     profile_picture: user?.user_info?.profile_picture ?? '',
     company_id: user?.user_info?.company_id,
@@ -422,11 +418,11 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
       id: Number(id),
       user_type: type,
     };
-    if (defaultValues?.profile_picture) {
-      Object.assign(payload, {
-        profile_picture: defaultValues?.profile_picture,
-      });
-    }
+    // if (defaultValues?.profile_picture) {
+    //   Object.assign(payload, {
+    //     profile_picture: defaultValues?.profile_picture,
+    //   });
+    // }
     updateUser(payload);
   };
 
@@ -458,8 +454,8 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
   };
 
   const onSubmitResetPassword = (formData: { password: string }) => {
-    // TODO : reset password
     updatePassword({
+      email: defaultValues?.email ?? '',
       password: formData?.password,
       id: Number(id),
     });

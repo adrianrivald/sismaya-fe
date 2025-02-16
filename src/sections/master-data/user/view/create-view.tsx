@@ -72,7 +72,7 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
-  const { mutate: addUser } = useAddUser();
+  const { mutate: addUser } = useAddUser({ isRbac: false });
   const { data: roles } = useRole();
   const { data: companies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();

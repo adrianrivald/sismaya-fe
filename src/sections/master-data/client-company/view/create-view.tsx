@@ -1,34 +1,13 @@
 import Typography from '@mui/material/Typography';
-import {
-  Box,
-  Button,
-  Chip,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Grid,
-  Input,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  SelectChangeEvent,
-  Stack,
-  TextField,
-  useTheme,
-  Theme,
-} from '@mui/material';
+import { Box, FormHelperText, Grid, TextField, useTheme } from '@mui/material';
 
-import { _tasks, _posts, _timeline, _users, _projects } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import React from 'react';
-import { API_URL } from 'src/constants';
-import { UseFormSetValue } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useNavigate } from 'react-router-dom';
 import { FieldDropzone } from 'src/components/form';
-import { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
+import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import { useAddCompany } from 'src/services/master-data/company';
 
 export function CreateClientCompanyView() {
