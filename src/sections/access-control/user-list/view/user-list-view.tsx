@@ -151,6 +151,7 @@ export function AccessControlUserListView() {
   const { getDataTableProps } = useUserList({
     internal_company: companyFilter,
     role_id: roleFilter,
+    type: 'internal',
   });
   const { data: internalCompanies } = useInternalCompanies();
   const { data: roles } = useRole();
