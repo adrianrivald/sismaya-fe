@@ -106,9 +106,9 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
             control={form.control}
             requestId={requestId}
             assignees={task?.assignees ?? []}
-            onAssign={(assignee) =>
-              assigneeFn({ kind: 'assign', taskId: task?.taskId, assigneeId: assignee.id })
-            }
+            onAssign={(assignee) => {
+              assigneeFn({ kind: 'assign', taskId: task?.taskId, assigneeId: assignee.id });
+            }}
             onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.id })}
           />
 

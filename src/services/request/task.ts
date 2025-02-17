@@ -44,7 +44,7 @@ export class RequestTask {
       json.step,
       json?.assignees?.map((assignee: any) => ({
         id: assignee?.id,
-        userId: assignee?.assignee_info?.id,
+        userId: assignee?.assignee_info?.userId,
         name: assignee?.assignee_info?.name,
         email: assignee?.assignee_info?.email,
         avatar: assignee?.assignee_info?.profile_picture,
@@ -117,19 +117,18 @@ export class RequestTask {
   });
 }
 const initialStore = {
-  tasks: [] as RequestTask[]
-}
+  tasks: [] as RequestTask[],
+};
 export const store = createStore({
   context: initialStore,
   on: {
-    storeTask: (context, event: {newTask: RequestTask[]}) => ({
-      tasks: event?.newTask
-    })
-  }
-})
+    storeTask: (context, event: { newTask: RequestTask[] }) => ({
+      tasks: event?.newTask,
+    }),
+  },
+});
 
 export function useTaskByRequest(requestId: RequestTask['requestId']) {
- 
   return useQuery({
     queryKey: RequestTask.queryKeys(requestId),
     queryFn: async () => {
@@ -137,9 +136,9 @@ export function useTaskByRequest(requestId: RequestTask['requestId']) {
       const items = response.data ?? [];
       const transformed: Array<RequestTask> = items.map((item: any) => RequestTask.fromJson(item));
       store.send({
-        type: "storeTask",
-        newTask: transformed
-      })
+        type: 'storeTask',
+        newTask: transformed,
+      });
       return transformed;
     },
   });
@@ -154,12 +153,12 @@ export function useCreateOrUpdateTask(
   requestId: RequestTask['requestId'],
   { defaultValues, ...options }: UseCreateOrUpdateTaskOptions = {}
 ) {
-  const isEdit = !!defaultValues?.taskId;
-
   const form = useForm<RequestTask>({
     resolver: zodResolver(RequestTask.formSchema),
     defaultValues,
   });
+
+  const isEdit = !!form.getValues().taskId;
 
   const mutation = useMutation<RequestTask, Error, RequestTask>({
     ...options,
@@ -167,7 +166,7 @@ export function useCreateOrUpdateTask(
     mutationFn: async (task) => {
       const formData = await RequestTask.toJson({ ...task, requestId });
 
-      return http(['/tasks', isEdit ? `/${defaultValues.taskId}` : ''].join(''), {
+      return http(['/tasks', isEdit ? `/${form.getValues().taskId}` : ''].join(''), {
         method: isEdit ? 'PUT' : 'POST',
         data: formData,
       });
@@ -175,14 +174,21 @@ export function useCreateOrUpdateTask(
   });
 
   const onSubmit = form.handleSubmit(
-    (formValues) =>
+    (formValues) => {
+      formValues.assignees.map(({ id, userId, ...rest }) => ({
+        id: userId,
+        ...rest,
+      }));
+
       toast.promise<RequestTask, Error>(mutation.mutateAsync(formValues), {
         pending: `${isEdit ? 'Updating' : 'Creating'} task...`,
         success: `${isEdit ? 'Updated' : 'Created'} task successfully`,
         error: {
           render: ({ data }) => data?.message || `${isEdit ? 'Update' : 'Create'} task failed`,
         },
-      }),
+      });
+    },
+
     (formErrors) => {
       console.debug('👾 ~ useCreateOrUpdateTask: ~ formErrors:', formErrors);
     }

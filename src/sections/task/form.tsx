@@ -146,8 +146,10 @@ function Form({ request, task }: FormProps) {
             control={form.control}
             requestId={requestId}
             assignees={task?.assignees ?? []}
-            onAssign={(assignee) => assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.id })}
-            onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.id })}
+            onAssign={(assignee) =>
+              assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.userId })
+            }
+            onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.userId })}
           />
 
           <DueDatePicker

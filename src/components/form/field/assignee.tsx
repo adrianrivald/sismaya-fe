@@ -132,6 +132,7 @@ export function AssigneeChooser({
                       }}
                       onClick={() => {
                         const handler = isAssigned ? onUnassign : onAssign;
+
                         handler(assignee, index);
                       }}
                     >
