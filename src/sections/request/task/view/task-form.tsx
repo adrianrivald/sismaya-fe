@@ -21,6 +21,7 @@ import * as formUtils from 'src/utils/form';
 interface RequestTaskFormProps {
   children: React.ReactElement;
   requestId: number;
+  requestNumber?: string;
   task?: taskService.RequestTask;
 }
 
@@ -31,7 +32,7 @@ const defaultFormValues = taskService.RequestTask.fromJson({
   dueDate: new Date(),
 });
 
-function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
+function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFormProps) {
   const { onClose } = Drawer.useDisclosure();
   const [_, assigneeFn] = taskService.useMutationAssignee(requestId);
   const [isUploadingOrDeletingFile, uploadOrDeleteFileFn] =
@@ -55,6 +56,8 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
 
+  console.log('data', task);
+
   return (
     <Drawer.Content anchor="right">
       <Box
@@ -75,7 +78,7 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
             width="max-content"
           >
             <Typography color="#919EAB" fontWeight="bold" textAlign="center">
-              Request #{requestId}
+              Request {requestNumber}
             </Typography>
           </Box>
 
@@ -98,7 +101,7 @@ function TaskForm({ requestId, task = defaultFormValues }: TaskFormProps) {
         <Divider />
 
         <Stack p={2} spacing={3} flexGrow={1}>
-          <TextField label="RequestTask Name" {...formUtils.getTextProps(form, 'title')} />
+          <TextField label="Request Task Name" {...formUtils.getTextProps(form, 'title')} />
 
           <AssigneeChooserField
             name="assignees"

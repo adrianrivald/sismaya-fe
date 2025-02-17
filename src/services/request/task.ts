@@ -236,7 +236,7 @@ export function useMutationAssignee(requestId: RequestTask['requestId']) {
         return http(`/task-assignee/${payload.assigneeId}`, { method: 'DELETE' });
       }
 
-      return http(`/task-assignee`, {
+      return http('/task-assignee', {
         method: 'POST',
         data: {
           task_id: payload.taskId,

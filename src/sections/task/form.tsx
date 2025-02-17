@@ -43,11 +43,11 @@ export function DueDatePicker({
   return (
     <DatePicker
       {...props}
-      disablePast
       label="Due date"
-      shouldDisableDate={(day) => day.isAfter(date)}
-      shouldDisableMonth={(month) => month.isAfter(date)}
-      shouldDisableYear={(year) => year.isAfter(date)}
+      disablePast
+      shouldDisableDate={(day) => day.isBefore(date)}
+      shouldDisableMonth={(month) => month.isBefore(date)}
+      shouldDisableYear={(year) => year.isBefore(date)}
     />
   );
 }
@@ -124,6 +124,7 @@ function Form({ request, task }: FormProps) {
 
         <Stack p={2} spacing={3} flexGrow={1}>
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
+
           <TextField
             label="Request"
             select
@@ -133,7 +134,7 @@ function Form({ request, task }: FormProps) {
           >
             {requests.map((r) => (
               <MenuItem key={r.id} value={r.id}>
-                {r?.name || `REQ#${r.id}`}
+                {r?.name || `REQ${r.number}`}
               </MenuItem>
             ))}
           </TextField>

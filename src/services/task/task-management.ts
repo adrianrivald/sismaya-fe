@@ -21,6 +21,7 @@ export interface Request {
   name: string;
   product: RequestProduct;
   priority: keyof typeof priorityColorMap;
+  start_date: string;
   end_date: string;
   assignee_company_id: number;
 }
@@ -62,6 +63,7 @@ export class TaskManagement {
         name: json.request?.product?.name || '-',
       },
       priority: json.request?.priority || 'medium',
+      start_date: json.request.start_date || '',
       end_date: json.request?.end_date || '',
       assignee_company_id: json.request?.assignee_company_id || 0,
     } satisfies Request;

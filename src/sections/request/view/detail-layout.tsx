@@ -302,7 +302,7 @@ export default function RequestDetailLayout() {
             </Box>
 
             {userType === 'internal' && (
-              <RequestTaskForm requestId={Number(id)}>
+              <RequestTaskForm requestId={Number(id)} requestNumber={requestDetail?.number}>
                 <Button variant="contained" disabled={requestDetail?.step === 'done'}>
                   Create Task
                 </Button>
