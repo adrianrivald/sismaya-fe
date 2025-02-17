@@ -90,10 +90,10 @@ const columns = (popoverProps: PopoverProps) => [
     },
   }),
 
-  columnHelper.display({
-    id: 'actions',
-    cell: (info) => ButtonActions(info, popoverProps),
-  }),
+  // columnHelper.display({
+  //   id: 'actions',
+  //   cell: (info) => ButtonActions(info, popoverProps),
+  // }),
 ];
 
 function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverProps) {
@@ -223,11 +223,11 @@ export function AccessControlUserListView() {
             </Box>
           </Box>
         </Box>
-        <Box>
+        {/* <Box>
           <Button onClick={onClickAddNew} variant="contained" color="primary">
             Create New User
           </Button>
-        </Box>
+        </Box> */}
       </Box>
       <Grid container spacing={3}>
         <Grid xs={12}>
