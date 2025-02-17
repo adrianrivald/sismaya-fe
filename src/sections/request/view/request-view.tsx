@@ -56,10 +56,7 @@ const columns = (popoverProps: PopoverProps) => [
 
   columnHelper.accessor((row) => row, {
     header: 'Project Deadline',
-    cell: (info) => {
-      const value = info.getValue();
-      return '-';
-    },
+    cell: (info) => '-',
   }),
 
   columnHelper.accessor((row) => row, {
@@ -105,7 +102,6 @@ function ButtonActions(props: CellContext<Request, unknown>, popoverProps: Popov
   const navigate = useNavigate();
   const requestId = row.original.id;
   const step = row?.original?.step;
-  console.log(requestId, 'requestId');
   const onClickDetail = () => {
     navigate(`${requestId}`);
   };
@@ -163,7 +159,7 @@ export function RequestView() {
   )?.company?.id;
   const [filter, setFilter] = useState<any>({});
   const [totalData, setTotalData] = useState(0);
-  const { getDataTableProps } = useRequestList(filter, String(assigneeCompanyId));
+  const { getDataTableProps } = useRequestList(filter, Number(assigneeCompanyId));
   const { data: requestSummary } = useRequestSummary(String(assigneeCompanyId));
   const { data: requestStatusSummary } = useRequestStatusSummary(String(assigneeCompanyId));
   const { mutate: deleteRequestById } = useDeleteRequestById();

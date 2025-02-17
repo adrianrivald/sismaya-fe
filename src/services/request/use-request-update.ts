@@ -6,7 +6,7 @@ import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
 import { Attachment } from "./types";
 
-export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[]};
+export type UpdateRequest = RequestDTO & {id: number, files?: any, attachments?: Attachment[], start_date: any, end_date: any};
 
 export function useUpdateRequest(internalCompany: string) {
     const queryClient = useQueryClient();
@@ -17,7 +17,6 @@ export function useUpdateRequest(internalCompany: string) {
         const payload =  {
           ...form
         }
-        console.log(payload,'payloadnyea')
 
         // if ((form?.attachments ?? [])?.length > 0) {
         //   Object.assign(payload, {
@@ -36,7 +35,6 @@ export function useUpdateRequest(internalCompany: string) {
       },
       {
           onSuccess: (res: any) => {
-          console.log(res,'res')
           queryClient.invalidateQueries(['request']);
   
           toast.success('Data updated successfully', {

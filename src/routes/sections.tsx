@@ -11,6 +11,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
+export const HomePage = lazy(() => import('src/pages/home'));
 
 export const DashboardInternalPage = lazy(() => import('src/pages/dashboard/dashboard-internal'));
 export const DashboardClientPage = lazy(() => import('src/pages/dashboard/dashboard-client'));
@@ -78,7 +79,25 @@ export const UserClientCreatePage = lazy(
 );
 export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/client-user/edit'));
 
+// Monitor Personal Load
 export const MonitorPersonalLoadPage = lazy(() => import('src/pages/monitor-personal-load/index'));
+
+// Access Control
+export const AccessControlUserListPage = lazy(() => import('src/pages/access-control/user-list'));
+export const AccessControlUserListEditPage = lazy(
+  () => import('src/pages/access-control/user-list/edit')
+);
+export const AccessControlUserListCreatePage = lazy(
+  () => import('src/pages/access-control/user-list/create')
+);
+
+export const AccessControlUserGroupPage = lazy(() => import('src/pages/access-control/user-group'));
+export const AccessControlUserGroupCreatePage = lazy(
+  () => import('src/pages/access-control/user-group/create')
+);
+export const AccessControlUserGroupEditPage = lazy(
+  () => import('src/pages/access-control/user-group/edit')
+);
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -102,7 +121,8 @@ const renderFallback = (
 
 const superAdminRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardInternalPage />, index: true },
+    { element: <HomePage />, index: true },
+    { path: 'dashboard', element: <DashboardInternalPage /> },
 
     // Master Data
     // Internal Company
@@ -122,12 +142,22 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'client-user', element: <UserClientListPage /> },
     { path: 'client-user/create', element: <UserClientCreatePage /> },
     { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
+
+    // Access Control User List
+    { path: 'access-control/user-list', element: <AccessControlUserListPage /> },
+    { path: 'access-control/user-list/:id/edit', element: <AccessControlUserListEditPage /> },
+    { path: 'access-control/user-list/create', element: <AccessControlUserListCreatePage /> },
+
+    { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
+    { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
+    { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
   ],
 };
 
 const internalRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardInternalPage />, index: true },
+    { element: <HomePage />, index: true },
+    { path: 'dashboard', element: <DashboardInternalPage /> },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
@@ -168,12 +198,22 @@ const internalRoutes: NonIndexRouteObject = {
       path: '/monitor-personal-load',
       element: <MonitorPersonalLoadPage />,
     },
+
+    // Access Control User List
+    { path: 'access-control/user-list', element: <AccessControlUserListPage /> },
+    { path: 'access-control/user-list/:id/edit', element: <AccessControlUserListEditPage /> },
+    { path: 'access-control/user-list/create', element: <AccessControlUserListCreatePage /> },
+
+    { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
+    { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
+    { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
   ],
 };
 
 const clientRoutes: NonIndexRouteObject = {
   children: [
-    { element: <DashboardClientPage />, index: true },
+    { element: <HomePage />, index: true },
+    { path: 'dashboard', element: <DashboardClientPage /> },
 
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },

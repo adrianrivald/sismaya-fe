@@ -3,27 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { UserClientDTO } from "./schemas/user-schema";
+import type { UserClientDTO } from "./schemas/user-schema";
 
 export type StoreUser = UserClientDTO & {cover?: any, user_type: string};
 
-export function useAddUser() {
+export function useAddUser({isRbac = false} : {isRbac: boolean}) {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreUser) => {
         const {cover, ...form} = formData;
-        
-      const imageData = new FormData();
-      imageData.append('file', cover as unknown as File);
-      const { url } = await uploadImage(
-        imageData
-      );
+        const payload = {
+          ...form,
+        }
+        if (cover) {
+          const imageData = new FormData();
+          imageData.append('file', cover as unknown as File);
+          const { url } = await uploadImage(
+            imageData
+          );
+          
+          Object.assign(payload, {
+          
+          profile_picture: url,
+          });
+        }
 
         return http(`users`, {
-          data: {
-            ...form,
-            profile_picture: url
-          },
+          data: payload
         });
       },
       {
@@ -40,13 +46,13 @@ export function useAddUser() {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`${isClient ? "/client-user" : "/internal-user"}`)
+          navigate(`${!isRbac ? isClient ? "/client-user" : "/internal-user" : "/access-control/user-list"}`)
 
         },
         onError: (error) => {
           const reason =
             error instanceof Error ? error.message : 'Something went wrong';
-  
+          
             toast.error(reason, {
               position: 'top-right',
               autoClose: 5000,

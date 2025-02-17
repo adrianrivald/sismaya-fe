@@ -49,7 +49,11 @@ export function AddAssigneeModal({
           <Box display="flex" gap={2} alignItems="center" p={2}>
             <Box
               component="img"
-              src={internalUser?.user_info?.profile_picture}
+              src={
+                internalUser?.user_info?.profile_picture !== ''
+                  ? internalUser?.user_info?.profile_picture
+                  : '/assets/icons/user.png'
+              }
               sx={{
                 borderRadius: 100,
                 width: 36,

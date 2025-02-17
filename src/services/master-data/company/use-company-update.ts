@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
-import { CompanyDTO } from "./schemas/company-schema";
+import type { CompanyDTO } from "./schemas/company-schema";
 
-export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any, image?:string};
+export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any, image?:string, cito_quota?: number};
 
 export function useUpdateCompany() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
       async (formData: UpdateCompany) => {
-        const { id, cover, ...form } = formData;
+        const { id, cover,  ...form } = formData;
         const payload = {
           ...form
         }
@@ -39,7 +39,6 @@ export function useUpdateCompany() {
       {
         // onSuccess: (res: {data: UpdateCompany}) => {
           onSuccess: (res: any) => {
-          console.log(res,'res')
           queryClient.invalidateQueries(['company']);
   
           toast.success('Data updated successfully', {

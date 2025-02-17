@@ -12,7 +12,6 @@ interface TaskListProps {
 
 function TaskList({ requestId }: TaskListProps) {
   const { data = [] } = useTaskByRequest(requestId);
-
   if (!data || data.length < 1) {
     return <TaskEmpty />;
   }

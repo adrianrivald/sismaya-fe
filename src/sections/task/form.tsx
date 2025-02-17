@@ -25,7 +25,7 @@ import {
 } from 'src/services/task/task-management';
 import { taskStatusMap } from 'src/constants/status';
 import dayjs from 'dayjs';
-import { useRequestList } from 'src/services/request/use-request-list';
+import { useTaskRequestList } from 'src/services/request/use-request-list';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -63,7 +63,10 @@ function Form({ request, task }: FormProps) {
     },
   });
   const taskId = form.getValues('taskId') ?? 0;
-  const { data } = useRequestList({ page: 1, page_size: 100 }, request?.assignee_company_id ?? 0);
+  const { data } = useTaskRequestList(
+    { page: 1, page_size: 100 },
+    request?.assignee_company_id ?? 0
+  );
   const requests = taskId ? [{ id: 0, name: request?.name }] : (data?.items ?? []);
 
   const [_, assigneeFn] = useMutationAssignee(requestId);

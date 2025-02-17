@@ -60,7 +60,7 @@ export function RequestDetailView() {
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
-  const { data: cito } = useCitoById(String(idCurrentCompany) ?? '');
+  const { data: cito } = useCitoById(String(requestDetail?.company?.id) ?? '');
   const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();
@@ -147,8 +147,8 @@ export function RequestDetailView() {
     });
   };
   const handleApprove = (formData: any) => {
-    const startDate = dayjs(dateValue).format('YYYY-MM-DD');
-    const endDate = dayjs(endDateValue).format('YYYY-MM-DD');
+    const startDate = dayjs(dateValue).format('YYYY-MM-DD hh:mm:ss');
+    const endDate = dayjs(endDateValue).format('YYYY-MM-DD hh:mm:ss');
     const payload = {
       ...formData,
       start_date: startDate,
@@ -277,7 +277,7 @@ export function RequestDetailView() {
                         >
                           <Box
                             component="img"
-                            src={item?.picture}
+                            src={item?.picture !== '' ? item?.picture : '/assets/icons/user.png'}
                             sx={{
                               cursor: 'pointer',
                               borderRadius: 100,

@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { loginUser } from 'src/services/auth/login';
-import { InternalCompany } from 'src/services/master-data/company/types';
-import { useUserById } from 'src/services/master-data/user';
-import { User } from 'src/services/master-data/user/types';
+import type { User } from 'src/services/master-data/user/types';
 import { createContext } from 'src/utils/create.context';
+import { createStore } from '@xstate/store';
 import * as sessionService from '../session/session';
 
 interface AuthContextValue {
@@ -27,34 +26,56 @@ interface LoginCredentialsDTO {
   password: string;
 }
 
+const initialStore = {
+  permissions: [] as string[],
+};
+export const permissionStore = createStore({
+  context: initialStore,
+  on: {
+    storePermissions: (context, event: { newPermissions: string[] }) => ({
+      permissions: event?.newPermissions,
+    }),
+    flushPermissions: () => ({
+      permissions: [],
+    }),
+  },
+});
+
 export function AuthProvider(props: React.PropsWithChildren) {
   const navigate = useNavigate();
   const [accessToken, setAccessToken] = React.useState<string | null>(() =>
     sessionService.getSession()
   );
   const [userInfo, setUserInfo] = React.useState<string | null>(() => sessionService.getUser());
-  // const [currentInternalCompany, setCurrentInternalCompany] = React.useState<number | null>(null);
 
   async function login(formField: LoginCredentialsDTO) {
     const { data } = await loginUser(formField);
     const { token, user } = data;
+    console.log(user, 'useruser');
     sessionService.setSession(token, user);
     setAccessToken(token);
     setUserInfo(JSON.stringify(user));
-    // setCurrentInternalCompany((user?.internal_companies ?? [])[0].id ?? null);
-
+    permissionStore.send({
+      type: 'storePermissions',
+      newPermissions: user?.user_info?.role?.permissions?.map((item) => item?.name),
+    });
     // Redirect as client user who has internal companies
-    if ((user?.internal_companies ?? [])?.length > 0 && user?.user_info?.role_id !== 1) {
-      navigate(`/${(user?.internal_companies ?? [])[0]?.company?.name?.toLowerCase()}/request`);
-    } else {
-      navigate('/');
-    }
+    // if ((user?.internal_companies ?? [])?.length > 0 && user?.user_info?.role_id !== 1) {
+    //   navigate(`/${(user?.internal_companies ?? [])[0]?.company?.name?.toLowerCase()}/request`);
+    // } else {
+    //   navigate('/');
+    // }
+
+    navigate('/');
   }
 
   async function logout() {
     sessionService.flushSession();
     setAccessToken(null);
     setAccessToken(null);
+    permissionStore.send({
+      type: 'flushPermissions',
+    });
     navigate('/');
   }
 

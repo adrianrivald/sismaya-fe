@@ -2,19 +2,9 @@ import { useEffect, useState } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { Outlet, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
+import type { SelectChangeEvent } from '@mui/material';
+import { Box, Stack, Grid, Button, capitalize, MenuItem, Select } from '@mui/material';
 import {
-  Box,
-  Stack,
-  Grid,
-  Input,
-  Button,
-  SelectChangeEvent,
-  capitalize,
-  MenuItem,
-  Select,
-} from '@mui/material';
-import {
-  useCompleteRequest,
   useRequestById,
   useRequestStatus,
   useUpdateRequestPriority,
@@ -22,6 +12,10 @@ import {
 } from 'src/services/request';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
+import { store } from 'src/services/request/task';
+import { useSelector } from '@xstate/store/react';
+import { useMessage } from 'src/services/messaging/use-messaging';
+import type { Messaging } from 'src/services/messaging/types';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
@@ -38,7 +32,12 @@ export default function RequestDetailLayout() {
   )?.company?.id;
   const { data: requestStatuses } = useRequestStatus(String(idCurrentCompany ?? ''));
   const { data: requestDetail } = useRequestById(id ?? '');
-  // const { mutate: completeRequest } = useCompleteRequest();
+  const [chatPage, setChatPage] = useState(1);
+  const [isShouldFetch, setIsShouldFetch] = useState(false);
+  const [isCoolingDown, setIsCoolingDown] = useState(false);
+  const [isFetchingChat, setIsFetchingChat] = useState(false);
+  const { data } = useMessage(Number(id), chatPage);
+  const [chatData, setChatData] = useState<Messaging[]>(data?.messages ?? []);
   const { mutate: updateStatus } = useUpdateRequestStatus();
   const { mutate: updatePriority } = useUpdateRequestPriority();
   const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
@@ -47,12 +46,82 @@ export default function RequestDetailLayout() {
     requestStatuses && requestStatuses?.find((item) => item?.id === currentStatus);
   const [openCompleteRequest, setOpenCompleteRequest] = useState(false);
 
+  const tasks = useSelector(store, (state) => state.context.tasks);
+  const tasksStatus = tasks?.map((task) => task?.status);
+  const isTasksHasBeenCompleted = tasksStatus?.every((item) => item === 'completed');
+
   const priorityEnum = () => {
     if (currentPriority === 'low') return 'low';
     if (currentPriority === 'medium') return 'medium';
     if (currentPriority === 'high') return 'high';
     if (currentPriority === 'cito') return 'cito';
     return 'low';
+  };
+
+  useEffect(() => {
+    if (chatPage === 1) setChatData(data?.messages ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-unsafe-optional-chaining
+    if (chatPage > 1) setChatData((prev) => [...prev, ...(data?.messages ?? [])]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatPage]);
+
+  useEffect(() => {
+    if (isShouldFetch && chatPage < data?.meta?.total_page && isCoolingDown) {
+      setIsFetchingChat(true);
+      setTimeout(() => {
+        setChatPage((prev) => prev + 1);
+        setIsCoolingDown(false);
+        setIsFetchingChat(false);
+      }, 1000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatPage, isShouldFetch, isCoolingDown]);
+
+  console.log(chatData, 'chatdata');
+  const bottomChatBoxElement = document.getElementById('bottomChatBox');
+
+  useEffect(() => {
+    const element = document.getElementById('chatBox');
+    const handleScroll = () => {
+      if (element) {
+        console.log(
+          element.scrollTop === 0 && chatPage < data?.meta?.total_page,
+          'element.scrollTop'
+        );
+        if (element.scrollTop === 0) {
+          setIsShouldFetch(true);
+        } else {
+          setIsShouldFetch(false);
+          setIsCoolingDown(true);
+        }
+      }
+    };
+
+    if (element) {
+      element.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener('scroll', handleScroll);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSuccess = (newData: any) => {
+    setChatData((prev) => [newData, ...prev]);
+    setTimeout(() => {
+      if (bottomChatBoxElement) {
+        bottomChatBoxElement.scrollIntoView({
+          block: 'end',
+        });
+      }
+    }, 100);
   };
 
   useEffect(() => {
@@ -167,7 +236,7 @@ export default function RequestDetailLayout() {
                     }}
                     onChange={(e: SelectChangeEvent<string>) => {
                       setCurrentPriority(e.target.value);
-                      const res = updatePriority({
+                      updatePriority({
                         id: Number(id),
                         priority: e.target.value,
                       });
@@ -245,7 +314,12 @@ export default function RequestDetailLayout() {
           </Box>
         </Grid>
         <Grid item xs={12} md={4}>
-          <RequestMessenger requestId={Number(id)} />
+          <RequestMessenger
+            isFetchingChat={isFetchingChat}
+            onSuccess={onSuccess}
+            requestId={Number(id)}
+            chats={chatData as Messaging[]}
+          />
         </Grid>
       </Grid>
 
@@ -253,6 +327,7 @@ export default function RequestDetailLayout() {
         onCompleteRequest={onCompleteRequest}
         openCompleteRequest={openCompleteRequest}
         setOpenCompleteRequest={setOpenCompleteRequest}
+        isUncompleted={!isTasksHasBeenCompleted}
       />
     </DashboardContent>
   );
