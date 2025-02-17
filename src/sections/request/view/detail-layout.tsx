@@ -301,13 +301,15 @@ export default function RequestDetailLayout() {
               </Box>
             </Box>
 
-            {userType === 'internal' && (
-              <RequestTaskForm requestId={Number(id)}>
-                <Button variant="contained" disabled={requestDetail?.step === 'done'}>
-                  Create Task
-                </Button>
-              </RequestTaskForm>
-            )}
+            {userType === 'internal' &&
+              requestDetail?.step !== 'pending' &&
+              requestDetail?.step !== 'rejected' && (
+                <RequestTaskForm requestId={Number(id)}>
+                  <Button variant="contained" disabled={requestDetail?.step === 'done'}>
+                    Create Task
+                  </Button>
+                </RequestTaskForm>
+              )}
           </Stack>
           <Box>
             <Outlet />
