@@ -42,7 +42,7 @@ export default function TaskDetailPage() {
   return (
     <DashboardContent maxWidth="xl">
       <Helmet>
-        <title>Task Management - {CONFIG.appName}</title>
+        <title> Task Management - {CONFIG.appName}</title>
       </Helmet>
 
       <Stack spacing={3}>

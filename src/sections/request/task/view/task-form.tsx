@@ -40,8 +40,8 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
   const [form, createOrUpdateFn] = taskService.useCreateOrUpdateTask(requestId, {
     defaultValues: task,
     onSuccess: () => {
-      onClose();
       form.reset({});
+      onClose();
     },
   });
   const [isDeleting, deleteFn] = taskService.useDeleteTask(requestId, {
@@ -104,6 +104,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
           <TextField label="Request Task Name" {...formUtils.getTextProps(form, 'title')} />
 
           <AssigneeChooserField
+            isCreate={task?.taskId === undefined || task?.taskId === 0}
             name="assignees"
             // @ts-ignore
             control={form.control}

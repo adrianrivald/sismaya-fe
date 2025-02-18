@@ -39,6 +39,7 @@ export function DueDatePicker({
   endDate,
   ...props
 }: { endDate?: string } & DatePickerProps<any, any>) {
+  console.log('data');
   const date = dayjs(endDate);
   return (
     <DatePicker

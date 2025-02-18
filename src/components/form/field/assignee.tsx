@@ -47,12 +47,14 @@ export function AssigneeList({ assignees }: { assignees: Array<Assignee> }) {
 
 export interface AssigneeChooserProps {
   requestId: string | number;
+  isCreate?: boolean;
   assignees?: Array<Assignee>;
   onAssign: (assignee: Assignee, index: number) => void;
   onUnassign: (assignee: Assignee, index: number) => void;
 }
 
 export function AssigneeChooser({
+  isCreate,
   requestId,
   assignees = [],
   onAssign,
@@ -166,6 +168,7 @@ export interface AssigneeChooserFieldProps<TFormFields extends FieldValues = Fie
     Partial<AssigneeChooserProps> {}
 
 export function AssigneeChooserField({
+  isCreate,
   requestId = 0,
   assignees: defaultAssignees = [],
   onAssign,
@@ -189,11 +192,16 @@ export function AssigneeChooserField({
             requestId={requestId}
             assignees={assignees}
             onAssign={(assignee, index) => {
-              onAssign?.(assignee, index);
+              if (!isCreate) {
+                onAssign?.(assignee, index);
+              }
               append(assignee);
             }}
             onUnassign={(assignee, index) => {
-              onUnassign?.(assignee, index);
+              if (!isCreate) {
+                onUnassign?.(assignee, index);
+              }
+
               remove(index);
             }}
           />
