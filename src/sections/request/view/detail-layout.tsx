@@ -304,7 +304,7 @@ export default function RequestDetailLayout() {
             {userType === 'internal' &&
               requestDetail?.step !== 'pending' &&
               requestDetail?.step !== 'rejected' && (
-                <RequestTaskForm requestId={Number(id)}>
+                <RequestTaskForm requestId={Number(id)} requestNumber={requestDetail?.number}>
                   <Button variant="contained" disabled={requestDetail?.step === 'done'}>
                     Create Task
                   </Button>
