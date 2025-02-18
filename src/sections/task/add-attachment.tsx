@@ -20,7 +20,6 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
 
     await toast.promise(uploadOrDeleteFileFn({ kind: 'create', taskId: taskId || 0, files }), {
       pending: 'Uploading...',
-      success: 'Uploaded successfully',
       error: {
         // @ts-ignore
         render: ({ data }) => data?.message || 'Upload failed',
