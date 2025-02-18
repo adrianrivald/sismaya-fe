@@ -3,10 +3,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
 import Button from '@mui/material/Button';
+import { useMutationAttachment } from 'src/services/task/task-management';
 
 export default function AddAttachment({ taskId }: { taskId?: number }) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [_, uploadOrDeleteFileFn] = useMutationAttachment(taskId ?? 0);
 
   async function handleUpload(files: File[]) {
     const formData = new FormData();
@@ -15,7 +18,7 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
       formData.append('files', file);
     });
 
-    await toast.promise(uploads(formData), {
+    await toast.promise(uploadOrDeleteFileFn({ kind: 'create', taskId: taskId || 0, files }), {
       pending: 'Uploading...',
       success: 'Uploaded successfully',
       error: {
