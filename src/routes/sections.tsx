@@ -26,6 +26,7 @@ export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 export const UnresolvedCitoListPage = lazy(() => import('src/pages/request/unresolved-cito-list'));
 export const CitoListPage = lazy(() => import('src/pages/request/cito-list'));
 export const PendingListPage = lazy(() => import('src/pages/request/pending-list'));
+export const RequestReviewPage = lazy(() => import('src/pages/request/review'));
 
 // Task Management
 export const TaskLayout = lazy(() => import('src/pages/task/layout'));
@@ -230,6 +231,7 @@ const clientRoutes: NonIndexRouteObject = {
     },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
+    { path: '/:vendor/request/:id/review', element: <RequestReviewPage /> },
   ],
 };
 
