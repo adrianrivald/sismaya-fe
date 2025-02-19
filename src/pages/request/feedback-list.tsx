@@ -13,7 +13,7 @@ export default function FeedbackListPage() {
   return (
     <>
       <Helmet>
-        <title> {`Request CITO List - ${CONFIG.appName}`}</title>
+        <title> {`Request Feedback List - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -21,7 +21,7 @@ export default function FeedbackListPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <RequestFeedbackView type={userType} />
+      <RequestFeedbackView />
     </>
   );
 }

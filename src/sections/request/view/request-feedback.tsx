@@ -93,7 +93,7 @@ function ButtonActions(
   );
 }
 
-export function RequestFeedbackView({ type }: { type: string }) {
+export function RequestFeedbackView() {
   const { user } = useAuth();
   const { vendor } = useParams();
   const assigneeCompanyId = user?.internal_companies?.find(
@@ -125,12 +125,12 @@ export function RequestFeedbackView({ type }: { type: string }) {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            Pending Requests
+            Requests Feedback
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Dashboard {currentCompany?.toUpperCase()}</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">Pending Requests</Typography>
+            <Typography color="grey.500">Requests Feedback</Typography>
           </Box>
         </Box>
       </Box>
