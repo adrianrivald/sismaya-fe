@@ -11,7 +11,7 @@ export function RequestReviewView() {
   const { id, vendor } = useParams();
   const { mutate: addRequestReview } = useAddRequestReview();
   const { data: requestDetail } = useRequestById(id ?? '');
-  const [rating, setRating] = useState<number | null>(0);
+  const [rating, setRating] = useState<number | null>(requestDetail?.rating ?? 0);
 
   const handleSubmit = (formData: { description: string }) => {
     // TODO Submit review
@@ -21,8 +21,6 @@ export function RequestReviewView() {
       description: formData?.description,
     });
   };
-
-  console.log(rating, 'rating');
 
   return (
     <DashboardContent maxWidth="xl">
@@ -61,6 +59,7 @@ export function RequestReviewView() {
               {({ register, watch, formState, setValue, control }) => (
                 <>
                   <Rating
+                    disabled={requestDetail?.rating !== null}
                     size="large"
                     name="simple-controlled"
                     value={rating}
@@ -76,35 +75,46 @@ export function RequestReviewView() {
                       width: '80%',
                     }}
                   >
-                    <TextField
-                      error={Boolean(formState?.errors?.description)}
-                      multiline
-                      label="Description"
-                      rows={8}
-                      {...register('description', {
-                        required: 'Description must be filled out',
-                      })}
-                    />
-                    {formState?.errors?.description && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.description?.message)}
-                      </FormHelperText>
+                    {requestDetail?.rating_desc ? (
+                      <>
+                        <Typography fontSize={24}>Rating Description:</Typography>
+                        <Typography mt={2}>{requestDetail?.rating_desc}</Typography>
+                      </>
+                    ) : (
+                      <>
+                        <TextField
+                          error={Boolean(formState?.errors?.description)}
+                          multiline
+                          label="Description"
+                          rows={8}
+                          {...register('description', {
+                            required: 'Description must be filled out',
+                          })}
+                        />
+                        {formState?.errors?.description && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.description?.message)}
+                          </FormHelperText>
+                        )}
+                      </>
                     )}
                   </Stack>
-                  <LoadingButton
-                    size="small"
-                    // loading={isLoading}
-                    loadingIndicator="Submitting..."
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      width: '80%',
-                      py: 2,
-                    }}
-                  >
-                    Submit
-                  </LoadingButton>
+                  {requestDetail?.rating === null && (
+                    <LoadingButton
+                      size="small"
+                      // loading={isLoading}
+                      loadingIndicator="Submitting..."
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        width: '80%',
+                        py: 2,
+                      }}
+                    >
+                      Submit
+                    </LoadingButton>
+                  )}
                 </>
               )}
             </Form>

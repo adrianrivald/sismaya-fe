@@ -26,6 +26,7 @@ export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 export const UnresolvedCitoListPage = lazy(() => import('src/pages/request/unresolved-cito-list'));
 export const CitoListPage = lazy(() => import('src/pages/request/cito-list'));
 export const PendingListPage = lazy(() => import('src/pages/request/pending-list'));
+export const FeedbackListPage = lazy(() => import('src/pages/request/feedback-list'));
 export const RequestReviewPage = lazy(() => import('src/pages/request/review'));
 
 // Task Management
@@ -165,6 +166,7 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
     { path: '/request/cito', element: <CitoListPage /> },
     { path: '/:vendor/request/pending', element: <PendingListPage /> },
+    { path: '/:vendor/request/feedback', element: <FeedbackListPage /> },
     {
       path: '/:vendor/request/:id',
       element: <RequestDetailLayout />,

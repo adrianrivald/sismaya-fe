@@ -125,6 +125,8 @@ export interface RequestDetail {
     end_date: string;
     reject_reason: string
     task_count: number;
+    rating: number;
+    rating_desc: string
 }
 
 
@@ -159,4 +161,11 @@ export interface RequestStatusSummary {
     count: number;
     id: number;
     name: string
+}
+
+export interface RequestFeedback {
+    number: string;
+    id: number;
+    review: string
+    rating: number
 }
