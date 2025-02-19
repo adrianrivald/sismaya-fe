@@ -39,15 +39,16 @@ export function DueDatePicker({
   endDate,
   ...props
 }: { endDate?: string } & DatePickerProps<any, any>) {
+  console.log('data');
   const date = dayjs(endDate);
   return (
     <DatePicker
       {...props}
-      disablePast
       label="Due date"
-      shouldDisableDate={(day) => day.isAfter(date)}
-      shouldDisableMonth={(month) => month.isAfter(date)}
-      shouldDisableYear={(year) => year.isAfter(date)}
+      disablePast
+      shouldDisableDate={(day) => day.isBefore(date)}
+      shouldDisableMonth={(month) => month.isBefore(date)}
+      shouldDisableYear={(year) => year.isBefore(date)}
     />
   );
 }
@@ -124,6 +125,7 @@ function Form({ request, task }: FormProps) {
 
         <Stack p={2} spacing={3} flexGrow={1}>
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
+
           <TextField
             label="Request"
             select
@@ -133,7 +135,7 @@ function Form({ request, task }: FormProps) {
           >
             {requests.map((r) => (
               <MenuItem key={r.id} value={r.id}>
-                {r?.name || `REQ#${r.id}`}
+                {r?.name || `REQ${r.number}`}
               </MenuItem>
             ))}
           </TextField>
@@ -146,8 +148,10 @@ function Form({ request, task }: FormProps) {
             control={form.control}
             requestId={requestId}
             assignees={task?.assignees ?? []}
-            onAssign={(assignee) => assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.id })}
-            onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.id })}
+            onAssign={(assignee) =>
+              assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.userId })
+            }
+            onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.userId })}
           />
 
           <DueDatePicker
