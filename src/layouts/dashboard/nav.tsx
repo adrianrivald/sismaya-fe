@@ -137,7 +137,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     heading: item?.company?.name,
     path: `/${item?.company?.name.toLowerCase()}/task`,
   }));
-  console.log(userPermissions, 'userPermissions');
+
   return (
     <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />

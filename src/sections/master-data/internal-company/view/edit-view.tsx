@@ -596,7 +596,6 @@ export function EditInternalCompanyView() {
   };
 
   const onChangeProductNew = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value, 'value product');
     setProduct(e.target.value);
   };
 

@@ -56,8 +56,6 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
 
-  console.log('data', task);
-
   return (
     <Drawer.Content anchor="right">
       <Box
