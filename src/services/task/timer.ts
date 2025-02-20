@@ -1,24 +1,26 @@
 import dayjs from 'dayjs';
 import { createStore } from '@xstate/store';
 import { useSelector } from '@xstate/store/react';
-import { useEffect } from 'react';
+import { act, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
 type TimerAction = 'start' | 'pause' | 'stop';
-export type TimerState = 'idle' | 'running' | 'paused' | 'stopped';
+export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '';
 
 type EventStart = Omit<typeof initialStore, 'state'>;
 
 type TimerActionPayload =
   | (EventStart & {
       action: 'start';
+      name?: string;
     })
   | {
       action: TimerAction;
       taskId: number;
+      name?: string;
     };
 
 const stateMap = {
@@ -31,16 +33,17 @@ const storageKey = 'task-timer';
 
 const initialStore = {
   timer: 0, // in seconds
-  state: 'idle' as TimerState,
+  state: '' as TimerState,
   activity: '',
   request: '',
   taskId: 0,
+  name: '',
 };
 
 const store = createStore({
   context: initialStore,
   on: {
-    transition: (_context, event: { nextState: TimerState }) => {
+    transition: (_context: any, event: { nextState: TimerState }) => {
       // Remove local storage when timer is idle or stopped
       if (event.nextState === 'idle' || event.nextState === 'stopped') {
         window.localStorage.removeItem(storageKey);
@@ -55,7 +58,7 @@ const store = createStore({
 
       return initialStore;
     },
-    start: (context, event: Partial<EventStart>) => {
+    start: (context: { [x: string]: any }, event: Partial<EventStart>) => {
       const storedData = window.localStorage.getItem(storageKey);
       const parsedData = storedData ? JSON.parse(storedData) : null;
 
@@ -75,12 +78,28 @@ const store = createStore({
         timer: getItem('timer'),
       };
     },
-    countup: (context) => ({
+
+    countup: (context: { timer: number }) => ({
       // not sure why, but sometimes trigger countup twice, so need to add 0.5 instead of 1
       timer: context.timer + 0.5,
     }),
+
+    idle: (context: { [x: string]: any }, event: Partial<EventStart>) => {
+      const getItem = (key: keyof typeof event) => event[key] || context[key];
+      return {
+        state: 'idle' as TimerState,
+        activity: getItem('activity'),
+        request: getItem('request'),
+        taskId: getItem('taskId'),
+        timer: getItem('timer'),
+      };
+    },
   },
 });
+
+export function useTimerActionStore() {
+  return store;
+}
 
 export function useTimerStore() {
   const state = useSelector(store, (s) => s.context);
@@ -126,7 +145,7 @@ export function useCheckTimer() {
       const activity = response?.data?.running_timer;
 
       if (!activity || activity?.id === 0) {
-        store.send({ type: 'transition', nextState: 'idle' });
+        store.send({ type: 'transition', nextState: '' });
         return;
       }
 
@@ -175,9 +194,12 @@ export function useCheckTimer() {
 export function useTimerAction() {
   return useMutation<unknown, Error, TimerActionPayload>({
     mutationKey: ['task', 'activity'],
-    mutationFn: async ({ action, taskId }) => http(`/tasks/${taskId}/${action}-timer`),
+    mutationFn: async ({ action, taskId, name }) =>
+      action === 'start'
+        ? http(`/tasks/${taskId}/${action}-timer?name=${encodeURIComponent(name || '')}`)
+        : http(`/tasks/${taskId}/${action}-timer`),
     // store next state to store immediately before tell the server
-    onMutate: ({ action, ...rest }) => {
+    onMutate: ({ name, action, ...rest }) => {
       if (action === 'start') {
         store.send({ type: 'start', ...rest });
         return;
