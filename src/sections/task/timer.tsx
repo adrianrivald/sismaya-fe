@@ -1,7 +1,13 @@
 import { Iconify } from 'src/components/iconify';
 import * as Dialog from 'src/components/disclosure/modal';
 import { Stack, IconButton, Typography } from '@mui/material';
-import { useTimer, useTimerStore, useTimerAction, type TimerState } from 'src/services/task/timer';
+import {
+  useTimer,
+  useTimerStore,
+  useTimerAction,
+  type TimerState,
+  useTimerActionStore,
+} from 'src/services/task/timer';
 
 type TimerActionButtonProps = {
   activity?: string;
@@ -9,6 +15,7 @@ type TimerActionButtonProps = {
   taskId: number;
   lastTimer?: number;
   state?: TimerState;
+  name?: string;
 };
 
 export function TimerActionButton({
@@ -16,10 +23,12 @@ export function TimerActionButton({
   activity,
   request,
   lastTimer = 0,
-  state: defaultState = 'idle',
+  state: defaultState = '',
+  name,
 }: TimerActionButtonProps) {
   const mutation = useTimerAction();
   const { state, taskId: storeTaskId } = useTimerStore();
+  const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
   const isDisabled = defaultState === 'stopped';
 
@@ -29,9 +38,29 @@ export function TimerActionButton({
       size="small"
       disabled={isDisabled}
       sx={{ bgcolor: 'success.main', color: 'white' }}
-      onClick={() =>
-        mutation.mutate({ action: 'start', taskId, activity, request, timer: lastTimer })
-      }
+      onClick={() => {
+        if (state === 'idle') {
+          mutation.mutate({
+            action: 'start',
+            taskId,
+            activity: activity || '',
+            request: request || '',
+            timer: lastTimer,
+            name: name || '',
+          });
+        } else {
+          store.send({
+            type: 'idle',
+            ...{
+              taskId,
+              activity: activity || '',
+              request: request || '',
+              timer: lastTimer,
+              name: name || '',
+            },
+          });
+        }
+      }}
     >
       <Iconify icon="solar:play-bold" />
     </IconButton>

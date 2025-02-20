@@ -9,7 +9,7 @@ export default function FloatingTimer() {
   const store = useTimerStore();
   const { dragInfo, getDragableProps } = useDragable();
 
-  if (store.taskId === 0 || store.state === 'idle' || store.state === 'stopped') {
+  if (store.taskId === 0 || store.state === 'stopped') {
     return null;
   }
 
@@ -75,7 +75,7 @@ export default function FloatingTimer() {
 
           <Stack spacing={1.5} direction="row" alignItems="center">
             <TimerCountdown size="small" />
-            <TimerActionButton taskId={store.taskId} />
+            <TimerActionButton taskId={store.taskId} name={store.activity} />
           </Stack>
         </Box>
       </Box>
