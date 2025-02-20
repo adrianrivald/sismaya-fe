@@ -217,3 +217,24 @@ export function useRequestFeedbacks(params: Partial<any> ) {
     (paginationState) => fetchRequestFeedbacks({ ...params, ...paginationState })
   );
 }
+
+async function fetchRequestFeedbacksAll(internalId?: number) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL(`/dashboard-internal/feedbacks/${internalId}`, baseUrl);
+
+
+  const data  = await http(
+    endpointUrl.toString().replace(baseUrl, '')
+  )
+
+  return data
+  }
+
+  export function useRequestFeedbacksAll(internalId?: number) {
+    const data = useQuery(
+      ['request-feedbacks-all'],
+      () => fetchRequestFeedbacksAll(internalId)
+    );
+  
+    return data;
+  }

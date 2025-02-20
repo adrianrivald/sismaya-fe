@@ -39,18 +39,8 @@ export function DueDatePicker({
   endDate,
   ...props
 }: { endDate?: string } & DatePickerProps<any, any>) {
-  console.log('data');
   const date = dayjs(endDate);
-  return (
-    <DatePicker
-      {...props}
-      label="Due date"
-      disablePast
-      shouldDisableDate={(day) => day.isBefore(date)}
-      shouldDisableMonth={(month) => month.isBefore(date)}
-      shouldDisableYear={(year) => year.isBefore(date)}
-    />
-  );
+  return <DatePicker {...props} label="Due date" />;
 }
 
 function Form({ request, task }: FormProps) {

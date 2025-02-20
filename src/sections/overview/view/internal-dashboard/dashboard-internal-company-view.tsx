@@ -16,6 +16,7 @@ import {
   useInternalTopStaffbyHour,
   useRequestHandlingTime,
   useHappinessRating,
+  useRequestFeedbacksAll,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -116,9 +117,11 @@ export function DashboardInternalCompanyView({
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
   const { data: topStaffbyHour } = useInternalTopStaffbyHour(idCompany, dateFromTopStaff, dateNow);
   const { data: requestHandlingTime } = useRequestHandlingTime(idCompany, dateFrom, dateNow);
-  // const { data: happinessRating } = useHappinessRating(idCompany, dateFrom, dateNow);
+  const { data: happinessRating } = useHappinessRating(idCompany, dateFrom, dateNow);
+  const { data: requestFeedbacks } = useRequestFeedbacksAll(idCompany);
 
-  // console.log(happinessRating, 'happinessRating');
+  // eslint-disable-next-line no-unsafe-optional-chaining
+  const happinessRatingPercentage = (happinessRating?.summary / 5) * 100;
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -679,7 +682,10 @@ export function DashboardInternalCompanyView({
               <Typography fontSize="18px" fontWeight="600" variant="h6">
                 Happiness Rating
               </Typography>
-              <HappinessRatingChart value={90} />
+              <HappinessRatingChart
+                ratingSummary={happinessRating?.summary}
+                value={happinessRatingPercentage}
+              />
               <Box textAlign="center">
                 <Typography color="grey.500" fontSize={12}>
                   Based on
@@ -691,7 +697,7 @@ export function DashboardInternalCompanyView({
                   fontSize={12}
                   sx={{ textDecoration: 'underline', cursor: 'pointer' }}
                 >
-                  16 performance evaluation feedbacks
+                  {requestFeedbacks?.meta?.total_data} performance evaluation feedbacks
                 </Typography>
               </Box>
             </Box>

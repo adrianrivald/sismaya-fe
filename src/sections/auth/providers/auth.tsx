@@ -51,7 +51,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
   async function login(formField: LoginCredentialsDTO) {
     const { data } = await loginUser(formField);
     const { token, user } = data;
-    console.log(user, 'useruser');
+
     sessionService.setSession(token, user);
     setAccessToken(token);
     setUserInfo(JSON.stringify(user));

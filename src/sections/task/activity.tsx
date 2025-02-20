@@ -1,5 +1,5 @@
-// import { Link } from 'react-router-dom';
-import { Box, Stack, Typography, /* Button, */ Paper } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { Box, Stack, Typography, Paper, Button } from '@mui/material';
 import { useTimerStore, useLastActivity } from 'src/services/task/timer';
 import { TimerActionButton, TimerCountdown } from './timer';
 
@@ -80,9 +80,9 @@ export function CardActivity({
   return (
     <Paper component={Stack} spacing={2} elevation={3} p={3} width="50%">
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6">Activities</Typography>
+        <Typography variant="h6">Activities </Typography>
 
-        {/* <Button
+        <Button
           size="small"
           variant="text"
           color="inherit"
@@ -90,7 +90,7 @@ export function CardActivity({
           to={`/task/${taskId}/activities`}
         >
           View all
-        </Button> */}
+        </Button>
       </Box>
 
       <Stack
@@ -118,6 +118,7 @@ export function CardActivity({
             taskId={taskId}
             state={lastActivity?.state}
             lastTimer={lastTimer}
+            name={taskName}
           />
         </Box>
       </Stack>
