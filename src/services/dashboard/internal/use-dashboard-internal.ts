@@ -172,3 +172,69 @@ export function useRequestHandlingTime(internalCompanyId: number, dateFrom: stri
 
   return data;
 }
+
+// Happiness Rating
+async function fetchHappinessRating(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const { data } = await http<{ data: any }>(`dashboard-internal/rating-summary/${internalCompanyId}`);
+
+  return data;
+}
+
+export function useHappinessRating(internalCompanyId: number, dateFrom: string, dateTo: string) {
+  const data = useQuery(['happiness-rating', internalCompanyId], () => fetchHappinessRating(internalCompanyId, dateFrom, dateTo));
+
+  return data;
+}
+
+
+export function fetchRequestFeedbacks(params: Partial<any>) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL(`/dashboard-internal/feedbacks/${params.internalCompanyId}`, baseUrl);
+
+
+  if (params.from) {
+    endpointUrl.searchParams.append('from', params.from);
+  }
+  if (params.to) {
+    endpointUrl.searchParams.append('to', params.to);
+  }
+
+  dataTableParamsBuilder({
+    searchParams: endpointUrl.searchParams,
+    filterValues: [params.order],
+    ...params,
+  });
+
+
+  return http<WithPagination<any>>(
+    endpointUrl.toString().replace(baseUrl, '')
+  );
+}
+
+export function useRequestFeedbacks(params: Partial<any> ) {
+  return usePaginationQuery(
+    ['request-feedbacks', params.internalCompanyId, params.from, params.to],
+    (paginationState) => fetchRequestFeedbacks({ ...params, ...paginationState })
+  );
+}
+
+async function fetchRequestFeedbacksAll(internalId?: number) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL(`/dashboard-internal/feedbacks/${internalId}`, baseUrl);
+
+
+  const data  = await http(
+    endpointUrl.toString().replace(baseUrl, '')
+  )
+
+  return data
+  }
+
+  export function useRequestFeedbacksAll(internalId?: number) {
+    const data = useQuery(
+      ['request-feedbacks-all'],
+      () => fetchRequestFeedbacksAll(internalId)
+    );
+  
+    return data;
+  }
