@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Stack, Typography, Paper, Button } from '@mui/material';
+import { Box, Stack, Typography, Paper, Button, TextField } from '@mui/material';
 import { useTimerStore, useLastActivity } from 'src/services/task/timer';
 import { TimerActionButton, TimerCountdown } from './timer';
 
@@ -36,7 +37,7 @@ function LastActivity({ activity }: { activity: ReturnType<typeof useLastActivit
             color="rgba(33, 43, 54, 1)"
             sx={{ fontWeight: 700, fontSize: '14px', lineHeight: '20px' }}
           >
-            {activity.name}
+            {activity.timerName}
           </Typography>
         </Stack>
 
@@ -75,6 +76,7 @@ export function CardActivity({
   const store = useTimerStore();
   const isCurrentTimer = store.taskId === taskId;
   const requestName = isCurrentTimer ? store.request : request;
+
   const taskName = isCurrentTimer ? store.activity : task;
 
   return (
@@ -107,7 +109,7 @@ export function CardActivity({
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {taskName}
+          {store?.name || lastActivity?.timerName}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -118,7 +120,7 @@ export function CardActivity({
             taskId={taskId}
             state={lastActivity?.state}
             lastTimer={lastTimer}
-            name={taskName}
+            name={lastActivity?.name}
           />
         </Box>
       </Stack>

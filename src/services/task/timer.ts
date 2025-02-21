@@ -76,6 +76,7 @@ const store = createStore({
         request: getItem('request'),
         taskId: getItem('taskId'),
         timer: getItem('timer'),
+        name: getItem('name'),
       };
     },
 
@@ -92,6 +93,7 @@ const store = createStore({
         request: getItem('request'),
         taskId: getItem('taskId'),
         timer: getItem('timer'),
+        name: getItem('name'),
       };
     },
   },
@@ -161,12 +163,15 @@ export function useCheckTimer() {
       if (state === 'running') {
         const lastTimer = response?.data?.current_timer_duration || 0;
 
+        console.log('data activity', activity);
+
         store.send({
           type: 'start',
           activity: activity?.task?.name,
-          request: activity?.task?.request?.name,
+          request: `REQ#${activity?.task?.request?.id}`,
           taskId: activity?.task_id,
           timer: dayjs().diff(dayjs(activity?.started_at), 'second') + lastTimer,
+          name: activity?.name,
         });
 
         return;
@@ -201,7 +206,8 @@ export function useTimerAction() {
     // store next state to store immediately before tell the server
     onMutate: ({ name, action, ...rest }) => {
       if (action === 'start') {
-        store.send({ type: 'start', ...rest });
+        console.log('dataa rest', rest);
+        store.send({ type: 'start', name: name || '', ...rest });
         return;
       }
 
@@ -251,6 +257,7 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
 
   return {
     state,
+    timerName: activity?.name,
     name: activity?.task?.name,
     data: fDate(activity?.created_at, 'DD MMMM YYYY'),
     time: [fTime(activity?.started_at), fTime(activity?.ended_at)].join(' - '),
