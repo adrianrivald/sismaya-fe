@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -12,6 +12,7 @@ import { Iconify } from 'src/components/iconify';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
 import { Avatar, IconButton, Typography } from '@mui/material';
+import { useNotifications } from 'src/services/notification';
 import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
@@ -37,7 +38,24 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const { user } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
+  // const { data: notifications } = useNotifications();
+  // console.log(notifications, 'notifications');
   const layoutQuery: Breakpoint = 'lg';
+
+  const getNotif = async () => {
+    await fetch('https://sismedika-api.emergencydomain.help/api/notifications', {
+      headers: {
+        Authorization: `
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiI0MyIsInN1YiI6InVzZXIiLCJleHAiOjE3NDAxMzUwMDAsImlhdCI6MTc0MDEzMTQwMH0.zkA545JPBHQ-TEstCZd4Uv1hzO-OU130ltMmIGzf9i0`,
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (user?.id === 69) {
+      getNotif();
+    }
+  }, [user?.id]);
 
   return (
     <LayoutSection
