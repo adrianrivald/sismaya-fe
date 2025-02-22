@@ -29,7 +29,7 @@ interface TaskFormProps extends Omit<RequestTaskFormProps, 'children'> {}
 
 const defaultFormValues = taskService.RequestTask.fromJson({
   status: 'to-do',
-  dueDate: new Date(),
+  dueDate: dayjs().toDate(),
 });
 
 function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFormProps) {

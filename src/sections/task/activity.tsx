@@ -84,13 +84,7 @@ export function CardActivity({
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">Activities </Typography>
 
-        <Button
-          size="small"
-          variant="text"
-          color="inherit"
-          component={Link}
-          to={`/task/${taskId}/activities`}
-        >
+        <Button size="small" variant="text" color="inherit" component={Link} to="activities">
           View all
         </Button>
       </Box>
