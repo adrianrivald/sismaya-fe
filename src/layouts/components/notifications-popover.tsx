@@ -13,37 +13,25 @@ import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
 import { fToNow } from 'src/utils/format-time';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-import { Notification } from 'src/services/notification/types';
+import type { Notification } from 'src/services/notification/types';
 import { useReadAllNotification, useReadNotification } from 'src/services/notification';
 
 // ----------------------------------------------------------------------
 
-type NotificationItemProps = {
-  id: string;
-  type: string;
-  title: string;
-  isUnRead: boolean;
-  description: string;
-  avatarUrl: string | null;
-  postedAt: string | number | null;
-};
-
 export type NotificationsPopoverProps = IconButtonProps & {
   data?: Notification[];
-  onScrollNotification: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+  onClickViewAll: () => void;
 };
 
 export function NotificationsPopover({
   data = [],
-  onScrollNotification,
+  onClickViewAll,
   sx,
   ...other
 }: NotificationsPopoverProps) {
@@ -123,11 +111,7 @@ export function NotificationsPopover({
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Scrollbar
-          onScroll={onScrollNotification}
-          fillContent
-          sx={{ overflow: 'auto', minHeight: 240, maxHeight: 400 }}
-        >
+        <Scrollbar fillContent sx={{ overflow: 'auto', minHeight: 240, maxHeight: 400 }}>
           <List disablePadding>
             {data?.length > 0 ? (
               data?.map((notification) => (
@@ -152,11 +136,11 @@ export function NotificationsPopover({
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        {/* <Box sx={{ p: 1 }}>
+        <Box sx={{ p: 1 }}>
           <Button onClick={onClickViewAll} fullWidth disableRipple color="inherit">
-            View all
+            Load More
           </Button>
-        </Box> */}
+        </Box>
       </Popover>
     </>
   );
