@@ -105,7 +105,7 @@ export function NotificationsPopover({
         <Box display="flex" alignItems="center" sx={{ py: 2, pl: 2.5, pr: 1.5 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="subtitle1">Notifications</Typography>
-            {data?.length > 0 && (
+            {totalUnRead > 0 && (
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 You have {totalUnRead} unread messages
               </Typography>
