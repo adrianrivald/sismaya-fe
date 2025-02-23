@@ -60,10 +60,12 @@ export function NotificationsPopover({
     setOpenPopover(null);
   }, []);
 
-  const handleMarkAsRead = (notificationId: number) => {
-    readNotification({
-      id: notificationId,
-    });
+  const handleMarkAsRead = (notificationId: number, readAt: string) => {
+    if (readAt === null) {
+      readNotification({
+        id: notificationId,
+      });
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -125,13 +127,24 @@ export function NotificationsPopover({
           sx={{ overflow: 'auto', minHeight: 240, maxHeight: 400 }}
         >
           <List disablePadding>
-            {data?.map((notification) => (
-              <NotificationItem
-                handleMarkAsRead={handleMarkAsRead}
-                key={notification.id}
-                notification={notification}
-              />
-            ))}
+            {data?.length > 0 ? (
+              data?.map((notification) => (
+                <NotificationItem
+                  handleMarkAsRead={handleMarkAsRead}
+                  key={notification.id}
+                  notification={notification}
+                />
+              ))
+            ) : (
+              <Box
+                sx={{ overflow: 'auto', minHeight: 240, maxHeight: 400 }}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Typography>You don&apos;t have any notification yet</Typography>
+              </Box>
+            )}
           </List>
         </Scrollbar>
 
@@ -154,7 +167,7 @@ function NotificationItem({
   handleMarkAsRead,
 }: {
   notification: Notification;
-  handleMarkAsRead: (id: number) => void;
+  handleMarkAsRead: (id: number, readAt: string) => void;
 }) {
   const { avatarUrl, title } = renderContent(notification);
 
@@ -168,7 +181,7 @@ function NotificationItem({
           bgcolor: 'action.selected',
         }),
       }}
-      onClick={() => handleMarkAsRead(notification?.id)}
+      onClick={() => handleMarkAsRead(notification?.id, notification?.read_at)}
     >
       {/* <ListItemAvatar>
         <Avatar sx={{ bgcolor: 'background.neutral' }}>{avatarUrl}</Avatar>
