@@ -21,6 +21,8 @@ import { fToNow } from 'src/utils/format-time';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+import { Notification } from 'src/services/notification/types';
+import { useReadAllNotification, useReadNotification } from 'src/services/notification';
 
 // ----------------------------------------------------------------------
 
@@ -35,14 +37,19 @@ type NotificationItemProps = {
 };
 
 export type NotificationsPopoverProps = IconButtonProps & {
-  data?: NotificationItemProps[];
+  data?: Notification[];
+  onScrollNotification: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
 };
 
-export function NotificationsPopover({ data = [], sx, ...other }: NotificationsPopoverProps) {
-  const [notifications, setNotifications] = useState(data);
-
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
-
+export function NotificationsPopover({
+  data = [],
+  onScrollNotification,
+  sx,
+  ...other
+}: NotificationsPopoverProps) {
+  const { mutate: readNotification } = useReadNotification();
+  const { mutate: readAllNotification } = useReadAllNotification();
+  const totalUnRead = data.filter((item) => item.read_at === null).length;
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -53,14 +60,15 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     setOpenPopover(null);
   }, []);
 
-  const handleMarkAllAsRead = useCallback(() => {
-    const updatedNotifications = notifications.map((notification) => ({
-      ...notification,
-      isUnRead: false,
-    }));
+  const handleMarkAsRead = (notificationId: number) => {
+    readNotification({
+      id: notificationId,
+    });
+  };
 
-    setNotifications(updatedNotifications);
-  }, [notifications]);
+  const handleMarkAllAsRead = () => {
+    readAllNotification();
+  };
 
   return (
     <>
@@ -111,41 +119,29 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Scrollbar fillContent sx={{ minHeight: 240, maxHeight: { xs: 360, sm: 'none' } }}>
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                New
-              </ListSubheader>
-            }
-          >
-            {notifications.slice(0, 2).map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
-
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                Before that
-              </ListSubheader>
-            }
-          >
-            {notifications.slice(2, 5).map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
+        <Scrollbar
+          onScroll={onScrollNotification}
+          fillContent
+          sx={{ overflow: 'auto', minHeight: 240, maxHeight: 400 }}
+        >
+          <List disablePadding>
+            {data.map((notification) => (
+              <NotificationItem
+                handleMarkAsRead={handleMarkAsRead}
+                key={notification.id}
+                notification={notification}
+              />
             ))}
           </List>
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Box sx={{ p: 1 }}>
-          <Button fullWidth disableRipple color="inherit">
+        {/* <Box sx={{ p: 1 }}>
+          <Button onClick={onClickViewAll} fullWidth disableRipple color="inherit">
             View all
           </Button>
-        </Box>
+        </Box> */}
       </Popover>
     </>
   );
@@ -153,7 +149,13 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 
 // ----------------------------------------------------------------------
 
-function NotificationItem({ notification }: { notification: NotificationItemProps }) {
+function NotificationItem({
+  notification,
+  handleMarkAsRead,
+}: {
+  notification: Notification;
+  handleMarkAsRead: (id: number) => void;
+}) {
   const { avatarUrl, title } = renderContent(notification);
 
   return (
@@ -162,14 +164,15 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
         py: 1.5,
         px: 2.5,
         mt: '1px',
-        ...(notification.isUnRead && {
+        ...(notification.read_at === null && {
           bgcolor: 'action.selected',
         }),
       }}
+      onClick={() => handleMarkAsRead(notification?.id)}
     >
-      <ListItemAvatar>
+      {/* <ListItemAvatar>
         <Avatar sx={{ bgcolor: 'background.neutral' }}>{avatarUrl}</Avatar>
-      </ListItemAvatar>
+      </ListItemAvatar> */}
       <ListItemText
         primary={title}
         secondary={
@@ -184,7 +187,7 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
             }}
           >
             <Iconify width={14} icon="solar:clock-circle-outline" />
-            {fToNow(notification.postedAt)}
+            {fToNow(notification.created_at)}
           </Typography>
         }
       />
@@ -194,54 +197,16 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
 
 // ----------------------------------------------------------------------
 
-function renderContent(notification: NotificationItemProps) {
+function renderContent(notification: Notification) {
   const title = (
     <Typography variant="subtitle2">
       {notification.title}
       <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
-        &nbsp; {notification.description}
+        &nbsp; {notification.content}
       </Typography>
     </Typography>
   );
 
-  if (notification.type === 'order-placed') {
-    return {
-      avatarUrl: (
-        <img
-          alt={notification.title}
-          src="/assets/icons/notification/ic-notification-package.svg"
-        />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'order-shipped') {
-    return {
-      avatarUrl: (
-        <img
-          alt={notification.title}
-          src="/assets/icons/notification/ic-notification-shipping.svg"
-        />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'mail') {
-    return {
-      avatarUrl: (
-        <img alt={notification.title} src="/assets/icons/notification/ic-notification-mail.svg" />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'chat-message') {
-    return {
-      avatarUrl: (
-        <img alt={notification.title} src="/assets/icons/notification/ic-notification-chat.svg" />
-      ),
-      title,
-    };
-  }
   return {
     avatarUrl: notification.avatarUrl ? (
       <img alt={notification.title} src={notification.avatarUrl} />

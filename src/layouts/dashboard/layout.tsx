@@ -38,24 +38,23 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const { user } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
-  // const { data: notifications } = useNotifications();
-  // console.log(notifications, 'notifications');
+  const [page, setPage] = useState(1);
+  const { data: notifications } = useNotifications(page);
+
   const layoutQuery: Breakpoint = 'lg';
 
-  const getNotif = async () => {
-    await fetch('https://sismedika-api.emergencydomain.help/api/notifications', {
-      headers: {
-        Authorization: `
-Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiI0MyIsInN1YiI6InVzZXIiLCJleHAiOjE3NDAxMzUwMDAsImlhdCI6MTc0MDEzMTQwMH0.zkA545JPBHQ-TEstCZd4Uv1hzO-OU130ltMmIGzf9i0`,
-      },
-    });
-  };
-
-  useEffect(() => {
-    if (user?.id === 69) {
-      getNotif();
+  const onScrollNotification: React.UIEventHandler<HTMLDivElement> = (e) => {
+    console.log('hit');
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Check if we're near bottom (within 50px)
+    const isBottom = scrollTop + clientHeight >= scrollHeight - 1;
+    // const hasNextPage = pageComment < totalPageComment;
+    console.log(scrollTop + clientHeight, 'scrollTop + clientHeight');
+    if (isBottom) {
+      console.log('Reached bottom of modal!');
+      setPage((prev) => prev + 1);
     }
-  }, [user?.id]);
+  };
 
   return (
     <LayoutSection
@@ -97,7 +96,10 @@ Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiI0MyIsInN1YiI6InVzZXIiLCJl
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                <NotificationsPopover data={_notifications} />
+                <NotificationsPopover
+                  data={notifications}
+                  onScrollNotification={onScrollNotification}
+                />
                 <AccountPopover
                   data={[
                     {
