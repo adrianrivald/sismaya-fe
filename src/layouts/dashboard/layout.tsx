@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -12,6 +12,7 @@ import { Iconify } from 'src/components/iconify';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
 import { Avatar, IconButton, Typography } from '@mui/material';
+import { useNotifications } from 'src/services/notification';
 import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
@@ -37,7 +38,23 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const { user } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const { data: notifications } = useNotifications(page);
+
   const layoutQuery: Breakpoint = 'lg';
+
+  const onScrollNotification: React.UIEventHandler<HTMLDivElement> = (e) => {
+    console.log('hit');
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Check if we're near bottom (within 50px)
+    const isBottom = scrollTop + clientHeight >= scrollHeight - 1;
+    // const hasNextPage = pageComment < totalPageComment;
+    console.log(scrollTop + clientHeight, 'scrollTop + clientHeight');
+    if (isBottom) {
+      console.log('Reached bottom of modal!');
+      setPage((prev) => prev + 1);
+    }
+  };
 
   return (
     <LayoutSection
@@ -79,7 +96,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                <NotificationsPopover data={_notifications} />
+                <NotificationsPopover
+                  data={notifications}
+                  onScrollNotification={onScrollNotification}
+                />
                 <AccountPopover
                   data={[
                     {
