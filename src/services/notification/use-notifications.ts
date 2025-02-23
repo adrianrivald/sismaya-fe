@@ -2,12 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { http } from "src/utils/http";
 import { Notification } from "./types";
 
+interface Meta {
+  page: number;
+  page_size: number;
+  total_data: number;
+  unread_count: number
+}
+
 async function fetchNotification(page: number) {
-    const { data } = await http<{data : Notification[]}>(
+    const { data, meta } = await http<{data : Notification[], meta: Meta}>(
       `notifications?page=${page}`,
     );
   
-    return data;
+    return {data, meta};
   }
   
   export function useNotifications(page: number) {
