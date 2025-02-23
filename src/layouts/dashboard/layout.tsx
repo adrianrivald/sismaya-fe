@@ -44,7 +44,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const layoutQuery: Breakpoint = 'lg';
 
   const onScrollNotification: React.UIEventHandler<HTMLDivElement> = (e) => {
-    console.log('hit');
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     // Check if we're near bottom (within 50px)
     const isBottom = scrollTop + clientHeight >= scrollHeight - 1;

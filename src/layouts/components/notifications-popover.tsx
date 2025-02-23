@@ -49,7 +49,7 @@ export function NotificationsPopover({
 }: NotificationsPopoverProps) {
   const { mutate: readNotification } = useReadNotification();
   const { mutate: readAllNotification } = useReadAllNotification();
-  const totalUnRead = data.filter((item) => item.read_at === null).length;
+  const totalUnRead = data?.filter((item) => item.read_at === null).length;
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
