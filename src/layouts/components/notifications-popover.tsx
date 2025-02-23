@@ -125,7 +125,7 @@ export function NotificationsPopover({
           sx={{ overflow: 'auto', minHeight: 240, maxHeight: 400 }}
         >
           <List disablePadding>
-            {data.map((notification) => (
+            {data?.map((notification) => (
               <NotificationItem
                 handleMarkAsRead={handleMarkAsRead}
                 key={notification.id}
