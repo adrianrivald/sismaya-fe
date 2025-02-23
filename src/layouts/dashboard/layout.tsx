@@ -38,16 +38,20 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const [navOpen, setNavOpen] = useState(false);
   const [page, setPage] = useState(1);
   const { data } = useNotifications(page);
-  const [notifications, setNotifications] = useState(data);
+  const totalData = data?.meta?.total_data;
+  const [notifications, setNotifications] = useState(data?.data);
+  const [isLoading, setIsLoading] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
 
   const onClickViewAll = () => {
+    setIsLoading(true);
     setPage((prev) => prev + 1);
   };
 
   useEffect(() => {
     if (page > 1) {
-      setNotifications((prev) => [...(prev ?? []), ...(data ?? [])]);
+      setNotifications((prev) => [...(prev ?? []), ...(data?.data ?? [])]);
+      setIsLoading(false);
     }
   }, [data, page]);
 
@@ -91,7 +95,12 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                <NotificationsPopover data={notifications} onClickViewAll={onClickViewAll} />
+                <NotificationsPopover
+                  data={notifications}
+                  totalData={totalData}
+                  onClickViewAll={onClickViewAll}
+                  isLoading={isLoading}
+                />
                 <AccountPopover
                   data={[
                     {
