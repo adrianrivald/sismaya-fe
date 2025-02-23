@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import type { SelectChangeEvent } from '@mui/material';
 import { Box, Stack, Grid, Button, capitalize, MenuItem, Select } from '@mui/material';
@@ -16,6 +16,7 @@ import { store } from 'src/services/request/task';
 import { useSelector } from '@xstate/store/react';
 import { useMessage } from 'src/services/messaging/use-messaging';
 import type { Messaging } from 'src/services/messaging/types';
+import { SvgColor } from 'src/components/svg-color';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
@@ -25,6 +26,7 @@ type StatusStepEnum = 'to_do' | 'in_progress' | 'completed' | 'pending' | 'reque
 
 export default function RequestDetailLayout() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
@@ -177,6 +179,39 @@ export default function RequestDetailLayout() {
             <Typography variant="h5">Request</Typography>
             <Typography variant="h5">{(vendor ?? '').toUpperCase()} Request Management</Typography>
           </Box>
+
+          {requestDetail?.step === 'done' && userType === 'client' && (
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{
+                backgroundColor: 'warning.200',
+                px: 3,
+                py: 2,
+                borderRadius: 2,
+                mb: 4,
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={2}>
+                <SvgColor color="#FFC107" src="/assets/icons/ic-alert.svg" />
+                <Typography color="warning.600">
+                  You haven’t filled out the evaluation report for this request.
+                </Typography>
+              </Box>
+              <Button
+                onClick={() => navigate(`/${vendor}/request/${id}/review`)}
+                sx={{
+                  borderWidth: 1,
+                  borderStyle: 'solid',
+                  color: 'warning.600',
+                  borderColor: 'warning.600',
+                }}
+              >
+                Fill Out the Evaluation Report
+              </Button>
+            </Box>
+          )}
           {requestDetail?.step === 'rejected' && (
             <Box
               display="flex"
@@ -301,13 +336,15 @@ export default function RequestDetailLayout() {
               </Box>
             </Box>
 
-            {userType === 'internal' && (
-              <RequestTaskForm requestId={Number(id)} requestNumber={requestDetail?.number}>
-                <Button variant="contained" disabled={requestDetail?.step === 'done'}>
-                  Create Task
-                </Button>
-              </RequestTaskForm>
-            )}
+            {userType === 'internal' &&
+              requestDetail?.step !== 'pending' &&
+              requestDetail?.step !== 'rejected' && (
+                <RequestTaskForm requestId={Number(id)} requestNumber={requestDetail?.number}>
+                  <Button variant="contained" disabled={requestDetail?.step === 'done'}>
+                    Create Task
+                  </Button>
+                </RequestTaskForm>
+              )}
           </Stack>
           <Box>
             <Outlet />

@@ -27,6 +27,8 @@ export const RequestEditPage = lazy(() => import('src/pages/request/edit'));
 export const UnresolvedCitoListPage = lazy(() => import('src/pages/request/unresolved-cito-list'));
 export const CitoListPage = lazy(() => import('src/pages/request/cito-list'));
 export const PendingListPage = lazy(() => import('src/pages/request/pending-list'));
+export const FeedbackListPage = lazy(() => import('src/pages/request/feedback-list'));
+export const RequestReviewPage = lazy(() => import('src/pages/request/review'));
 
 // Task Management
 export const TaskLayout = lazy(() => import('src/pages/task/layout'));
@@ -165,6 +167,7 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
     { path: '/request/cito', element: <CitoListPage /> },
     { path: '/:vendor/request/pending', element: <PendingListPage /> },
+    { path: '/:vendor/request/feedback', element: <FeedbackListPage /> },
     {
       path: '/:vendor/request/:id',
       element: <RequestDetailLayout />,
@@ -235,6 +238,7 @@ const clientRoutes: NonIndexRouteObject = {
     },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
+    { path: '/:vendor/request/:id/review', element: <RequestReviewPage /> },
   ],
 };
 

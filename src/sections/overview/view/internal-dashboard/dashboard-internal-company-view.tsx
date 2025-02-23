@@ -15,13 +15,15 @@ import {
   useInternalTopStaff,
   useInternalTopStaffbyHour,
   useRequestHandlingTime,
+  useHappinessRating,
+  useRequestFeedbacksAll,
 } from 'src/services/dashboard';
 import { SvgColor } from 'src/components/svg-color';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
 import type { UnresolvedCito } from 'src/services/dashboard/types';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TotalRequestOvertimeChart } from '../../total-request-overtime-chart';
 import { RequestDueChart } from '../../request-due-chart';
 import { TopRequesterChart } from '../../top-requester-chart';
@@ -115,6 +117,11 @@ export function DashboardInternalCompanyView({
   const { data: topStaff } = useInternalTopStaff(idCompany, dateFromTopStaff, dateNow);
   const { data: topStaffbyHour } = useInternalTopStaffbyHour(idCompany, dateFromTopStaff, dateNow);
   const { data: requestHandlingTime } = useRequestHandlingTime(idCompany, dateFrom, dateNow);
+  const { data: happinessRating } = useHappinessRating(idCompany, dateFrom, dateNow);
+  const { data: requestFeedbacks } = useRequestFeedbacksAll(idCompany);
+
+  // eslint-disable-next-line no-unsafe-optional-chaining
+  const happinessRatingPercentage = (happinessRating?.summary / 5) * 100;
 
   const handleChangeRequestState = (state: 'priority' | 'status') => {
     setRequestState(state);
@@ -675,13 +682,22 @@ export function DashboardInternalCompanyView({
               <Typography fontSize="18px" fontWeight="600" variant="h6">
                 Happiness Rating
               </Typography>
-              <HappinessRatingChart value={90} />
+              <HappinessRatingChart
+                ratingSummary={happinessRating?.summary}
+                value={happinessRatingPercentage}
+              />
               <Box textAlign="center">
                 <Typography color="grey.500" fontSize={12}>
                   Based on
                 </Typography>
-                <Typography color="blue.700" fontSize={12} sx={{ textDecoration: 'underline' }}>
-                  16 performance evaluation feedbacks
+                <Typography
+                  component={Link}
+                  to={`/${vendor}/request/feedback`}
+                  color="blue.700"
+                  fontSize={12}
+                  sx={{ textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  {requestFeedbacks?.meta?.total_data} performance evaluation feedbacks
                 </Typography>
               </Box>
             </Box>
