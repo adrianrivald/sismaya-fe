@@ -40,7 +40,7 @@ export function DueDatePicker({
   ...props
 }: { endDate?: string } & DatePickerProps<any, any>) {
   const date = dayjs(endDate);
-  return <DatePicker {...props} label="Due date" />;
+  return <DatePicker {...props} label="Due date" defaultValue={dayjs()} />;
 }
 
 function Form({ request, task }: FormProps) {
@@ -53,6 +53,7 @@ function Form({ request, task }: FormProps) {
       form.reset({});
     },
   });
+
   const taskId = form.getValues('taskId') ?? 0;
   const { data } = useTaskRequestList(
     { page: 1, page_size: 100 },
@@ -76,6 +77,7 @@ function Form({ request, task }: FormProps) {
       ...task,
       taskId: task?.id,
       title: task?.name,
+      dueDate: new Date().toISOString(),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
@@ -134,6 +136,7 @@ function Form({ request, task }: FormProps) {
 
           <AssigneeChooserField
             name="assignees"
+            isCreate
             // @ts-ignore
             control={form.control}
             requestId={requestId}
@@ -146,6 +149,7 @@ function Form({ request, task }: FormProps) {
 
           <DueDatePicker
             endDate={request?.end_date}
+            defaultValue={new Date()}
             {...formUtils.getDatePickerProps(form, 'dueDate')}
           />
 

@@ -183,6 +183,8 @@ export function AssigneeChooserField({
   });
   const assignees = fields as unknown as Array<Assignee>;
 
+  console.log('data', isCreate);
+
   return (
     <FormControl>
       <Stack direction="row" spacing={1}>

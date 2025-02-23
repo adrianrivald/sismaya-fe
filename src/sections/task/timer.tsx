@@ -16,6 +16,8 @@ type TimerActionButtonProps = {
   lastTimer?: number;
   state?: TimerState;
   name?: string;
+  setErrorTask?: (args: boolean) => void;
+  errorTask?: boolean;
 };
 
 export function TimerActionButton({
@@ -25,12 +27,15 @@ export function TimerActionButton({
   lastTimer = 0,
   state: defaultState = '',
   name,
+  setErrorTask,
+  errorTask,
 }: TimerActionButtonProps) {
   const mutation = useTimerAction();
   const { state, taskId: storeTaskId } = useTimerStore();
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
   const isDisabled = defaultState === 'stopped';
+  console.log('dataa', name);
 
   const btnStart = (
     <IconButton
@@ -40,24 +45,28 @@ export function TimerActionButton({
       sx={{ bgcolor: 'success.main', color: 'white' }}
       onClick={() => {
         if (state === 'idle') {
+          if (!name) {
+            setErrorTask?.(true);
+            return;
+          }
+
+          setErrorTask?.(false);
           mutation.mutate({
             action: 'start',
             taskId,
             activity: activity || '',
             request: request || '',
             timer: lastTimer,
-            name: name || '',
+            name,
           });
         } else {
           store.send({
             type: 'idle',
-            ...{
-              taskId,
-              activity: activity || '',
-              request: request || '',
-              timer: lastTimer,
-              name: name || '',
-            },
+            taskId,
+            activity: activity || '',
+            request: request || '',
+            timer: lastTimer,
+            name,
           });
         }
       }}
