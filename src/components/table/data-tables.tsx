@@ -80,8 +80,6 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     // onResetPage();
   };
 
-  console.log('dataa', table.getState().pagination);
-
   //   const notFound = !dataFiltered.length && !!filterName;
   return (
     <Card>
