@@ -21,18 +21,23 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import type { Notification } from 'src/services/notification/types';
 import { useReadAllNotification, useReadNotification } from 'src/services/notification';
+import { CircularProgress } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
 export type NotificationsPopoverProps = IconButtonProps & {
   data?: Notification[];
   onClickViewAll: () => void;
+  totalData: number | undefined;
+  isLoading: boolean;
 };
 
 export function NotificationsPopover({
   data = [],
   onClickViewAll,
   sx,
+  totalData,
+  isLoading,
   ...other
 }: NotificationsPopoverProps) {
   const { mutate: readNotification } = useReadNotification();
@@ -132,15 +137,23 @@ export function NotificationsPopover({
               </Box>
             )}
           </List>
+
+          {isLoading && (
+            <Box display="flex" justifyContent="center" my={4}>
+              <CircularProgress />
+            </Box>
+          )}
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Box sx={{ p: 1 }}>
-          <Button onClick={onClickViewAll} fullWidth disableRipple color="inherit">
-            Load More
-          </Button>
-        </Box>
+        {data?.length < (totalData ?? 0) && (
+          <Box sx={{ p: 1 }}>
+            <Button onClick={onClickViewAll} fullWidth disableRipple color="inherit">
+              Load More
+            </Button>
+          </Box>
+        )}
       </Popover>
     </>
   );
