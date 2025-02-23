@@ -6,8 +6,6 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
-import { _notifications } from 'src/_mock';
-
 import { Iconify } from 'src/components/iconify';
 import { useAuth } from 'src/sections/auth/providers/auth';
 
@@ -39,21 +37,19 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const { user } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const { data: notifications } = useNotifications(page);
-
+  const { data } = useNotifications(page);
+  const [notifications, setNotifications] = useState(data);
   const layoutQuery: Breakpoint = 'lg';
 
-  const onScrollNotification: React.UIEventHandler<HTMLDivElement> = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    // Check if we're near bottom (within 50px)
-    const isBottom = scrollTop + clientHeight >= scrollHeight - 1;
-    // const hasNextPage = pageComment < totalPageComment;
-    console.log(scrollTop + clientHeight, 'scrollTop + clientHeight');
-    if (isBottom) {
-      console.log('Reached bottom of modal!');
-      setPage((prev) => prev + 1);
-    }
+  const onClickViewAll = () => {
+    setPage((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    if (page > 1) {
+      setNotifications((prev) => [...(prev ?? []), ...(data ?? [])]);
+    }
+  }, [data, page]);
 
   return (
     <LayoutSection
@@ -95,10 +91,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                <NotificationsPopover
-                  data={notifications}
-                  onScrollNotification={onScrollNotification}
-                />
+                <NotificationsPopover data={notifications} onClickViewAll={onClickViewAll} />
                 <AccountPopover
                   data={[
                     {
