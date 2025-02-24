@@ -52,6 +52,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     if (page > 1) {
       setNotifications((prev) => [...(prev ?? []), ...(data?.data ?? [])]);
       setIsLoading(false);
+    } else {
+      setNotifications(data?.data);
     }
   }, [data, page]);
 

@@ -7,4 +7,5 @@ export interface Notification {
     reff_id: number;
     reff_type: string;
     title: string
+    internal_company_id: number
 }
