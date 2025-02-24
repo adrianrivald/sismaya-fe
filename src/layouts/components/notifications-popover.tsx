@@ -22,6 +22,8 @@ import { Scrollbar } from 'src/components/scrollbar';
 import type { Notification } from 'src/services/notification/types';
 import { useReadAllNotification, useReadNotification } from 'src/services/notification';
 import { CircularProgress } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +42,7 @@ export function NotificationsPopover({
   isLoading,
   ...other
 }: NotificationsPopoverProps) {
+  const navigate = useNavigate();
   const { mutate: readNotification } = useReadNotification();
   const { mutate: readAllNotification } = useReadAllNotification();
   const totalUnRead = data?.filter((item) => item.read_at === null).length;
@@ -53,11 +56,29 @@ export function NotificationsPopover({
     setOpenPopover(null);
   }, []);
 
-  const handleMarkAsRead = (notificationId: number, readAt: string) => {
+  const { user } = useAuth();
+
+  const handleMarkAsRead = (
+    notificationId: number,
+    readAt: string,
+    refType: string,
+    refId: number,
+    internalCompanyId: number
+  ) => {
+    const companyName =
+      user?.internal_companies
+        ?.find((item) => item?.company?.id === internalCompanyId)
+        ?.company?.name.toLowerCase() ?? '';
     if (readAt === null) {
       readNotification({
         id: notificationId,
       });
+    }
+    if (refType === 'requests') {
+      navigate(`/${companyName}/request/${refId}`);
+    }
+    if (refType === 'tasks') {
+      navigate(`/${companyName}/task/${refId}`);
     }
   };
 
@@ -166,7 +187,13 @@ function NotificationItem({
   handleMarkAsRead,
 }: {
   notification: Notification;
-  handleMarkAsRead: (id: number, readAt: string) => void;
+  handleMarkAsRead: (
+    id: number,
+    readAt: string,
+    type: string,
+    refId: number,
+    internalCompanyId: number
+  ) => void;
 }) {
   const { avatarUrl, title } = renderContent(notification);
 
@@ -180,7 +207,15 @@ function NotificationItem({
           bgcolor: 'action.selected',
         }),
       }}
-      onClick={() => handleMarkAsRead(notification?.id, notification?.read_at)}
+      onClick={() =>
+        handleMarkAsRead(
+          notification?.id,
+          notification?.read_at,
+          notification?.reff_type,
+          notification?.reff_id,
+          notification?.internal_company_id
+        )
+      }
     >
       {/* <ListItemAvatar>
         <Avatar sx={{ bgcolor: 'background.neutral' }}>{avatarUrl}</Avatar>
