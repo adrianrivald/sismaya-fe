@@ -477,7 +477,7 @@ export function EditAccessControlUserView({ type }: EditUserProps) {
         <Typography color="grey.500">Edit User</Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
+      <Grid width="auto" container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form
           onSubmit={handleSubmit}
           options={{

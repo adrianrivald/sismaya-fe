@@ -53,13 +53,19 @@ export const managementMenus = (
   },
 ];
 
-export const rbacMenus = () => [
+export const settingMenus = (internalCompaniesAutoResponse?: ChildMenus[]) => [
   {
     heading: 'Access Control',
     id: 'user group:read',
     path: '/access-control/user-list',
     icon: icon('ic-authenticator'),
     list: [],
+  },
+  {
+    heading: 'Auto-Reponse',
+    id: 'chat',
+    icon: icon('ic-chat'),
+    list: internalCompaniesAutoResponse,
   },
 ];
 
@@ -93,6 +99,7 @@ export const menuItems = (
   internalCompaniesDashboard?: ChildMenus[],
   internalCompaniesRequest?: ChildMenus[],
   internalCompaniesTask?: ChildMenus[],
+  internalCompaniesAutoResponse?: ChildMenus[],
   userType?: string
 ) => [
   {
@@ -108,8 +115,8 @@ export const menuItems = (
 
   {
     heading: 'SETTINGS',
-    id: 'management',
-    list: rbacMenus(),
+    id: 'settings',
+    list: settingMenus(internalCompaniesAutoResponse),
   },
 
   {
