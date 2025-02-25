@@ -15,6 +15,7 @@ export interface LoginCredentialsDTO {
   interface Data {
     token: string
     user: User
+    permissions: string[]
   }
   
   export async function loginUser(formData: LoginCredentialsDTO) {

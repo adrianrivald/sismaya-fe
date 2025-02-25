@@ -9,6 +9,7 @@ import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
+import PageListTimer from 'src/sections/task/page-list-timer';
 
 // ----------------------------------------------------------------------
 export const HomePage = lazy(() => import('src/pages/home'));
@@ -83,6 +84,9 @@ export const UserClientEditPage = lazy(() => import('src/pages/master-data/user/
 
 // Monitor Personal Load
 export const MonitorPersonalLoadPage = lazy(() => import('src/pages/monitor-personal-load/index'));
+
+// Auto Reponse
+export const AutoResponsePage = lazy(() => import('src/pages/auto-response/index'));
 
 // Access Control
 export const AccessControlUserListPage = lazy(() => import('src/pages/access-control/user-list'));
@@ -194,6 +198,10 @@ const internalRoutes: NonIndexRouteObject = {
       path: '/:vendor/task/:taskId',
       element: <TaskDetailPage />,
     },
+    {
+      path: '/:vendor/task/:taskId/activities',
+      element: <PageListTimer />,
+    },
 
     // Monitor Personal Load
 
@@ -210,6 +218,9 @@ const internalRoutes: NonIndexRouteObject = {
     { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
     { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
     { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
+
+    // Auto Reponse
+    { path: '/:vendor/auto-response', element: <AutoResponsePage /> },
   ],
 };
 

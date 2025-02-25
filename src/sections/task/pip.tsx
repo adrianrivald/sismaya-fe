@@ -1,18 +1,25 @@
-import * as React from 'react';
-import { Box, Stack, Typography, Portal } from '@mui/material';
-import { useTimerStore, useCheckTimer } from 'src/services/task/timer';
+import { useEffect, useState } from 'react';
+import { Box, Stack, Typography, Portal, TextField } from '@mui/material';
+import { useTimerStore, useCheckTimer, useLastActivity } from 'src/services/task/timer';
 import { Iconify } from 'src/components/iconify';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 export default function FloatingTimer() {
-  useCheckTimer();
+  const timer = useCheckTimer();
   const store = useTimerStore();
+
+  const lastActivity = useLastActivity({ taskId: store?.taskId });
+  const [nameTask, setNameTask] = useState(store?.name || lastActivity?.timerName || '');
+  const [errorTask, setErrorTask] = useState(false);
   const { dragInfo, getDragableProps } = useDragable();
 
-  if (store.taskId === 0 || store.state === 'stopped') {
+  useEffect(() => {
+    setNameTask(store?.name || lastActivity?.timerName || '');
+  }, [lastActivity, store, timer]);
+
+  if (store?.taskId === 0 || store?.state === 'stopped') {
     return null;
   }
-
   return (
     <Portal container={document.body}>
       <Box
@@ -23,7 +30,7 @@ export default function FloatingTimer() {
         border="1px solid rgba(145, 158, 171, 0.16)"
         borderRadius={2}
         boxShadow="-20px 20px 40px -4px rgba(145, 158, 171, 0.24)"
-        width="320px"
+        width="350px"
         zIndex={9999}
         display="inline-flex"
         style={{
@@ -64,18 +71,47 @@ export default function FloatingTimer() {
             >
               {store.request}
             </Typography>
-            <Typography
-              flexGrow={1}
-              color="rgba(99, 115, 129, 1)"
-              sx={{ fontWeight: 700, fontSize: '14px', lineHeight: '20px' }}
-            >
-              {store.activity}
-            </Typography>
+            {lastActivity?.timerName || store.state === 'running' || store.state === 'paused' ? (
+              <div>
+                <Typography color="rgba(145, 158, 171, 1)" sx={{ fontSize: '13px' }}>
+                  {nameTask}
+                </Typography>
+              </div>
+            ) : (
+              <Stack className="flex flex-row">
+                <TextField
+                  sx={{
+                    fontSize: '12px',
+                    width: '130px',
+                    '& .MuiInputBase-input': {
+                      padding: '4px 8px',
+                      height: '20px',
+                      width: '80%',
+                      fontSize: '12px',
+                    },
+                  }}
+                  defaultValue={nameTask}
+                  value={nameTask || ''}
+                  onChange={(e) => setNameTask(e.target.value)}
+                  placeholder="Name you activity"
+                />
+                {errorTask && (
+                  <Typography color="rgba(255, 86, 48, 1)" variant="caption">
+                    Name your activity first to begin recording
+                  </Typography>
+                )}
+              </Stack>
+            )}
           </Stack>
 
           <Stack spacing={1.5} direction="row" alignItems="center">
             <TimerCountdown size="small" />
-            <TimerActionButton taskId={store.taskId} name={store.activity} />
+            <TimerActionButton
+              taskId={store.taskId}
+              name={nameTask}
+              setErrorTask={setErrorTask}
+              errorTask={errorTask}
+            />
           </Stack>
         </Box>
       </Box>
@@ -86,7 +122,7 @@ export default function FloatingTimer() {
 const startingPosition = { x: 16, y: 16 };
 
 function useDragable() {
-  const [dragInfo, setDragInfo] = React.useState({
+  const [dragInfo, setDragInfo] = useState({
     isInitial: true,
     isDragging: false,
     origin: { x: 0, y: 0 },
