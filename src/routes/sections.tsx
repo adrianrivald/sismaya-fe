@@ -157,9 +157,6 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
     { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
     { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
-
-    // Auto Reponse
-    { path: 'auto-response', element: <AutoResponsePage /> },
   ],
 };
 
@@ -221,6 +218,9 @@ const internalRoutes: NonIndexRouteObject = {
     { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
     { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
     { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
+
+    // Auto Reponse
+    { path: '/:vendor/auto-response', element: <AutoResponsePage /> },
   ],
 };
 

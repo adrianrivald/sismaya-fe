@@ -39,6 +39,13 @@ import { SvgColor } from 'src/components/svg-color';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
+import { useAddAutoResponse } from 'src/services/auto-response/use-auto-response';
+import {
+  AutoResponseDTO,
+  autoResponseSchema,
+} from 'src/services/auto-response/schemas/auto-response-schema';
+import { useParams } from 'react-router-dom';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -60,33 +67,52 @@ function getStyles(id: number, selectedInternalCompanies: readonly number[], the
   };
 }
 
+const periodOptions = [
+  {
+    is_custom: 'false',
+    label: 'Outside Working Hours',
+  },
+  {
+    is_custom: 'true',
+    label: 'Custom Period',
+  },
+];
+
 export function AutoResponseView() {
-  const [currentPeriod, setCurrentPeriod] = useState('-');
+  const { user } = useAuth();
+  const { vendor } = useParams();
+  const idCurrentCompany =
+    user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
+      ?.id ?? 0;
+  const [isCustom, setIsCustom] = useState('false');
 
   const [isActive, setIsActive] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const { mutate: addUser } = useAddUser({ isRbac: true });
+  const [dateValue, setDateValue] = useState<Dayjs | null>(null);
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
 
-  const defaultValues = {
-    internal_id: [],
-  };
+  const { mutate: addAutoResponse } = useAddAutoResponse();
 
-  const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
+  const handleSubmit = (formData: AutoResponseDTO) => {
     setIsLoading(true);
-    // const { internal_id, ...restForm } = formData;
-    try {
-      addUser({
-        ...formData,
-        user_type: 'internal',
+    const payload = {
+      ...formData,
+      company_id: String(idCurrentCompany),
+      is_custom: isCustom === 'true',
+    };
+    if (isCustom === 'true') {
+      Object.assign(payload, {
+        start_date: dateValue?.format('YYYY-MM-DD hh:mm'),
+        end_date: endDateValue?.format('YYYY-MM-DD hh:mm'),
       });
+    }
+    try {
+      addAutoResponse(payload);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
     }
   };
-
-  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
-  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs());
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
@@ -112,16 +138,7 @@ export function AutoResponseView() {
       </Box>
 
       <Grid width="auto" container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form
-          width="100%"
-          onSubmit={handleSubmit}
-          schema={userInternalSchema}
-          options={{
-            defaultValues: {
-              ...defaultValues,
-            },
-          }}
-        >
+        <Form width="100%" onSubmit={handleSubmit} schema={autoResponseSchema}>
           {({ register, control, watch, formState, setValue }) => (
             <>
               <Card
@@ -153,12 +170,12 @@ export function AutoResponseView() {
                     <>
                       <Grid item xs={12} md={12}>
                         <FormControl sx={{ width: '100%' }}>
-                          <Typography mb={1} component="label" htmlFor="period">
+                          <Typography mb={1} component="label" htmlFor="is_custom">
                             Active Period
                           </Typography>
 
                           <Select
-                            value={currentPeriod}
+                            value={isCustom}
                             sx={{
                               height: 54,
                               paddingY: 0.5,
@@ -169,18 +186,16 @@ export function AutoResponseView() {
                               '& .MuiOutlinedInput-notchedOutline': {
                                 border: 1,
                               },
-                              '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                {
-                                  // border: 'none',
-                                },
                             }}
                             onChange={(e: SelectChangeEvent<string>) => {
-                              setCurrentPeriod(e.target.value);
+                              setIsCustom(e.target.value);
                             }}
-                            id="period"
+                            id="is_custom"
                           >
-                            {['Outside Working Hours', 'Custom Period']?.map((value) => (
-                              <MenuItem value={value}>{capitalize(`${value}`)}</MenuItem>
+                            {periodOptions?.map((value) => (
+                              <MenuItem value={value?.is_custom}>
+                                {capitalize(`${value?.label}`)}
+                              </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
@@ -205,7 +220,7 @@ export function AutoResponseView() {
                         )}
                       </Grid>
 
-                      {currentPeriod === 'Custom Period' && (
+                      {isCustom === 'true' && (
                         <Grid item xs={12} md={12}>
                           <Box
                             mt={4}
@@ -246,15 +261,15 @@ export function AutoResponseView() {
 
                       <Grid item xs={12} md={12}>
                         <FormControl sx={{ width: '100%' }}>
-                          <Typography mb={1} component="label" htmlFor="content">
+                          <Typography mb={1} component="label" htmlFor="message">
                             Automated Response
                           </Typography>
 
                           <OutlinedInput
-                            {...register('content', {
+                            {...register('message', {
                               required: 'Automated Response Name must be filled out',
                             })}
-                            id="content"
+                            id="message"
                             placeholder="Enter your automated response message here."
                             sx={{ width: '100%' }}
                             multiline
@@ -262,14 +277,14 @@ export function AutoResponseView() {
                           />
                         </FormControl>
 
-                        {formState?.errors?.content && (
+                        {formState?.errors?.message && (
                           <FormHelperText sx={{ color: 'error.main' }}>
-                            {String(formState?.errors?.content?.message)}
+                            {String(formState?.errors?.message?.message)}
                           </FormHelperText>
                         )}
                       </Grid>
 
-                      {currentPeriod === 'Custom Period' && (
+                      {isCustom === 'true' && (
                         <Grid item xs={12} md={12}>
                           <FormControl sx={{ width: '100%' }}>
                             <Typography mb={1} component="label" htmlFor="reason">

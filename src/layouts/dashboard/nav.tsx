@@ -19,6 +19,7 @@ import { Scrollbar } from 'src/components/scrollbar';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { usePermissions } from 'src/services/master-data/role';
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 import { menuItems } from '../config-nav-dashboard';
 
@@ -112,9 +113,10 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { data: userPermissionsList } = usePermissions();
   const userRole = user?.user_info?.role_id;
   const userType = user?.user_info?.user_type;
-  const userPermissions = user?.user_info?.role?.permissions?.map((item) => item?.name);
+  const userPermissions = userPermissionsList?.map((item) => item?.name);
   const currentMenu = window.location.href.split('/')[3];
 
   const onClickParentAccordion = (path?: string) => {
@@ -138,6 +140,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     path: `/${item?.company?.name.toLowerCase()}/task`,
   }));
 
+  const internalCompaniesAutoResponse = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/auto-response`,
+  }));
+
   return (
     <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />
@@ -149,6 +156,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           internalCompaniesDashboard,
           internalCompaniesRequest,
           internalCompaniesTask,
+          internalCompaniesAutoResponse,
           userType
         )
           ?.filter((item) =>
@@ -181,12 +189,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                       ?.filter((item) =>
                         userRole !== 1
                           ? userPermissions?.includes(item?.id)
-                          : [
-                              'dashboard',
-                              'master-data',
-                              'user group:read',
-                              'auto-response:read',
-                            ].includes(item?.id)
+                          : ['dashboard', 'master-data', 'user group:read'].includes(item?.id)
                       )
                       .map((childMenu: any, index) => {
                         const isActived = childMenu.path === pathname;
