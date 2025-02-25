@@ -181,7 +181,12 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                       ?.filter((item) =>
                         userRole !== 1
                           ? userPermissions?.includes(item?.id)
-                          : ['dashboard', 'master-data', 'user group:read'].includes(item?.id)
+                          : [
+                              'dashboard',
+                              'master-data',
+                              'user group:read',
+                              'auto-response:read',
+                            ].includes(item?.id)
                       )
                       .map((childMenu: any, index) => {
                         const isActived = childMenu.path === pathname;

@@ -91,7 +91,7 @@ export function CreateAccessControlUserView() {
         <Typography color="grey.500">Create User</Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
+      <Grid width="auto" container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form
           width="100%"
           onSubmit={handleSubmit}

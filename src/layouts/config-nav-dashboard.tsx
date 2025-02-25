@@ -61,6 +61,13 @@ export const rbacMenus = () => [
     icon: icon('ic-authenticator'),
     list: [],
   },
+  {
+    heading: 'Auto-Reponse',
+    id: 'auto-response:read',
+    path: '/auto-response',
+    icon: icon('ic-chat'),
+    list: [],
+  },
 ];
 
 export const masterDataMenus = () => [
