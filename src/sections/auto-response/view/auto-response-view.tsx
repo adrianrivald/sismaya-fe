@@ -23,7 +23,7 @@ import {
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { LoadingButton } from '@mui/lab';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Iconify } from 'src/components/iconify';
 import { useAddUser } from 'src/services/master-data/user';
 import { useRole } from 'src/services/master-data/role';
@@ -125,6 +125,13 @@ export function AutoResponseView() {
   const onToggleAutoResponse = () => {
     setIsActive((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (!isCustom) {
+      setDateValue(null);
+      setEndDateValue(null);
+    }
+  }, [isCustom]);
 
   return (
     <DashboardContent maxWidth="xl">
