@@ -6,14 +6,14 @@ async function fetchPermissions() {
   const endpointUrl = new URL('/user-permissions', baseUrl);
 
 
-  const { data } = await http<{data: any}>(
+  const { data } = await http<{data: string[]}>(
     endpointUrl.toString().replace(baseUrl, '')
   )
 
   return data
   }
 
-  export function useUsers() {
+  export function useUserPermissions() {
     const data = useQuery(
       ['user-permissions'],
       () => fetchPermissions()

@@ -19,7 +19,7 @@ import { Scrollbar } from 'src/components/scrollbar';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { usePermissions } from 'src/services/master-data/role';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 import { menuItems } from '../config-nav-dashboard';
 
@@ -113,10 +113,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: userPermissionsList } = usePermissions();
+  const { data: userPermissionsList } = useUserPermissions();
+  console.log(userPermissionsList, 'userPermissionsList');
   const userRole = user?.user_info?.role_id;
   const userType = user?.user_info?.user_type;
-  const userPermissions = userPermissionsList?.map((item) => item?.name);
+  const userPermissions = userPermissionsList?.map((item) => item);
   const currentMenu = window.location.href.split('/')[3];
 
   const onClickParentAccordion = (path?: string) => {
