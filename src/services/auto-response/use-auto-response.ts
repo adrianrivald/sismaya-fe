@@ -22,7 +22,7 @@ async function fetchAutoResponseById(companyId: string) {
 
   export function useAutoResponse(companyId: string) {
     const data = useQuery(
-      ['auto-reply-messages'],
+      ['auto-reply-messages', companyId],
       () => fetchAutoResponseById(companyId)
     );
   
@@ -79,3 +79,54 @@ export function useAddAutoResponse() {
     );
   }
   
+  
+export function useUpdateAutoResponse() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    async (formData: AutoResponseDTO & {id: number}) => {
+      const {id, ...form} = formData
+      const payload =  {
+        ...form
+      }
+      
+      
+      return http(`auto-reply-messages/${id}`, {
+        method: "PUT",
+        data: payload
+      });
+    },
+    {
+        onSuccess: () => {
+          queryClient.invalidateQueries(['auto-reply-messages'])
+        toast.success('Auto-Response Settings Updated Succesfully', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        });
+
+      },
+      onError: (error) => {
+        const reason =
+          error instanceof Error ? error.message : 'Something went wrong';
+
+          toast.error(reason, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: 'light',
+            transition: Bounce,
+          });
+      },
+    }
+  );
+}
