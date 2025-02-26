@@ -39,7 +39,7 @@ import { SvgColor } from 'src/components/svg-color';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { useAddAutoResponse } from 'src/services/auto-response/use-auto-response';
+import { useAddAutoResponse, useAutoResponse } from 'src/services/auto-response/use-auto-response';
 import {
   AutoResponseDTO,
   autoResponseSchema,
@@ -84,14 +84,23 @@ export function AutoResponseView() {
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
+  const { data: autoResponse } = useAutoResponse(String(idCurrentCompany));
+  const defaultValue = autoResponse !== null ? autoResponse[0] : null;
   const [isCustom, setIsCustom] = useState('false');
 
-  const [isActive, setIsActive] = React.useState(false);
+  const [isActive, setIsActive] = React.useState(!!defaultValue);
   const [isLoading, setIsLoading] = React.useState(false);
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
-
   const { mutate: addAutoResponse } = useAddAutoResponse();
+
+  useEffect(() => {
+    if (defaultValue) {
+      setIsCustom(defaultValue?.is_custom ? 'true' : 'false');
+      setDateValue(dayjs(defaultValue?.start_date));
+      setEndDateValue(dayjs(defaultValue?.end_date));
+    }
+  }, [defaultValue]);
 
   const handleSubmit = (formData: AutoResponseDTO) => {
     setIsLoading(true);
@@ -167,7 +176,7 @@ export function AutoResponseView() {
                       }}
                     >
                       <FormControlLabel
-                        control={<Switch onChange={onToggleAutoResponse} />}
+                        control={<Switch checked={isActive} onChange={onToggleAutoResponse} />}
                         label="Turn on Auto-Response"
                       />
                     </Box>
@@ -220,9 +229,9 @@ export function AutoResponseView() {
                           When &apos;Outside Working Hours&apos; is selected, the auto-response will
                           be active on weekdays from 17:00 - 07:59, and all day on weekends.
                         </FormHelperText>
-                        {formState?.errors?.email && (
+                        {formState?.errors?.is_custom && (
                           <FormHelperText sx={{ color: 'error.main' }}>
-                            {String(formState?.errors?.email?.message)}
+                            {String(formState?.errors?.is_custom?.message)}
                           </FormHelperText>
                         )}
                       </Grid>
@@ -281,6 +290,7 @@ export function AutoResponseView() {
                             sx={{ width: '100%' }}
                             multiline
                             rows={3}
+                            defaultValue={defaultValue?.message}
                           />
                         </FormControl>
 

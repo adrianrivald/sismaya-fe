@@ -1,9 +1,33 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
-import type { AutoResponse } from "./types";
-import { AutoResponseDTO } from "./schemas/auto-response-schema";
+import type { AutoResponseDTO } from "./schemas/auto-response-schema";
 
+async function fetchAutoResponseById(companyId: string) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL('/auto-reply-messages', baseUrl);
+
+  
+  if (companyId) {
+    endpointUrl.searchParams.append('company_id', companyId);
+  }
+
+
+  const { data } = await http<{data:  any}>(
+    endpointUrl.toString().replace(baseUrl, '')
+  )
+
+  return data
+  }
+
+  export function useAutoResponse(companyId: string) {
+    const data = useQuery(
+      ['auto-reply-messages'],
+      () => fetchAutoResponseById(companyId)
+    );
+  
+    return data;
+  }
 
 export function useAddAutoResponse() {
     const queryClient = useQueryClient();
@@ -21,7 +45,7 @@ export function useAddAutoResponse() {
       },
       {
           onSuccess: () => {
-  
+            queryClient.invalidateQueries(['auto-reply-messages'])
           toast.success('Auto-Response Settings Saved Succesfully', {
             position: 'top-right',
             autoClose: 5000,
