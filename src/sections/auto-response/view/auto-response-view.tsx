@@ -39,7 +39,11 @@ import { SvgColor } from 'src/components/svg-color';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { useAddAutoResponse, useAutoResponse } from 'src/services/auto-response/use-auto-response';
+import {
+  useAddAutoResponse,
+  useAutoResponse,
+  useUpdateAutoResponse,
+} from 'src/services/auto-response/use-auto-response';
 import {
   AutoResponseDTO,
   autoResponseSchema,
@@ -93,14 +97,20 @@ export function AutoResponseView() {
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
   const { mutate: addAutoResponse } = useAddAutoResponse();
+  const { mutate: updateAutoResponse } = useUpdateAutoResponse();
 
   useEffect(() => {
-    if (defaultValue) {
+    if (defaultValue !== null) {
       setIsCustom(defaultValue?.is_custom ? 'true' : 'false');
       setDateValue(dayjs(defaultValue?.start_date));
       setEndDateValue(dayjs(defaultValue?.end_date));
+    } else {
+      setIsActive(false);
+      setIsCustom('false');
+      setDateValue(null);
+      setEndDateValue(null);
     }
-  }, [defaultValue]);
+  }, [defaultValue, idCurrentCompany, vendor]);
 
   const handleSubmit = (formData: AutoResponseDTO) => {
     setIsLoading(true);
@@ -116,7 +126,14 @@ export function AutoResponseView() {
       });
     }
     try {
-      addAutoResponse(payload);
+      if (defaultValue) {
+        updateAutoResponse({
+          ...payload,
+          id: defaultValue?.id,
+        });
+      } else {
+        addAutoResponse(payload);
+      }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
