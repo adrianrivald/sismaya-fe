@@ -98,7 +98,7 @@ export function AutoResponseView() {
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
   const { mutate: addAutoResponse } = useAddAutoResponse();
   const { mutate: updateAutoResponse } = useUpdateAutoResponse();
-  console.log(defaultValue, 'defaultValue');
+
   useEffect(() => {
     if (defaultValue !== null) {
       setIsCustom(defaultValue?.is_custom ? 'true' : 'false');
