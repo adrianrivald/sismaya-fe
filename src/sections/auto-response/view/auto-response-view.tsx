@@ -331,6 +331,7 @@ export function AutoResponseView() {
                               id="content"
                               placeholder="ex. Annual leave"
                               sx={{ width: '100%' }}
+                              defaultValue={defaultValue?.reason}
                             />
                           </FormControl>
 
