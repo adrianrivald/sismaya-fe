@@ -104,6 +104,7 @@ export function AutoResponseView() {
       setIsCustom(defaultValue?.is_custom ? 'true' : 'false');
       setDateValue(dayjs(defaultValue?.start_date));
       setEndDateValue(dayjs(defaultValue?.end_date));
+      setIsActive(true);
     } else {
       setIsActive(false);
       setIsCustom('false');
