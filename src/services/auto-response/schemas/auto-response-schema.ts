@@ -6,6 +6,7 @@ export const autoResponseSchema = z
     start_date: z.any().optional(),
     end_date: z.any().optional(),
     is_custom: z.boolean(),
+    reason: z.string().optional()
   })
   .partial();
 
