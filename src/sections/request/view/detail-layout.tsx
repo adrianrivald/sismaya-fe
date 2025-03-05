@@ -17,6 +17,7 @@ import { useSelector } from '@xstate/store/react';
 import { useMessage } from 'src/services/messaging/use-messaging';
 import type { Messaging } from 'src/services/messaging/types';
 import { SvgColor } from 'src/components/svg-color';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { StatusBadge } from '../status-badge';
 import { RequestTaskForm } from '../task/view/task-form';
 import { RequestMessenger } from '../messenger';
@@ -26,6 +27,8 @@ type StatusStepEnum = 'to_do' | 'in_progress' | 'completed' | 'pending' | 'reque
 
 export default function RequestDetailLayout() {
   const { user } = useAuth();
+  const { data: userPermissionsList } = useUserPermissions();
+  console.log(userPermissionsList, 'permissionlist');
   const navigate = useNavigate();
   const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
@@ -249,6 +252,7 @@ export default function RequestDetailLayout() {
                 >
                   Priority
                   <Select
+                    disabled={userType === 'client'}
                     value={currentPriority}
                     sx={{
                       fontWeight: 'bold',
