@@ -35,6 +35,7 @@ import {
 import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 import { SvgColor } from 'src/components/svg-color';
 import { Bounce, toast } from 'react-toastify';
+import { getFileExtension } from 'src/utils/get-file-format';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
@@ -95,6 +96,17 @@ export function EditRequestView() {
     }))
   );
 
+  const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
+
+  const onPreviewFile = (filePath: string, fileName: string) => {
+    const fileExtension = getFileExtension(fileName);
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const isImage = imageExtensions.includes(fileExtension);
+    if (isImage) {
+      setIsImagePreviewModal(true);
+    }
+  };
+
   useEffect(() => {
     setSelectedPic(
       requestDetail?.assignees?.map((item) => ({
@@ -118,8 +130,8 @@ export function EditRequestView() {
     const payload = {
       ...formData,
       id: Number(id),
-      start_date: dateValue,
-      end_date: endDateValue,
+      ...(requestDetail?.step === 'to_do' && { start_date: dateValue }),
+      ...(requestDetail?.step === 'to_do' && { end_date: endDateValue }),
     };
     updateRequest(payload);
     // setTimeout(() => {
@@ -367,109 +379,113 @@ export function EditRequestView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={12}>
-                <Box mt={4} display="flex" alignItems="center" gap={2}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DateTimePicker
-                      sx={{
-                        width: '300px',
-                      }}
-                      label="Start Date"
-                      value={dateValue}
-                      onChange={handleChangeDate}
-                      // renderInput={(params: any) => <TextField {...params} />}
-                    />
-                  </LocalizationProvider>
+              {requestDetail?.step === 'to_do' && (
+                <Grid item xs={12} md={12}>
+                  <Box mt={4} display="flex" alignItems="center" gap={2}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DateTimePicker
+                        sx={{
+                          width: '300px',
+                        }}
+                        label="Start Date"
+                        value={dateValue}
+                        onChange={handleChangeDate}
+                        // renderInput={(params: any) => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
 
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DateTimePicker
-                      sx={{
-                        width: '300px',
-                      }}
-                      label="End Date"
-                      value={endDateValue}
-                      onChange={handleChangeEndDate}
-                      // renderInput={(params: any) => <TextField {...params} />}
-                    />
-                  </LocalizationProvider>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DateTimePicker
+                        sx={{
+                          width: '300px',
+                        }}
+                        label="End Date"
+                        value={endDateValue}
+                        onChange={handleChangeEndDate}
+                        // renderInput={(params: any) => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
 
-                  <Box display="flex" flexDirection="column">
-                    <Typography>PIC</Typography>
-                    <Box display="flex" gap={2} alignItems="center">
-                      <Box display="flex" alignItems="center">
-                        {selectedPic?.map((item) => (
+                    <Box display="flex" flexDirection="column">
+                      <Typography>PIC</Typography>
+                      <Box display="flex" gap={2} alignItems="center">
+                        <Box display="flex" alignItems="center">
+                          {selectedPic?.map((item) => (
+                            <Box
+                              width={36}
+                              height={36}
+                              sx={{
+                                marginRight: '-10px',
+                              }}
+                            >
+                              <Box
+                                component="img"
+                                src={
+                                  item?.picture !== '' ? item?.picture : '/assets/icons/user.png'
+                                }
+                                sx={{
+                                  cursor: 'pointer',
+                                  borderRadius: 100,
+                                  width: 36,
+                                  height: 36,
+                                  borderColor: 'white',
+                                  borderWidth: 2,
+                                  borderStyle: 'solid',
+                                }}
+                              />
+                            </Box>
+                          ))}
+                        </Box>
+                        <ModalDialog
+                          open={openAssigneeModal}
+                          setOpen={setOpenAssigneeModal}
+                          minWidth={600}
+                          title="Assignee"
+                          content={
+                            (
+                              <AddAssigneeModal
+                                internalUsers={filteredInternalUser}
+                                handleAddPicItem={handleAddPicItemFromDetail}
+                                selectedPic={selectedPic}
+                                handleDeletePicItem={handleDeletePicItemFromDetail}
+                                isDetail
+                                onSearchUser={onSearchUser}
+                                setOpenAssigneeModal={setOpenAssigneeModal}
+                              />
+                            ) as JSX.Element & string
+                          }
+                        >
                           <Box
-                            width={36}
-                            height={36}
+                            component="button"
+                            type="button"
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
                             sx={{
-                              marginRight: '-10px',
+                              width: 36,
+                              height: 36,
+                              cursor: 'pointer',
+                              paddingX: 1.5,
+                              paddingY: 1.5,
+                              border: 1,
+                              borderStyle: 'dashed',
+                              borderColor: 'grey.500',
+                              borderRadius: 100,
                             }}
                           >
-                            <Box
-                              component="img"
-                              src={item?.picture !== '' ? item?.picture : '/assets/icons/user.png'}
-                              sx={{
-                                cursor: 'pointer',
-                                borderRadius: 100,
-                                width: 36,
-                                height: 36,
-                                borderColor: 'white',
-                                borderWidth: 2,
-                                borderStyle: 'solid',
-                              }}
+                            <SvgColor
+                              color="#637381"
+                              width={12}
+                              height={12}
+                              src="/assets/icons/ic-plus.svg"
                             />
                           </Box>
-                        ))}
+                        </ModalDialog>
                       </Box>
-                      <ModalDialog
-                        open={openAssigneeModal}
-                        setOpen={setOpenAssigneeModal}
-                        minWidth={600}
-                        title="Assignee"
-                        content={
-                          (
-                            <AddAssigneeModal
-                              internalUsers={filteredInternalUser}
-                              handleAddPicItem={handleAddPicItemFromDetail}
-                              selectedPic={selectedPic}
-                              handleDeletePicItem={handleDeletePicItemFromDetail}
-                              isDetail
-                              onSearchUser={onSearchUser}
-                              setOpenAssigneeModal={setOpenAssigneeModal}
-                            />
-                          ) as JSX.Element & string
-                        }
-                      >
-                        <Box
-                          component="button"
-                          type="button"
-                          display="flex"
-                          justifyContent="center"
-                          alignItems="center"
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            cursor: 'pointer',
-                            paddingX: 1.5,
-                            paddingY: 1.5,
-                            border: 1,
-                            borderStyle: 'dashed',
-                            borderColor: 'grey.500',
-                            borderRadius: 100,
-                          }}
-                        >
-                          <SvgColor
-                            color="#637381"
-                            width={12}
-                            height={12}
-                            src="/assets/icons/ic-plus.svg"
-                          />
-                        </Box>
-                      </ModalDialog>
                     </Box>
                   </Box>
-                </Box>
-              </Grid>
+                </Grid>
+              )}
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
@@ -492,10 +508,36 @@ export function EditRequestView() {
                           >
                             <Box display="flex" gap={1} alignItems="center">
                               <Box component="img" src="/assets/icons/file.png" />
-                              <Box>
-                                <Typography fontWeight="bold">{attachment?.file_name}</Typography>
-                                {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
-                              </Box>
+                              <ModalDialog
+                                open={isImagePreviewModal}
+                                setOpen={setIsImagePreviewModal}
+                                minWidth={600}
+                                title="Preview"
+                                content={
+                                  (
+                                    <Box
+                                      component="img"
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        mt: 4,
+                                        width: '100%',
+                                      }}
+                                      src={`${attachment?.file_path}/${attachment?.file_name}`}
+                                    />
+                                  ) as JSX.Element & string
+                                }
+                              >
+                                <Box
+                                  sx={{ cursor: 'pointer' }}
+                                  onClick={() =>
+                                    onPreviewFile(attachment?.file_path, attachment?.file_name)
+                                  }
+                                >
+                                  <Typography fontWeight="bold">{attachment?.file_name}</Typography>
+                                  {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
+                                </Box>
+                              </ModalDialog>
                             </Box>
                             <Box
                               sx={{ cursor: 'pointer' }}
