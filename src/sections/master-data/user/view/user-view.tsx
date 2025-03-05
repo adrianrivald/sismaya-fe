@@ -22,7 +22,7 @@ interface PopoverProps {
 
 const columnHelper = createColumnHelper<User>();
 
-const columns = (popoverProps: PopoverProps) => [
+const columns = (popoverProps: PopoverProps, isInternalUserList: boolean) => [
   columnHelper.accessor('user_info.name', {
     header: 'Name',
   }),
@@ -35,26 +35,30 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Phone Number',
   }),
 
-  columnHelper.accessor('user_info.role.name', {
-    header: 'Role',
-    cell: (info) => {
-      const value = info.getValue();
-      return (
-        <Box
-          sx={{
-            backgroundColor: '#D6F3F9',
-            color: 'info.dark',
-            px: 1,
-            py: 0.5,
-            borderRadius: '8px',
-            display: 'inline-block',
-          }}
-        >
-          <Typography fontWeight="500">{value}</Typography>
-        </Box>
-      );
-    },
-  }),
+  ...(isInternalUserList
+    ? [
+        columnHelper.accessor('user_info.role.name', {
+          header: 'Role',
+          cell: (info) => {
+            const value = info.getValue();
+            return (
+              <Box
+                sx={{
+                  backgroundColor: '#D6F3F9',
+                  color: 'info.dark',
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: '8px',
+                  display: 'inline-block',
+                }}
+              >
+                <Typography fontWeight="500">{value}</Typography>
+              </Box>
+            );
+          },
+        }),
+      ]
+    : []),
 
   columnHelper.display({
     id: 'actions',
@@ -151,7 +155,10 @@ export function UserView({ type }: UserViewProps) {
       <Grid container spacing={3}>
         <Grid xs={12}>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            columns={columns(
+              { ...popoverFuncs(), setOpenRemoveModal, setSelectedId },
+              type === 'internal'
+            )}
             {...getDataTableProps()}
           />
         </Grid>
