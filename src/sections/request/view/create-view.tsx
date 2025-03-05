@@ -23,11 +23,13 @@ import { LoadingButton } from '@mui/lab';
 import type { ChangeEvent } from 'react';
 import React from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { getFileExtension } from 'src/utils/get-file-format';
 import type { RequestDTO } from 'src/services/request/schemas/request-schema';
 import { useUsers } from 'src/services/master-data/user';
 import { useAddRequest } from 'src/services/request';
 import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
 import { Bounce, toast } from 'react-toastify';
+import ModalDialog from 'src/components/modal/modal';
 
 export function CreateRequestView() {
   const { user } = useAuth();
@@ -43,6 +45,17 @@ export function CreateRequestView() {
 
   const [selectedCompany, setSelectedCompany] = React.useState('');
   const [selectedDepartment, setSelectedDepartment] = React.useState('');
+
+  const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
+
+  const onPreviewFile = (filePath: string, fileName: string) => {
+    const fileExtension = getFileExtension(fileName);
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const isImage = imageExtensions.includes(fileExtension);
+    if (isImage) {
+      setIsImagePreviewModal(true);
+    }
+  };
 
   const handleSubmit = (formData: RequestDTO) => {
     let payload = {};
@@ -104,6 +117,8 @@ export function CreateRequestView() {
       department_id: clientUser?.user_info?.department_id,
       department_name: clientUser?.user_info?.department?.name,
     }));
+
+  console.log(files, 'filesnya');
 
   return (
     <DashboardContent maxWidth="xl">
@@ -399,10 +414,34 @@ export function CreateRequestView() {
                       {Array.from(files)?.map((file: any) => (
                         <Box display="flex" gap={1} alignItems="center">
                           <Box component="img" src="/assets/icons/file.png" />
-                          <Box>
-                            <Typography fontWeight="bold">{file?.name}</Typography>
-                            {(file.size / (1024 * 1024)).toFixed(2)} Mb
-                          </Box>
+                          <ModalDialog
+                            open={isImagePreviewModal}
+                            setOpen={setIsImagePreviewModal}
+                            minWidth={600}
+                            title="Preview"
+                            content={
+                              (
+                                <Box
+                                  component="img"
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    mt: 4,
+                                    width: '100%',
+                                  }}
+                                  src={URL.createObjectURL(file)}
+                                />
+                              ) as JSX.Element & string
+                            }
+                          >
+                            <Box
+                              sx={{ cursor: 'pointer' }}
+                              onClick={() => onPreviewFile(file?.file_path, file?.file_name)}
+                            >
+                              <Typography fontWeight="bold">{file?.name}</Typography>
+                              {(file.size / (1024 * 1024)).toFixed(2)} Mb
+                            </Box>
+                          </ModalDialog>
                         </Box>
                       ))}
                     </Box>

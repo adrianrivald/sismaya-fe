@@ -26,6 +26,7 @@ import {
   useRejectRequest,
   useRequestById,
 } from 'src/services/request';
+import { getFileExtension } from 'src/utils/get-file-format';
 import { useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
 import { downloadFile } from 'src/utils/download';
@@ -82,6 +83,7 @@ export function RequestDetailView() {
     }))
   );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
+  const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
 
   const [searchTerm, setSearchTerm] = useSearchDebounce();
 
@@ -168,6 +170,15 @@ export function RequestDetailView() {
 
   const onSearchUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+
+  const onPreviewFile = (filePath: string, fileName: string) => {
+    const fileExtension = getFileExtension(fileName);
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const isImage = imageExtensions.includes(fileExtension);
+    if (isImage) {
+      setIsImagePreviewModal(true);
+    }
   };
 
   return (
@@ -387,13 +398,37 @@ export function RequestDetailView() {
                           sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
                         >
                           <Box component="img" src="/assets/icons/file.png" />
-                          <Box>
-                            <Typography fontWeight="bold">
-                              {file?.file_name?.length > 15
-                                ? `${file?.file_name?.substring(0, 15)}...`
-                                : file?.file_name}
-                            </Typography>
-                          </Box>
+                          <ModalDialog
+                            open={isImagePreviewModal}
+                            setOpen={setIsImagePreviewModal}
+                            minWidth={600}
+                            title="Preview"
+                            content={
+                              (
+                                <Box
+                                  component="img"
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    mt: 4,
+                                    width: '100%',
+                                  }}
+                                  src={`${file?.file_path}/${file?.file_name}`}
+                                />
+                              ) as JSX.Element & string
+                            }
+                          >
+                            <Box
+                              sx={{ cursor: 'pointer' }}
+                              onClick={() => onPreviewFile(file?.file_path, file?.file_name)}
+                            >
+                              <Typography fontWeight="bold">
+                                {file?.file_name?.length > 15
+                                  ? `${file?.file_name?.substring(0, 15)}...`
+                                  : file?.file_name}
+                              </Typography>
+                            </Box>
+                          </ModalDialog>
                           <SvgColor
                             sx={{ cursor: 'pointer' }}
                             onClick={(event) => {

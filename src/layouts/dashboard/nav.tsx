@@ -114,7 +114,6 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: userPermissionsList } = useUserPermissions();
-  console.log(userPermissionsList, 'userPermissionsList');
   const userRole = user?.user_info?.role_id;
   const userType = user?.user_info?.user_type;
   const userPermissions = userPermissionsList?.map((item) => item);
