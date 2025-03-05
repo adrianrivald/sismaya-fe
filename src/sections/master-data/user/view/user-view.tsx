@@ -35,6 +35,27 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Phone Number',
   }),
 
+  columnHelper.accessor('user_info.role.name', {
+    header: 'Role',
+    cell: (info) => {
+      const value = info.getValue();
+      return (
+        <Box
+          sx={{
+            backgroundColor: '#D6F3F9',
+            color: 'info.dark',
+            px: 1,
+            py: 0.5,
+            borderRadius: '8px',
+            display: 'inline-block',
+          }}
+        >
+          <Typography fontWeight="500">{value}</Typography>
+        </Box>
+      );
+    },
+  }),
+
   columnHelper.display({
     id: 'actions',
     cell: (info) => ButtonActions(info, popoverProps),
