@@ -14,6 +14,8 @@ import {
 import { Iconify } from 'src/components/iconify';
 import { RequestPriority } from 'src/sections/request/request-priority';
 import { TaskForm } from 'src/sections/task/form';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import { Bounce, toast } from 'react-toastify';
 
 // const reorder = (list: any, startIndex: number, endIndex: number) => {
 //   const result = Array.from(list);
@@ -41,7 +43,21 @@ function BoardColumnHeader({
   label,
   count,
   request,
-}: KanbanColumn['meta'] & { request: Partial<Request> }) {
+  permission,
+}: KanbanColumn['meta'] & { request: Partial<Request>; permission?: string[] }) {
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
   return (
     <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5}>
       <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -61,11 +77,17 @@ function BoardColumnHeader({
         </Typography>
       </Stack>
 
-      <TaskForm request={request}>
-        <IconButton aria-label="Create Task" size="small">
+      {permission?.includes('task:create') ? (
+        <TaskForm request={request}>
+          <IconButton aria-label="Create Task" size="small">
+            <Iconify icon="mdi:plus" />
+          </IconButton>
+        </TaskForm>
+      ) : (
+        <IconButton onClick={onShowErrorToast} aria-label="Create Task" size="small">
           <Iconify icon="mdi:plus" />
         </IconButton>
-      </TaskForm>
+      )}
     </Stack>
   );
 }
@@ -131,7 +153,13 @@ function BoardItem({ item, index }: { item: TaskManagement; index: number }) {
   );
 }
 
-function BoardColumn({ column }: { column: Task['status'] }) {
+function BoardColumn({
+  column,
+  permission,
+}: {
+  column: Task['status'];
+  permission: string[] | undefined;
+}) {
   const [searchParams] = useSearchParams();
   const assigneeCompanyId = useAssigneeCompanyId();
   const { data } = useKanbanColumn(column, {
@@ -158,7 +186,7 @@ function BoardColumn({ column }: { column: Task['status'] }) {
             minWidth: 335,
           }}
         >
-          <BoardColumnHeader request={request} {...data.meta} />
+          <BoardColumnHeader permission={permission} request={request} {...data.meta} />
 
           {data.items.map((json, index) => {
             const item = TaskManagement.fromJson(json);
@@ -174,7 +202,7 @@ function BoardColumn({ column }: { column: Task['status'] }) {
 
 export default function TaskKanbanPage() {
   const { mutate } = useKanbanChangeStatus();
-
+  const { data: userPermissionList } = useUserPermissions();
   const onDragEnd: OnDragEndResponder = (result) => {
     const taskId = Number(result.draggableId);
     const sourceStatus = result.source.droppableId;
@@ -202,9 +230,9 @@ export default function TaskKanbanPage() {
   return (
     <Stack direction="row" spacing={3} sx={{ overflowX: 'auto' }}>
       <DragDropContext onDragEnd={onDragEnd}>
-        <BoardColumn column="to-do" />
-        <BoardColumn column="in-progress" />
-        <BoardColumn column="completed" />
+        <BoardColumn permission={userPermissionList} column="to-do" />
+        <BoardColumn permission={userPermissionList} column="in-progress" />
+        <BoardColumn permission={userPermissionList} column="completed" />
       </DragDropContext>
     </Stack>
   );
