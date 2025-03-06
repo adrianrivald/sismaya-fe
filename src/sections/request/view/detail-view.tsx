@@ -103,6 +103,9 @@ export function RequestDetailView() {
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+    if (dayjs(endDateValue).isBefore(newValue)) {
+      setEndDateValue(newValue);
+    }
   };
 
   const handleChangeEndDate = (newValue: Dayjs | null) => {
