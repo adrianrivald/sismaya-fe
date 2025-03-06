@@ -170,6 +170,9 @@ export function EditRequestView() {
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+    if (dayjs(endDateValue).isBefore(newValue)) {
+      setEndDateValue(newValue);
+    }
   };
 
   const handleChangeEndDate = (newValue: Dayjs | null) => {
@@ -390,6 +393,7 @@ export function EditRequestView() {
                         label="Start Date"
                         value={dateValue}
                         onChange={handleChangeDate}
+                        // minDate={dayjs()}
                         // renderInput={(params: any) => <TextField {...params} />}
                       />
                     </LocalizationProvider>
@@ -402,6 +406,7 @@ export function EditRequestView() {
                         label="End Date"
                         value={endDateValue}
                         onChange={handleChangeEndDate}
+                        minDate={dateValue ?? dayjs()}
                         // renderInput={(params: any) => <TextField {...params} />}
                       />
                     </LocalizationProvider>
