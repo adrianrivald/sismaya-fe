@@ -120,6 +120,7 @@ export function ApproveAction({
                         label="Start Date"
                         value={dateValue}
                         onChange={handleChangeDate}
+                        minDate={dayjs()}
                         // renderInput={(params: any) => <TextField {...params} />}
                       />
                     </LocalizationProvider>
