@@ -427,7 +427,8 @@ export function CreateRequestView() {
                                     display: 'flex',
                                     justifyContent: 'center',
                                     mt: 4,
-                                    width: '100%',
+                                    maxHeight: '500px',
+                                    mx: 'auto',
                                   }}
                                   src={URL.createObjectURL(file)}
                                 />

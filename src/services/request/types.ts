@@ -1,6 +1,6 @@
 import { StringValidation } from "zod";
 import type { Companies } from "src/sections/master-data/internal-company/view/types";
-import { InternalCompany } from "../master-data/company/types";
+import { CompanyInInternal, InternalCompany } from "../master-data/company/types";
 import { UserInfo } from "../master-data/user/types";
 
 export interface Company {
@@ -111,6 +111,7 @@ export interface RequestDetail {
     attachments: Attachment[];
     company: Company;
     department: Department;
+    internal_company:CompanyInInternal
     id: number;
     assignee_company_id: number;
     priority: string;
