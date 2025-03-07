@@ -335,7 +335,7 @@ export function CreateRequestView() {
                   </Box>
                   <Box
                     sx={{
-                      width: { xs: '100%', md: '35%' },
+                      width: { xs: '100%', md: '25%' },
                     }}
                   >
                     <FormControl fullWidth>
@@ -361,7 +361,7 @@ export function CreateRequestView() {
                   </Box>
                   <Box
                     sx={{
-                      width: { xs: '100%', md: '25%' },
+                      width: { xs: '100%', md: '45%' },
                     }}
                   >
                     <Typography fontWeight="bold">CITO Status</Typography>
