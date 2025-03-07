@@ -103,6 +103,9 @@ export function RequestDetailView() {
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+    if (dayjs(endDateValue).isBefore(newValue)) {
+      setEndDateValue(newValue);
+    }
   };
 
   const handleChangeEndDate = (newValue: Dayjs | null) => {
@@ -211,6 +214,7 @@ export function RequestDetailView() {
             borderColor: 'primary.main',
             borderRadius: 1.5,
           }}
+          disabled={userType === 'client' && requestDetail?.step?.toLowerCase() !== 'pending'}
         >
           Edit Detail
         </Button>
@@ -411,7 +415,8 @@ export function RequestDetailView() {
                                     display: 'flex',
                                     justifyContent: 'center',
                                     mt: 4,
-                                    width: '100%',
+                                    maxHeight: '500px',
+                                    mx: 'auto',
                                   }}
                                   src={`${file?.file_path}/${file?.file_name}`}
                                 />

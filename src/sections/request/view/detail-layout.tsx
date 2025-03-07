@@ -10,6 +10,7 @@ import {
   useUpdateRequestPriority,
   useUpdateRequestStatus,
 } from 'src/services/request';
+import { Bounce, toast } from 'react-toastify';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { store } from 'src/services/request/task';
@@ -28,7 +29,6 @@ type StatusStepEnum = 'to_do' | 'in_progress' | 'completed' | 'pending' | 'reque
 export default function RequestDetailLayout() {
   const { user } = useAuth();
   const { data: userPermissionsList } = useUserPermissions();
-  console.log(userPermissionsList, 'permissionlist');
   const navigate = useNavigate();
   const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
@@ -162,6 +162,20 @@ export default function RequestDetailLayout() {
     });
     setCurrentStatus(idComplete);
     setOpenCompleteRequest(false);
+  };
+
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
   };
 
   return (
@@ -339,8 +353,17 @@ export default function RequestDetailLayout() {
                 </Select>
               </Box>
             </Box>
-
+            {!userPermissionsList?.includes('task:create') && userType === 'internal' && (
+              <Button
+                onClick={onShowErrorToast}
+                variant="contained"
+                disabled={requestDetail?.step === 'done'}
+              >
+                Create Task
+              </Button>
+            )}
             {userType === 'internal' &&
+              userPermissionsList?.includes('task:create') &&
               requestDetail?.step !== 'pending' &&
               requestDetail?.step !== 'rejected' && (
                 <RequestTaskForm requestId={Number(id)} requestNumber={requestDetail?.number}>
