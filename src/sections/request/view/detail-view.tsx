@@ -415,7 +415,8 @@ export function RequestDetailView() {
                                     display: 'flex',
                                     justifyContent: 'center',
                                     mt: 4,
-                                    width: '100%',
+                                    maxHeight: '500px',
+                                    mx: 'auto',
                                   }}
                                   src={`${file?.file_path}/${file?.file_name}`}
                                 />

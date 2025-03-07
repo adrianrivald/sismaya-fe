@@ -62,7 +62,7 @@ export interface InternalCompany {
     user_id: number;
 }
 
-interface CompanyInInternal {
+export interface CompanyInInternal {
     abbreviation: string
     categories: Categories[]
     cito_quota: number

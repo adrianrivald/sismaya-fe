@@ -62,10 +62,15 @@ const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor((row) => row, {
     header: 'Status',
     cell: (info) => {
-      const value = info.getValue()?.progress_status?.name;
+      const progressStatus = info.getValue()?.progress_status?.name;
+      const step = info.getValue()?.step;
       return (
         <Typography>
-          {info.getValue()?.progress_status !== null ? capitalize(`${value}`) : 'Requested'}
+          {step === 'pending' || step === 'rejected'
+            ? step === 'pending'
+              ? 'Requested'
+              : capitalize(step)
+            : capitalize(progressStatus)}
         </Typography>
       );
     },

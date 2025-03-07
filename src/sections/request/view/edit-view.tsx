@@ -334,20 +334,26 @@ export function EditRequestView() {
                   </Box>
                   <Box
                     sx={{
-                      width: { xs: '100%', md: '25%' },
+                      width: { xs: '100%', md: '35%' },
                     }}
                   >
                     <Typography fontWeight="bold">CITO Status</Typography>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...register('is_cito')}
-                          defaultChecked={watch('is_cito')}
-                          value={watch('is_cito')}
-                        />
-                      }
-                      label="Request CITO"
-                    />
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...register('is_cito')}
+                            defaultChecked={watch('is_cito')}
+                            value={watch('is_cito')}
+                          />
+                        }
+                        label="Request CITO"
+                      />
+                      <Typography>
+                        {requestDetail?.internal_company?.cito_used}/
+                        {requestDetail?.internal_company?.cito_quota} used
+                      </Typography>
+                    </Box>
                   </Box>
                   <Box
                     sx={{
@@ -526,7 +532,8 @@ export function EditRequestView() {
                                         display: 'flex',
                                         justifyContent: 'center',
                                         mt: 4,
-                                        width: '100%',
+                                        maxHeight: '500px',
+                                        mx: 'auto',
                                       }}
                                       src={`${attachment?.file_path}/${attachment?.file_name}`}
                                     />
