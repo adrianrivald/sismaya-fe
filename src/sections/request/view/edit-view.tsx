@@ -97,13 +97,14 @@ export function EditRequestView() {
   );
 
   const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
-
+  const [selectedImage, setSelectedImage] = React.useState('');
   const onPreviewFile = (filePath: string, fileName: string) => {
     const fileExtension = getFileExtension(fileName);
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
     const isImage = imageExtensions.includes(fileExtension);
     if (isImage) {
       setIsImagePreviewModal(true);
+      setSelectedImage(fileName);
     }
   };
 
@@ -520,7 +521,13 @@ export function EditRequestView() {
                             <Box display="flex" gap={1} alignItems="center">
                               <Box component="img" src="/assets/icons/file.png" />
                               <ModalDialog
-                                open={isImagePreviewModal}
+                                onClose={() => {
+                                  setIsImagePreviewModal(false);
+                                  setSelectedImage('');
+                                }}
+                                open={
+                                  isImagePreviewModal && selectedImage === attachment?.file_name
+                                }
                                 setOpen={setIsImagePreviewModal}
                                 minWidth={600}
                                 title="Preview"
