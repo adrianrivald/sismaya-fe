@@ -33,6 +33,7 @@ import { downloadFile } from 'src/utils/download';
 import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
 import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
+import PdfPreview from 'src/utils/pdf-viewer';
 import { StatusBadge } from '../status-badge';
 import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
@@ -178,9 +179,15 @@ export function RequestDetailView() {
 
   const onPreviewFile = (filePath: string, fileName: string) => {
     const fileExtension = getFileExtension(fileName);
+    const pdfExtension = ['pdf'];
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
     const isImage = imageExtensions.includes(fileExtension);
+    const isPdf = pdfExtension.includes(fileExtension);
     if (isImage) {
+      setIsImagePreviewModal(true);
+      setSelectedImage(fileName);
+    }
+    if (isPdf) {
       setIsImagePreviewModal(true);
       setSelectedImage(fileName);
     }
@@ -415,17 +422,23 @@ export function RequestDetailView() {
                             title="Preview"
                             content={
                               (
-                                <Box
-                                  component="img"
-                                  sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    mt: 4,
-                                    maxHeight: '500px',
-                                    mx: 'auto',
-                                  }}
-                                  src={`${file?.file_path}/${file?.file_name}`}
-                                />
+                                <>
+                                  {file?.file_name?.toLowerCase().endsWith('.pdf') ? (
+                                    <PdfPreview pdfFile={`${file?.file_path}/${file?.file_name}`} />
+                                  ) : (
+                                    <Box
+                                      component="img"
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        mt: 4,
+                                        maxHeight: '500px',
+                                        mx: 'auto',
+                                      }}
+                                      src={`${file?.file_path}/${file?.file_name}`}
+                                    />
+                                  )}
+                                </>
                               ) as JSX.Element & string
                             }
                           >
