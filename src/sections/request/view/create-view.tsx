@@ -27,7 +27,12 @@ import { getFileExtension } from 'src/utils/get-file-format';
 import type { RequestDTO } from 'src/services/request/schemas/request-schema';
 import { useUsers } from 'src/services/master-data/user';
 import { useAddRequest } from 'src/services/request';
-import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
+import {
+  useCategoryByCompanyId,
+  useCompanyById,
+  useInternalCompanies,
+  useProductByCompanyId,
+} from 'src/services/master-data/company';
 import { Bounce, toast } from 'react-toastify';
 import ModalDialog from 'src/components/modal/modal';
 
@@ -37,6 +42,8 @@ export function CreateRequestView() {
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
+  const { data: companyById } = useCompanyById(idCurrentCompany ?? 0);
+
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
@@ -371,7 +378,9 @@ export function CreateRequestView() {
                         control={<Checkbox {...register('is_cito')} />}
                         label="Request CITO"
                       />
-                      <Typography>0/5 used</Typography>
+                      <Typography>
+                        {companyById?.cito_used}/{companyById?.cito_quota} used
+                      </Typography>
                     </Box>
                   </Box>
                   <Box
