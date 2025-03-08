@@ -36,6 +36,7 @@ import {
 import { Bounce, toast } from 'react-toastify';
 import ModalDialog from 'src/components/modal/modal';
 import { SvgColor } from 'src/components/svg-color';
+import PdfPreview from 'src/utils/pdf-viewer';
 
 export function CreateRequestView() {
   const { user } = useAuth();
@@ -60,14 +61,18 @@ export function CreateRequestView() {
   const onPreviewFile = (fileName: string) => {
     const fileExtension = getFileExtension(fileName);
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const pdfExtension = ['pdf'];
     const isImage = imageExtensions.includes(fileExtension);
+    const isPdf = pdfExtension.includes(fileExtension);
     if (isImage) {
       setIsImagePreviewModal(true);
       setSelectedImage(fileName);
     }
+    if (isPdf) {
+      setIsImagePreviewModal(true);
+      setSelectedImage(fileName);
+    }
   };
-
-  console.log(files, 'filesfiles');
 
   const handleSubmit = (formData: RequestDTO) => {
     let payload = {};
@@ -456,17 +461,23 @@ export function CreateRequestView() {
                                 title="Preview"
                                 content={
                                   (
-                                    <Box
-                                      component="img"
-                                      sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        mt: 4,
-                                        maxHeight: '500px',
-                                        mx: 'auto',
-                                      }}
-                                      src={URL.createObjectURL(file)}
-                                    />
+                                    <>
+                                      {file?.type === 'application/pdf' ? (
+                                        <PdfPreview pdfFile={URL.createObjectURL(file)} />
+                                      ) : (
+                                        <Box
+                                          component="img"
+                                          sx={{
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            mt: 4,
+                                            maxHeight: '500px',
+                                            mx: 'auto',
+                                          }}
+                                          src={URL.createObjectURL(file)}
+                                        />
+                                      )}
+                                    </>
                                   ) as JSX.Element & string
                                 }
                               >
