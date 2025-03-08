@@ -41,6 +41,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import ModalDialog from 'src/components/modal/modal';
 import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
+import PdfPreview from 'src/utils/pdf-viewer';
 import { AddAssigneeModal } from '../add-assignee';
 
 export function EditRequestView() {
@@ -101,8 +102,14 @@ export function EditRequestView() {
   const onPreviewFile = (filePath: string, fileName: string) => {
     const fileExtension = getFileExtension(fileName);
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const pdfExtension = ['pdf'];
     const isImage = imageExtensions.includes(fileExtension);
+    const isPdf = pdfExtension.includes(fileExtension);
     if (isImage) {
+      setIsImagePreviewModal(true);
+      setSelectedImage(fileName);
+    }
+    if (isPdf) {
       setIsImagePreviewModal(true);
       setSelectedImage(fileName);
     }
@@ -533,17 +540,25 @@ export function EditRequestView() {
                                 title="Preview"
                                 content={
                                   (
-                                    <Box
-                                      component="img"
-                                      sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        mt: 4,
-                                        maxHeight: '500px',
-                                        mx: 'auto',
-                                      }}
-                                      src={`${attachment?.file_path}/${attachment?.file_name}`}
-                                    />
+                                    <>
+                                      {attachment?.file_name?.toLowerCase().endsWith('.pdf') ? (
+                                        <PdfPreview
+                                          pdfFile={`${attachment?.file_path}/${attachment?.file_name}`}
+                                        />
+                                      ) : (
+                                        <Box
+                                          component="img"
+                                          sx={{
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            mt: 4,
+                                            maxHeight: '500px',
+                                            mx: 'auto',
+                                          }}
+                                          src={`${attachment?.file_path}/${attachment?.file_name}`}
+                                        />
+                                      )}
+                                    </>
                                   ) as JSX.Element & string
                                 }
                               >
