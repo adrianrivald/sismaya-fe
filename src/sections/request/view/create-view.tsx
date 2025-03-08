@@ -35,6 +35,7 @@ import {
 } from 'src/services/master-data/company';
 import { Bounce, toast } from 'react-toastify';
 import ModalDialog from 'src/components/modal/modal';
+import { SvgColor } from 'src/components/svg-color';
 
 export function CreateRequestView() {
   const { user } = useAuth();
@@ -56,7 +57,7 @@ export function CreateRequestView() {
   const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState('');
 
-  const onPreviewFile = (filePath: string, fileName: string) => {
+  const onPreviewFile = (fileName: string) => {
     const fileExtension = getFileExtension(fileName);
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
     const isImage = imageExtensions.includes(fileExtension);
@@ -65,6 +66,8 @@ export function CreateRequestView() {
       setSelectedImage(fileName);
     }
   };
+
+  console.log(files, 'filesfiles');
 
   const handleSubmit = (formData: RequestDTO) => {
     let payload = {};
@@ -114,6 +117,11 @@ export function CreateRequestView() {
         }
       }
     }
+  };
+
+  const onRemoveFile = (index: number) => {
+    const newFiles = files?.filter((file: any, indexItem: number) => indexItem !== index);
+    setFiles(newFiles);
   };
 
   const requesterList =
@@ -419,52 +427,68 @@ export function CreateRequestView() {
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
                   {files?.length > 0 ? (
-                    <Box
-                      display="flex"
-                      gap={3}
-                      p={4}
-                      mb={3}
-                      sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
-                    >
-                      {Array.from(files)?.map((file: any) => (
-                        <Box display="flex" gap={1} alignItems="center">
-                          <Box component="img" src="/assets/icons/file.png" />
-                          <ModalDialog
-                            onClose={() => {
-                              setIsImagePreviewModal(false);
-                              setSelectedImage('');
-                            }}
-                            open={isImagePreviewModal && selectedImage === file?.file_name}
-                            setOpen={setIsImagePreviewModal}
-                            minWidth={600}
-                            title="Preview"
-                            content={
-                              (
-                                <Box
-                                  component="img"
-                                  sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    mt: 4,
-                                    maxHeight: '500px',
-                                    mx: 'auto',
-                                  }}
-                                  src={URL.createObjectURL(file)}
-                                />
-                              ) as JSX.Element & string
-                            }
+                    <>
+                      {Array.from(files)?.map((file: any, index: number) => (
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          gap={3}
+                          p={4}
+                          mb={3}
+                          sx={{ border: 1, borderRadius: 1, borderColor: 'grey.500' }}
+                        >
+                          <Box
+                            display="flex"
+                            width="100%"
+                            justifyContent="space-between"
+                            alignItems="center"
                           >
-                            <Box
-                              sx={{ cursor: 'pointer' }}
-                              onClick={() => onPreviewFile(file?.file_path, file?.file_name)}
-                            >
-                              <Typography fontWeight="bold">{file?.name}</Typography>
-                              {(file.size / (1024 * 1024)).toFixed(2)} Mb
+                            <Box display="flex" gap={1} alignItems="center">
+                              <Box component="img" src="/assets/icons/file.png" />
+                              <ModalDialog
+                                onClose={() => {
+                                  setIsImagePreviewModal(false);
+                                  setSelectedImage('');
+                                }}
+                                open={isImagePreviewModal && selectedImage === file?.name}
+                                setOpen={setIsImagePreviewModal}
+                                minWidth={600}
+                                title="Preview"
+                                content={
+                                  (
+                                    <Box
+                                      component="img"
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        mt: 4,
+                                        maxHeight: '500px',
+                                        mx: 'auto',
+                                      }}
+                                      src={URL.createObjectURL(file)}
+                                    />
+                                  ) as JSX.Element & string
+                                }
+                              >
+                                <Box
+                                  sx={{ cursor: 'pointer' }}
+                                  onClick={() => onPreviewFile(file?.name)}
+                                >
+                                  <Typography fontWeight="bold">{file?.name}</Typography>
+                                  {(file.size / (1024 * 1024)).toFixed(2)} Mb
+                                </Box>
+                              </ModalDialog>
                             </Box>
-                          </ModalDialog>
+                            <Box sx={{ cursor: 'pointer' }} onClick={() => onRemoveFile(index)}>
+                              <SvgColor
+                                sx={{ width: 10, height: 10 }}
+                                src="/assets/icons/ic-cross.svg"
+                              />
+                            </Box>
+                          </Box>
                         </Box>
                       ))}
-                    </Box>
+                    </>
                   ) : null}
                   {/* <InputLabel id="attachment-files">Attachment</InputLabel> */}
                   <input
