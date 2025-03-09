@@ -4,6 +4,7 @@ import { loginUser } from 'src/services/auth/login';
 import type { User } from 'src/services/master-data/user/types';
 import { createContext } from 'src/utils/create.context';
 import { createStore } from '@xstate/store';
+import { useTimerAction, useTimerStore } from 'src/services/task/timer';
 import * as sessionService from '../session/session';
 
 interface AuthContextValue {
@@ -15,9 +16,7 @@ interface AuthContextValue {
   currentInternalCompany?: number | null;
 }
 
-const [useAuth, AuthInternalProvider] = createContext<AuthContextValue>({
-  name: 'Auth',
-});
+const [useAuth, AuthInternalProvider] = createContext<AuthContextValue>({ name: 'Auth' });
 
 export { useAuth };
 
@@ -26,18 +25,14 @@ interface LoginCredentialsDTO {
   password: string;
 }
 
-const initialStore = {
-  permissions: [] as string[],
-};
+const initialStore = { permissions: [] as string[] };
 export const permissionStore = createStore({
   context: initialStore,
   on: {
     storePermissions: (context, event: { newPermissions: string[] }) => ({
       permissions: event?.newPermissions,
     }),
-    flushPermissions: () => ({
-      permissions: [],
-    }),
+    flushPermissions: () => ({ permissions: [] }),
   },
 });
 
@@ -46,6 +41,8 @@ export function AuthProvider(props: React.PropsWithChildren) {
   const [accessToken, setAccessToken] = React.useState<string | null>(() =>
     sessionService.getSession()
   );
+  const mutation = useTimerAction();
+  const store = useTimerStore();
   const [userInfo, setUserInfo] = React.useState<string | null>(() => sessionService.getUser());
 
   async function login(formField: LoginCredentialsDTO) {
@@ -70,12 +67,15 @@ export function AuthProvider(props: React.PropsWithChildren) {
   }
 
   async function logout() {
+    if (store?.taskId) {
+      mutation.mutate({ action: 'pause', taskId: store?.taskId });
+      window.localStorage.removeItem('task-timer');
+    }
+
     sessionService.flushSession();
     setAccessToken(null);
     setAccessToken(null);
-    permissionStore.send({
-      type: 'flushPermissions',
-    });
+    permissionStore.send({ type: 'flushPermissions' });
     navigate('/');
   }
 

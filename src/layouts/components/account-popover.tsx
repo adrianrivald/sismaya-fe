@@ -16,16 +16,12 @@ import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { useTimerAction, useTimerStore } from 'src/services/task/timer';
 
 // ----------------------------------------------------------------------
 
 export type AccountPopoverProps = IconButtonProps & {
-  data?: {
-    label: string;
-    href: string;
-    icon?: React.ReactNode;
-    info?: React.ReactNode;
-  }[];
+  data?: { label: string; href: string; icon?: React.ReactNode; info?: React.ReactNode }[];
 };
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
@@ -58,15 +54,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   return (
     <>
-      <IconButton
-        onClick={handleOpenPopover}
-        sx={{
-          p: '2px',
-          width: 40,
-          height: 40,
-        }}
-        {...other}
-      >
+      <IconButton onClick={handleOpenPopover} sx={{ p: '2px', width: 40, height: 40 }} {...other}>
         <Avatar
           src={user?.user_info?.profile_picture}
           alt={user?.user_info?.name}
@@ -82,11 +70,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          paper: {
-            sx: { width: 200 },
-          },
-        }}
+        slotProps={{ paper: { sx: { width: 200 } } }}
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
