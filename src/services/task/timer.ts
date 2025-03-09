@@ -13,21 +13,13 @@ export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '';
 type EventStart = Omit<typeof initialStore, 'state'>;
 
 type TimerActionPayload =
-  | (EventStart & {
-      action: 'start';
-      name?: string;
-    })
-  | {
-      action: TimerAction;
-      taskId: number;
-      name?: string;
-    };
+  | (EventStart & { action: 'start'; name?: string })
+  | { action: TimerAction; taskId: number; name?: string };
 
-const stateMap = {
-  start: 'running',
-  pause: 'paused',
-  stop: 'stopped',
-} satisfies Record<TimerAction, TimerState>;
+const stateMap = { start: 'running', pause: 'paused', stop: 'stopped' } satisfies Record<
+  TimerAction,
+  TimerState
+>;
 
 const storageKey = 'task-timer';
 
@@ -49,9 +41,7 @@ const store = createStore({
         window.localStorage.removeItem(storageKey);
       }
 
-      return {
-        state: event.nextState,
-      };
+      return { state: event.nextState };
     },
     stop: () => {
       window.localStorage.removeItem(storageKey);
@@ -140,14 +130,12 @@ export function useCheckTimer() {
     const abortController = new AbortController();
 
     async function checkTimer() {
-      const response = await http('/tasks/get-running-timer', {
-        signal: abortController.signal,
-      });
+      const response = await http('/tasks/get-running-timer', { signal: abortController.signal });
 
       const activity = response?.data?.running_timer;
 
       if (!activity || activity?.id === 0) {
-        store.send({ type: 'transition', nextState: '' });
+        // store.send({ type: 'transition', nextState: '' });
         return;
       }
 
@@ -232,12 +220,7 @@ export function useActivities(params: Partial<ActivitiesParams>) {
   return useQuery({
     queryKey: ['task', 'activity', params],
     queryFn: async () =>
-      http('/tasks/get-all-timer', {
-        params: {
-          ...params,
-          task_id: params.taskId,
-        },
-      }),
+      http('/tasks/get-all-timer', { params: { ...params, task_id: params.taskId } }),
   });
 }
 

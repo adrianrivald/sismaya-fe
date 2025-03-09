@@ -35,7 +35,6 @@ export function TimerActionButton({
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
   const isDisabled = defaultState === 'stopped';
-  console.log('dataa', name);
 
   const btnStart = (
     <IconButton
