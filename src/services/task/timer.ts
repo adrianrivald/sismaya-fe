@@ -5,8 +5,9 @@ import { useSelector } from '@xstate/store/react';
 import { useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
-import { useAuth } from 'src/sections/auth/providers/auth';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
+// eslint-disable-next-line import/no-cycle
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 type TimerAction = 'start' | 'pause' | 'stop';
 export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '';
