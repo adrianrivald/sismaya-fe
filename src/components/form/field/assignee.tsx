@@ -128,10 +128,7 @@ export function AssigneeChooser({
                       startIcon={
                         isAssigned ? <Iconify icon="mdi:check" /> : <Iconify icon="mdi:plus" />
                       }
-                      sx={{
-                        fontWeight: 'bold',
-                        color: isAssigned ? 'primary' : 'inherit',
-                      }}
+                      sx={{ fontWeight: 'bold', color: isAssigned ? 'primary' : 'inherit' }}
                       onClick={() => {
                         const handler = isAssigned ? onUnassign : onAssign;
 
@@ -182,8 +179,6 @@ export function AssigneeChooserField({
     keyName: '_id',
   });
   const assignees = fields as unknown as Array<Assignee>;
-
-  console.log('data', isCreate);
 
   return (
     <FormControl>

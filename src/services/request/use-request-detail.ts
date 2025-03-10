@@ -3,7 +3,7 @@ import { http } from 'src/utils/http';
 import type { RequestDetail, Assignees } from './types';
 
 async function fetchRequestByID(requestId: string) {
-  const { data } = await http<{ data: RequestDetail }>(`requests/${requestId}`);
+  const { data } = await http<{ data: RequestDetail }>(`requests/${requestId}/assignee`);
 
   return data;
 }
