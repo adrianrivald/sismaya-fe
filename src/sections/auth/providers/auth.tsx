@@ -5,6 +5,7 @@ import type { User } from 'src/services/master-data/user/types';
 import { createContext } from 'src/utils/create.context';
 import { createStore } from '@xstate/store';
 import { useTimerAction, useTimerStore } from 'src/services/task/timer';
+// eslint-disable-next-line import/no-cycle
 import * as sessionService from '../session/session';
 
 interface AuthContextValue {
