@@ -144,7 +144,14 @@ function Form({ request, task }: FormProps) {
             onAssign={(assignee) =>
               assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.userId })
             }
-            onUnassign={(assignee) => assigneeFn({ kind: 'unassign', assigneeId: assignee.userId })}
+            onUnassign={(assignee) => {
+              const assigneeId = task?.assignees.filter(
+                (item) => item.userId === assignee.userId
+              )?.[0];
+              if (assigneeId) {
+                assigneeFn({ kind: 'unassign', assigneeId: assigneeId.id });
+              }
+            }}
           />
 
           <DueDatePicker
