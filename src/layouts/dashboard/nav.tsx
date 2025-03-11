@@ -162,7 +162,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           ?.filter((item) =>
             item?.list?.some((listItem) =>
               userRole !== 1
-                ? userPermissions?.includes(listItem?.id)
+                ? userType === 'client'
+                  ? userPermissions
+                      ?.filter((permissionItem) => permissionItem !== 'chat')
+                      .includes(listItem?.id)
+                  : userPermissions?.includes(listItem?.id)
                 : ['dashboard', 'master-data', 'user group:read'].includes(listItem?.id)
             )
           )

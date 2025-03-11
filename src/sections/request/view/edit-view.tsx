@@ -46,7 +46,7 @@ import { AddAssigneeModal } from '../add-assignee';
 
 export function EditRequestView() {
   const { user } = useAuth();
-  const { data } = useUserById(user?.id);
+  const userType = user?.user_info?.user_type;
   const navigate = useNavigate();
   const { vendor, id } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
@@ -353,6 +353,11 @@ export function EditRequestView() {
                             {...register('is_cito')}
                             defaultChecked={watch('is_cito')}
                             value={watch('is_cito')}
+                            disabled={
+                              userType === 'internal' ||
+                              (userType === 'client' &&
+                                requestDetail?.step?.toLowerCase() !== 'pending')
+                            }
                           />
                         }
                         label="Request CITO"

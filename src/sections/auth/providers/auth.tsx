@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from 'src/services/auth/login';
