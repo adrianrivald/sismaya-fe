@@ -34,6 +34,8 @@ import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
 import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 import PdfPreview from 'src/utils/pdf-viewer';
+import { toast } from 'react-toastify';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { StatusBadge } from '../status-badge';
 import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
@@ -56,6 +58,7 @@ const priorities = [
 
 export function RequestDetailView() {
   const { user } = useAuth();
+  const { data: userPermissions } = useUserPermissions();
   const userType = user?.user_info?.user_type;
   const { id, vendor } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
@@ -114,7 +117,11 @@ export function RequestDetailView() {
   };
 
   const onClickEdit = () => {
-    navigate(`/${vendor}/request/${id}/edit`);
+    if (!userPermissions?.includes('request:update')) {
+      toast.error("You don't have permission");
+    } else {
+      navigate(`/${vendor}/request/${id}/edit`);
+    }
   };
 
   const handleSubmit = (formData: { reason: string }) => {
