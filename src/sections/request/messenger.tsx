@@ -13,6 +13,7 @@ import { useMessagePost } from 'src/services/messaging/use-messaging';
 import type { Messaging } from 'src/services/messaging/types';
 import { Bounce, toast } from 'react-toastify';
 import dayjs from 'dayjs';
+import ModalDialog from 'src/components/modal/modal';
 import { useAuth } from '../auth/providers/auth';
 
 const Messenger = React.lazy(() => import('./task/task-activities'));
@@ -29,6 +30,8 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
   const { user } = useAuth();
   const [file, setFile] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState('');
+  const [isPreviewImage, setIsPreviewImage] = React.useState(false);
+  const [selectedImage, setSelectedImage] = React.useState('');
   // const chatRef = React.useRef<HTMLDivElement | null>(null);
   const { mutate: sendChat } = useMessagePost(onSuccess);
 
@@ -44,6 +47,11 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
         block: 'end',
       });
     }
+  };
+
+  const onPreviewImage = (selectedImageSrc: string) => {
+    setSelectedImage(selectedImageSrc);
+    setIsPreviewImage(true);
   };
 
   const onResetField = () => {
@@ -165,12 +173,48 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
                         {chat?.file_path && (
                           <Box
                             sx={{
-                              borderRadius: '8px',
                               maxWidth: '75%',
                             }}
-                            component="img"
-                            src={`${chat?.file_path}/${chat?.file_name}`}
-                          />
+                          >
+                            <ModalDialog
+                              onClose={() => {
+                                setIsPreviewImage(false);
+                                setSelectedImage('');
+                              }}
+                              open={isPreviewImage}
+                              setOpen={setIsPreviewImage}
+                              minWidth={600}
+                              title="Preview"
+                              content={
+                                (
+                                  <Box
+                                    component="img"
+                                    sx={{
+                                      display: 'flex',
+                                      justifyContent: 'center',
+                                      mt: 4,
+                                      maxHeight: '500px',
+                                      mx: 'auto',
+                                    }}
+                                    src={`${chat?.file_path}/${chat?.file_name}`}
+                                  />
+                                ) as JSX.Element & string
+                              }
+                            >
+                              <Box
+                                sx={{
+                                  borderRadius: '8px',
+                                  maxWidth: '100%',
+                                  cursor: 'pointer',
+                                }}
+                                component="img"
+                                src={`${chat?.file_path}/${chat?.file_name}`}
+                                onClick={() =>
+                                  onPreviewImage(`${chat?.file_path}/${chat?.file_name}`)
+                                }
+                              />
+                            </ModalDialog>
+                          </Box>
                         )}
                       </Box>
                     </Box>
@@ -226,7 +270,49 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
                 sx={{ borderWidth: 0 }}
                 onKeyDown={handleKeyDown}
               />
-              <Box component="img" src={preview} sx={{ width: '50%' }} onClick={onRemoveFile} />
+              <Box position="relative" sx={{ width: '50%' }}>
+                <ModalDialog
+                  onClose={() => {
+                    setIsPreviewImage(false);
+                    setSelectedImage('');
+                  }}
+                  open={isPreviewImage}
+                  setOpen={setIsPreviewImage}
+                  minWidth={600}
+                  title="Preview"
+                  content={
+                    (
+                      <Box
+                        component="img"
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          mt: 4,
+                          maxHeight: '500px',
+                          mx: 'auto',
+                        }}
+                        src={selectedImage}
+                      />
+                    ) as JSX.Element & string
+                  }
+                >
+                  <Box
+                    onClick={() => onPreviewImage(preview)}
+                    component="img"
+                    src={preview}
+                    sx={{ width: '100%', cursor: 'pointer' }}
+                    // onClick={onRemoveFile}
+                  />
+                </ModalDialog>
+                {preview && (
+                  <Box
+                    sx={{ cursor: 'pointer', position: 'absolute', top: '-14px', right: '-6px' }}
+                    onClick={onRemoveFile}
+                  >
+                    <SvgColor sx={{ width: 10, height: 10 }} src="/assets/icons/ic-cross.svg" />
+                  </Box>
+                )}
+              </Box>
             </Box>
             <Box display="flex" alignItems="center" gap={2}>
               <Box>
