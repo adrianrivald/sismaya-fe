@@ -223,6 +223,10 @@ export function AutoResponseView() {
                             }}
                             onChange={(e: SelectChangeEvent<string>) => {
                               setIsCustom(e.target.value);
+                              if (e.target.value !== 'true') {
+                                setDateValue(null);
+                                setEndDateValue(null);
+                              }
                             }}
                             id="is_custom"
                           >
@@ -233,20 +237,21 @@ export function AutoResponseView() {
                             ))}
                           </Select>
                         </FormControl>
-
-                        <FormHelperText
-                          sx={{
-                            mt: 2,
-                            color: 'grey.600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                          }}
-                        >
-                          <SvgColor src="/assets/icons/ic-info.svg" width={13} height={13} />
-                          When &apos;Outside Working Hours&apos; is selected, the auto-response will
-                          be active on weekdays from 17:00 - 07:59, and all day on weekends.
-                        </FormHelperText>
+                        {isCustom !== 'true' && (
+                          <FormHelperText
+                            sx={{
+                              mt: 2,
+                              color: 'grey.600',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <SvgColor src="/assets/icons/ic-info.svg" width={13} height={13} />
+                            When &apos;Outside Working Hours&apos; is selected, the auto-response
+                            will be active on weekdays from 17:00 - 07:59, and all day on weekends.
+                          </FormHelperText>
+                        )}
                         {formState?.errors?.is_custom && (
                           <FormHelperText sx={{ color: 'error.main' }}>
                             {String(formState?.errors?.is_custom?.message)}
