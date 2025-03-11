@@ -29,6 +29,7 @@ export interface Assignee {
   name: string;
   email?: string;
   avatar: string;
+  assigneeId?: number;
 }
 
 export function AssigneeList({ assignees }: { assignees: Array<Assignee> }) {
@@ -189,17 +190,16 @@ export function AssigneeChooserField({
             requestId={requestId}
             assignees={assignees}
             onAssign={(assignee, index) => {
+              append(assignee);
               if (!isCreate) {
                 onAssign?.(assignee, index);
               }
-              append(assignee);
             }}
             onUnassign={(assignee, index) => {
+              remove(index);
               if (!isCreate) {
                 onUnassign?.(assignee, index);
               }
-
-              remove(index);
             }}
           />
         </Box>
