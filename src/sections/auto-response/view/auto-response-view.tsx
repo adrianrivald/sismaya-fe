@@ -223,6 +223,10 @@ export function AutoResponseView() {
                             }}
                             onChange={(e: SelectChangeEvent<string>) => {
                               setIsCustom(e.target.value);
+                              if (e.target.value !== 'true') {
+                                setDateValue(null);
+                                setEndDateValue(null);
+                              }
                             }}
                             id="is_custom"
                           >
