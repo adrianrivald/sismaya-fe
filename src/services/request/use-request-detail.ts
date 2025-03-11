@@ -15,10 +15,14 @@ async function fetchRequestAssigneeByID(requestId: string) {
 }
 
 export function useRequestAssigneeById(requestId: string, options: any = {}) {
-  const data = useQuery(['request-items', requestId], () => fetchRequestAssigneeByID(requestId), {
-    enabled: requestId !== undefined,
-    ...options,
-  });
+  const data = useQuery(
+    ['request-items-assignee', requestId],
+    () => fetchRequestAssigneeByID(requestId),
+    {
+      enabled: requestId !== undefined,
+      ...options,
+    }
+  );
 
   return data;
 }
@@ -40,8 +44,6 @@ export function useRequestAssignees(requestId: string) {
       const assignees = data?.assignees ?? [];
 
       if (assignees.length === 0) return [];
-
-      console.log('dataa 567', assignees);
 
       return assignees.map((val: Assignees) => ({
         id: val.assignee.id,
