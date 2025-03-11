@@ -136,7 +136,7 @@ function Form({ request, task }: FormProps) {
 
           <AssigneeChooserField
             name="assignees"
-            isCreate
+            isCreate={!taskId}
             // @ts-ignore
             control={form.control}
             requestId={requestId}
