@@ -36,6 +36,7 @@ module.exports = {
     'no-restricted-exports': 0,
     'no-promise-executor-return': 0,
     'import/prefer-default-export': 0,
+    'import/no-cycle': 0,
     // 'prefer-destructuring': [1, { object: true, array: false }],
     // typescript
     '@typescript-eslint/naming-convention': 0,
@@ -63,6 +64,7 @@ module.exports = {
       0,
       { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
     ],
+
     // perfectionist
     // 'perfectionist/sort-exports': [1, { order: 'asc', type: 'line-length' }],
     // 'perfectionist/sort-named-imports': [1, { order: 'asc', type: 'line-length' }],

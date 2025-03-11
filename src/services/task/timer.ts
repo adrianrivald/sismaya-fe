@@ -2,11 +2,11 @@
 import dayjs from 'dayjs';
 import { createStore } from '@xstate/store';
 import { useSelector } from '@xstate/store/react';
-import { act, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
-import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 
 type TimerAction = 'start' | 'pause' | 'stop';
 export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '';
