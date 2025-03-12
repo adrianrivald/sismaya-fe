@@ -152,8 +152,6 @@ export function useCheckTimer() {
       if (state === 'running') {
         const lastTimer = response?.data?.current_timer_duration || 0;
 
-        console.log('data activity', activity);
-
         store.send({
           type: 'start',
           activity: activity?.task?.name,
@@ -195,7 +193,6 @@ export function useTimerAction() {
     // store next state to store immediately before tell the server
     onMutate: ({ name, action, ...rest }) => {
       if (action === 'start') {
-        console.log('dataa rest', rest);
         store.send({ type: 'start', name: name || '', ...rest });
         return;
       }
