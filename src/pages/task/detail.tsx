@@ -10,6 +10,8 @@ import {
   Paper,
   Menu,
   MenuItem,
+  IconButton,
+  Modal,
 } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -27,17 +29,19 @@ import { TaskForm } from 'src/sections/task/form';
 import AddAttachment from 'src/sections/task/add-attachment';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
+import { http } from 'src/utils/http';
 import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
 
 export default function TaskDetailPage() {
   const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '' });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: 0 });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { taskId, vendor } = useParams();
   const assigneeCompanyId = useAssigneeCompanyId();
-  const { data, error } = useTaskDetail(Number(taskId), assigneeCompanyId);
+  const { data, error, refetch } = useTaskDetail(Number(taskId), assigneeCompanyId);
 
   if (!data || error) {
     return null;
@@ -52,6 +56,9 @@ export default function TaskDetailPage() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const removeAttachment = async (id: number) =>
+    http(`/task-attachment/${id}`, { method: 'DELETE' }).then(() => refetch());
 
   // const getButtonProgressProps = (progress: number) =>
   //   ({
@@ -259,7 +266,12 @@ export default function TaskDetailPage() {
                         />
                         <Typography sx={{ ml: 1 }}>Download</Typography>
                       </MenuItem>
-                      <MenuItem onClick={handleClose}>
+                      <MenuItem
+                        onClick={() => {
+                          setDeleteModal({ isOpen: true, id: attachment.id });
+                          handleClose();
+                        }}
+                      >
                         <Icon icon="mynaui:trash" width="18" height="18" color="red" />
                         <Typography sx={{ ml: 1 }}>Delete</Typography>
                       </MenuItem>
@@ -286,6 +298,54 @@ export default function TaskDetailPage() {
           />
         </Stack>
       </Stack>
+      <Modal
+        open={deleteModal.isOpen}
+        onClose={() => {
+          setDeleteModal({ isOpen: false, id: 0 });
+        }}
+        aria-labelledby="attachment-modal"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            maxWidth: '32vw',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            borderRadius: 1,
+          }}
+        >
+          <Typography textAlign="center">
+            Are you sure you want to delete this attachment ? This action cannot be undone.
+          </Typography>
+          <Stack sx={{ mt: 2 }} flexDirection="row" justifyContent="center" gap={5}>
+            <Button
+              onClick={() => {
+                setDeleteModal({ isOpen: false, id: 0 });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                removeAttachment(deleteModal.id);
+                setDeleteModal({ isOpen: false, id: 0 });
+              }}
+            >
+              Delete
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
     </DashboardContent>
   );
 }
