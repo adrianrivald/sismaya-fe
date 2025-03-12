@@ -1,7 +1,18 @@
 import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
 import { Link, useParams } from 'react-router-dom';
-import { Box, Stack, Typography, /* ButtonGroup, */ Button, Divider, Paper } from '@mui/material';
+import {
+  Box,
+  Stack,
+  Typography,
+  /* ButtonGroup, */ Button,
+  Divider,
+  Paper,
+  Menu,
+  MenuItem,
+  IconButton,
+  Modal,
+} from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import {
@@ -16,13 +27,21 @@ import { downloadFile } from 'src/utils/download';
 import { CardActivity } from 'src/sections/task/activity';
 import { TaskForm } from 'src/sections/task/form';
 import AddAttachment from 'src/sections/task/add-attachment';
+import { Icon } from '@iconify/react';
+import { useState } from 'react';
+import { http } from 'src/utils/http';
+import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
 
 export default function TaskDetailPage() {
+  const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '' });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: 0 });
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
   const { taskId, vendor } = useParams();
   const assigneeCompanyId = useAssigneeCompanyId();
-  const { data, error } = useTaskDetail(Number(taskId), assigneeCompanyId);
+  const { data, error, refetch } = useTaskDetail(Number(taskId), assigneeCompanyId);
 
   if (!data || error) {
     return null;
@@ -30,6 +49,16 @@ export default function TaskDetailPage() {
 
   const { task, request } = data;
   const title = task.name;
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const removeAttachment = async (id: number) =>
+    http(`/task-attachment/${id}`, { method: 'DELETE' }).then(() => refetch());
 
   // const getButtonProgressProps = (progress: number) =>
   //   ({
@@ -169,26 +198,84 @@ export default function TaskDetailPage() {
               <Stack spacing={2}>
                 {task.attachments.map((attachment) => (
                   <Stack
+                    flexDirection="row"
+                    alignItems="center"
+                    justifyContent="space-between"
                     key={attachment.id}
                     spacing={0.5}
                     border="1px solid rgba(145, 158, 171, 0.12)"
                     borderRadius={2}
                     p={2}
-                    onClick={() => downloadFile(attachment.url)}
+                    gap={3}
                   >
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                    <Box
+                      sx={{ cursor: 'pointer', flex: 1 }}
+                      onClick={() => {
+                        setAttachmentModal({ isOpen: true, url: attachment.url });
+                        // downloadFile(attachment.url);
                       }}
                     >
-                      {attachment.name}
-                    </Typography>
-                    <Typography variant="caption">
-                      {TaskManagement.formatAttachmentDate(attachment.createdAt)}
-                    </Typography>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {attachment.name}
+                      </Typography>
+                      <Typography variant="caption">
+                        {TaskManagement.formatAttachmentDate(attachment.createdAt)}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{ p: 0, cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleClick(e);
+                      }}
+                    >
+                      <Icon icon="material-symbols:more-vert" width="24" height="24" />
+                    </Box>
+                    <Menu
+                      id="demo-positioned-menu"
+                      aria-labelledby="demo-positioned-button"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleClose}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          downloadFile(attachment.url);
+                          handleClose();
+                        }}
+                      >
+                        <Icon
+                          icon="material-symbols-light:download-rounded"
+                          width="18"
+                          height="18"
+                        />
+                        <Typography sx={{ ml: 1 }}>Download</Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setDeleteModal({ isOpen: true, id: attachment.id });
+                          handleClose();
+                        }}
+                      >
+                        <Icon icon="mynaui:trash" width="18" height="18" color="red" />
+                        <Typography sx={{ ml: 1 }}>Delete</Typography>
+                      </MenuItem>
+                    </Menu>
                   </Stack>
                 ))}
               </Stack>
@@ -201,8 +288,64 @@ export default function TaskDetailPage() {
             taskName={task.name}
             lastTimer={task.lastTimer}
           />
+
+          <AttachmentModal
+            isOpen={attachmentModal.isOpen}
+            url={attachmentModal.url}
+            onClose={() => {
+              setAttachmentModal({ isOpen: false, url: '' });
+            }}
+          />
         </Stack>
       </Stack>
+      <Modal
+        open={deleteModal.isOpen}
+        onClose={() => {
+          setDeleteModal({ isOpen: false, id: 0 });
+        }}
+        aria-labelledby="attachment-modal"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            maxWidth: '32vw',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            borderRadius: 1,
+          }}
+        >
+          <Typography textAlign="center">
+            Are you sure you want to delete this attachment ? This action cannot be undone.
+          </Typography>
+          <Stack sx={{ mt: 2 }} flexDirection="row" justifyContent="center" gap={5}>
+            <Button
+              onClick={() => {
+                setDeleteModal({ isOpen: false, id: 0 });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                removeAttachment(deleteModal.id);
+                setDeleteModal({ isOpen: false, id: 0 });
+              }}
+            >
+              Delete
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
     </DashboardContent>
   );
 }

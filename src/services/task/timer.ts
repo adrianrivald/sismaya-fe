@@ -152,8 +152,6 @@ export function useCheckTimer() {
       if (state === 'running') {
         const lastTimer = response?.data?.current_timer_duration || 0;
 
-        console.log('data activity', activity);
-
         store.send({
           type: 'start',
           activity: activity?.task?.name,
@@ -195,7 +193,6 @@ export function useTimerAction() {
     // store next state to store immediately before tell the server
     onMutate: ({ name, action, ...rest }) => {
       if (action === 'start') {
-        console.log('dataa rest', rest);
         store.send({ type: 'start', name: name || '', ...rest });
         return;
       }
@@ -213,7 +210,7 @@ export function useTimerAction() {
 export type ActivitiesParams = {
   page: number;
   page_size: number;
-
+  user_id?: number;
   taskId: number;
 };
 
@@ -227,6 +224,10 @@ export function useActivities(params: Partial<ActivitiesParams>) {
 
 export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
   const { data: activities } = useActivities({ ...params, page_size: 1 });
+  const { user } = useAuth();
+  const { data: activitiesUser } = useActivities({ ...params, page_size: 1, user_id: user?.id });
+
+  const activityUser = activitiesUser?.data?.[0];
   const activity = activities?.data?.[0];
 
   if (!activity) {
@@ -235,9 +236,13 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
 
   let state: TimerState = 'idle';
 
-  if (activity?.is_pause) state = 'paused';
-  else if (activity?.ended_at !== null) state = 'stopped';
+  if (activityUser?.is_pause) state = 'paused';
+  else if (activityUser?.ended_at !== null) state = 'stopped';
   else state = 'idle';
+
+  if (activityUser?.creator?.user_id !== user?.id) state = 'idle';
+
+  console.log('dataa', activityUser);
 
   return {
     state,
@@ -246,5 +251,7 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
     data: fDate(activity?.created_at, 'DD MMMM YYYY'),
     time: [fTime(activity?.started_at), fTime(activity?.ended_at)].join(' - '),
     diff: formatSecondToTime(dayjs(activity?.ended_at).diff(activity?.started_at, 'second')),
+
+    tmtName: activityUser?.creator?.user_id !== user?.id ? '' : activityUser?.name,
   };
 }

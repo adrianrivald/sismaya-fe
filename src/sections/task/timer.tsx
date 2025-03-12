@@ -35,7 +35,7 @@ export function TimerActionButton({
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
   const isDisabled = defaultState === 'stopped';
-
+  console.log('data', name);
   const btnStart = (
     <IconButton
       aria-label="start"
@@ -43,31 +43,37 @@ export function TimerActionButton({
       disabled={isDisabled}
       sx={{ bgcolor: 'success.main', color: 'white' }}
       onClick={() => {
-        if (state === 'idle') {
-          if (!name) {
-            setErrorTask?.(true);
-            return;
-          }
-
-          setErrorTask?.(false);
-          mutation.mutate({
-            action: 'start',
-            taskId,
-            activity: activity || '',
-            request: request || '',
-            timer: lastTimer,
-            name,
-          });
-        } else {
-          store.send({
-            type: 'idle',
-            taskId,
-            activity: activity || '',
-            request: request || '',
-            timer: lastTimer,
-            name,
-          });
+        if (!isCurrentTimer) {
+          mutation.mutate({ action: 'pause', taskId: storeTaskId });
+          store.send({ type: 'stop' });
         }
+        setTimeout(() => {
+          if (state === 'idle') {
+            if (!name) {
+              setErrorTask?.(true);
+              return;
+            }
+
+            setErrorTask?.(false);
+            mutation.mutate({
+              action: 'start',
+              taskId,
+              activity: activity || '',
+              request: request || '',
+              timer: lastTimer,
+              name,
+            });
+          } else {
+            store.send({
+              type: 'idle',
+              taskId,
+              activity: activity || '',
+              request: request || '',
+              timer: lastTimer,
+              name,
+            });
+          }
+        }, 500);
       }}
     >
       <Iconify icon="solar:play-bold" />
