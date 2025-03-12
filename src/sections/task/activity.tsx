@@ -78,8 +78,6 @@ export function CardActivity({
   const requestName = isCurrentTimer ? store.request : request;
   const taskName = isCurrentTimer ? store.activity : task;
 
-  console.log('1234', store.taskId, taskId);
-
   return (
     <Paper component={Stack} spacing={2} elevation={3} p={3} width="50%">
       <Box display="flex" justifyContent="space-between" alignItems="center">
