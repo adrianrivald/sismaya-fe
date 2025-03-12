@@ -402,6 +402,7 @@ export function EditAccessControlUserGroupView() {
                                   ?.map((item) => item?.id)
                                   ?.every((item) => selectedPermissions?.includes(item))}
                                 onChange={onCheckAllGeneral}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
                               />{' '}
                               General
                             </Box>
@@ -455,6 +456,7 @@ export function EditAccessControlUserGroupView() {
                                     ?.includes(false)
                                 }
                                 onChange={onCheckAllManagement}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
                               />{' '}
                               Management
                             </Box>
@@ -556,6 +558,7 @@ export function EditAccessControlUserGroupView() {
                                     ?.includes(false)
                                 }
                                 onChange={onCheckAllSettings}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
                               />{' '}
                               Settings
                             </Box>
