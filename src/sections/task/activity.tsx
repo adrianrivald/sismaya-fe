@@ -78,10 +78,12 @@ export function CardActivity({
   const requestName = isCurrentTimer ? store.request : request;
   const taskName = isCurrentTimer ? store.activity : task;
 
+  console.log('dataa', lastActivity?.state);
+
   return (
     <Paper component={Stack} spacing={2} elevation={3} p={3} width="50%">
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6">Activities </Typography>
+        <Typography variant="h6">Activities</Typography>
         {lastActivity?.data && (
           <Button size="small" variant="text" color="inherit" component={Link} to="activities">
             View all
@@ -103,18 +105,19 @@ export function CardActivity({
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {store?.name || lastActivity?.timerName}
+          {store?.name || lastActivity?.tmtName}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <TimerCountdown size="large" taskId={taskId} lastTimer={lastTimer} />
+
           <TimerActionButton
             activity={taskName}
             request={requestName}
             taskId={taskId}
             state={lastActivity?.state}
             lastTimer={lastTimer}
-            name={lastActivity?.name}
+            name={lastActivity?.tmtName}
           />
         </Box>
       </Stack>

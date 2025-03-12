@@ -9,13 +9,13 @@ export default function FloatingTimer() {
   const store = useTimerStore();
 
   const lastActivity = useLastActivity({ taskId: store?.taskId });
-  const [nameTask, setNameTask] = useState(store?.name || lastActivity?.timerName || '');
+  const [nameTask, setNameTask] = useState(store?.name || lastActivity?.tmtName || '');
   const [errorTask, setErrorTask] = useState(false);
   const { dragInfo, getDragableProps } = useDragable();
 
   useEffect(() => {
-    setNameTask(store?.name || lastActivity?.timerName || '');
-  }, [lastActivity, store, timer]);
+    setNameTask(lastActivity?.tmtName || '');
+  }, [lastActivity]);
 
   if (store?.taskId === 0 || store?.state === 'stopped') {
     return null;
@@ -71,7 +71,7 @@ export default function FloatingTimer() {
             >
               {store.request}
             </Typography>
-            {lastActivity?.timerName || store.state === 'running' || store.state === 'paused' ? (
+            {lastActivity?.tmtName || store.state === 'running' || store.state === 'paused' ? (
               <div>
                 <Typography color="rgba(145, 158, 171, 1)" sx={{ fontSize: '13px' }}>
                   {nameTask}
