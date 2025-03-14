@@ -130,7 +130,7 @@ export function CardActivity({
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {lastActivity?.tmtName || store?.name}
+          {lastActivity?.tmtName || store.taskId === taskId ? store?.name : ''}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
