@@ -42,24 +42,24 @@ export function TimerActionButton({
   const { state, taskId: storeTaskId } = useTimerStore();
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
-  const isDisabled = defaultState === 'stopped';
+  const isDisabled = defaultState === 'stopped' || step === 'completed';
+
   const changeState = async () => {
-    if (assigneeCompanyId) {
-      const response = await http(`/tasks/${taskId}`, {
-        params: {
-          assignee_company_id: assigneeCompanyId,
-        },
+    const response = await http(`/tasks/${taskId}`, {
+      params: {
+        assignee_company_id: assigneeCompanyId,
+      },
+    });
+    if (response?.data?.step === 'to-do') {
+      http(`/tasks/${taskId}`, {
+        method: 'PUT',
+        data: { step: 'in-progress' },
+      }).then(() => {
+        refetch?.();
       });
-      if (response?.data?.step === 'to-do') {
-        http(`/tasks/${taskId}`, {
-          method: 'PUT',
-          data: { step: 'in-progress' },
-        }).then(() => {
-          refetch?.();
-        });
-      }
     }
   };
+
   const btnStart = (
     <IconButton
       aria-label="start"
