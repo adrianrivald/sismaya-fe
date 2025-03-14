@@ -66,11 +66,17 @@ export function CardActivity({
   taskName: task,
   requestName: request,
   lastTimer,
+  step,
+  refetch,
+  assigneeCompanyId,
 }: {
   taskId: number;
   requestName: string;
   taskName: string;
   lastTimer: number;
+  step?: string;
+  refetch?: any;
+  assigneeCompanyId?: number;
 }) {
   const lastActivity = useLastActivity({ taskId });
   const actionStore = useTimerActionStore();
@@ -130,7 +136,7 @@ export function CardActivity({
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {lastActivity?.tmtName || store.taskId === taskId ? store?.name : ''}
+          {lastActivity?.tmtName ?? (store.taskId === taskId ? store?.name : '')}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -143,6 +149,9 @@ export function CardActivity({
             state={lastActivity?.state}
             lastTimer={lastTimer}
             name={lastActivity?.tmtName}
+            step={step}
+            refetch={refetch}
+            assigneeCompanyId={assigneeCompanyId}
           />
         </Box>
       </Stack>
