@@ -34,7 +34,6 @@ export default function FloatingTimer() {
   return (
     <Portal container={document.body}>
       <Box
-        {...getDragableProps()}
         bgcolor="white"
         position="fixed"
         bottom="1rem"
@@ -52,6 +51,7 @@ export default function FloatingTimer() {
         }}
       >
         <Box
+          {...getDragableProps()}
           sx={{
             width: '1rem',
             cursor: 'move',
@@ -73,9 +73,8 @@ export default function FloatingTimer() {
           alignItems="center"
           width="100%"
           px={1.5}
-          py={3.5}
         >
-          <Stack spacing={0.5} direction="column" flexGrow={1}>
+          <Stack pt={3.5} pb={2} flex={1} {...getDragableProps()} direction="column" flexGrow={1}>
             <Typography
               color="rgba(99, 115, 129, 1)"
               sx={{ fontWeight: 500, fontSize: '14px', lineHeight: '20px' }}
@@ -114,47 +113,47 @@ export default function FloatingTimer() {
               </Stack>
             )}
           </Stack>
-
-          <Stack spacing={1.5} direction="row" alignItems="center">
-            <TimerCountdown size="small" />
-            <TimerActionButton
-              taskId={store.taskId}
-              name={nameTask}
-              setErrorTask={setErrorTask}
-              errorTask={errorTask}
-            />
-          </Stack>
         </Box>
-
-        <Button
-          onClick={() => {
-            if (store.state === 'running') {
-              actionStore.send({
-                type: 'background',
-                taskId: store.taskId,
-                activity: store.activity,
-                request: store.request,
-                timer: store.timer,
-                name: nameTask,
-              });
-            } else if (store.state === 'paused' || store.state === 'idle') {
-              actionStore.send({
-                type: 'idlePaused',
-                taskId: store.taskId,
-                activity: store.activity,
-                request: store.request,
-                timer: store.timer,
-                name: nameTask,
-              });
-            } else {
-              actionStore.send({
-                type: 'background',
-              });
-            }
-          }}
-          startIcon={<Iconify icon="material-symbols:close" />}
-          sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mr: 1, mb: 2 }}
-        />
+        <Stack spacing={1.5} direction="row" alignItems="center" mt={2}>
+          <TimerCountdown size="small" />
+          <TimerActionButton
+            taskId={store.taskId}
+            name={nameTask}
+            setErrorTask={setErrorTask}
+            errorTask={errorTask}
+          />
+        </Stack>
+        {store.state !== 'running' && (
+          <Button
+            onClick={() => {
+              if (store.state === 'running') {
+                actionStore.send({
+                  type: 'background',
+                  taskId: store.taskId,
+                  activity: store.activity,
+                  request: store.request,
+                  timer: store.timer,
+                  name: nameTask,
+                });
+              } else if (store.state === 'paused' || store.state === 'idle') {
+                actionStore.send({
+                  type: 'idlePaused',
+                  taskId: store.taskId,
+                  activity: store.activity,
+                  request: store.request,
+                  timer: store.timer,
+                  name: nameTask,
+                });
+              } else {
+                actionStore.send({
+                  type: 'background',
+                });
+              }
+            }}
+            startIcon={<Iconify icon="material-symbols:close" />}
+            sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mr: 1, mb: 2 }}
+          />
+        )}
       </Box>
     </Portal>
   );

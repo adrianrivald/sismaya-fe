@@ -294,6 +294,9 @@ export default function TaskDetailPage() {
             requestName={request.name}
             taskName={task.name}
             lastTimer={task.lastTimer}
+            step={task.status}
+            refetch={refetch}
+            assigneeCompanyId={assigneeCompanyId}
           />
 
           <AttachmentModal

@@ -8,6 +8,8 @@ import {
   type TimerState,
   useTimerActionStore,
 } from 'src/services/task/timer';
+import { useKanbanChangeStatus } from 'src/services/task/task-management';
+import { http } from 'src/utils/http';
 
 type TimerActionButtonProps = {
   activity?: string;
@@ -18,6 +20,9 @@ type TimerActionButtonProps = {
   name?: string;
   setErrorTask?: (args: boolean) => void;
   errorTask?: boolean;
+  step?: any;
+  refetch?: any;
+  assigneeCompanyId?: number;
 };
 
 export function TimerActionButton({
@@ -29,26 +34,46 @@ export function TimerActionButton({
   name,
   setErrorTask,
   errorTask,
+  step,
+  refetch,
+  assigneeCompanyId,
 }: TimerActionButtonProps) {
   const mutation = useTimerAction();
   const { state, taskId: storeTaskId } = useTimerStore();
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
   const isDisabled = defaultState === 'stopped';
-
+  const changeState = async () => {
+    if (assigneeCompanyId) {
+      const response = await http(`/tasks/${taskId}`, {
+        params: {
+          assignee_company_id: assigneeCompanyId,
+        },
+      });
+      if (response?.data?.step === 'to-do') {
+        http(`/tasks/${taskId}`, {
+          method: 'PUT',
+          data: { step: 'in-progress' },
+        }).then(() => {
+          refetch?.();
+        });
+      }
+    }
+  };
   const btnStart = (
     <IconButton
       aria-label="start"
       size="small"
       disabled={isDisabled}
       sx={{ bgcolor: 'success.main', color: 'white' }}
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         if (!isCurrentTimer) {
           mutation.mutate({ action: 'pause', taskId: storeTaskId });
           store.send({ type: 'stop' });
         }
         setTimeout(() => {
-          if (state === 'idle') {
+          if (state === 'idle' || state === 'paused') {
             if (!name) {
               setErrorTask?.(true);
               return;
@@ -63,6 +88,7 @@ export function TimerActionButton({
               timer: lastTimer,
               name,
             });
+            changeState();
           } else {
             store.send({
               type: 'idle',
@@ -86,7 +112,10 @@ export function TimerActionButton({
       size="small"
       disabled={isDisabled}
       sx={{ bgcolor: 'warning.main', color: 'white' }}
-      onClick={() => mutation.mutate({ action: 'pause', taskId })}
+      onClick={(e) => {
+        e.stopPropagation();
+        mutation.mutate({ action: 'pause', taskId });
+      }}
     >
       <Iconify icon="solar:pause-bold" />
     </IconButton>
@@ -107,7 +136,9 @@ export function TimerActionButton({
 
       <Dialog.AlertConfirmation
         message="Are you sure you want to stop the timer? This action cannot be undone."
-        onConfirm={() => mutation.mutate({ action: 'stop', taskId })}
+        onConfirm={() => {
+          mutation.mutate({ action: 'stop', taskId });
+        }}
       />
     </Dialog.Root>
   );
