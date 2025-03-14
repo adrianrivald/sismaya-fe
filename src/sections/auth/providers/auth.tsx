@@ -5,7 +5,7 @@ import { loginUser } from 'src/services/auth/login';
 import type { User } from 'src/services/master-data/user/types';
 import { createContext } from 'src/utils/create.context';
 import { createStore } from '@xstate/store';
-import { useTimerAction, useTimerStore } from 'src/services/task/timer';
+import { useTimerAction, useTimerActionStore, useTimerStore } from 'src/services/task/timer';
 import * as sessionService from '../session/session';
 
 interface AuthContextValue {
@@ -42,6 +42,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
   const [accessToken, setAccessToken] = React.useState<string | null>(() =>
     sessionService.getSession()
   );
+  const actionStore = useTimerActionStore();
   const mutation = useTimerAction();
   const store = useTimerStore();
   const [userInfo, setUserInfo] = React.useState<string | null>(() => sessionService.getUser());
@@ -68,16 +69,29 @@ export function AuthProvider(props: React.PropsWithChildren) {
   }
 
   async function logout() {
-    if (store?.taskId) {
-      mutation.mutate({ action: 'pause', taskId: store?.taskId });
-      window.localStorage.removeItem('task-timer');
-    }
+    try {
+      // Handle timer pause if active
+      if (store?.taskId) {
+        await mutation.mutateAsync({ action: 'pause', taskId: store.taskId });
+        actionStore.send({ type: 'reset' });
+      }
 
-    sessionService.flushSession();
-    setAccessToken(null);
-    setAccessToken(null);
-    permissionStore.send({ type: 'flushPermissions' });
-    navigate('/');
+      // Ensure session flush completes
+      await sessionService.flushSession();
+
+      window.localStorage.removeItem('task-timer');
+
+      permissionStore.send({ type: 'flushPermissions' });
+      setAccessToken(null);
+      navigate('/');
+    } catch (error) {
+      await sessionService.flushSession();
+      actionStore.send({ type: 'reset' });
+      window.localStorage.removeItem('task-timer');
+      permissionStore.send({ type: 'flushPermissions' });
+      setAccessToken(null);
+      navigate('/');
+    }
   }
 
   React.useEffect(() => {
