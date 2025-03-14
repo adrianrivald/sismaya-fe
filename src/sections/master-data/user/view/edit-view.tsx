@@ -119,9 +119,6 @@ function EditForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  console.log(userCompanies, 'defaultValues?.internal_id');
-  console.log(internalCompanies, 'defaultValues?.internalCompanies');
-
   useEffect(() => {
     if (divisions?.length) {
       setValue('department_id', defaultValues?.department_id);
