@@ -7,6 +7,8 @@ import {
   useTimerActionStore,
 } from 'src/services/task/timer';
 import { Iconify } from 'src/components/iconify';
+import { useParams } from 'react-router-dom';
+import { useAssigneeCompanyId, useTaskDetail } from 'src/services/task/task-management';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 export default function FloatingTimer() {
@@ -114,7 +116,7 @@ export default function FloatingTimer() {
             )}
           </Stack>
         </Box>
-        <Stack spacing={1.5} direction="row" alignItems="center" mt={2}>
+        <Stack spacing={1.5} direction="row" alignItems="center" mt={2} mr={2}>
           <TimerCountdown size="small" />
           <TimerActionButton
             taskId={store.taskId}
