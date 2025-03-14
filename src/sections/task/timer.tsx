@@ -35,14 +35,15 @@ export function TimerActionButton({
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
   const isDisabled = defaultState === 'stopped';
-  console.log('data', name);
+
   const btnStart = (
     <IconButton
       aria-label="start"
       size="small"
       disabled={isDisabled}
       sx={{ bgcolor: 'success.main', color: 'white' }}
-      onClick={() => {
+      onClick={(e) => {
+        e.preventDefault();
         if (!isCurrentTimer) {
           mutation.mutate({ action: 'pause', taskId: storeTaskId });
           store.send({ type: 'stop' });
@@ -116,7 +117,7 @@ export function TimerActionButton({
     return btnStart;
   }
 
-  if (state === 'running') {
+  if (state === 'running' || state === 'background') {
     return (
       <Stack direction="row" spacing={1}>
         {btnPause}

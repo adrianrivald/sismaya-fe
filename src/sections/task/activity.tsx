@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Stack, Typography, Paper, Button, TextField } from '@mui/material';
-import { useTimerStore, useLastActivity } from 'src/services/task/timer';
+import { useTimerStore, useLastActivity, useTimerActionStore } from 'src/services/task/timer';
+import { SvgColor } from 'src/components/svg-color';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 function LastActivity({ activity }: { activity: ReturnType<typeof useLastActivity> }) {
@@ -72,13 +73,11 @@ export function CardActivity({
   lastTimer: number;
 }) {
   const lastActivity = useLastActivity({ taskId });
-
+  const actionStore = useTimerActionStore();
   const store = useTimerStore();
   const isCurrentTimer = store.taskId === taskId;
   const requestName = isCurrentTimer ? store.request : request;
   const taskName = isCurrentTimer ? store.activity : task;
-
-  console.log('dataa', lastActivity?.state);
 
   return (
     <Paper component={Stack} spacing={2} elevation={3} p={3} width="50%">
@@ -102,10 +101,33 @@ export function CardActivity({
           <Typography color="rgba(145, 158, 171, 1)" variant="subtitle2">
             {requestName}
           </Typography>
+          {isCurrentTimer && store.state !== 'running' && store.state !== 'idle' && (
+            <Button
+              onClick={() => {
+                if (store.state !== 'running' && store.state !== 'idle') {
+                  actionStore.send({
+                    type: 'start',
+                    taskId: store.taskId,
+                    activity: store.activity,
+                    request: store.request,
+                    timer: store.timer,
+                    name: store.name,
+                  });
+                }
+              }}
+              startIcon={
+                <SvgColor
+                  sx={{ width: 20, height: 20, bgcolor: 'grey.500' }}
+                  src="/assets/icons/minimize_square.svg"
+                />
+              }
+              sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mb: 2 }}
+            />
+          )}
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {lastActivity?.tmtName}
+          {lastActivity?.tmtName || store?.name}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
