@@ -101,29 +101,32 @@ export function CardActivity({
           <Typography color="rgba(145, 158, 171, 1)" variant="subtitle2">
             {requestName}
           </Typography>
-          {isCurrentTimer && store.state !== 'running' && store.state !== 'idle' && (
-            <Button
-              onClick={() => {
-                if (store.state !== 'running' && store.state !== 'idle') {
-                  actionStore.send({
-                    type: 'start',
-                    taskId: store.taskId,
-                    activity: store.activity,
-                    request: store.request,
-                    timer: store.timer,
-                    name: store.name,
-                  });
+          {isCurrentTimer &&
+            store.state !== 'running' &&
+            store.state !== 'idle' &&
+            store.state !== 'idlePaused' && (
+              <Button
+                onClick={() => {
+                  if (store.state !== 'running' && store.state !== 'idle') {
+                    actionStore.send({
+                      type: 'start',
+                      taskId: store.taskId,
+                      activity: store.activity,
+                      request: store.request,
+                      timer: store.timer,
+                      name: store.name,
+                    });
+                  }
+                }}
+                startIcon={
+                  <SvgColor
+                    sx={{ width: 20, height: 20, bgcolor: 'grey.500' }}
+                    src="/assets/icons/minimize_square.svg"
+                  />
                 }
-              }}
-              startIcon={
-                <SvgColor
-                  sx={{ width: 20, height: 20, bgcolor: 'grey.500' }}
-                  src="/assets/icons/minimize_square.svg"
-                />
-              }
-              sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mb: 2 }}
-            />
-          )}
+                sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mb: 2 }}
+              />
+            )}
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">

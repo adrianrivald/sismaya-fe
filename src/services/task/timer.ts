@@ -9,7 +9,14 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 
 type TimerAction = 'start' | 'pause' | 'stop';
-export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '' | 'background';
+export type TimerState =
+  | 'idle'
+  | 'running'
+  | 'paused'
+  | 'stopped'
+  | ''
+  | 'background'
+  | 'idlePaused';
 
 type EventStart = Omit<typeof initialStore, 'state'>;
 
@@ -84,6 +91,17 @@ const store = createStore({
       const getItem = (key: keyof typeof event) => event[key] || context[key];
       return {
         state: 'idle' as TimerState,
+        activity: getItem('activity'),
+        request: getItem('request'),
+        taskId: getItem('taskId'),
+        timer: getItem('timer'),
+        name: getItem('name'),
+      };
+    },
+    idlePaused: (context: { [x: string]: any }, event: Partial<EventStart>) => {
+      const getItem = (key: keyof typeof event) => event[key] || context[key];
+      return {
+        state: 'idlePaused' as TimerState,
         activity: getItem('activity'),
         request: getItem('request'),
         taskId: getItem('taskId'),

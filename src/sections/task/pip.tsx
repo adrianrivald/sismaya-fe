@@ -23,7 +23,12 @@ export default function FloatingTimer() {
     setNameTask(lastActivity?.tmtName || store?.name);
   }, [lastActivity?.tmtName, store?.name]);
 
-  if (store?.taskId === 0 || store?.state === 'stopped' || store?.state === 'background') {
+  if (
+    store?.taskId === 0 ||
+    store?.state === 'stopped' ||
+    store?.state === 'background' ||
+    store.state === 'idlePaused'
+  ) {
     return null;
   }
   return (
@@ -120,11 +125,21 @@ export default function FloatingTimer() {
             />
           </Stack>
         </Box>
+
         <Button
           onClick={() => {
             if (store.state === 'running') {
               actionStore.send({
                 type: 'background',
+                taskId: store.taskId,
+                activity: store.activity,
+                request: store.request,
+                timer: store.timer,
+                name: nameTask,
+              });
+            } else if (store.state === 'paused' || store.state === 'idle') {
+              actionStore.send({
+                type: 'idlePaused',
                 taskId: store.taskId,
                 activity: store.activity,
                 request: store.request,

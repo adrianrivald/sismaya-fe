@@ -113,7 +113,12 @@ export function TimerActionButton({
     </Dialog.Root>
   );
 
-  if (state === 'idle' || state === 'stopped' || isCurrentTimer === false) {
+  if (
+    state === 'idle' ||
+    state === 'idlePaused' ||
+    state === 'stopped' ||
+    isCurrentTimer === false
+  ) {
     return btnStart;
   }
 
