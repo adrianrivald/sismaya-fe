@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Box, Stack, Typography, Portal, TextField } from '@mui/material';
-import { useTimerStore, useCheckTimer, useLastActivity } from 'src/services/task/timer';
+import { Box, Stack, Typography, Portal, TextField, Button } from '@mui/material';
+import {
+  useTimerStore,
+  useCheckTimer,
+  useLastActivity,
+  useTimerActionStore,
+} from 'src/services/task/timer';
 import { Iconify } from 'src/components/iconify';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 export default function FloatingTimer() {
   const timer = useCheckTimer();
   const store = useTimerStore();
+  const actionStore = useTimerActionStore();
 
   const lastActivity = useLastActivity({ taskId: store?.taskId });
   const [nameTask, setNameTask] = useState(store?.name || lastActivity?.tmtName || '');
@@ -14,15 +20,16 @@ export default function FloatingTimer() {
   const { dragInfo, getDragableProps } = useDragable();
 
   useEffect(() => {
-    setNameTask(lastActivity?.tmtName || '');
-  }, [lastActivity]);
+    setNameTask(lastActivity?.tmtName || store?.name);
+  }, [lastActivity?.tmtName, store?.name]);
 
-  if (store?.taskId === 0 || store?.state === 'stopped') {
+  if (store?.taskId === 0 || store?.state === 'stopped' || store?.state === 'background') {
     return null;
   }
   return (
     <Portal container={document.body}>
       <Box
+        {...getDragableProps()}
         bgcolor="white"
         position="fixed"
         bottom="1rem"
@@ -40,7 +47,6 @@ export default function FloatingTimer() {
         }}
       >
         <Box
-          {...getDragableProps()}
           sx={{
             width: '1rem',
             cursor: 'move',
@@ -62,7 +68,7 @@ export default function FloatingTimer() {
           alignItems="center"
           width="100%"
           px={1.5}
-          py={2}
+          py={3.5}
         >
           <Stack spacing={0.5} direction="column" flexGrow={1}>
             <Typography
@@ -114,6 +120,26 @@ export default function FloatingTimer() {
             />
           </Stack>
         </Box>
+        <Button
+          onClick={() => {
+            if (store.state === 'running') {
+              actionStore.send({
+                type: 'background',
+                taskId: store.taskId,
+                activity: store.activity,
+                request: store.request,
+                timer: store.timer,
+                name: nameTask,
+              });
+            } else {
+              actionStore.send({
+                type: 'background',
+              });
+            }
+          }}
+          startIcon={<Iconify icon="material-symbols:close" />}
+          sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mr: 1, mb: 2 }}
+        />
       </Box>
     </Portal>
   );

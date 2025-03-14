@@ -9,7 +9,7 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import { fTime, fDate, formatSecondToTime } from 'src/utils/format-time';
 
 type TimerAction = 'start' | 'pause' | 'stop';
-export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '';
+export type TimerState = 'idle' | 'running' | 'paused' | 'stopped' | '' | 'background';
 
 type EventStart = Omit<typeof initialStore, 'state'>;
 
@@ -36,6 +36,10 @@ const initialStore = {
 const store = createStore({
   context: initialStore,
   on: {
+    reset: () => {
+      window.localStorage.removeItem(storageKey);
+      return initialStore;
+    },
     transition: (_context: any, event: { nextState: TimerState }) => {
       // Remove local storage when timer is idle or stopped
       if (event.nextState === 'idle' || event.nextState === 'stopped') {
@@ -87,6 +91,18 @@ const store = createStore({
         name: getItem('name'),
       };
     },
+    background: (context: { [x: string]: any }, event: Partial<EventStart>) => {
+      const getItem = (key: keyof typeof event) => event[key] || context[key];
+
+      return {
+        state: 'background' as TimerState,
+        activity: getItem('activity'),
+        request: getItem('request'),
+        taskId: getItem('taskId'),
+        timer: getItem('timer'),
+        name: getItem('name'),
+      };
+    },
   },
 });
 
@@ -105,7 +121,7 @@ export function useTimer(taskId?: number, lastTimer = 0) {
   const isPip = !taskId;
   const isCurrentTimer = isPip ? true : storeTaskId === taskId;
 
-  const isCounting = state === 'running'; // && isCurrentTimer;
+  const isCounting = state === 'running' || state === 'background'; // && isCurrentTimer;
   useEffect(() => {
     if (isCounting === false) {
       return;
@@ -240,9 +256,9 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
   else if (activityUser?.ended_at !== null) state = 'stopped';
   else state = 'idle';
 
-  if (activityUser?.creator?.user_id !== user?.id) state = 'idle';
-
-  console.log('dataa', activityUser);
+  if (activityUser?.creator?.user_id !== user?.id) {
+    state = 'idle';
+  }
 
   return {
     state,
@@ -252,6 +268,10 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
     time: [fTime(activity?.started_at), fTime(activity?.ended_at)].join(' - '),
     diff: formatSecondToTime(dayjs(activity?.ended_at).diff(activity?.started_at, 'second')),
 
-    tmtName: activityUser?.creator?.user_id !== user?.id ? '' : activityUser?.name,
+    tmtName: activityUser
+      ? activityUser?.creator?.user_id !== user?.id
+        ? ''
+        : activityUser?.name
+      : '',
   };
 }
