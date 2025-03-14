@@ -65,6 +65,7 @@ const columns = [
   columnHelper.accessor('name', {
     header: 'Activity',
   }),
+
   columnHelper.accessor('started_at', {
     header: 'Start Time',
     cell: (info) => {
@@ -85,6 +86,18 @@ const columns = [
       return (
         <div data-testid="td" key={info.getValue()}>
           {fDate(created_at, 'HH:mm:ss')}
+        </div>
+      );
+    },
+  }),
+  columnHelper.accessor('is_pause', {
+    header: 'Type',
+    cell: (info) => {
+      const is_pause = info.getValue();
+
+      return (
+        <div data-testid="td" key={info.getValue()}>
+          {is_pause ? 'Paused' : 'Stopped'}
         </div>
       );
     },
