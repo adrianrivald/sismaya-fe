@@ -105,7 +105,7 @@ export function CardActivity({
         </Box>
 
         <Typography color="rgba(145, 158, 171, 1)" variant="subtitle1">
-          {store?.name || lastActivity?.tmtName}
+          {lastActivity?.tmtName}
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">

@@ -37,8 +37,14 @@ import { AttachmentModal } from './attachment-modal';
 export default function TaskDetailPage() {
   const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '' });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: 0 });
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [menuState, setMenuState] = useState<{
+    anchorEl: null | HTMLElement;
+    attachmentId: number | null;
+  }>({
+    anchorEl: null,
+    attachmentId: null,
+  });
+  const open = Boolean(menuState.anchorEl);
   const { taskId, vendor } = useParams();
   const assigneeCompanyId = useAssigneeCompanyId();
   const { data, error, refetch } = useTaskDetail(Number(taskId), assigneeCompanyId);
@@ -50,11 +56,12 @@ export default function TaskDetailPage() {
   const { task, request } = data;
   const title = task.name;
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLElement>, id: number) => {
+    setMenuState({ anchorEl: event.currentTarget, attachmentId: id });
   };
+
   const handleClose = () => {
-    setAnchorEl(null);
+    setMenuState({ anchorEl: null, attachmentId: null });
   };
 
   const removeAttachment = async (id: number) =>
@@ -209,7 +216,7 @@ export default function TaskDetailPage() {
                     gap={3}
                   >
                     <Box
-                      sx={{ cursor: 'pointer', flex: 1 }}
+                      sx={{ cursor: 'pointer', flex: 1, width: '80%' }}
                       onClick={() => {
                         setAttachmentModal({ isOpen: true, url: attachment.url });
                         // downloadFile(attachment.url);
@@ -233,16 +240,16 @@ export default function TaskDetailPage() {
                       sx={{ p: 0, cursor: 'pointer' }}
                       onClick={(e) => {
                         e.preventDefault();
-                        handleClick(e);
+                        handleClick(e, attachment.id);
                       }}
                     >
                       <Icon icon="material-symbols:more-vert" width="24" height="24" />
                     </Box>
                     <Menu
-                      id="demo-positioned-menu"
+                      id={`menu-${attachment.id}`}
                       aria-labelledby="demo-positioned-button"
-                      anchorEl={anchorEl}
-                      open={open}
+                      anchorEl={menuState.anchorEl}
+                      open={Boolean(menuState.anchorEl) && menuState.attachmentId === attachment.id}
                       onClose={handleClose}
                       anchorOrigin={{
                         vertical: 'bottom',
