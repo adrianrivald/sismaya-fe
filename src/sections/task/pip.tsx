@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Box, Stack, Typography, Portal, TextField } from '@mui/material';
-import { useTimerStore, useCheckTimer, useLastActivity } from 'src/services/task/timer';
+import { Box, Stack, Typography, Portal, TextField, Button } from '@mui/material';
+import {
+  useTimerStore,
+  useCheckTimer,
+  useLastActivity,
+  useTimerActionStore,
+} from 'src/services/task/timer';
 import { Iconify } from 'src/components/iconify';
+import { useParams } from 'react-router-dom';
+import { useAssigneeCompanyId, useTaskDetail } from 'src/services/task/task-management';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 export default function FloatingTimer() {
   const timer = useCheckTimer();
   const store = useTimerStore();
+  const actionStore = useTimerActionStore();
 
   const lastActivity = useLastActivity({ taskId: store?.taskId });
   const [nameTask, setNameTask] = useState(store?.name || lastActivity?.tmtName || '');
@@ -14,10 +22,15 @@ export default function FloatingTimer() {
   const { dragInfo, getDragableProps } = useDragable();
 
   useEffect(() => {
-    setNameTask(lastActivity?.tmtName || '');
-  }, [lastActivity]);
+    setNameTask(lastActivity?.tmtName || store?.name);
+  }, [lastActivity?.tmtName, store?.name]);
 
-  if (store?.taskId === 0 || store?.state === 'stopped') {
+  if (
+    store?.taskId === 0 ||
+    store?.state === 'stopped' ||
+    store?.state === 'background' ||
+    store.state === 'idlePaused'
+  ) {
     return null;
   }
   return (
@@ -62,9 +75,8 @@ export default function FloatingTimer() {
           alignItems="center"
           width="100%"
           px={1.5}
-          py={2}
         >
-          <Stack spacing={0.5} direction="column" flexGrow={1}>
+          <Stack pt={3.5} pb={2} flex={1} {...getDragableProps()} direction="column" flexGrow={1}>
             <Typography
               color="rgba(99, 115, 129, 1)"
               sx={{ fontWeight: 500, fontSize: '14px', lineHeight: '20px' }}
@@ -103,17 +115,47 @@ export default function FloatingTimer() {
               </Stack>
             )}
           </Stack>
-
-          <Stack spacing={1.5} direction="row" alignItems="center">
-            <TimerCountdown size="small" />
-            <TimerActionButton
-              taskId={store.taskId}
-              name={nameTask}
-              setErrorTask={setErrorTask}
-              errorTask={errorTask}
-            />
-          </Stack>
         </Box>
+        <Stack spacing={1.5} direction="row" alignItems="center" mt={2} mr={2}>
+          <TimerCountdown size="small" />
+          <TimerActionButton
+            taskId={store.taskId}
+            name={nameTask}
+            setErrorTask={setErrorTask}
+            errorTask={errorTask}
+          />
+        </Stack>
+        {store.state !== 'running' && (
+          <Button
+            onClick={() => {
+              if (store.state === 'running') {
+                actionStore.send({
+                  type: 'background',
+                  taskId: store.taskId,
+                  activity: store.activity,
+                  request: store.request,
+                  timer: store.timer,
+                  name: nameTask,
+                });
+              } else if (store.state === 'paused' || store.state === 'idle') {
+                actionStore.send({
+                  type: 'idlePaused',
+                  taskId: store.taskId,
+                  activity: store.activity,
+                  request: store.request,
+                  timer: store.timer,
+                  name: nameTask,
+                });
+              } else {
+                actionStore.send({
+                  type: 'background',
+                });
+              }
+            }}
+            startIcon={<Iconify icon="material-symbols:close" />}
+            sx={{ height: 10, width: 10, p: 0, minWidth: 5, mt: 1, mr: 1, mb: 2 }}
+          />
+        )}
       </Box>
     </Portal>
   );
