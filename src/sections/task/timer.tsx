@@ -42,8 +42,7 @@ export function TimerActionButton({
       size="small"
       disabled={isDisabled}
       sx={{ bgcolor: 'success.main', color: 'white' }}
-      onClick={(e) => {
-        e.preventDefault();
+      onClick={() => {
         if (!isCurrentTimer) {
           mutation.mutate({ action: 'pause', taskId: storeTaskId });
           store.send({ type: 'stop' });
