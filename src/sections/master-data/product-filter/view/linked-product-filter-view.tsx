@@ -3,10 +3,10 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
 import { useCompanyList } from 'src/services/master-data/company/use-company-list';
-import { useDeleteCompanyById } from 'src/services/master-data/company';
+import { useCompanyRelation, useDeleteCompanyById } from 'src/services/master-data/company';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DataTable } from 'src/components/table/data-tables';
 import type { CellContext } from '@tanstack/react-table';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -91,6 +91,9 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
 // ];
 
 export function ProductFilterLinkedView() {
+  const { id } = useParams();
+  // const { data: companyRelation } = useCompanyRelation({ client_company_id: id });
+  // console.log(companyRelation, 'companyRelation');
   const { getDataTableProps } = useCompanyList({}, 'internal');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
@@ -103,8 +106,8 @@ export function ProductFilterLinkedView() {
   };
 
   const popoverFuncs = () => {
-    const handleEdit = (id: number) => {
-      navigate(`${id}/edit`);
+    const handleEdit = (itemId: number) => {
+      navigate(`${itemId}/edit`);
     };
 
     const handleDelete = () => {
@@ -129,11 +132,6 @@ export function ProductFilterLinkedView() {
             <Typography color="grey.500">•</Typography>
             <Typography color="grey.500">Linked Internal Company</Typography>
           </Box>
-        </Box>
-        <Box>
-          <Button onClick={onClickAddNew} variant="contained" color="primary">
-            Create New Internal Company
-          </Button>
         </Box>
       </Box>
 

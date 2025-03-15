@@ -118,11 +118,11 @@ export function ProductFilterView() {
             <Typography color="grey.500">Product Filter</Typography>
           </Box>
         </Box>
-        <Box>
+        {/* <Box>
           <Button onClick={onClickAddNew} variant="contained" color="primary">
             Create New Product Filter
           </Button>
-        </Box>
+        </Box> */}
       </Box>
 
       <Grid container spacing={3}>
