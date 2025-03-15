@@ -105,6 +105,11 @@ export const AccessControlUserGroupEditPage = lazy(
   () => import('src/pages/access-control/user-group/edit')
 );
 
+export const ProductFilterPage = lazy(() => import('src/pages/master-data/product-filter/list'));
+export const ProductFilterLinkedPage = lazy(
+  () => import('src/pages/master-data/product-filter/linked-list')
+);
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
@@ -157,6 +162,9 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'access-control/user-group', element: <AccessControlUserGroupPage /> },
     { path: 'access-control/user-group/create', element: <AccessControlUserGroupCreatePage /> },
     { path: 'access-control/user-group/:id/edit', element: <AccessControlUserGroupEditPage /> },
+
+    { path: 'product-filter', element: <ProductFilterPage /> },
+    { path: 'product-filter/:id', element: <ProductFilterLinkedPage /> },
   ],
 };
 
