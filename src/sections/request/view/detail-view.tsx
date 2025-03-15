@@ -40,6 +40,7 @@ import { StatusBadge } from '../status-badge';
 import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
 import { RejectAction } from '../reject-action';
+import { TextBox } from '@react-pdf-viewer/core';
 
 const priorities = [
   {
@@ -203,6 +204,8 @@ export function RequestDetailView() {
     }
   };
 
+  const names = selectedPic?.slice(0, 5).map((item) => item.name);
+
   return (
     <Box
       p={3}
@@ -301,35 +304,9 @@ export function RequestDetailView() {
                 <TableCell size="small">
                   <Box display="flex" gap={2} alignItems="center">
                     <Box display="flex" alignItems="center">
-                      {selectedPic?.slice(0, 5).map((item, index) => (
-                        <>
-                          <Typography>
-                            {item?.name}
-                            {index !== 4 ? `,${' '}` : null}
-                          </Typography>
-                        </>
-                        // <Box
-                        //   width={36}
-                        //   height={36}
-                        //   sx={{
-                        //     marginRight: '-10px',
-                        //   }}
-                        // >
-                        //   <Box
-                        //     component="img"
-                        //     src={item?.picture !== '' ? item?.picture : '/assets/icons/user.png'}
-                        //     sx={{
-                        //       cursor: 'pointer',
-                        //       borderRadius: 100,
-                        //       width: 36,
-                        //       height: 36,
-                        //       borderColor: 'white',
-                        //       borderWidth: 2,
-                        //       borderStyle: 'solid',
-                        //     }}
-                        //   />
-                        // </Box>
-                      ))}
+                      {names && names.join(', ').length > 50
+                        ? `${names.join(', ').substring(0, 50 - 3)}...`
+                        : names && names.join(', ')}
                     </Box>
                     {userType === 'internal' && requestDetail?.step !== 'done' && (
                       <ModalDialog
@@ -352,7 +329,7 @@ export function RequestDetailView() {
                           ) as JSX.Element & string
                         }
                       >
-                        <Typography sx={{ cursor: 'pointer' }}>See More</Typography>
+                        <Box sx={{ color: 'primary.main', cursor: 'pointer' }}>See All</Box>
                         {/* <Box
                           component="button"
                           type="button"
