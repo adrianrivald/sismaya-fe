@@ -143,7 +143,11 @@ export function EditRequestView() {
       ...(requestDetail?.step === 'to_do' && { start_date: dateValue }),
       ...(requestDetail?.step === 'to_do' && { end_date: endDateValue }),
     };
-    updateRequest(payload);
+    if (endDateValue?.isBefore(dateValue ?? dayjs())) {
+      toast.error('End date must later than start date');
+    } else {
+      updateRequest(payload);
+    }
     // setTimeout(() => {
     //   navigate('/request/test');
     //   setIsLoading(false);
