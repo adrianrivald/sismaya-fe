@@ -14,6 +14,7 @@ import type { Messaging } from 'src/services/messaging/types';
 import { Bounce, toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import ModalDialog from 'src/components/modal/modal';
+import { truncate } from 'src/utils/truncate-text';
 import { useAuth } from '../auth/providers/auth';
 
 const Messenger = React.lazy(() => import('./task/task-activities'));
@@ -155,9 +156,16 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
                         gap={1}
                         alignItems={!isMine ? 'flex-end' : 'flex-start'}
                       >
-                        <Typography color="grey.600" fontSize={12}>
-                          {dayjs(chat?.created_at).format('h:mm a')}
-                        </Typography>
+                        <Box display="flex" gap={2}>
+                          <Typography color="grey.600" fontSize={12}>
+                            {truncate(chat?.creator?.name, 15)} <strong>·</strong>{' '}
+                            {chat?.creator?.role?.name ?? 'Role'} <strong>·</strong>{' '}
+                            {dayjs(chat?.created_at).format('h:mm a')}
+                          </Typography>
+                          {/* <Typography color="grey.600" fontSize={12}>
+                            {dayjs(chat?.created_at).format('h:mm a')}
+                          </Typography> */}
+                        </Box>
 
                         {chat?.content !== '' && (
                           <Box
