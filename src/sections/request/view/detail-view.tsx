@@ -40,7 +40,6 @@ import { StatusBadge } from '../status-badge';
 import { AddAssigneeModal } from '../add-assignee';
 import { ApproveAction } from '../approve-action';
 import { RejectAction } from '../reject-action';
-import { TextBox } from '@react-pdf-viewer/core';
 
 const priorities = [
   {
