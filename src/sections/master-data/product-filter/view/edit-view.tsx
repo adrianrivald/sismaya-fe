@@ -23,23 +23,42 @@ import { SvgColor } from 'src/components/svg-color';
 import { usePermissions, useRoleById, useUpdateRole } from 'src/services/master-data/role';
 import { roleSchema, type RoleDTO } from 'src/services/master-data/role/schemas/role-schema';
 import { useParams } from 'react-router-dom';
-import { useProductFilter } from 'src/services/master-data/product-filter';
+import {
+  useAddProductFilter,
+  useDeleteProductFilterById,
+  useProductFilter,
+} from 'src/services/master-data/product-filter';
 import { useProductByCompanyId } from 'src/services/master-data/company/product/use-product-list';
 
 export function EditProductFilterView() {
-  const { id } = useParams();
-  const { data: products } = useProductByCompanyId(Number(id));
-  const { data: productFilter } = useProductFilter({ company_id: id });
-  console.log(productFilter, 'data product filter');
+  const { id, vendorId } = useParams();
+  const { data: products } = useProductByCompanyId(Number(vendorId));
+  const { data: productFilter } = useProductFilter({
+    company_id: id,
+    internal_company_id: vendorId,
+  });
+  const { mutate: addProductFilter } = useAddProductFilter();
+  const { mutate: deleteProductFilter } = useDeleteProductFilterById();
+  console.log(productFilter, 'productFilter');
   const [isLoading, setIsLoading] = React.useState(false);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const onChangePermission = (permissionId?: string) => {
-    if (permissionId) {
-      if (!selectedPermissions?.includes(permissionId)) {
-        setSelectedPermissions((prev) => [...prev, permissionId]);
+  const [selectedProductFilter, setSelectedProductFilter] = useState<string[]>(
+    productFilter?.map((item: any) => item?.product?.id.toString())
+  );
+  const onChangeProductFilter = (productFilterId?: string) => {
+    if (productFilterId) {
+      if (!selectedProductFilter?.includes(productFilterId)) {
+        setSelectedProductFilter((prev) => [...prev, productFilterId]);
+        addProductFilter({
+          product_id: Number(productFilterId),
+          company_id: Number(id),
+        });
       } else {
-        const newArr = selectedPermissions?.filter((item) => item !== permissionId);
-        setSelectedPermissions(newArr);
+        const newArr = selectedProductFilter?.filter((item) => item !== productFilterId);
+        setSelectedProductFilter(newArr);
+        const productUseId = productFilter?.find(
+          (item: any) => item?.product?.id === Number(productFilterId)
+        ).id;
+        deleteProductFilter(Number(productUseId));
       }
     }
   };
@@ -70,44 +89,6 @@ export function EditProductFilterView() {
     },
   }));
 
-  const generalChilds = [
-    {
-      id: 'dashboard',
-      name: 'Dashboard',
-    },
-    {
-      id: 'report',
-      name: 'Report',
-    },
-  ];
-
-  const managementChilds = [
-    {
-      id: 'request:create',
-      name: 'Create',
-    },
-    {
-      id: 'request:read',
-      name: 'Read',
-    },
-    {
-      id: 'request:update',
-      name: 'Update',
-    },
-    {
-      id: 'request:approve/reject',
-      name: 'Approve/Reject',
-    },
-    {
-      id: 'request:change status',
-      name: 'Change Status',
-    },
-    {
-      id: 'request:assign',
-      name: 'Assign',
-    },
-  ];
-
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -121,7 +102,7 @@ export function EditProductFilterView() {
         <Typography color="grey.500">Product Filter</Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
+      <Grid container spacing={3} sx={{ width: 'auto', mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Form width="100%" onSubmit={handleSubmit} schema={roleSchema}>
           {({ register, control, watch, formState, setValue }) => (
             <>
@@ -135,12 +116,12 @@ export function EditProductFilterView() {
                   borderRadius: 4,
                 }}
               >
-                {managementChilds?.map((item) => (
+                {products?.map((item) => (
                   <Box display="flex" alignItems="center" gap={1}>
                     <Checkbox
                       id={`item-${item?.id}`}
-                      onChange={() => onChangePermission(item?.id)}
-                      checked={selectedPermissions?.includes(item?.id)}
+                      onChange={() => onChangeProductFilter(item?.id.toString())}
+                      checked={selectedProductFilter?.includes(item?.id.toString())}
                     />{' '}
                     <Typography
                       sx={{ cursor: 'pointer' }}
@@ -152,29 +133,6 @@ export function EditProductFilterView() {
                   </Box>
                 ))}
               </Card>
-
-              <Box
-                display="flex"
-                justifyContent="end"
-                width="100%"
-                sx={{
-                  mt: 4,
-                }}
-              >
-                <LoadingButton
-                  size="small"
-                  loading={isLoading}
-                  loadingIndicator="Submitting..."
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    width: 120,
-                  }}
-                >
-                  Save User Group
-                </LoadingButton>
-              </Box>
             </>
           )}
         </Form>

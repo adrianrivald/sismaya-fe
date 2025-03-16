@@ -21,18 +21,18 @@ interface PopoverProps {
   setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
-const columnHelper = createColumnHelper<Companies>();
+const columnHelper = createColumnHelper<{ internal_company: Companies }>();
 
 const columns = (popoverProps: PopoverProps) => [
-  columnHelper.accessor('name', {
+  columnHelper.accessor('internal_company.name', {
     header: 'Name',
   }),
 
-  columnHelper.accessor('abbreviation', {
+  columnHelper.accessor('internal_company.abbreviation', {
     header: 'Abbreviation',
   }),
 
-  columnHelper.accessor('type', {
+  columnHelper.accessor('internal_company.type', {
     header: 'Type',
   }),
 
@@ -42,9 +42,12 @@ const columns = (popoverProps: PopoverProps) => [
   }),
 ];
 
-function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: PopoverProps) {
+function ButtonActions(
+  props: CellContext<{ internal_company: Companies }, unknown>,
+  popoverProps: PopoverProps
+) {
   const { row } = props;
-  const companyId = row.original.id;
+  const companyId = row.original.internal_company.id;
   const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
 
   const onClickRemove = (itemId?: number) => {
@@ -92,9 +95,9 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
 
 export function ProductFilterLinkedView() {
   const { id } = useParams();
-  // const { data: companyRelation } = useCompanyRelation({ client_company_id: id });
+  const { getDataTableProps } = useCompanyRelation({ client_company_id: id });
   // console.log(companyRelation, 'companyRelation');
-  const { getDataTableProps } = useCompanyList({}, 'internal');
+  // const { getDataTableProps } = useCompanyList({}, 'internal');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
@@ -102,7 +105,7 @@ export function ProductFilterLinkedView() {
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/internal-company/create');
+    navigate('create');
   };
 
   const popoverFuncs = () => {
@@ -132,6 +135,12 @@ export function ProductFilterLinkedView() {
             <Typography color="grey.500">•</Typography>
             <Typography color="grey.500">Linked Internal Company</Typography>
           </Box>
+        </Box>
+
+        <Box>
+          <Button onClick={onClickAddNew} variant="contained" color="primary">
+            Create New Vendor
+          </Button>
         </Box>
       </Box>
 
