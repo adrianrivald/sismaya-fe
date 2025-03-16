@@ -27,7 +27,7 @@ import {
   useRequestById,
 } from 'src/services/request';
 import { getFileExtension } from 'src/utils/get-file-format';
-import { useUsers } from 'src/services/master-data/user';
+import { useInternalUsers, useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
 import { downloadFile } from 'src/utils/download';
 import { SvgColor } from 'src/components/svg-color';
@@ -66,7 +66,7 @@ export function RequestDetailView() {
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: cito } = useCitoById(String(requestDetail?.company?.id) ?? '');
-  const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
+  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();

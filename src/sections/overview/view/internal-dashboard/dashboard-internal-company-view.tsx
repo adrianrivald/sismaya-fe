@@ -3,7 +3,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Box, Button, Card, MenuItem, Select, type SelectChangeEvent, Stack } from '@mui/material';
 import dayjs from 'dayjs';
-
+import { parseDuration } from 'src/utils/format-duration';
 import {
   useInternalTotalRequestByCompany,
   usePendingRequestInternal,
@@ -349,7 +349,9 @@ export function DashboardInternalCompanyView({
                 >
                   <Typography fontSize={14}>Total Request</Typography>
                   <Typography fontSize={12}>
-                    {dateFilter !== 0 ? `for the last ${renderDateFilter().label} days` : `Today`}{' '}
+                    {dateFilter !== 0
+                      ? `for the last ${renderDateFilter().label} days`
+                      : `Today`}{' '}
                   </Typography>
                   <Typography fontSize={36} fontWeight="bold">
                     {internalTotalRequest?.total_request}
@@ -595,19 +597,52 @@ export function DashboardInternalCompanyView({
               flexDirection="column"
               alignItems="center"
             >
-              <Typography fontSize="36px" fontWeight="bold" sx={{ mb: 2 }}>
-                {requestHandlingTime?.converted}
+              <Typography sx={{ mb: 2 }}>Average Handling Time</Typography>
+              <Typography
+                fontSize="36px"
+                fontWeight="bold"
+                color={
+                  requestHandlingTime?.realization === 'faster'
+                    ? 'success.main'
+                    : requestHandlingTime?.realization === 'slower'
+                      ? 'error.dark'
+                      : ''
+                }
+              >
+                {requestHandlingTime?.average} {requestHandlingTime?.realization}
               </Typography>
-              <Typography>Average Handling Time</Typography>
-              {/* <Box display="flex" alignItems="center" gap={1} mt={3}>
-                <SvgColor color="error.dark" src="/assets/icons/ic-grow.svg" />
+              {requestHandlingTime?.realization !== '' ? (
+                <Typography color="grey.600">than expectation</Typography>
+              ) : null}
+              <Box display="flex" alignItems="center" gap={1} mt={3}>
+                <SvgColor
+                  color={
+                    requestHandlingTime?.comparison_last_month.startsWith('-')
+                      ? 'error.dark'
+                      : 'success.main'
+                  }
+                  src={
+                    requestHandlingTime?.comparison_last_month.startsWith('-')
+                      ? '/assets/icons/ic-trend-down.svg'
+                      : '/assets/icons/ic-grow.svg'
+                  }
+                />
                 <Typography>
-                  <Typography color="error.dark" component="span">
-                    8 minutes
+                  <Typography
+                    color={
+                      requestHandlingTime?.comparison_last_month.startsWith('-')
+                        ? 'error.dark'
+                        : 'success.main'
+                    }
+                    component="span"
+                  >
+                    {parseDuration(requestHandlingTime?.comparison_last_month)}
                   </Typography>{' '}
-                  than last month
+                  <Typography component="span" color="grey.600">
+                    than last month
+                  </Typography>
                 </Typography>
-              </Box> */}
+              </Box>
               <Box
                 display="flex"
                 justifyContent="space-between"

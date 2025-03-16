@@ -13,6 +13,8 @@ export interface Company {
     progress_statuses: Status[]
     department: Department[]
     image: string
+    cito_used: number;
+    cito_quota: number;
 }
 
 export interface Status {
