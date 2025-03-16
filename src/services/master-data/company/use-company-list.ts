@@ -13,15 +13,6 @@ export function fetchCompanyList(params: Partial<any>, type: string) {
 
   if (type) {
     endpointUrl.searchParams.append('type', type);
-
-  }
-
-  if (params.active) {
-    endpointUrl.searchParams.append('active', params.active);
-  }
-
-  if (params.platform) {
-    endpointUrl.searchParams.append('platform', params.platform);
   }
 
   dataTableParamsBuilder({

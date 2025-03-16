@@ -22,7 +22,7 @@ import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useUserById, useUsers } from 'src/services/master-data/user';
+import { useInternalUsers, useUserById, useUsers } from 'src/services/master-data/user';
 import {
   useAddAttachment,
   useAddRequest,
@@ -52,7 +52,7 @@ export function EditRequestView() {
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
-  const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
+  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
@@ -88,12 +88,13 @@ export function EditRequestView() {
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
 
   const [selectedPic, setSelectedPic] = React.useState<
-    { id: number; picture: string; assignee_id?: number }[] | undefined
+    { id: number; picture: string; assignee_id?: number; name: string }[] | undefined
   >(
     requestDetail?.assignees?.map((item) => ({
       assignee_id: item?.assignee_id,
       picture: item?.assignee?.user_info?.profile_picture,
       id: item?.id,
+      name: item?.assignee?.user_info?.name,
     }))
   );
 
@@ -121,6 +122,7 @@ export function EditRequestView() {
         assignee_id: item?.assignee_id,
         picture: item?.assignee?.user_info?.profile_picture,
         id: item?.id,
+        name: item?.assignee?.user_info?.name,
       }))
     );
   }, [requestDetail]);
@@ -141,7 +143,11 @@ export function EditRequestView() {
       ...(requestDetail?.step === 'to_do' && { start_date: dateValue }),
       ...(requestDetail?.step === 'to_do' && { end_date: endDateValue }),
     };
-    updateRequest(payload);
+    if (endDateValue?.isBefore(dateValue ?? dayjs())) {
+      toast.error('End date must later than start date');
+    } else {
+      updateRequest(payload);
+    }
     // setTimeout(() => {
     //   navigate('/request/test');
     //   setIsLoading(false);
@@ -301,6 +307,7 @@ export function EditRequestView() {
                         })}
                         label="Product"
                         value={watch('product_id')}
+                        disabled={userType === 'internal'}
                       >
                         {products?.map((product) => (
                           <MenuItem value={product?.id}>{product?.name}</MenuItem>
@@ -328,6 +335,7 @@ export function EditRequestView() {
                         })}
                         label="Category"
                         value={watch('category_id')}
+                        disabled={userType === 'internal'}
                       >
                         {categories?.map((category) => (
                           <MenuItem value={category?.id}>{category?.name}</MenuItem>
@@ -363,8 +371,8 @@ export function EditRequestView() {
                         label="Request CITO"
                       />
                       <Typography>
-                        {requestDetail?.internal_company?.cito_used}/
-                        {requestDetail?.internal_company?.cito_quota} used
+                        {requestDetail?.company?.cito_used}/{requestDetail?.company?.cito_quota}{' '}
+                        used
                       </Typography>
                     </Box>
                   </Box>
@@ -393,6 +401,7 @@ export function EditRequestView() {
                   {...register('description', {
                     required: 'Request Description must be filled out',
                   })}
+                  disabled={userType === 'internal'}
                 />
                 {formState?.errors?.description && (
                   <FormHelperText sx={{ color: 'error.main' }}>
@@ -401,115 +410,116 @@ export function EditRequestView() {
                 )}
               </Grid>
 
-              {requestDetail?.step === 'to_do' && (
-                <Grid item xs={12} md={12}>
-                  <Box mt={4} display="flex" alignItems="center" gap={2}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DateTimePicker
-                        sx={{
-                          width: '300px',
-                        }}
-                        label="Start Date"
-                        value={dateValue}
-                        onChange={handleChangeDate}
-                        // minDate={dayjs()}
-                        // renderInput={(params: any) => <TextField {...params} />}
-                      />
-                    </LocalizationProvider>
+              {userType === 'internal' &&
+                (requestDetail?.step === 'to_do' || requestDetail?.step === 'in_progress') && (
+                  <Grid item xs={12} md={12}>
+                    <Box mt={4} display="flex" alignItems="center" gap={2}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DateTimePicker
+                          sx={{
+                            width: '300px',
+                          }}
+                          label="Start Date"
+                          value={dateValue}
+                          onChange={handleChangeDate}
+                          // minDate={dayjs()}
+                          // renderInput={(params: any) => <TextField {...params} />}
+                        />
+                      </LocalizationProvider>
 
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DateTimePicker
-                        sx={{
-                          width: '300px',
-                        }}
-                        label="End Date"
-                        value={endDateValue}
-                        onChange={handleChangeEndDate}
-                        minDate={dateValue ?? dayjs()}
-                        // renderInput={(params: any) => <TextField {...params} />}
-                      />
-                    </LocalizationProvider>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DateTimePicker
+                          sx={{
+                            width: '300px',
+                          }}
+                          label="End Date"
+                          value={endDateValue}
+                          onChange={handleChangeEndDate}
+                          minDate={dateValue ?? dayjs()}
+                          // renderInput={(params: any) => <TextField {...params} />}
+                        />
+                      </LocalizationProvider>
 
-                    <Box display="flex" flexDirection="column">
-                      <Typography>PIC</Typography>
-                      <Box display="flex" gap={2} alignItems="center">
-                        <Box display="flex" alignItems="center">
-                          {selectedPic?.map((item) => (
+                      <Box display="flex" flexDirection="column">
+                        <Typography>PIC</Typography>
+                        <Box display="flex" gap={2} alignItems="center">
+                          <Box display="flex" alignItems="center">
+                            {selectedPic?.map((item) => (
+                              <Box
+                                width={36}
+                                height={36}
+                                sx={{
+                                  marginRight: '-10px',
+                                }}
+                              >
+                                <Box
+                                  component="img"
+                                  src={
+                                    item?.picture !== '' ? item?.picture : '/assets/icons/user.png'
+                                  }
+                                  sx={{
+                                    cursor: 'pointer',
+                                    borderRadius: 100,
+                                    width: 36,
+                                    height: 36,
+                                    borderColor: 'white',
+                                    borderWidth: 2,
+                                    borderStyle: 'solid',
+                                  }}
+                                />
+                              </Box>
+                            ))}
+                          </Box>
+                          <ModalDialog
+                            open={openAssigneeModal}
+                            setOpen={setOpenAssigneeModal}
+                            minWidth={600}
+                            title="Assignee"
+                            content={
+                              (
+                                <AddAssigneeModal
+                                  internalUsers={filteredInternalUser}
+                                  handleAddPicItem={handleAddPicItemFromDetail}
+                                  selectedPic={selectedPic}
+                                  handleDeletePicItem={handleDeletePicItemFromDetail}
+                                  isDetail
+                                  onSearchUser={onSearchUser}
+                                  setOpenAssigneeModal={setOpenAssigneeModal}
+                                />
+                              ) as JSX.Element & string
+                            }
+                          >
                             <Box
-                              width={36}
-                              height={36}
+                              component="button"
+                              type="button"
+                              display="flex"
+                              justifyContent="center"
+                              alignItems="center"
                               sx={{
-                                marginRight: '-10px',
+                                width: 36,
+                                height: 36,
+                                cursor: 'pointer',
+                                paddingX: 1.5,
+                                paddingY: 1.5,
+                                border: 1,
+                                borderStyle: 'dashed',
+                                borderColor: 'grey.500',
+                                borderRadius: 100,
                               }}
                             >
-                              <Box
-                                component="img"
-                                src={
-                                  item?.picture !== '' ? item?.picture : '/assets/icons/user.png'
-                                }
-                                sx={{
-                                  cursor: 'pointer',
-                                  borderRadius: 100,
-                                  width: 36,
-                                  height: 36,
-                                  borderColor: 'white',
-                                  borderWidth: 2,
-                                  borderStyle: 'solid',
-                                }}
+                              <SvgColor
+                                color="#637381"
+                                width={12}
+                                height={12}
+                                src="/assets/icons/ic-plus.svg"
                               />
                             </Box>
-                          ))}
+                          </ModalDialog>
                         </Box>
-                        <ModalDialog
-                          open={openAssigneeModal}
-                          setOpen={setOpenAssigneeModal}
-                          minWidth={600}
-                          title="Assignee"
-                          content={
-                            (
-                              <AddAssigneeModal
-                                internalUsers={filteredInternalUser}
-                                handleAddPicItem={handleAddPicItemFromDetail}
-                                selectedPic={selectedPic}
-                                handleDeletePicItem={handleDeletePicItemFromDetail}
-                                isDetail
-                                onSearchUser={onSearchUser}
-                                setOpenAssigneeModal={setOpenAssigneeModal}
-                              />
-                            ) as JSX.Element & string
-                          }
-                        >
-                          <Box
-                            component="button"
-                            type="button"
-                            display="flex"
-                            justifyContent="center"
-                            alignItems="center"
-                            sx={{
-                              width: 36,
-                              height: 36,
-                              cursor: 'pointer',
-                              paddingX: 1.5,
-                              paddingY: 1.5,
-                              border: 1,
-                              borderStyle: 'dashed',
-                              borderColor: 'grey.500',
-                              borderRadius: 100,
-                            }}
-                          >
-                            <SvgColor
-                              color="#637381"
-                              width={12}
-                              height={12}
-                              src="/assets/icons/ic-plus.svg"
-                            />
-                          </Box>
-                        </ModalDialog>
                       </Box>
                     </Box>
-                  </Box>
-                </Grid>
-              )}
+                  </Grid>
+                )}
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
@@ -578,15 +588,17 @@ export function EditRequestView() {
                                 </Box>
                               </ModalDialog>
                             </Box>
-                            <Box
-                              sx={{ cursor: 'pointer' }}
-                              onClick={() => onDeleteAttachment(attachment?.id)}
-                            >
-                              <SvgColor
-                                sx={{ width: 10, height: 10 }}
-                                src="/assets/icons/ic-cross.svg"
-                              />
-                            </Box>
+                            {userType === 'client' && (
+                              <Box
+                                sx={{ cursor: 'pointer' }}
+                                onClick={() => onDeleteAttachment(attachment?.id)}
+                              >
+                                <SvgColor
+                                  sx={{ width: 10, height: 10 }}
+                                  src="/assets/icons/ic-cross.svg"
+                                />
+                              </Box>
+                            )}
                           </Box>
                         </Box>
                       ))}
@@ -599,22 +611,26 @@ export function EditRequestView() {
                     hidden
                     onChange={handleFileChange}
                     multiple
+                    disabled={userType === 'internal'}
                     max={5000000}
                   />
                   <Button
+                    disabled={userType === 'internal'}
                     type="button"
                     sx={{
+                      cursor: userType === 'internal' ? 'not-allowed' : 'pointer',
                       padding: 0,
                       border: 1,
                       borderColor: 'primary.main',
                       width: '200px',
+                      opacity: userType === 'internal' ? 0.5 : 1,
                     }}
                   >
                     <FormLabel
                       sx={{
                         color: 'primary.main',
                         fontWeight: 'bold',
-                        cursor: 'pointer',
+                        cursor: userType === 'internal' ? 'not-allowed' : 'pointer',
                         width: '100%',
                         padding: '6px 8px',
                       }}

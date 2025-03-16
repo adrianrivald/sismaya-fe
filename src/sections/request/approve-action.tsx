@@ -22,6 +22,7 @@ import { AddAssigneeModal } from './add-assignee';
 interface SelectedPic {
   id: number;
   picture: string;
+  name: string;
 }
 
 interface Priority {
@@ -44,7 +45,7 @@ interface ApproveActionProps {
   openAssigneeModal: boolean;
   setOpenAssigneeModal: Dispatch<SetStateAction<boolean>>;
   internalUsers: User[] | undefined;
-  handleAddPicItem: (userId: number, userPicture: string) => void;
+  handleAddPicItem: (userId: number, userPicture: string, userName: string) => void;
   handleDeletePicItem: (userId: number) => void;
   onSearchUser: (e: ChangeEvent<HTMLInputElement>) => void;
 }

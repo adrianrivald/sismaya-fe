@@ -27,7 +27,7 @@ import {
   useRequestById,
 } from 'src/services/request';
 import { getFileExtension } from 'src/utils/get-file-format';
-import { useUsers } from 'src/services/master-data/user';
+import { useInternalUsers, useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
 import { downloadFile } from 'src/utils/download';
 import { SvgColor } from 'src/components/svg-color';
@@ -66,7 +66,7 @@ export function RequestDetailView() {
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: cito } = useCitoById(String(requestDetail?.company?.id) ?? '');
-  const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
+  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
@@ -78,12 +78,13 @@ export function RequestDetailView() {
   const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs());
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(dayjs());
   const [selectedPic, setSelectedPic] = React.useState<
-    { id: number; picture: string; assignee_id?: number }[] | undefined
+    { id: number; picture: string; assignee_id?: number; name: string }[] | undefined
   >(
     requestDetail?.assignees?.map((item) => ({
       assignee_id: item?.assignee_id,
       picture: item?.assignee?.user_info?.profile_picture,
       id: item?.id,
+      name: item?.assignee?.user_info?.name,
     }))
   );
   const [selectedPicWarning, setSelectedPicWarning] = React.useState(false);
@@ -101,6 +102,7 @@ export function RequestDetailView() {
         assignee_id: item?.assignee_id,
         picture: item?.assignee?.user_info?.profile_picture,
         id: item?.id,
+        name: item?.assignee?.user_info?.name,
       }))
     );
   }, [requestDetail]);
@@ -133,12 +135,13 @@ export function RequestDetailView() {
     setOpen(false);
   };
 
-  const handleAddPicItem = (userId: number, userPicture: string) => {
-    setSelectedPic((prev: { id: number; picture: string }[] | undefined) => [
+  const handleAddPicItem = (userId: number, userPicture: string, userName: string) => {
+    setSelectedPic((prev: { id: number; picture: string; name: string }[] | undefined) => [
       ...(prev as []),
       {
         id: userId,
         picture: userPicture,
+        name: userName,
       },
     ]);
     setSelectedPicWarning(false);
@@ -199,6 +202,8 @@ export function RequestDetailView() {
       setSelectedImage(fileName);
     }
   };
+
+  const names = selectedPic?.slice(0, 5).map((item) => item.name);
 
   return (
     <Box
@@ -298,29 +303,9 @@ export function RequestDetailView() {
                 <TableCell size="small">
                   <Box display="flex" gap={2} alignItems="center">
                     <Box display="flex" alignItems="center">
-                      {selectedPic?.map((item) => (
-                        <Box
-                          width={36}
-                          height={36}
-                          sx={{
-                            marginRight: '-10px',
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={item?.picture !== '' ? item?.picture : '/assets/icons/user.png'}
-                            sx={{
-                              cursor: 'pointer',
-                              borderRadius: 100,
-                              width: 36,
-                              height: 36,
-                              borderColor: 'white',
-                              borderWidth: 2,
-                              borderStyle: 'solid',
-                            }}
-                          />
-                        </Box>
-                      ))}
+                      {names && names.join(', ').length > 50
+                        ? `${names.join(', ').substring(0, 50 - 3)}...`
+                        : names && names.join(', ')}
                     </Box>
                     {userType === 'internal' && requestDetail?.step !== 'done' && (
                       <ModalDialog
@@ -331,6 +316,7 @@ export function RequestDetailView() {
                         content={
                           (
                             <AddAssigneeModal
+                              isAssignable={false}
                               internalUsers={filteredInternalUser}
                               handleAddPicItem={handleAddPicItemFromDetail}
                               selectedPic={selectedPic}
@@ -342,7 +328,8 @@ export function RequestDetailView() {
                           ) as JSX.Element & string
                         }
                       >
-                        <Box
+                        <Box sx={{ color: 'primary.main', cursor: 'pointer' }}>See All</Box>
+                        {/* <Box
                           component="button"
                           type="button"
                           display="flex"
@@ -366,7 +353,7 @@ export function RequestDetailView() {
                             height={12}
                             src="/assets/icons/ic-plus.svg"
                           />
-                        </Box>
+                        </Box> */}
                       </ModalDialog>
                     )}
                   </Box>

@@ -4,6 +4,7 @@ export * from "./use-company-list"
 export * from "./use-company-update"
 export * from "./use-company-delete"
 export * from "./use-company-list-all"
+export * from "./use-company-relation"
 
 
 export * from "./division/use-division-create"

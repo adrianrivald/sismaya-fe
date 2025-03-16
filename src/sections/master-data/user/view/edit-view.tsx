@@ -49,6 +49,7 @@ import {
 import { User } from 'src/services/master-data/user/types';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
+import { Bounce, toast } from 'react-toastify';
 import { RemoveAction } from './remove-action';
 
 interface UserValues {
@@ -482,11 +483,29 @@ export function EditUserView({ type }: EditUserProps) {
 
   // User Company
   const onaddUserCompany = () => {
-    addUserCompany({
-      user_id: Number(id),
-      company_id: userCompany,
-    });
-    setUserCompany(null);
+    const hasUserCompanies = userCompanies?.some((item2) =>
+      internalCompanies?.some((item1) => item1.id === item2.company_id)
+    );
+
+    if (!hasUserCompanies) {
+      addUserCompany({
+        user_id: Number(id),
+        company_id: userCompany,
+      });
+      setUserCompany(null);
+    } else {
+      toast.error(`Company already selected`, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+    }
   };
 
   const onChangeUserCompany = (e: SelectChangeEvent<number>, itemId: number) => {

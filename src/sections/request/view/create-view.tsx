@@ -1,3 +1,4 @@
+import React from 'react';
 import Typography from '@mui/material/Typography';
 import {
   Autocomplete,
@@ -20,13 +21,11 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import type { ChangeEvent } from 'react';
-import React from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { getFileExtension } from 'src/utils/get-file-format';
 import type { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useUsers } from 'src/services/master-data/user';
-import { useAddRequest } from 'src/services/request';
+import { useClientUsers, useUsers } from 'src/services/master-data/user';
+import { useAddRequest, useCitoById } from 'src/services/request';
 import {
   useCategoryByCompanyId,
   useCompanyById,
@@ -40,16 +39,18 @@ import PdfPreview from 'src/utils/pdf-viewer';
 
 export function CreateRequestView() {
   const { user } = useAuth();
+  console.log(user, 'usernya');
   const { vendor } = useParams();
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
-  const { data: companyById } = useCompanyById(idCurrentCompany ?? 0);
+  const [selectedCompanyId, setSelectedCompanyId] = React.useState('');
+  const { data: cito } = useCitoById(selectedCompanyId);
 
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
-  const { data: clientUsers } = useUsers('client', String(idCurrentCompany));
+  const { data: clientUsers } = useClientUsers(String(idCurrentCompany));
   const { mutate: addRequest } = useAddRequest();
 
   const [selectedCompany, setSelectedCompany] = React.useState('');
@@ -97,7 +98,7 @@ export function CreateRequestView() {
     addRequest(payload);
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const size = e.target.files[0]?.size;
 
@@ -240,6 +241,7 @@ export function CreateRequestView() {
                           setValue('company_id', newValue?.company_id);
                           setValue('department_id', newValue?.department_id);
                           setSelectedCompany(newValue?.company_name);
+                          setSelectedCompanyId(newValue?.company_id.toString());
                           setSelectedDepartment(newValue?.department_name);
                         }}
                         value={watch('user_id')}
@@ -391,9 +393,11 @@ export function CreateRequestView() {
                         control={<Checkbox {...register('is_cito')} />}
                         label="Request CITO"
                       />
-                      <Typography>
-                        {companyById?.cito_used}/{companyById?.cito_quota} used
-                      </Typography>
+                      {selectedCompanyId !== '' && (
+                        <Typography>
+                          {cito?.used}/{cito?.quota} used
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                   <Box
