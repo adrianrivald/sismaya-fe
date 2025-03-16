@@ -26,6 +26,8 @@ import {
 import { taskStatusMap } from 'src/constants/status';
 import dayjs from 'dayjs';
 import { useTaskRequestList } from 'src/services/request/use-request-list';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import { toast, Bounce } from 'react-toastify';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -60,7 +62,7 @@ function Form({ request, task }: FormProps) {
     request?.assignee_company_id ?? 0
   );
   const requests = taskId ? [{ id: 0, name: request?.name }] : (data?.items ?? []);
-
+  const { data: userPermissionsList } = useUserPermissions();
   const [_, assigneeFn] = useMutationAssignee(requestId);
 
   const [isUploadingOrDeletingFile, uploadOrDeleteFileFn] = useMutationAttachment(requestId);
@@ -72,9 +74,24 @@ function Form({ request, task }: FormProps) {
     },
   });
 
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
+
   useEffect(() => {
     form.reset({
       ...task,
+      requestId,
       taskId: task?.id,
       title: task?.name,
       dueDate: new Date().toISOString(),
@@ -125,8 +142,8 @@ function Form({ request, task }: FormProps) {
             disabled={taskId ? true : requests.length === 0}
             {...formUtils.getTextProps(form, 'requestId')}
           >
-            {requests.map((r) => (
-              <MenuItem key={r.id} value={r.id}>
+            {requests?.map((r) => (
+              <MenuItem key={r.id} value={r.id} onClick={(e) => e.stopPropagation()}>
                 {r?.name || `REQ${r.number}`}
               </MenuItem>
             ))}
@@ -139,7 +156,7 @@ function Form({ request, task }: FormProps) {
             isCreate={!taskId}
             // @ts-ignore
             control={form.control}
-            requestId={requestId}
+            requestId={form.watch('requestId') || requestId}
             assignees={task?.assignees ?? []}
             onAssign={(assignee) =>
               assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.userId })
@@ -182,12 +199,20 @@ function Form({ request, task }: FormProps) {
             label="Attachment"
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
-              if (!taskId) return;
-              uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+              if (userPermissionsList?.includes('request attachment:create')) {
+                if (!taskId) return;
+                uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+              } else {
+                onShowErrorToast();
+              }
             }}
             onRemove={(fileId) => {
-              if (!taskId) return;
-              uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
+              if (userPermissionsList?.includes('request attachment:delete')) {
+                if (!taskId) return;
+                uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
+              } else {
+                onShowErrorToast();
+              }
             }}
             {...formUtils.getMultipleDropzoneProps(form, 'files')}
           />

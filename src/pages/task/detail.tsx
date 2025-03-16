@@ -12,6 +12,8 @@ import {
   MenuItem,
   IconButton,
   Modal,
+  InputAdornment,
+  TextField,
 } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -30,6 +32,9 @@ import AddAttachment from 'src/sections/task/add-attachment';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { http } from 'src/utils/http';
+import { Bounce, toast } from 'react-toastify';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import { SvgColor } from 'src/components/svg-color';
 import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
@@ -48,6 +53,9 @@ export default function TaskDetailPage() {
   const { taskId, vendor } = useParams();
   const assigneeCompanyId = useAssigneeCompanyId();
   const { data, error, refetch } = useTaskDetail(Number(taskId), assigneeCompanyId);
+  const { data: userPermissionsList } = useUserPermissions();
+  const [modalAssignee, setModalAssignee] = useState(false);
+  const [search, setSearch] = useState('');
 
   if (!data || error) {
     return null;
@@ -74,6 +82,24 @@ export default function TaskDetailPage() {
   //       console.log('👾 ~ TaskDetailPage ~ changeProgress ~ progress:', progress);
   //     },
   //   }) as const;
+
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
+
+  const onSearchUser = (text: string) => {
+    setSearch(text);
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -110,9 +136,20 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          <TaskForm request={request} task={task}>
-            <Button variant="outlined">Edit Task</Button>
-          </TaskForm>
+          {userPermissionsList?.includes('task:update') ? (
+            <TaskForm request={request} task={task}>
+              <Button variant="outlined">Edit Task</Button>
+            </TaskForm>
+          ) : (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                onShowErrorToast();
+              }}
+            >
+              Edit Task
+            </Button>
+          )}
         </Box>
 
         {/* <Box
@@ -153,7 +190,13 @@ export default function TaskDetailPage() {
 
             <Stack spacing={0.5}>
               <Typography variant="body2">Assignee</Typography>
-              <AssigneeList assignees={task.assignees} />
+
+              <AssigneeList
+                assignees={task.assignees}
+                onClick={() => {
+                  setModalAssignee(true);
+                }}
+              />
             </Stack>
           </Stack>
 
@@ -218,8 +261,11 @@ export default function TaskDetailPage() {
                     <Box
                       sx={{ cursor: 'pointer', flex: 1, width: '80%' }}
                       onClick={() => {
-                        setAttachmentModal({ isOpen: true, url: attachment.url });
-                        // downloadFile(attachment.url);
+                        if (userPermissionsList?.includes('request attachment:read')) {
+                          setAttachmentModal({ isOpen: true, url: attachment.url });
+                        } else {
+                          onShowErrorToast();
+                        }
                       }}
                     >
                       <Typography
@@ -262,8 +308,13 @@ export default function TaskDetailPage() {
                     >
                       <MenuItem
                         onClick={() => {
-                          downloadFile(attachment.url);
-                          handleClose();
+                          if (userPermissionsList?.includes('request attachment:read')) {
+                            downloadFile(attachment.url);
+                            handleClose();
+                          } else {
+                            onShowErrorToast();
+                            handleClose();
+                          }
                         }}
                       >
                         <Icon
@@ -275,8 +326,13 @@ export default function TaskDetailPage() {
                       </MenuItem>
                       <MenuItem
                         onClick={() => {
-                          setDeleteModal({ isOpen: true, id: attachment.id });
-                          handleClose();
+                          if (userPermissionsList?.includes('request attachment:read')) {
+                            setDeleteModal({ isOpen: true, id: attachment.id });
+                            handleClose();
+                          } else {
+                            onShowErrorToast();
+                            handleClose();
+                          }
                         }}
                       >
                         <Icon icon="mynaui:trash" width="18" height="18" color="red" />
@@ -354,6 +410,89 @@ export default function TaskDetailPage() {
               Delete
             </Button>
           </Stack>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={modalAssignee}
+        onClose={() => {
+          setModalAssignee(false);
+        }}
+        aria-labelledby="attachment-modal"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 600,
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            minWidth: '600px',
+            maxHeight: '600px',
+            borderRadius: 1,
+          }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+            Assignee
+          </Typography>
+          <TextField
+            sx={{ width: '100%' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SvgColor width={18} height={24} src="/assets/icons/ic-search.svg" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="Search..."
+            onChange={(e) => onSearchUser(e.target.value)}
+          />
+          <Box height={350} overflow="auto">
+            {task?.assignees
+              ?.filter((item) => new RegExp(search, 'i').test(item.name))
+              .map((item, index) => (
+                <Box display="flex" alignItems="center" justifyContent="space-between" key={index}>
+                  <Box display="flex" gap={2} alignItems="center" p={2}>
+                    <Box
+                      component="img"
+                      src={item.avatar !== '' ? item?.avatar : '/assets/icons/user.png'}
+                      sx={{
+                        borderRadius: 100,
+                        width: 36,
+                        height: 36,
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        borderStyle: 'solid',
+                      }}
+                    />
+                    <Box>
+                      <Typography>{item.name}</Typography>
+                      <Typography color="grey.600">{item.email}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              ))}
+          </Box>
+          <Box mt={3} display="flex" justifyContent="flex-end">
+            <Button
+              onClick={() => setModalAssignee(false)}
+              type="button"
+              sx={{
+                paddingY: 1,
+                border: 1,
+                borderColor: 'grey.250',
+                borderRadius: 1.5,
+                color: 'grey.800',
+              }}
+            >
+              Close{' '}
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </DashboardContent>

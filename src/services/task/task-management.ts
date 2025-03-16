@@ -57,7 +57,7 @@ export class TaskManagement {
   static fromJson(json: any) {
     const request = {
       id: json.request?.id,
-      name: json.request?.name || `REQ#${json.request?.id}` || '-',
+      name: json.request?.name || `REQ${json.request?.number}` || '-',
       product: {
         id: json.request?.product?.id || null,
         name: json.request?.product?.name || '-',

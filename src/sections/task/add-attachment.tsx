@@ -1,11 +1,13 @@
 import { useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
+import { Bounce, toast } from 'react-toastify';
 import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
 import Button from '@mui/material/Button';
 import { useMutationAttachment } from 'src/services/task/task-management';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 
 export default function AddAttachment({ taskId }: { taskId?: number }) {
+  const { data: userPermissionsList } = useUserPermissions();
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,9 +33,33 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
     });
   }
 
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
+
   return (
     <>
-      <Button size="small" variant="contained" onClick={() => inputRef.current?.click()}>
+      <Button
+        size="small"
+        variant="contained"
+        onClick={() => {
+          if (userPermissionsList?.includes('request attachment:create')) {
+            inputRef.current?.click();
+          } else {
+            onShowErrorToast();
+          }
+        }}
+      >
         Add
       </Button>
 
