@@ -653,7 +653,6 @@ export function DashboardInternalCompanyView({
                   </Typography>
                 </Box>
               )}
-
               <Box
                 display="flex"
                 justifyContent="space-between"
