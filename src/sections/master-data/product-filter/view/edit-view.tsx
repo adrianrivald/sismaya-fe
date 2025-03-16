@@ -1,26 +1,9 @@
 import Typography from '@mui/material/Typography';
-import type { AccordionSummaryProps } from '@mui/material';
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  Grid,
-  OutlinedInput,
-  Card,
-  AccordionSummary,
-  Accordion,
-  AccordionDetails,
-  Checkbox,
-  styled,
-  Divider,
-} from '@mui/material';
+import { Box, Grid, Card, Checkbox } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import { LoadingButton } from '@mui/lab';
-import React, { useEffect, useState } from 'react';
-import { SvgColor } from 'src/components/svg-color';
-import { usePermissions, useRoleById, useUpdateRole } from 'src/services/master-data/role';
+import React, { useState } from 'react';
 import { roleSchema, type RoleDTO } from 'src/services/master-data/role/schemas/role-schema';
 import { useParams } from 'react-router-dom';
 import {
@@ -39,7 +22,6 @@ export function EditProductFilterView() {
   });
   const { mutate: addProductFilter } = useAddProductFilter();
   const { mutate: deleteProductFilter } = useDeleteProductFilterById();
-  console.log(productFilter, 'productFilter');
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedProductFilter, setSelectedProductFilter] = useState<string[]>(
     productFilter?.map((item: any) => item?.product?.id.toString())
@@ -63,32 +45,6 @@ export function EditProductFilterView() {
     }
   };
 
-  const handleSubmit = (formData: RoleDTO) => {
-    setIsLoading(true);
-
-    try {
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-    }
-  };
-
-  const AccordionHeader = styled((props: AccordionSummaryProps) => (
-    <AccordionSummary
-      expandIcon={<SvgColor width={15} src="/assets/icons/ic-chevron-down.svg" />}
-      {...props}
-    />
-  ))(() => ({
-    fontWeight: '600',
-    '& .MuiAccordionSummary-content.Mui-expanded': {
-      backgroundColor: 'unset',
-      color: 'black',
-    },
-    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-      backgroundColor: 'unset',
-    },
-  }));
-
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -103,39 +59,29 @@ export function EditProductFilterView() {
       </Box>
 
       <Grid container spacing={3} sx={{ width: 'auto', mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit} schema={roleSchema}>
-          {({ register, control, watch, formState, setValue }) => (
-            <>
-              <Card
-                sx={{
-                  mt: 2,
-                  p: 4,
-                  boxShadow: '2',
-                  position: 'relative',
-                  backgroundColor: 'blue.50',
-                  borderRadius: 4,
-                }}
-              >
-                {products?.map((item) => (
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Checkbox
-                      id={`item-${item?.id}`}
-                      onChange={() => onChangeProductFilter(item?.id.toString())}
-                      checked={selectedProductFilter?.includes(item?.id.toString())}
-                    />{' '}
-                    <Typography
-                      sx={{ cursor: 'pointer' }}
-                      component="label"
-                      htmlFor={`item-${item?.id}`}
-                    >
-                      {item?.name}
-                    </Typography>
-                  </Box>
-                ))}
-              </Card>
-            </>
-          )}
-        </Form>
+        <Card
+          sx={{
+            mt: 2,
+            p: 4,
+            boxShadow: '2',
+            position: 'relative',
+            backgroundColor: 'blue.50',
+            borderRadius: 4,
+          }}
+        >
+          {products?.map((item) => (
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                id={`item-${item?.id}`}
+                onChange={() => onChangeProductFilter(item?.id.toString())}
+                checked={selectedProductFilter?.includes(item?.id.toString())}
+              />{' '}
+              <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor={`item-${item?.id}`}>
+                {item?.name}
+              </Typography>
+            </Box>
+          ))}
+        </Card>
       </Grid>
     </DashboardContent>
   );
