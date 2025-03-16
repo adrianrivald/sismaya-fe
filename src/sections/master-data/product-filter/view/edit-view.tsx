@@ -22,21 +22,16 @@ export function EditProductFilterView() {
   });
   const { mutate: addProductFilter } = useAddProductFilter();
   const { mutate: deleteProductFilter } = useDeleteProductFilterById();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [selectedProductFilter, setSelectedProductFilter] = useState<string[]>(
-    productFilter?.map((item: any) => item?.product?.id.toString())
-  );
   const onChangeProductFilter = (productFilterId?: string) => {
     if (productFilterId) {
-      if (!selectedProductFilter?.includes(productFilterId)) {
-        setSelectedProductFilter((prev) => [...prev, productFilterId]);
+      if (
+        !productFilter?.map((item: any) => item?.product?.id?.toString()).includes(productFilterId)
+      ) {
         addProductFilter({
           product_id: Number(productFilterId),
           company_id: Number(id),
         });
       } else {
-        const newArr = selectedProductFilter?.filter((item) => item !== productFilterId);
-        setSelectedProductFilter(newArr);
         const productUseId = productFilter?.find(
           (item: any) => item?.product?.id === Number(productFilterId)
         ).id;
@@ -61,6 +56,7 @@ export function EditProductFilterView() {
       <Grid container spacing={3} sx={{ width: 'auto', mb: { xs: 3, md: 5 }, ml: 0 }}>
         <Card
           sx={{
+            width: '100%',
             mt: 2,
             p: 4,
             boxShadow: '2',
@@ -74,7 +70,9 @@ export function EditProductFilterView() {
               <Checkbox
                 id={`item-${item?.id}`}
                 onChange={() => onChangeProductFilter(item?.id.toString())}
-                checked={selectedProductFilter?.includes(item?.id.toString())}
+                checked={productFilter
+                  ?.map((productItem: any) => productItem?.product?.id.toString())
+                  ?.includes(item?.id.toString())}
               />{' '}
               <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor={`item-${item?.id}`}>
                 {item?.name}
