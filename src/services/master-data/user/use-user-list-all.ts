@@ -31,3 +31,56 @@ async function fetchUsers(type : string, internalId?: string) {
   
     return data;
   }
+
+
+async function fetchClientUsers(internalId?: string) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL('/users-client', baseUrl);
+
+  if(internalId) {
+    endpointUrl.searchParams.append('internal_company', internalId);
+
+  }
+
+  const { data } = await http<{data: User[]}>(
+    endpointUrl.toString().replace(baseUrl, '')
+  )
+
+  return data
+  }
+
+  export function useClientUsers(internalId?: string) {
+    const data = useQuery(
+      ['client-user-items-all'],
+      () => fetchClientUsers(internalId)
+    );
+  
+    return data;
+  }
+
+
+
+async function fetchInternalUsers(internalId?: string) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL('/users-internal', baseUrl);
+
+  if(internalId) {
+    endpointUrl.searchParams.append('internal_company', internalId);
+
+  }
+
+  const { data } = await http<{data: User[]}>(
+    endpointUrl.toString().replace(baseUrl, '')
+  )
+
+  return data
+  }
+
+  export function useInternalUsers(internalId?: string) {
+    const data = useQuery(
+      ['internal-user-items-all'],
+      () => fetchInternalUsers(internalId)
+    );
+  
+    return data;
+  }

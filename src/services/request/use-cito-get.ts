@@ -14,7 +14,7 @@ async function fetchCitoById(companyId: string) {
       ['cito-items', companyId],
       () => fetchCitoById(companyId),
       {
-        enabled: companyId !== undefined,
+        enabled: companyId !== "",
       }
     );
   
