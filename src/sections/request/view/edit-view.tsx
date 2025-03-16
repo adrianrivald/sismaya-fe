@@ -22,7 +22,7 @@ import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useUserById, useUsers } from 'src/services/master-data/user';
+import { useInternalUsers, useUserById, useUsers } from 'src/services/master-data/user';
 import {
   useAddAttachment,
   useAddRequest,
@@ -52,7 +52,7 @@ export function EditRequestView() {
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
-  const { data: internalUser } = useUsers('internal', String(idCurrentCompany));
+  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
@@ -371,8 +371,8 @@ export function EditRequestView() {
                         label="Request CITO"
                       />
                       <Typography>
-                        {requestDetail?.internal_company?.cito_used}/
-                        {requestDetail?.internal_company?.cito_quota} used
+                        {requestDetail?.company?.cito_used}/{requestDetail?.company?.cito_quota}{' '}
+                        used
                       </Typography>
                     </Box>
                   </Box>
