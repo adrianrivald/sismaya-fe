@@ -331,6 +331,33 @@ export function CreateRequestView() {
                 <Stack direction="row" gap={3} alignItems="center">
                   <Box
                     sx={{
+                      width: { xs: '100%', md: '48%' },
+                    }}
+                  >
+                    <TextField
+                      error={Boolean(formState?.errors?.name)}
+                      sx={{
+                        width: '100%',
+                      }}
+                      label="Name"
+                      {...register('name', {
+                        required: 'Name must be filled out',
+                      })}
+                      autoComplete="off"
+                    />
+                    {formState?.errors?.name && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.name?.message)}
+                      </FormHelperText>
+                    )}
+                  </Box>
+                </Stack>
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Stack direction="row" gap={3} alignItems="center">
+                  <Box
+                    sx={{
                       width: { xs: '100%', md: '25%' },
                     }}
                   >
