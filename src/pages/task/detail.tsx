@@ -30,6 +30,8 @@ import AddAttachment from 'src/sections/task/add-attachment';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { http } from 'src/utils/http';
+import { Bounce, toast } from 'react-toastify';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
@@ -48,6 +50,7 @@ export default function TaskDetailPage() {
   const { taskId, vendor } = useParams();
   const assigneeCompanyId = useAssigneeCompanyId();
   const { data, error, refetch } = useTaskDetail(Number(taskId), assigneeCompanyId);
+  const { data: userPermissionsList } = useUserPermissions();
 
   if (!data || error) {
     return null;
@@ -74,6 +77,20 @@ export default function TaskDetailPage() {
   //       console.log('👾 ~ TaskDetailPage ~ changeProgress ~ progress:', progress);
   //     },
   //   }) as const;
+
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -110,9 +127,20 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          <TaskForm request={request} task={task}>
-            <Button variant="outlined">Edit Task</Button>
-          </TaskForm>
+          {userPermissionsList?.includes('task:update') ? (
+            <TaskForm request={request} task={task}>
+              <Button variant="outlined">Edit Task</Button>
+            </TaskForm>
+          ) : (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                onShowErrorToast();
+              }}
+            >
+              Edit Task
+            </Button>
+          )}
         </Box>
 
         {/* <Box
@@ -153,6 +181,7 @@ export default function TaskDetailPage() {
 
             <Stack spacing={0.5}>
               <Typography variant="body2">Assignee</Typography>
+
               <AssigneeList assignees={task.assignees} />
             </Stack>
           </Stack>
@@ -218,8 +247,11 @@ export default function TaskDetailPage() {
                     <Box
                       sx={{ cursor: 'pointer', flex: 1, width: '80%' }}
                       onClick={() => {
-                        setAttachmentModal({ isOpen: true, url: attachment.url });
-                        // downloadFile(attachment.url);
+                        if (userPermissionsList?.includes('request attachment:read')) {
+                          setAttachmentModal({ isOpen: true, url: attachment.url });
+                        } else {
+                          onShowErrorToast();
+                        }
                       }}
                     >
                       <Typography
@@ -262,8 +294,13 @@ export default function TaskDetailPage() {
                     >
                       <MenuItem
                         onClick={() => {
-                          downloadFile(attachment.url);
-                          handleClose();
+                          if (userPermissionsList?.includes('request attachment:read')) {
+                            downloadFile(attachment.url);
+                            handleClose();
+                          } else {
+                            onShowErrorToast();
+                            handleClose();
+                          }
                         }}
                       >
                         <Icon
@@ -275,8 +312,13 @@ export default function TaskDetailPage() {
                       </MenuItem>
                       <MenuItem
                         onClick={() => {
-                          setDeleteModal({ isOpen: true, id: attachment.id });
-                          handleClose();
+                          if (userPermissionsList?.includes('request attachment:read')) {
+                            setDeleteModal({ isOpen: true, id: attachment.id });
+                            handleClose();
+                          } else {
+                            onShowErrorToast();
+                            handleClose();
+                          }
                         }}
                       >
                         <Icon icon="mynaui:trash" width="18" height="18" color="red" />

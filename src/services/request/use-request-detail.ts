@@ -19,7 +19,7 @@ export function useRequestAssigneeById(requestId: string, options: any = {}) {
     ['request-items-assignee', requestId],
     () => fetchRequestAssigneeByID(requestId),
     {
-      enabled: requestId !== undefined,
+      enabled: requestId !== undefined && requestId !== '0',
       ...options,
     }
   );
@@ -28,8 +28,9 @@ export function useRequestAssigneeById(requestId: string, options: any = {}) {
 }
 
 export function useRequestById(requestId: string, options: any = {}) {
+  console.log('dataa 456', requestId);
   const data = useQuery(['request-items', requestId], () => fetchRequestByID(requestId), {
-    enabled: requestId !== undefined,
+    enabled: requestId !== undefined && requestId !== '0',
     ...options,
   });
 
@@ -39,18 +40,19 @@ export function useRequestById(requestId: string, options: any = {}) {
 export function useRequestAssignees(requestId: string) {
   return useRequestAssigneeById(requestId, {
     staleTime: Infinity,
+
     // @ts-ignore
     select: (data) => {
       const assignees = data?.assignees ?? [];
 
-      if (assignees.length === 0) return [];
+      if (assignees?.length === 0) return [];
 
       return assignees.map((val: Assignees) => ({
-        id: val.assignee.id,
-        userId: val.assignee.user_info?.id,
-        name: val.assignee.user_info?.name,
-        avatar: val.assignee.user_info?.profile_picture,
-        assigneeId: val.id,
+        id: val?.assignee?.id,
+        userId: val?.assignee?.user_info?.id,
+        name: val?.assignee?.user_info?.name,
+        avatar: val?.assignee?.user_info?.profile_picture,
+        assigneeId: val?.id,
       }));
     },
   });
