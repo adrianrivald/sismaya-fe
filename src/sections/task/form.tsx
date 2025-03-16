@@ -56,7 +56,7 @@ function Form({ request, task }: FormProps) {
     },
   });
 
-  const taskId = form.watch('taskId') ?? 0;
+  const taskId = form.getValues('taskId') ?? 0;
   const { data } = useTaskRequestList(
     { page: 1, page_size: 100 },
     request?.assignee_company_id ?? 0
@@ -91,6 +91,7 @@ function Form({ request, task }: FormProps) {
   useEffect(() => {
     form.reset({
       ...task,
+      requestId,
       taskId: task?.id,
       title: task?.name,
       dueDate: new Date().toISOString(),
@@ -142,7 +143,7 @@ function Form({ request, task }: FormProps) {
             {...formUtils.getTextProps(form, 'requestId')}
           >
             {requests?.map((r) => (
-              <MenuItem key={r.id} value={r.id}>
+              <MenuItem key={r.id} value={r.id} onClick={(e) => e.stopPropagation()}>
                 {r?.name || `REQ${r.number}`}
               </MenuItem>
             ))}
