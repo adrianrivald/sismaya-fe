@@ -118,6 +118,7 @@ export interface RequestDetail {
     assignee_company_id: number;
     priority: string;
     progress_status: Status;
+    name: string;
     number: string;
     description: string;
     is_cito: boolean;
