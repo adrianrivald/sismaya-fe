@@ -598,51 +598,62 @@ export function DashboardInternalCompanyView({
               alignItems="center"
             >
               <Typography sx={{ mb: 2 }}>Average Handling Time</Typography>
-              <Typography
-                fontSize="36px"
-                fontWeight="bold"
-                color={
-                  requestHandlingTime?.realization === 'faster'
-                    ? 'success.main'
-                    : requestHandlingTime?.realization === 'slower'
-                      ? 'error.dark'
-                      : ''
-                }
-              >
-                {requestHandlingTime?.average} {requestHandlingTime?.realization}
-              </Typography>
-              {requestHandlingTime?.realization !== '' ? (
-                <Typography color="grey.600">than expectation</Typography>
-              ) : null}
-              <Box display="flex" alignItems="center" gap={1} mt={3}>
-                <SvgColor
-                  color={
-                    requestHandlingTime?.comparison_last_month.startsWith('-')
-                      ? 'error.dark'
-                      : 'success.main'
-                  }
-                  src={
-                    requestHandlingTime?.comparison_last_month.startsWith('-')
-                      ? '/assets/icons/ic-trend-down.svg'
-                      : '/assets/icons/ic-grow.svg'
-                  }
-                />
-                <Typography>
+              {requestHandlingTime?.is_empty === false ? (
+                <>
                   <Typography
+                    fontSize="36px"
+                    fontWeight="bold"
                     color={
-                      requestHandlingTime?.comparison_last_month.startsWith('-')
-                        ? 'error.dark'
-                        : 'success.main'
+                      requestHandlingTime?.realization === 'faster'
+                        ? 'success.main'
+                        : requestHandlingTime?.realization === 'slower'
+                          ? 'error.dark'
+                          : ''
                     }
-                    component="span"
                   >
-                    {parseDuration(requestHandlingTime?.comparison_last_month)}
-                  </Typography>{' '}
-                  <Typography component="span" color="grey.600">
-                    than last month
+                    {requestHandlingTime?.average} {requestHandlingTime?.realization}
                   </Typography>
-                </Typography>
-              </Box>
+                  {requestHandlingTime?.realization !== '' ? (
+                    <Typography color="grey.600">than expectation</Typography>
+                  ) : null}
+                  <Box display="flex" alignItems="center" gap={1} mt={3}>
+                    <SvgColor
+                      color={
+                        requestHandlingTime?.comparison_last_month.startsWith('-')
+                          ? 'error.dark'
+                          : 'success.main'
+                      }
+                      src={
+                        requestHandlingTime?.comparison_last_month.startsWith('-')
+                          ? '/assets/icons/ic-trend-down.svg'
+                          : '/assets/icons/ic-grow.svg'
+                      }
+                    />
+                    <Typography>
+                      <Typography
+                        color={
+                          requestHandlingTime?.comparison_last_month.startsWith('-')
+                            ? 'error.dark'
+                            : 'success.main'
+                        }
+                        component="span"
+                      >
+                        {parseDuration(requestHandlingTime?.comparison_last_month)}
+                      </Typography>{' '}
+                      <Typography component="span" color="grey.600">
+                        than last month
+                      </Typography>
+                    </Typography>
+                  </Box>
+                </>
+              ) : (
+                <Box display="flex" justifyContent="center" p={4}>
+                  <Typography color="grey.500" fontWeight="bold">
+                    No Data yet
+                  </Typography>
+                </Box>
+              )}
+
               <Box
                 display="flex"
                 justifyContent="space-between"
@@ -660,7 +671,7 @@ export function DashboardInternalCompanyView({
                 <Box
                   display="flex"
                   justifyContent="center"
-                  alignItems="center"
+                  alignItems="start"
                   flexDirection="column"
                   sx={{
                     p: 3,
@@ -676,9 +687,20 @@ export function DashboardInternalCompanyView({
                   <Typography color="grey.600" fontSize="12px" textAlign="center">
                     First Response Time
                   </Typography>
-                  <Typography color="blue.700" fontSize="24px" fontWeight="bold" textAlign="center">
-                    1h 30m
-                  </Typography>
+                  {requestHandlingTime?.is_empty === false ? (
+                    <Typography
+                      color="blue.700"
+                      fontSize="24px"
+                      fontWeight="bold"
+                      textAlign="center"
+                    >
+                      1h 30m
+                    </Typography>
+                  ) : (
+                    <Typography color="grey.500" fontWeight="bold" mt={2}>
+                      No Data yet
+                    </Typography>
+                  )}
                 </Box>
 
                 <Box
@@ -694,9 +716,20 @@ export function DashboardInternalCompanyView({
                   <Typography color="grey.600" fontSize="12px" textAlign="center">
                     Next Response Time
                   </Typography>
-                  <Typography color="blue.700" fontSize="24px" fontWeight="bold" textAlign="center">
-                    45m
-                  </Typography>
+                  {requestHandlingTime?.is_empty === false ? (
+                    <Typography
+                      color="blue.700"
+                      fontSize="24px"
+                      fontWeight="bold"
+                      textAlign="center"
+                    >
+                      45m
+                    </Typography>
+                  ) : (
+                    <Typography color="grey.500" fontWeight="bold" mt={2}>
+                      No Data yet
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
