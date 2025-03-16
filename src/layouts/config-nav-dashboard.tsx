@@ -91,10 +91,10 @@ export const masterDataMenus = () => [
         heading: 'Client User',
         path: '/client-user',
       },
-      // {
-      //   heading: 'Product Filter',
-      //   path: '/product-filter',
-      // },
+      {
+        heading: 'Product Filter',
+        path: '/product-filter',
+      },
     ],
   },
 ];

@@ -113,6 +113,10 @@ export const ProductFilterEditPage = lazy(
   () => import('src/pages/master-data/product-filter/edit')
 );
 
+export const CompanyRelationCreatePage = lazy(
+  () => import('src/pages/master-data/product-filter/create')
+);
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
@@ -169,6 +173,7 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'product-filter', element: <ProductFilterPage /> },
     { path: 'product-filter/:id', element: <ProductFilterLinkedPage /> },
     { path: 'product-filter/:id/:vendorId/edit', element: <ProductFilterEditPage /> },
+    { path: 'product-filter/:id/create', element: <CompanyRelationCreatePage /> },
   ],
 };
 
