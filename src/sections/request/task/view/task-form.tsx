@@ -52,7 +52,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
   });
 
   useEffect(() => {
-    form.reset(task);
+    form.reset({ ...task, requestId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
 

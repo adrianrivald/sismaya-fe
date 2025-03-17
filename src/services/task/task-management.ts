@@ -212,6 +212,7 @@ export function useKanbanColumn(column: Task['status'], filter: TaskManagementFi
     suspense: false,
     useErrorBoundary: false,
     refetchOnWindowFocus: false,
+    enabled: !!filter.assigneeCompanyId,
     queryKey: kanbanKeys(column, filter),
     queryFn: async () => {
       const response = await getTaskManagement({
