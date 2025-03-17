@@ -22,6 +22,7 @@ import {
   useDeleteTask,
   useMutationAssignee,
   useMutationAttachment,
+  useAssigneeCompanyId,
 } from 'src/services/task/task-management';
 import { taskStatusMap } from 'src/constants/status';
 import dayjs from 'dayjs';
@@ -48,6 +49,7 @@ export function DueDatePicker({
 function Form({ request, task }: FormProps) {
   const requestId = request?.id ?? 0;
   const { onClose } = Drawer.useDisclosure();
+  const assigneeCompanyId = useAssigneeCompanyId();
 
   const [form, createOrUpdateFn] = useCreateOrUpdateTask(requestId, {
     onSuccess: () => {
@@ -57,10 +59,7 @@ function Form({ request, task }: FormProps) {
   });
 
   const taskId = form.getValues('taskId') ?? 0;
-  const { data } = useTaskRequestList(
-    { page: 1, page_size: 100 },
-    request?.assignee_company_id ?? 0
-  );
+  const { data } = useTaskRequestList({ page: 1, page_size: 100 }, assigneeCompanyId ?? 0);
   const requests = taskId ? [{ id: 0, name: request?.name }] : (data?.items ?? []);
   const { data: userPermissionsList } = useUserPermissions();
   const [_, assigneeFn] = useMutationAssignee(requestId);
