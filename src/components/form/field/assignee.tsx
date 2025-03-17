@@ -32,13 +32,26 @@ export interface Assignee {
   assigneeId?: number;
 }
 
-export function AssigneeList({ assignees }: { assignees: Array<Assignee> }) {
+export function AssigneeList({
+  assignees,
+  onClick,
+}: {
+  assignees: Array<Assignee>;
+  onClick?: any;
+}) {
   if (!assignees || assignees.length < 1) {
     return null;
   }
 
   return (
-    <AvatarGroup max={4} total={assignees.length}>
+    <AvatarGroup
+      max={4}
+      total={assignees.length}
+      onClick={() => {
+        onClick();
+      }}
+      sx={{ cursor: 'pointer' }}
+    >
       {assignees.map((assignee) => (
         <Avatar key={assignee.id} title={assignee.name} alt={assignee.name} src={assignee.avatar} />
       ))}

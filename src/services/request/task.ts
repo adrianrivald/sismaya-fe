@@ -158,15 +158,21 @@ export function useCreateOrUpdateTask(
     defaultValues,
   });
 
-  const isEdit = !!form.getValues().taskId;
+  const isEdit = !!form.watch().taskId;
 
   const mutation = useMutation<RequestTask, Error, RequestTask>({
     ...options,
     mutationKey: ['task'],
     mutationFn: async (task) => {
-      const formData = await RequestTask.toJson({ ...task, requestId });
+      let formData;
+      if (isEdit) {
+        formData = await RequestTask.toJson({ ...task, requestId });
+      } else {
+        const reqId = form.watch('requestId');
+        formData = await RequestTask.toJson({ ...task, requestId: reqId });
+      }
 
-      return http(['/tasks', isEdit ? `/${form.getValues().taskId}` : ''].join(''), {
+      return http(['/tasks', isEdit ? `/${form.watch().taskId}` : ''].join(''), {
         method: isEdit ? 'PUT' : 'POST',
         data: formData,
       });

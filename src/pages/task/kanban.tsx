@@ -229,7 +229,11 @@ export default function TaskKanbanPage() {
 
   return (
     <Stack direction="row" spacing={3} sx={{ overflowX: 'auto' }}>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext
+        onDragEnd={(result, provided) => {
+          onDragEnd(result, provided);
+        }}
+      >
         <BoardColumn permission={userPermissionList} column="to-do" />
         <BoardColumn permission={userPermissionList} column="in-progress" />
         <BoardColumn permission={userPermissionList} column="completed" />
