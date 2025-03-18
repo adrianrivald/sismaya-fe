@@ -8,6 +8,12 @@ async function fetchRequestByID(requestId: string) {
   return data;
 }
 
+async function fetchMyRequestByID(requestId: string) {
+  const { data } = await http<{ data: RequestDetail }>(`my-requests/${requestId}`);
+
+  return data;
+}
+
 async function fetchRequestAssigneeByID(requestId: string) {
   const { data } = await http<{ data: RequestDetail }>(`requests/${requestId}/assignee`);
 
@@ -28,8 +34,16 @@ export function useRequestAssigneeById(requestId: string, options: any = {}) {
 }
 
 export function useRequestById(requestId: string, options: any = {}) {
-  console.log('dataa 456', requestId);
   const data = useQuery(['request-items', requestId], () => fetchRequestByID(requestId), {
+    enabled: requestId !== undefined && requestId !== '0',
+    ...options,
+  });
+
+  return data;
+}
+
+export function useMyRequestById(requestId: string, options: any = {}) {
+  const data = useQuery(['my-request-items', requestId], () => fetchMyRequestByID(requestId), {
     enabled: requestId !== undefined && requestId !== '0',
     ...options,
   });
