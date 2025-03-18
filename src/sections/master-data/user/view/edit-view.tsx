@@ -80,7 +80,7 @@ interface EditFormProps {
   userCompanies: InternalCompany[];
   onClickDeleteUserCompany: (userCompanyId: number) => void;
   onChangeUserCompanyNew: (e: SelectChangeEvent<number>) => void;
-  onaddUserCompany: () => void;
+  onAddUserCompany: () => void;
   onChangeUserCompany: (e: SelectChangeEvent<number>, itemId: number) => void;
   internalCompanies: Company[] | undefined;
   onClickRemove: (id: number) => void;
@@ -103,7 +103,7 @@ function EditForm({
   userCompany,
   userCompanies,
   onChangeUserCompanyNew,
-  onaddUserCompany,
+  onAddUserCompany,
   onChangeUserCompany,
   onClickDeleteUserCompany,
   internalCompanies,
@@ -246,7 +246,7 @@ function EditForm({
               <Button
                 variant="contained"
                 color="primary"
-                onClick={onaddUserCompany}
+                onClick={onAddUserCompany}
                 sx={{ marginY: 2 }}
               >
                 Save
@@ -482,10 +482,8 @@ export function EditUserView({ type }: EditUserProps) {
   };
 
   // User Company
-  const onaddUserCompany = () => {
-    const hasUserCompanies = userCompanies?.some((item2) =>
-      internalCompanies?.some((item1) => item1.id === item2.company_id)
-    );
+  const onAddUserCompany = () => {
+    const hasUserCompanies = userCompanies?.some((item) => item.company_id === userCompany);
 
     if (!hasUserCompanies) {
       addUserCompany({
@@ -571,7 +569,7 @@ export function EditUserView({ type }: EditUserProps) {
               userCompany={userCompany}
               userCompanies={userCompanies}
               onChangeUserCompanyNew={onChangeUserCompanyNew}
-              onaddUserCompany={onaddUserCompany}
+              onAddUserCompany={onAddUserCompany}
               onChangeUserCompany={onChangeUserCompany}
               internalCompanies={internalCompanies}
               onClickDeleteUserCompany={onClickDeleteUserCompany}
