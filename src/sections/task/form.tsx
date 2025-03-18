@@ -94,6 +94,7 @@ function Form({ request, task }: FormProps) {
       taskId: task?.id,
       title: task?.name,
       dueDate: new Date().toISOString(),
+      files: task?.attachments,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
@@ -196,6 +197,7 @@ function Form({ request, task }: FormProps) {
 
           <MultipleDropzoneField
             label="Attachment"
+            disabledForm={userPermissionsList?.includes('request attachment:create')}
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
               if (userPermissionsList?.includes('request attachment:create')) {

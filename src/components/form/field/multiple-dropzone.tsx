@@ -17,7 +17,7 @@ import {
   type FieldValues,
   type UseControllerProps,
 } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { Bounce, toast } from 'react-toastify';
 import { Iconify } from 'src/components/iconify';
 
 export interface MultipleDropzoneFieldProps<TFormFields extends FieldValues = FieldValues>
@@ -25,6 +25,7 @@ export interface MultipleDropzoneFieldProps<TFormFields extends FieldValues = Fi
     UseControllerProps<TFormFields> {
   label?: string;
   onRemove?: (fileId?: number) => void;
+  disabledForm?: boolean;
 }
 
 interface MultipleField {
@@ -39,6 +40,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
   name,
   control,
   onRemove,
+  disabledForm,
   ...dropzoneOptions
 }: MultipleDropzoneFieldProps<TFormFields>) {
   const theme = useTheme();
@@ -47,9 +49,11 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
   const { getRootProps, getInputProps } = useDropzone({
     ...dropzoneOptions,
     multiple: true,
+
     onDropAccepted: (files, event) => {
       dropzoneOptions.onDropAccepted?.(files, event);
-      append(files as any);
+      const existingFiles = fields.map((field) => field);
+      append([...existingFiles, ...files] as any);
     },
   });
 
@@ -62,11 +66,31 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
     }
   }, [fieldError]);
 
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
+
   return (
     <Stack spacing={2}>
       <Stack spacing={2}>
         <FormLabel sx={{ px: 2, py: 0 }}>{label ?? 'Attachment'}</FormLabel>
-        <input {...getInputProps()} style={{ display: 'none' }} type="file" />
+        <input
+          {...getInputProps()}
+          style={{ display: 'none' }}
+          type="file"
+          accept="image/*"
+          disabled={!disabledForm}
+        />
 
         <FormControl
           component="div"
@@ -142,8 +166,12 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
             <IconButton
               aria-label={`remove ${fileName}`}
               onClick={() => {
-                remove(index);
-                onRemove?.(fileId);
+                if (!disabledForm) {
+                  onShowErrorToast();
+                } else {
+                  remove(index);
+                  onRemove?.(fileId);
+                }
               }}
             >
               <Iconify icon="mdi:close" />
@@ -152,7 +180,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
         );
       })}
 
-      {fields.length > 0 ? (
+      {/* {fields.length > 0 ? (
         <Box display="flex" justifyContent="flex-end">
           <Button
             size="small"
@@ -167,7 +195,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
             Remove all
           </Button>
         </Box>
-      ) : null}
+      ) : null} */}
     </Stack>
   );
 }
