@@ -12,6 +12,7 @@ import {
   useProductFilter,
 } from 'src/services/master-data/product-filter';
 import { useProductByCompanyId } from 'src/services/master-data/company/product/use-product-list';
+import { useCompanyById } from 'src/services/master-data/company';
 
 export function EditProductFilterView() {
   const { id, vendorId } = useParams();
@@ -40,6 +41,9 @@ export function EditProductFilterView() {
     }
   };
 
+  const { data: companyById } = useCompanyById(Number(id));
+  const { data: internalCompanyById } = useCompanyById(Number(vendorId));
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -50,7 +54,9 @@ export function EditProductFilterView() {
         <Typography color="grey.500">•</Typography>
         <Typography color="grey.500">Product Filter</Typography>
         <Typography color="grey.500">•</Typography>
-        <Typography color="grey.500">Product Filter</Typography>
+        <Typography color="grey.500">{companyById?.name}</Typography>
+        <Typography color="grey.500">•</Typography>
+        <Typography color="grey.500">{internalCompanyById?.name}</Typography>
       </Box>
 
       <Grid container spacing={3} sx={{ width: 'auto', mb: { xs: 3, md: 5 }, ml: 0 }}>

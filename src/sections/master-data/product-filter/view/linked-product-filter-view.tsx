@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
 import { useCompanyList } from 'src/services/master-data/company/use-company-list';
 import {
+  useCompanyById,
   useCompanyRelation,
   useDeleteCompanyById,
   useDeleteCompanyRelation,
@@ -125,6 +126,8 @@ export function ProductFilterLinkedView() {
     return { handleEdit, handleDelete };
   };
 
+  const { data: companyById } = useCompanyById(Number(id));
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -137,7 +140,7 @@ export function ProductFilterLinkedView() {
             <Typography color="grey.500">•</Typography>
             <Typography color="grey.500">Product Filter</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">Linked Internal Company</Typography>
+            <Typography color="grey.500">{companyById?.name}</Typography>
           </Box>
         </Box>
 
