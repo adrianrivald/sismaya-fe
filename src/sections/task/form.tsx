@@ -29,6 +29,7 @@ import dayjs from 'dayjs';
 import { useTaskRequestList } from 'src/services/request/use-request-list';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { toast, Bounce } from 'react-toastify';
+import { useParams } from 'react-router-dom';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -50,7 +51,7 @@ function Form({ request, task }: FormProps) {
   const requestId = request?.id ?? 0;
   const { onClose } = Drawer.useDisclosure();
   const assigneeCompanyId = useAssigneeCompanyId();
-
+  const { vendor } = useParams();
   const [form, createOrUpdateFn] = useCreateOrUpdateTask(requestId, {
     onSuccess: () => {
       onClose();
@@ -72,6 +73,8 @@ function Form({ request, task }: FormProps) {
       form.reset({});
     },
   });
+
+  console.log('fddd', form.watch());
 
   const onShowErrorToast = () => {
     toast.error(`You don't have permission`, {
@@ -148,6 +151,19 @@ function Form({ request, task }: FormProps) {
               </MenuItem>
             ))}
           </TextField>
+          {form.watch('requestId') && (
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ cursor: 'pointer' }}
+                onClick={() => {
+                  window.open(`/${vendor}/my-request/${form.watch('requestId')}`, '_blank');
+                }}
+              >
+                View Request
+              </Typography>
+            </Box>
+          )}
 
           <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
 
