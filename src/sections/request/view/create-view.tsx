@@ -425,6 +425,12 @@ export function CreateRequestView() {
                           {cito?.used}/{cito?.quota} used
                         </Typography>
                       )}
+                      {user.user_info.user_type === 'client' && (
+                        <Typography>
+                          {user?.user_info?.company?.cito_used}/
+                          {user?.user_info?.company?.cito_quota} used
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                   <Box
