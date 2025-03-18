@@ -68,10 +68,15 @@ export function TimerActionButton({
       sx={{ bgcolor: 'success.main', color: 'white' }}
       onClick={(e) => {
         e.stopPropagation();
-        if (!isCurrentTimer) {
-          mutation.mutate({ action: 'pause', taskId: storeTaskId });
+        if (!isCurrentTimer && storeTaskId !== 0 && state === 'running') {
+          mutation.mutate({ action: 'pause', taskId });
           store.send({ type: 'stop' });
         }
+
+        if (!isCurrentTimer && storeTaskId !== 0 && state === 'paused') {
+          store.send({ type: 'stop' });
+        }
+
         setTimeout(() => {
           if (state === 'idle' || state === 'paused') {
             if (!name) {
