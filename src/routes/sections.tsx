@@ -221,7 +221,7 @@ const internalRoutes: NonIndexRouteObject = {
       element: <PageListTimer />,
     },
     {
-      path: '/:vendor/task/:taskId/my-request/:id',
+      path: '/:vendor/my-request/:id',
       element: <MyRequestTask />,
     },
 

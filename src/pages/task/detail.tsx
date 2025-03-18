@@ -209,7 +209,7 @@ export default function TaskDetailPage() {
                 variant="subtitle2"
                 sx={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => {
-                  window.open(`/${vendor}/task/${taskId}/my-request/${request.id}`, '_blank');
+                  window.open(`/${vendor}/my-request/${request.id}`, '_blank');
                 }}
               >
                 {request.name}
