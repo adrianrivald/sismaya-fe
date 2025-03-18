@@ -140,7 +140,7 @@ export function ProductFilterLinkedView() {
             <Typography color="grey.500">•</Typography>
             <Typography color="grey.500">Product Filter</Typography>
             <Typography color="grey.500">•</Typography>
-            <Typography color="grey.500">{companyById.name}</Typography>
+            <Typography color="grey.500">{companyById?.name}</Typography>
           </Box>
         </Box>
 
