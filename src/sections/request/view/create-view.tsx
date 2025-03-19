@@ -39,15 +39,19 @@ import PdfPreview from 'src/utils/pdf-viewer';
 
 export function CreateRequestView() {
   const { user } = useAuth();
-  console.log(user, 'usernya');
+  const userType = user.user_info.user_type;
   const { vendor } = useParams();
+  const clientCompanyId = user?.user_info?.company?.id;
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   const [selectedCompanyId, setSelectedCompanyId] = React.useState('');
   const { data: cito } = useCitoById(selectedCompanyId);
 
-  const { data: products } = useProductByCompanyId(idCurrentCompany ?? 0);
+  const { data: products } = useProductByCompanyId(
+    userType === 'client' ? clientCompanyId : (Number(selectedCompanyId) ?? 0),
+    true
+  );
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
   const { data: clientUsers } = useClientUsers(String(idCurrentCompany));
