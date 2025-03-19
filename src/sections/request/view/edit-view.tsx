@@ -102,7 +102,7 @@ export function EditRequestView() {
       name: item?.assignee?.user_info?.name,
     }))
   );
-
+  const [isCito, setIsCito] = React.useState(requestDetail?.is_cito);
   const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState('');
   const onPreviewFile = (filePath: string, fileName: string) => {
@@ -145,6 +145,7 @@ export function EditRequestView() {
     const payload = {
       ...formData,
       id: Number(id),
+      is_cito: isCito,
       ...(requestDetail?.step === 'to_do' && { start_date: dateValue }),
       ...(requestDetail?.step === 'to_do' && { end_date: endDateValue }),
     };
@@ -207,6 +208,8 @@ export function EditRequestView() {
       request_id: Number(id),
     });
   };
+
+  console.log(isCito, 'value');
 
   const handleDeletePicItemFromDetail = (_userId: number, assigneeId?: number) => {
     if (assigneeId) deleteRequestAssignee(assigneeId);
@@ -391,9 +394,11 @@ export function EditRequestView() {
                       <FormControlLabel
                         control={
                           <Checkbox
-                            {...register('is_cito')}
-                            defaultChecked={watch('is_cito')}
-                            value={watch('is_cito')}
+                            onChange={(e) => {
+                              setIsCito((prev) => !prev);
+                            }}
+                            value={isCito}
+                            defaultChecked={isCito}
                             disabled={
                               userType === 'internal' ||
                               (userType === 'client' &&
