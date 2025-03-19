@@ -90,16 +90,16 @@ function Form({ request, task }: FormProps) {
   };
 
   useEffect(() => {
-    if (task?.id) {
-      form.reset({
-        ...task,
-        requestId,
-        taskId: task?.id,
-        title: task?.name,
-        dueDate: new Date().toISOString(),
-        files: task?.attachments,
-      });
-    }
+    // if (task?.id) {
+    form.reset({
+      ...task,
+      requestId,
+      taskId: task?.id,
+      title: task?.name,
+      dueDate: new Date().toISOString(),
+      files: task?.attachments,
+    });
+    // }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
@@ -213,11 +213,19 @@ function Form({ request, task }: FormProps) {
           />
 
           <MultipleDropzoneField
+            acceptForm="image/*"
             label="Attachment"
-            disabledForm={userPermissionsList?.includes('request attachment:create')}
+            maxSizeForm={5}
+            disabledForm={
+              userPermissionsList?.includes('task:update') ||
+              userPermissionsList?.includes('task:create')
+            }
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
-              if (userPermissionsList?.includes('request attachment:create')) {
+              if (
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              ) {
                 if (!taskId) return;
                 uploadOrDeleteFileFn({ kind: 'create', taskId, files });
               } else {
@@ -225,7 +233,10 @@ function Form({ request, task }: FormProps) {
               }
             }}
             onRemove={(fileId) => {
-              if (userPermissionsList?.includes('request attachment:delete')) {
+              if (
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              ) {
                 if (!taskId) return;
                 uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
               } else {

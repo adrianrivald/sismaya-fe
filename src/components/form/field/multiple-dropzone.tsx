@@ -26,6 +26,8 @@ export interface MultipleDropzoneFieldProps<TFormFields extends FieldValues = Fi
   label?: string;
   onRemove?: (fileId?: number) => void;
   disabledForm?: boolean;
+  acceptForm?: string;
+  maxSizeForm?: number;
 }
 
 interface MultipleField {
@@ -41,6 +43,8 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
   control,
   onRemove,
   disabledForm,
+  acceptForm = '*',
+  maxSizeForm = 10,
   ...dropzoneOptions
 }: MultipleDropzoneFieldProps<TFormFields>) {
   const theme = useTheme();
@@ -51,6 +55,24 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
     multiple: true,
 
     onDropAccepted: (files, event) => {
+      const MAX_SIZE = maxSizeForm * 1024 * 1024; // 5MB in bytes
+      const oversizedFiles = files.filter((file) => file.size > MAX_SIZE);
+
+      if (oversizedFiles.length > 0) {
+        toast.error('File size should not exceed 5MB', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        });
+        return;
+      }
+
       dropzoneOptions.onDropAccepted?.(files, event);
       const existingFiles = fields.map((field) => field);
       append([...existingFiles, ...files] as any);
@@ -88,7 +110,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
           {...getInputProps()}
           style={{ display: 'none' }}
           type="file"
-          accept="image/*"
+          accept={acceptForm}
           disabled={!disabledForm}
         />
 
