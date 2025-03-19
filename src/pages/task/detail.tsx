@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { CONFIG } from 'src/config-global';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
   Stack,
@@ -205,7 +205,15 @@ export default function TaskDetailPage() {
 
             <Stack spacing={0.5}>
               <Typography variant="body2">Request</Typography>
-              <Typography variant="subtitle2">{request.name}</Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => {
+                  window.open(`/${vendor}/my-request/${request.id}`, '_blank');
+                }}
+              >
+                {request.name}
+              </Typography>
             </Stack>
           </Stack>
 

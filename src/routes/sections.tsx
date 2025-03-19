@@ -10,6 +10,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 
 import { useAuth } from 'src/sections/auth/providers/auth';
 import PageListTimer from 'src/sections/task/page-list-timer';
+import MyRequestTask from 'src/sections/task/my-request';
 
 // ----------------------------------------------------------------------
 export const HomePage = lazy(() => import('src/pages/home'));
@@ -218,6 +219,10 @@ const internalRoutes: NonIndexRouteObject = {
     {
       path: '/:vendor/task/:taskId/activities',
       element: <PageListTimer />,
+    },
+    {
+      path: '/:vendor/my-request/:id',
+      element: <MyRequestTask />,
     },
 
     // Monitor Personal Load

@@ -29,6 +29,7 @@ import dayjs from 'dayjs';
 import { useTaskRequestList } from 'src/services/request/use-request-list';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { toast, Bounce } from 'react-toastify';
+import { useParams } from 'react-router-dom';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -50,7 +51,7 @@ function Form({ request, task }: FormProps) {
   const requestId = request?.id ?? 0;
   const { onClose } = Drawer.useDisclosure();
   const assigneeCompanyId = useAssigneeCompanyId();
-
+  const { vendor } = useParams();
   const [form, createOrUpdateFn] = useCreateOrUpdateTask(requestId, {
     onSuccess: () => {
       onClose();
@@ -73,6 +74,8 @@ function Form({ request, task }: FormProps) {
     },
   });
 
+  console.log('fddd', form.watch());
+
   const onShowErrorToast = () => {
     toast.error(`You don't have permission`, {
       position: 'top-right',
@@ -94,6 +97,7 @@ function Form({ request, task }: FormProps) {
       taskId: task?.id,
       title: task?.name,
       dueDate: new Date().toISOString(),
+      files: task?.attachments,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
@@ -147,6 +151,19 @@ function Form({ request, task }: FormProps) {
               </MenuItem>
             ))}
           </TextField>
+          {form.watch('requestId') && (
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ cursor: 'pointer' }}
+                onClick={() => {
+                  window.open(`/${vendor}/my-request/${form.watch('requestId')}`, '_blank');
+                }}
+              >
+                View Request
+              </Typography>
+            </Box>
+          )}
 
           <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
 
@@ -196,6 +213,7 @@ function Form({ request, task }: FormProps) {
 
           <MultipleDropzoneField
             label="Attachment"
+            disabledForm={userPermissionsList?.includes('request attachment:create')}
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
               if (userPermissionsList?.includes('request attachment:create')) {
