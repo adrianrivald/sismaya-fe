@@ -8,6 +8,7 @@ import {
   MenuItem,
   Button,
   IconButton,
+  FormLabel,
 } from '@mui/material';
 import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
@@ -49,7 +50,7 @@ export function DueDatePicker({
 
 function Form({ request, task }: FormProps) {
   const requestId = request?.id ?? 0;
-  const { onClose } = Drawer.useDisclosure();
+  const { onClose, isOpen } = Drawer.useDisclosure();
   const assigneeCompanyId = useAssigneeCompanyId();
   const { vendor } = useParams();
   const [form, createOrUpdateFn] = useCreateOrUpdateTask(requestId, {
@@ -74,8 +75,6 @@ function Form({ request, task }: FormProps) {
     },
   });
 
-  console.log('fddd', form.watch());
-
   const onShowErrorToast = () => {
     toast.error(`You don't have permission`, {
       position: 'top-right',
@@ -91,6 +90,7 @@ function Form({ request, task }: FormProps) {
   };
 
   useEffect(() => {
+    // if (task?.id) {
     form.reset({
       ...task,
       requestId,
@@ -99,6 +99,8 @@ function Form({ request, task }: FormProps) {
       dueDate: new Date().toISOString(),
       files: task?.attachments,
     });
+    // }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
 
@@ -137,33 +139,32 @@ function Form({ request, task }: FormProps) {
 
         <Stack p={2} spacing={3} flexGrow={1}>
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
-
-          <TextField
-            label="Request"
-            select
-            defaultValue={0}
-            disabled={taskId ? true : requests.length === 0}
-            {...formUtils.getTextProps(form, 'requestId')}
-          >
-            {requests?.map((r) => (
-              <MenuItem key={r.id} value={r.id} onClick={(e) => e.stopPropagation()}>
-                {r?.name || `REQ${r.number}`}
-              </MenuItem>
-            ))}
-          </TextField>
-          {form.watch('requestId') && (
-            <Box>
-              <Typography
-                variant="subtitle2"
-                sx={{ cursor: 'pointer' }}
+          <Stack spacing={1}>
+            <TextField
+              label="Request"
+              select
+              defaultValue={0}
+              sx={{ pb: '-10px' }}
+              disabled={taskId ? true : requests.length === 0}
+              {...formUtils.getTextProps(form, 'requestId')}
+            >
+              {requests?.map((r) => (
+                <MenuItem key={r.id} value={r.id} onClick={(e) => e.stopPropagation()}>
+                  {r?.name || `REQ${r.number}`}
+                </MenuItem>
+              ))}
+            </TextField>
+            {form.watch('requestId') && String(form.watch('requestId')) !== '0' && (
+              <FormLabel
                 onClick={() => {
                   window.open(`/${vendor}/my-request/${form.watch('requestId')}`, '_blank');
                 }}
+                sx={{ cursor: 'pointer', textDecoration: 'underline' }}
               >
                 View Request
-              </Typography>
-            </Box>
-          )}
+              </FormLabel>
+            )}
+          </Stack>
 
           <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
 
@@ -212,11 +213,19 @@ function Form({ request, task }: FormProps) {
           />
 
           <MultipleDropzoneField
+            acceptForm="image/*"
             label="Attachment"
-            disabledForm={userPermissionsList?.includes('request attachment:create')}
+            maxSizeForm={5}
+            disabledForm={
+              userPermissionsList?.includes('task:update') ||
+              userPermissionsList?.includes('task:create')
+            }
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
-              if (userPermissionsList?.includes('request attachment:create')) {
+              if (
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              ) {
                 if (!taskId) return;
                 uploadOrDeleteFileFn({ kind: 'create', taskId, files });
               } else {
@@ -224,7 +233,10 @@ function Form({ request, task }: FormProps) {
               }
             }}
             onRemove={(fileId) => {
-              if (userPermissionsList?.includes('request attachment:delete')) {
+              if (
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              ) {
                 if (!taskId) return;
                 uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
               } else {

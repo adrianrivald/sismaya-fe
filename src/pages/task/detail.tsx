@@ -269,7 +269,7 @@ export default function TaskDetailPage() {
                     <Box
                       sx={{ cursor: 'pointer', flex: 1, width: '80%' }}
                       onClick={() => {
-                        if (userPermissionsList?.includes('request attachment:read')) {
+                        if (userPermissionsList?.includes('task:read')) {
                           setAttachmentModal({ isOpen: true, url: attachment.url });
                         } else {
                           onShowErrorToast();
@@ -316,7 +316,7 @@ export default function TaskDetailPage() {
                     >
                       <MenuItem
                         onClick={() => {
-                          if (userPermissionsList?.includes('request attachment:read')) {
+                          if (userPermissionsList?.includes('task:read')) {
                             downloadFile(attachment.url);
                             handleClose();
                           } else {
@@ -334,7 +334,7 @@ export default function TaskDetailPage() {
                       </MenuItem>
                       <MenuItem
                         onClick={() => {
-                          if (userPermissionsList?.includes('request attachment:read')) {
+                          if (userPermissionsList?.includes('task:update')) {
                             setDeleteModal({ isOpen: true, id: attachment.id });
                             handleClose();
                           } else {
