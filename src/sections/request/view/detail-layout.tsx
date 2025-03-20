@@ -43,7 +43,7 @@ export default function RequestDetailLayout() {
   const [isFetchingChat, setIsFetchingChat] = useState(false);
   const { data } = useMessage(Number(id), chatPage);
   const [chatData, setChatData] = useState<Messaging[]>(data?.messages ?? []);
-  const { mutate: updateStatus } = useUpdateRequestStatus();
+  const { mutate: updateStatus, isSuccess } = useUpdateRequestStatus();
   const { mutate: updatePriority } = useUpdateRequestPriority();
   const [currentPriority, setCurrentPriority] = useState(requestDetail?.priority ?? '-');
   const [currentStatus, setCurrentStatus] = useState(requestDetail?.progress_status?.id ?? 0);
@@ -86,7 +86,6 @@ export default function RequestDetailLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatPage, isShouldFetch, isCoolingDown]);
 
-  console.log(chatData, 'chatdata');
   const bottomChatBoxElement = document.getElementById('bottomChatBox');
 
   useEffect(() => {
@@ -144,6 +143,21 @@ export default function RequestDetailLayout() {
       e.stopPropagation();
       e.preventDefault();
       setOpenCompleteRequest(true);
+    } else if (
+      userType === 'internal' &&
+      !requestDetail?.assignees?.map((item) => item?.assignee?.id).includes(user?.user_info?.id)
+    ) {
+      toast.error(`You are not included as an assignee`, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
     } else {
       updateStatus({
         id: Number(id),
@@ -155,12 +169,18 @@ export default function RequestDetailLayout() {
 
   const onCompleteRequest = () => {
     const idComplete = requestStatuses?.find((item) => item?.step === 'done')?.id ?? 0;
+    updateStatus(
+      {
+        id: Number(id),
+        statusId: idComplete,
+      },
+      {
+        onSuccess: () => {
+          setCurrentStatus(idComplete);
+        },
+      }
+    );
 
-    updateStatus({
-      id: Number(id),
-      statusId: idComplete,
-    });
-    setCurrentStatus(idComplete);
     setOpenCompleteRequest(false);
   };
 
@@ -266,7 +286,7 @@ export default function RequestDetailLayout() {
                 >
                   Priority
                   <Select
-                    disabled={userType === 'client'}
+                    disabled={userType === 'client' || requestDetail?.step === 'done'}
                     value={currentPriority}
                     sx={{
                       fontWeight: 'bold',
@@ -288,11 +308,30 @@ export default function RequestDetailLayout() {
                       },
                     }}
                     onChange={(e: SelectChangeEvent<string>) => {
-                      setCurrentPriority(e.target.value);
-                      updatePriority({
-                        id: Number(id),
-                        priority: e.target.value,
-                      });
+                      if (
+                        userType === 'internal' &&
+                        !requestDetail?.assignees
+                          ?.map((item) => item?.assignee?.id)
+                          .includes(user?.user_info?.id)
+                      ) {
+                        toast.error(`You are not included as an assignee`, {
+                          position: 'top-right',
+                          autoClose: 5000,
+                          hideProgressBar: true,
+                          closeOnClick: true,
+                          pauseOnHover: true,
+                          draggable: true,
+                          progress: undefined,
+                          theme: 'light',
+                          transition: Bounce,
+                        });
+                      } else {
+                        setCurrentPriority(e.target.value);
+                        updatePriority({
+                          id: Number(id),
+                          priority: e.target.value,
+                        });
+                      }
                     }}
                   >
                     {['low', 'medium', 'high']?.map((value) => (
