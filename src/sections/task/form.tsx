@@ -143,12 +143,12 @@ function Form({ request, task }: FormProps) {
           <Stack spacing={1}>
             <Autocomplete
               disablePortal
+              popupIcon={null}
               options={requests ?? []}
               getOptionLabel={(option) => option?.name || `REQ${option?.number}`}
               disabled={taskId ? true : requests.length === 0}
               value={requests?.find((r) => r?.id === form.watch('requestId'))}
               onChange={(_event, newValue) => {
-                console.log('data', newValue);
                 form.setValue('requestId', newValue?.id || '');
               }}
               renderInput={(params) => (
