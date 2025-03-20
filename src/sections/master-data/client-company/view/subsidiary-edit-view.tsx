@@ -155,7 +155,7 @@ function EditForm({
         <Box display="flex" flexDirection="column" gap={2}>
           {data?.department?.map((item, index) => (
             <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-              <Box width="50%">
+              <Box width="100%">
                 <TextField
                   sx={{
                     width: '100%',
@@ -165,25 +165,10 @@ function EditForm({
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     onChangeDivision(e, item?.id, 'name')
                   }
-                  // InputProps={{
-                  //   readOnly: true,
-                  // }}
+                  InputProps={{
+                    readOnly: true,
+                  }}
                 />
-              </Box>
-              <Box width="50%">
-                <FormControl fullWidth>
-                  <InputLabel id="type">Division</InputLabel>
-                  <Select
-                    label="Division"
-                    value={item?.is_show_all}
-                    onChange={(e: SelectChangeEvent<boolean>) =>
-                      onChangeDivision(e, item?.id, 'division')
-                    }
-                  >
-                    <MenuItem value="true">Show all division</MenuItem>
-                    <MenuItem value="false">Only show this division</MenuItem>
-                  </Select>
-                </FormControl>
               </Box>
               <MenuList
                 disablePadding
@@ -200,14 +185,14 @@ function EditForm({
                   },
                 }}
               >
-                <MenuItem
+                {/* <MenuItem
                   onClick={() =>
                     onClickEdit(departments[index].name, departments[index].is_show_all, item?.id)
                   }
                 >
                   <Iconify icon="solar:pen-bold" />
                   Edit
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem
                   onClick={() => onClickRemove(item?.id, 'division')}
                   sx={{ color: 'error.main' }}
@@ -228,7 +213,7 @@ function EditForm({
                   onChange={(e: SelectChangeEvent<string>) => onChangeDivisionNew(e, 'name')}
                 >
                   {parentDepartments?.map((item) => (
-                    <MenuItem value={item?.id.toString()}>{item?.name}</MenuItem>
+                    <MenuItem value={item?.name}>{item?.name}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -279,7 +264,6 @@ export function EditClientSubCompanyView() {
   const [departments, setDepartments] = React.useState(data?.department ?? []);
   const [department, setDepartment] = React.useState<Partial<Department>>({
     name: '',
-    is_show_all: false,
   });
 
   const [deleteType, setDeleteType] = React.useState('');
@@ -295,7 +279,6 @@ export function EditClientSubCompanyView() {
   const onAddDepartment = () => {
     addDivision({
       name: department?.name,
-      is_show_all: department?.is_show_all,
       company_id: data?.id,
     });
     setDepartment({
