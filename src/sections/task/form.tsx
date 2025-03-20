@@ -64,7 +64,7 @@ function Form({ request, task }: FormProps) {
 
   const taskId = task?.id ?? 0;
   const { data } = useTaskRequestList({ page: 1, page_size: 999 }, assigneeCompanyId ?? 0);
-  const requests = taskId ? [{ id: taskId, name: request?.name }] : (data?.items ?? []);
+  const requests = taskId ? [{ id: requestId, name: request?.name }] : (data?.items ?? []);
   const { data: userPermissionsList } = useUserPermissions();
   const [_, assigneeFn] = useMutationAssignee(requestId);
 
@@ -138,7 +138,6 @@ function Form({ request, task }: FormProps) {
         </Box>
 
         <Divider />
-
         <Stack p={2} spacing={3} flexGrow={1}>
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
           <Stack spacing={1}>
@@ -147,9 +146,10 @@ function Form({ request, task }: FormProps) {
               options={requests ?? []}
               getOptionLabel={(option) => option?.name || `REQ${option?.number}`}
               disabled={taskId ? true : requests.length === 0}
-              value={requests?.find((r) => r?.id === form.watch('taskId')) || null}
+              value={requests?.find((r) => r?.id === form.watch('requestId'))}
               onChange={(_event, newValue) => {
-                form.setValue('taskId', newValue?.id || '');
+                console.log('data', newValue);
+                form.setValue('requestId', newValue?.id || '');
               }}
               renderInput={(params) => (
                 <TextField
