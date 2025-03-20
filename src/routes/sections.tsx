@@ -61,6 +61,10 @@ export const ClientCompanyEditPage = lazy(
   () => import('src/pages/master-data/client-company/edit')
 );
 
+export const ClientSubCompanyEditPage = lazy(
+  () => import('src/pages/master-data/client-company/edit-sub')
+);
+
 // Internal User
 export const UserInternalListPage = lazy(
   () => import('src/pages/master-data/user/internal-user/list')
@@ -152,6 +156,8 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'client-company', element: <ClientCompanyListPage /> },
     { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
     { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
+    { path: 'client-company/:id/:subId/edit', element: <ClientSubCompanyEditPage /> },
+
     // Internal User
     { path: 'internal-user', element: <UserInternalListPage /> },
     { path: 'internal-user/create', element: <UserInternalCreatePage /> },

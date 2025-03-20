@@ -6,14 +6,14 @@ import { http } from "src/utils/http";
 import { CompanyDTO } from "./schemas/company-schema";
 import { Company } from "./types";
 
-export type StoreCompany = CompanyDTO & {type: string, cover?: any};
+export type StoreCompany = CompanyDTO & {type: string, cover?: any, parent_id?: string};
 
 export function useAddCompany() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreCompany) => {
-        const { name, abbreviation, type, cover } = formData;
+        const { name, abbreviation, type, cover, parent_id } = formData;
         const payload =  {
           name,
           abbreviation,
@@ -33,6 +33,12 @@ export function useAddCompany() {
             image: url,
           });
           }
+        }
+
+        if (parent_id) {
+          Object.assign(payload, {
+            parent_id
+          })
         }
   
         return http(`companies`, {
@@ -57,9 +63,8 @@ export function useAddCompany() {
           });
           if (res?.data?.type === "holding") {
             navigate(`/client-company/${res?.data?.id}/edit`)
-          } else {
+          } else if (res?.data?.type === "internal") {
             navigate(`/internal-company/${res?.data?.id}/edit`)
-
           }
         },
         onError: (error) => {
