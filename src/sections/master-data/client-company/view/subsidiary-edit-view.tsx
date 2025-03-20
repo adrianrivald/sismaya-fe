@@ -62,10 +62,7 @@ interface EditFormProps {
   ) => void;
   onClickEdit: (value: string, type: boolean, divisionId: number) => void;
   onClickDelete: (divisionId: number) => void;
-  onChangeDivisionNew: (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-    type: string
-  ) => void;
+  onChangeDivisionNew: (e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>) => void;
   data: Company | undefined;
   department: Partial<Department>;
   departments: Department[];
@@ -209,11 +206,11 @@ function EditForm({
                 <InputLabel id="type">Division</InputLabel>
                 <Select
                   label="Division"
-                  value={department?.name}
-                  onChange={(e: SelectChangeEvent<string>) => onChangeDivisionNew(e, 'name')}
+                  value={department?.id?.toString()}
+                  onChange={(e: SelectChangeEvent<string>) => onChangeDivisionNew(e)}
                 >
                   {parentDepartments?.map((item) => (
-                    <MenuItem value={item?.name}>{item?.name}</MenuItem>
+                    <MenuItem value={item?.id.toString()}>{item?.name}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -279,6 +276,7 @@ export function EditClientSubCompanyView() {
   const onAddDepartment = () => {
     addDivision({
       name: department?.name,
+      is_show_all: department?.is_show_all,
       company_id: data?.id,
     });
     setDepartment({
@@ -347,15 +345,14 @@ export function EditClientSubCompanyView() {
   };
 
   const onChangeDivisionNew = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-    type: string
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>
   ) => {
-    if (type === 'name') {
-      setDepartment({
-        ...department,
-        name: e.target.value as string,
-      });
-    }
+    const selectedDiv = divisions?.find((item) => item?.id === Number(e.target.value));
+    setDepartment({
+      name: selectedDiv?.name,
+      is_show_all: selectedDiv?.is_show_all,
+      id: selectedDiv?.id,
+    });
   };
 
   const onClickEdit = async (value: string, type: boolean, divisionId: number) => {
