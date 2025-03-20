@@ -16,6 +16,8 @@ function TaskList({ requestId }: TaskListProps) {
     return <TaskEmpty />;
   }
 
+  console.log('dataa', data);
+
   return data.map((task) => (
     // @ts-ignore
     <RequestTaskForm key={task.taskId} requestId={requestId} task={{ ...task }}>
