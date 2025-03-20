@@ -235,7 +235,10 @@ export function RequestDetailView() {
             borderColor: 'primary.main',
             borderRadius: 1.5,
           }}
-          disabled={userType === 'client' && requestDetail?.step?.toLowerCase() !== 'pending'}
+          disabled={
+            (userType === 'client' && requestDetail?.step?.toLowerCase() !== 'pending') ||
+            requestDetail?.step === 'done'
+          }
         >
           Edit Detail
         </Button>
