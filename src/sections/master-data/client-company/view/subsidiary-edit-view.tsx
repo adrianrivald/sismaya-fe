@@ -28,6 +28,7 @@ import {
   useUpdateCompany,
   useUpdateDivision,
   useDeleteCompanyById,
+  useDivisionByCompanyId,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
 import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
@@ -60,23 +61,16 @@ interface EditFormProps {
     type: string
   ) => void;
   onClickEdit: (value: string, type: boolean, divisionId: number) => void;
-  onClickEditCompany: (companyId: number) => void;
   onClickDelete: (divisionId: number) => void;
   onChangeDivisionNew: (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
-    type: string
-  ) => void;
-  onChangeSubCompanyNew: (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
     type: string
   ) => void;
   data: Company | undefined;
   department: Partial<Department>;
   departments: Department[];
-  subCompany: Partial<Company>;
-  subCompanies: Company[];
+  parentDepartments: Department[] | undefined;
   onAddDepartment: () => void;
-  onAddSubCompany: () => void;
   onClickRemove: (id: number, type: string) => void;
 }
 
@@ -90,16 +84,12 @@ function EditForm({
   onClickEdit,
   onClickDelete,
   onChangeDivisionNew,
-  onChangeSubCompanyNew,
   department,
   departments,
-  subCompany,
-  subCompanies,
   data,
   onAddDepartment,
-  onAddSubCompany,
   onClickRemove,
-  onClickEditCompany,
+  parentDepartments,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -182,12 +172,12 @@ function EditForm({
               </Box>
               <Box width="50%">
                 <FormControl fullWidth>
-                  <InputLabel id="type">Show Type</InputLabel>
+                  <InputLabel id="type">Division</InputLabel>
                   <Select
-                    label="Type"
+                    label="Division"
                     value={item?.is_show_all}
                     onChange={(e: SelectChangeEvent<boolean>) =>
-                      onChangeDivision(e, item?.id, 'type')
+                      onChangeDivision(e, item?.id, 'division')
                     }
                   >
                     <MenuItem value="true">Show all division</MenuItem>
@@ -229,29 +219,17 @@ function EditForm({
             </Stack>
           ))}
           <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-            <Box width="50%">
-              <TextField
-                sx={{
-                  width: '100%',
-                }}
-                label="Division"
-                value={department?.name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onChangeDivisionNew(e, 'name')
-                }
-              />
-            </Box>
-
-            <Box width="50%">
+            <Box width="100%">
               <FormControl fullWidth>
-                <InputLabel id="type">Show Type</InputLabel>
+                <InputLabel id="type">Division</InputLabel>
                 <Select
-                  label="Type"
-                  value={department?.is_show_all}
-                  onChange={(e: SelectChangeEvent<boolean>) => onChangeDivisionNew(e, 'type')}
+                  label="Division"
+                  value={department?.name}
+                  onChange={(e: SelectChangeEvent<string>) => onChangeDivisionNew(e, 'name')}
                 >
-                  <MenuItem value="true">Show all division</MenuItem>
-                  <MenuItem value="false">Only show this division</MenuItem>
+                  {parentDepartments?.map((item) => (
+                    <MenuItem value={item?.id.toString()}>{item?.name}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
@@ -262,110 +240,6 @@ function EditForm({
               sx={{ marginY: 2 }}
             >
               Save
-            </Button>
-          </Stack>
-        </Box>
-      </Grid>
-
-      <Grid item xs={12} md={12}>
-        <Typography variant="h4" color="primary" mb={4}>
-          Sub-Company
-        </Typography>
-        <Box display="flex" flexDirection="column" gap={2}>
-          {data?.subsidiaries?.map((item, index) => (
-            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-              <Box width="50%">
-                <TextField
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Sub-Company Name"
-                  value={item.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onChangeDivision(e, item?.id, 'name')
-                  }
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
-              </Box>
-              <Box width="50%">
-                <TextField
-                  sx={{
-                    width: '100%',
-                  }}
-                  label="Sub-Company Description"
-                  value={item?.abbreviation}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onChangeDivisionNew(e, 'abbreviation')
-                  }
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
-              </Box>
-              <MenuList
-                disablePadding
-                sx={{
-                  p: 0.5,
-                  gap: 0.5,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  [`& .${menuItemClasses.root}`]: {
-                    px: 1,
-                    gap: 2,
-                    borderRadius: 0.75,
-                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                  },
-                }}
-              >
-                <MenuItem onClick={() => onClickEditCompany(item?.id)}>
-                  <Iconify icon="solar:pen-bold" />
-                  Edit
-                </MenuItem>
-                <MenuItem
-                  onClick={() => onClickRemove(item?.id, 'company')}
-                  sx={{ color: 'error.main' }}
-                >
-                  <Iconify icon="solar:trash-bin-trash-bold" />
-                  Delete
-                </MenuItem>
-              </MenuList>
-            </Stack>
-          ))}
-          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-            <Box width="50%">
-              <TextField
-                sx={{
-                  width: '100%',
-                }}
-                label="Sub-Company Name"
-                value={subCompany?.name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onChangeSubCompanyNew(e, 'name')
-                }
-              />
-            </Box>
-
-            <Box width="50%">
-              <TextField
-                sx={{
-                  width: '100%',
-                }}
-                label="Sub-Company Description"
-                value={subCompany?.abbreviation}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onChangeSubCompanyNew(e, 'abbreviation')
-                }
-              />
-            </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={onAddSubCompany}
-              sx={{ marginY: 2 }}
-            >
-              Create Sub-Company
             </Button>
           </Stack>
         </Box>
@@ -387,14 +261,15 @@ function EditForm({
   );
 }
 
-export function EditClientCompanyView() {
-  const { id } = useParams();
+export function EditClientSubCompanyView() {
+  const { id, subId } = useParams();
   const navigate = useNavigate();
-  const { data } = useCompanyById(Number(id));
+  const { data } = useCompanyById(Number(subId));
   const { mutate: addSubCompany } = useAddCompany();
   const { mutate: updateCompany } = useUpdateCompany();
   const { mutate: deleteCompany } = useDeleteCompanyById();
-  const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
+  const { data: divisions } = useDivisionByCompanyId(Number(id));
+  const { mutate: deleteDivision } = useDeleteDivisionItem(Number(subId));
   const { mutate: addDivision } = useAddDivision();
   const { mutate: updateDivision } = useUpdateDivision();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
@@ -407,11 +282,6 @@ export function EditClientCompanyView() {
     is_show_all: false,
   });
 
-  const [subCompanies, setSubCompanies] = React.useState([]);
-  const [subCompany, setSubCompany] = React.useState({
-    name: '',
-    abbreviation: '',
-  });
   const [deleteType, setDeleteType] = React.useState('');
 
   const defaultValues: ClientCompanyValues = {
@@ -431,19 +301,6 @@ export function EditClientCompanyView() {
     setDepartment({
       name: '',
       is_show_all: false,
-    });
-  };
-
-  const onAddSubCompany = () => {
-    addSubCompany({
-      name: subCompany?.name,
-      abbreviation: subCompany?.abbreviation,
-      parent_id: id?.toString(),
-      type: 'subsidiary',
-    });
-    setSubCompany({
-      name: '',
-      abbreviation: '',
     });
   };
 
@@ -467,8 +324,8 @@ export function EditClientCompanyView() {
     const payload = {
       ...formData,
       cito_quota: data?.cito_quota,
-      id: Number(id),
-      type: 'holding',
+      id: Number(subId),
+      type: 'subsidiary',
     };
     if (defaultValues?.image) {
       Object.assign(payload, {
@@ -507,7 +364,7 @@ export function EditClientCompanyView() {
   };
 
   const onChangeDivisionNew = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
+    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
     type: string
   ) => {
     if (type === 'name') {
@@ -515,37 +372,7 @@ export function EditClientCompanyView() {
         ...department,
         name: e.target.value as string,
       });
-    } else {
-      setDepartment({
-        ...department,
-        is_show_all: e.target.value as boolean,
-      });
     }
-  };
-
-  const onChangeSubCompanyNew = (
-    e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<boolean>,
-    type: string
-  ) => {
-    if (type === 'name') {
-      setSubCompany({
-        ...subCompany,
-        name: e.target.value as string,
-      });
-    } else {
-      setSubCompany({
-        ...subCompany,
-        abbreviation: e.target.value as string,
-      });
-    }
-  };
-
-  const onClickDelete = async (divisionId: number) => {
-    deleteDivision(divisionId);
-  };
-
-  const onClickEditCompany = (companyId: number) => {
-    navigate(`/client-company/${id}/${companyId}/edit`);
   };
 
   const onClickEdit = async (value: string, type: boolean, divisionId: number) => {
@@ -557,6 +384,10 @@ export function EditClientCompanyView() {
     });
   };
 
+  const onClickDelete = async (divisionId: number) => {
+    deleteDivision(divisionId);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -566,6 +397,8 @@ export function EditClientCompanyView() {
         <Typography>Master Data</Typography>
         <Typography color="grey.500">•</Typography>
         <Typography color="grey.500">Client Company</Typography>
+        <Typography color="grey.500">•</Typography>
+        <Typography color="grey.500">Client Sub-Company</Typography>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
@@ -594,11 +427,7 @@ export function EditClientCompanyView() {
               onClickDelete={onClickDelete}
               onClickEdit={onClickEdit}
               onClickRemove={onClickRemove}
-              onChangeSubCompanyNew={onChangeSubCompanyNew}
-              subCompany={subCompany}
-              subCompanies={subCompanies}
-              onAddSubCompany={onAddSubCompany}
-              onClickEditCompany={onClickEditCompany}
+              parentDepartments={divisions}
             />
           )}
         </Form>

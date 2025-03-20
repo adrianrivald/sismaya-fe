@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
-async function deleteCompanyById(comopanyId: number) {
-    await http(`companies/${comopanyId}`, {
+async function deleteCompanyById(companyId: number) {
+    await http(`companies/${companyId}`, {
       method: 'DELETE',
     });
   }
@@ -13,10 +13,10 @@ async function deleteCompanyById(comopanyId: number) {
   
   
     return useMutation(
-      (comopanyId: number) => deleteCompanyById(comopanyId),
+      (companyId: number) => deleteCompanyById(companyId),
       {
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["company"]})
+            queryClient.invalidateQueries({queryKey: ["company-items"]})
             toast.success("Item deleted successfully", {
                 position: 'top-right',
                 autoClose: 5000,

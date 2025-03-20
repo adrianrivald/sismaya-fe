@@ -39,7 +39,7 @@ export function useUpdateCompany() {
       {
         // onSuccess: (res: {data: UpdateCompany}) => {
           onSuccess: (res: any) => {
-          queryClient.invalidateQueries(['company']);
+          queryClient.invalidateQueries(['company-items']);
   
           toast.success('Data updated successfully', {
             position: 'top-right',
@@ -54,9 +54,8 @@ export function useUpdateCompany() {
           });
           if (res?.data?.type === "holding") {
             navigate(`/client-company/`)
-          } else {
+          } else if (res?.data?.type === "internal") {
             navigate(`/internal-company/`)
-
           }
         },
         onError: (error) => {
