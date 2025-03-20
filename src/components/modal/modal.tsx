@@ -53,7 +53,7 @@ export default function ModalDialog({
             p: 4,
           }}
         >
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
             {title}
           </Typography>
           {content as JSX.Element}
