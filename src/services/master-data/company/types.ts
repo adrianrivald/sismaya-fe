@@ -11,7 +11,14 @@ export interface Company {
     department: Department[]
     image: string
     cito_quota: number;
-    cito_used: number
+    cito_used: number;
+    subsidiaries: {
+        abbreviation: string;
+        id: number;
+        image: string;
+        name: string;
+        type: string
+    }[]
 }
 
 export interface Status {
