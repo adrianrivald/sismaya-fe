@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { http } from "src/utils/http";
 import { Company } from "./types";
 
-async function fetchCompanies(type : string) {
+async function fetchCompanies(type : string, showAll?: boolean) {
     const { data } = await http<{data : Company[]}>(
-      !type ? `companies` :  type === "internal" ? `companies?type=internal` : `companies?type=holding`,
+      !type ? `companies` :  type === "internal" ? `companies?type=internal${showAll ? "&page_size=100" : "&page_size=10"}` : `companies?type=holding${showAll ? "&page_size=100" : "&page_size=10"}`,
     );
   
     return data;
@@ -28,10 +28,10 @@ async function fetchInternalCompanies() {
     return data;
   }
 
-  export function useClientCompanies() {
+  export function useClientCompanies(showAll?: boolean) {
     const data = useQuery(
       ['client-company-items-all'],
-      () => fetchCompanies("client")
+      () => fetchCompanies("client", showAll)
     );
   
     return data;

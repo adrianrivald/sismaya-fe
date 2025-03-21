@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
@@ -11,6 +11,7 @@ export type StoreCompany = CompanyDTO & {type: string, cover?: any, parent_id?: 
 export function useAddCompany() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
+    const location = useLocation()
     return useMutation(
       async (formData: StoreCompany) => {
         const { name, abbreviation, type, cover, parent_id } = formData;
@@ -65,6 +66,10 @@ export function useAddCompany() {
             navigate(`/client-company/${res?.data?.id}/edit`)
           } else if (res?.data?.type === "internal") {
             navigate(`/internal-company/${res?.data?.id}/edit`)
+          } else {
+            const currentPath = location.pathname;
+            const slicedPath = currentPath?.split("/edit")[0]
+            navigate(`${slicedPath}/${res?.data?.id}/edit`)
           }
         },
         onError: (error) => {
