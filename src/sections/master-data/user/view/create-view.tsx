@@ -2,6 +2,8 @@ import Typography from '@mui/material/Typography';
 import {
   Box,
   Button,
+  Card,
+  Checkbox,
   Chip,
   FormControl,
   FormHelperText,
@@ -10,18 +12,22 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
+  MenuList,
   OutlinedInput,
   Select,
+  Stack,
   TextField,
   Theme,
   useTheme,
+  SelectChangeEvent,
+  menuItemClasses,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useNavigate } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Iconify } from 'src/components/iconify';
 import { useAddUser } from 'src/services/master-data/user';
 import { useRole } from 'src/services/master-data/role';
@@ -32,10 +38,11 @@ import {
   useCompanies,
   useDivisionByCompanyId,
   useInternalCompanies,
+  useProductByCompanyId,
 } from 'src/services/master-data/company';
 import { API_URL } from 'src/constants';
 import { getSession } from 'src/sections/auth/session/session';
-import { Department } from 'src/services/master-data/company/types';
+import { Department, InternalCompany } from 'src/services/master-data/company/types';
 import {
   UserInternalDTO,
   UserClientDTO,
@@ -43,6 +50,8 @@ import {
   userInternalSchema,
 } from 'src/services/master-data/user/schemas/user-schema';
 import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { Bounce, toast } from 'react-toastify';
+import { RemoveAction } from './remove-action';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -76,7 +85,16 @@ export function CreateUserView({ type }: CreateUserProps) {
   const { data: roles } = useRole();
   const { data: companies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
-
+  const [userCompany, setUserCompany] = React.useState<number | null>(null);
+  const [existingUserCompany, setExistingUserCompany] = React.useState<number | null>(null);
+  const { data: companyProducts } = useProductByCompanyId(Number(userCompany));
+  const { data: existingCompanyProducts } = useProductByCompanyId(Number(existingUserCompany));
+  const [userCompanies, setUserCompanies] = React.useState<number[]>([]);
+  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<number | undefined>();
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [selectedProductsTemp, setSelectedProductsTemp] = useState<number[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const defaultValues = {
     internal_id: [],
   };
@@ -120,6 +138,86 @@ export function CreateUserView({ type }: CreateUserProps) {
     }
   };
 
+  const onChangeUserCompany = (e: SelectChangeEvent<number>, itemId: number) => {
+    setUserCompanies((prevUserCompanies) => {
+      const updatedUserCompanies = [...prevUserCompanies];
+      // Update the string at the specified index
+      const index = updatedUserCompanies?.findIndex((item) => item === itemId);
+      updatedUserCompanies[index] = Number(e.target.value);
+      return updatedUserCompanies;
+    });
+  };
+
+  console.log(userCompanies, 'usercompanies');
+  console.log(selectedProducts, 'usercompanies prod');
+
+  const onClickEdit = (selectedItemId: number) => {
+    if (selectedCompanyId === null) {
+      setSelectedCompanyId(selectedItemId);
+      setExistingUserCompany(selectedItemId);
+    } else {
+      setSelectedCompanyId(null);
+      setExistingUserCompany(null);
+    }
+  };
+
+  const onSaveUserCompany = () => {
+    // setSelectedProducts(selectedProductsTemp);
+    setSelectedCompanyId(null);
+    setExistingUserCompany(null);
+  };
+
+  // User Company
+  const onAddUserCompany = () => {
+    const hasUserCompanies = userCompanies?.some((item) => item === userCompany);
+
+    if (!hasUserCompanies) {
+      setUserCompanies((prevUserCompanies: any) => {
+        const updatedUserCompanies = [...prevUserCompanies, userCompany];
+        return updatedUserCompanies;
+      });
+      // setSelectedProducts(selectedProductsTemp);
+      setUserCompany(null);
+    } else {
+      toast.error(`Company already selected`, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+    }
+  };
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
+
+  const onRemove = () => {
+    const newCompanies = userCompanies?.filter((item) => item !== selectedId);
+    setUserCompanies(newCompanies);
+    setOpenRemoveModal(false);
+  };
+
+  const onChangeUserCompanyNew = (e: SelectChangeEvent<number>) => {
+    setUserCompany(Number(e.target.value));
+  };
+
+  const onChangeProductFilter = (productFilterId: number) => {
+    const hasProduct = selectedProducts?.includes(productFilterId);
+    if (!hasProduct) {
+      setSelectedProducts([...selectedProducts, productFilterId]);
+    } else {
+      const newArr = selectedProducts?.filter((item) => item !== productFilterId);
+      setSelectedProducts(newArr);
+    }
+  };
+  console.log(selectedProductsTemp, 'selectedproductstemp');
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -229,58 +327,210 @@ export function CreateUserView({ type }: CreateUserProps) {
 
               {/* {type === 'internal' ? ( */}
               <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-outlined-label-type">
-                    Internal Company
-                  </InputLabel>
-                  <Select
-                    label="Internal Company"
-                    labelId="demo-simple-select-outlined-label-type"
-                    error={Boolean(formState?.errors?.internal_id)}
-                    id="internal_id"
-                    {...register('internal_id', {
-                      required: 'Internal Company must be filled out',
-                    })}
-                    multiple
-                    value={watch('internal_id')}
-                    input={
-                      <OutlinedInput
-                        error={Boolean(formState?.errors?.internal_id)}
-                        id="select-multiple-chip"
-                        label="Chip"
-                      />
-                    }
-                    renderValue={() => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {watch('internal_id').map((value: any) => (
-                          <Chip
-                            key={value}
-                            label={internalCompanies?.find((item) => item?.id === value)?.name}
-                          />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
-                  >
-                    {internalCompanies &&
-                      internalCompanies?.map((company) => (
-                        <MenuItem
-                          key={company?.id}
-                          value={company?.id}
-                          style={getStyles(company?.id, watch('internal_id'), theme)}
+                <Typography variant="h4" color="primary" mb={2}>
+                  Internal Company
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  {internalCompanies
+                    ?.filter((item) =>
+                      userCompanies?.some((userCompanyItem) => userCompanyItem === item?.id)
+                    )
+                    ?.map((item, index) => (
+                      <>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          spacing={3}
+                          alignItems="center"
                         >
-                          {company?.name}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
-                {formState?.errors?.internal_id && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.internal_id?.message)}
-                  </FormHelperText>
-                )}
+                          <Box width="100%">
+                            <FormControl fullWidth>
+                              <InputLabel id="existing-company">Internal Company</InputLabel>
+                              <Select
+                                label="Internal Company"
+                                value={userCompanies[index]}
+                                disabled
+                              >
+                                {internalCompanies?.map((company) => (
+                                  <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Box>
+                          <MenuList
+                            disablePadding
+                            sx={{
+                              p: 0.5,
+                              gap: 0.5,
+                              display: 'flex',
+                              flexDirection: 'row',
+                              [`& .${menuItemClasses.root}`]: {
+                                px: 1,
+                                gap: 2,
+                                borderRadius: 0.75,
+                                [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                              },
+                            }}
+                          >
+                            <MenuItem onClick={() => onClickEdit(item?.id)}>
+                              <Iconify icon="solar:pen-bold" />
+                              Edit
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => onClickRemove(item?.id)}
+                              sx={{ color: 'error.main' }}
+                            >
+                              <Iconify icon="solar:trash-bin-trash-bold" />
+                              Delete
+                            </MenuItem>
+                          </MenuList>
+                        </Stack>
+
+                        {item?.id === selectedCompanyId && (
+                          <Card
+                            sx={{
+                              width: '100%',
+                              p: 4,
+                              boxShadow: '2',
+                              position: 'relative',
+                              backgroundColor: 'blue.50',
+                              borderRadius: 4,
+                            }}
+                          >
+                            <Typography fontSize={18} fontWeight="bold">
+                              Product Handled
+                            </Typography>
+                            <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} mt={2}>
+                              {existingCompanyProducts &&
+                                existingCompanyProducts?.map((existingItem, existingIndex) => (
+                                  <Box
+                                    gridColumn={`${existingIndex % 2 === 0 ? '1 / 2' : '2 / 4'}`}
+                                  >
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                      <Checkbox
+                                        id={`item-${item?.id}`}
+                                        onChange={() => onChangeProductFilter(existingItem?.id)}
+                                        checked={selectedProducts?.includes(existingItem?.id)}
+                                      />{' '}
+                                      <Typography
+                                        sx={{ cursor: 'pointer' }}
+                                        component="label"
+                                        htmlFor={`item-${existingItem?.id}`}
+                                      >
+                                        {existingItem?.name}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                ))}
+                            </Box>
+                            <Box
+                              display="flex"
+                              justifyContent="end"
+                              width="100%"
+                              sx={{
+                                mt: 4,
+                              }}
+                            >
+                              <Button
+                                size="small"
+                                onClick={onSaveUserCompany}
+                                variant="contained"
+                                color="primary"
+                                sx={{
+                                  width: 120,
+                                }}
+                              >
+                                Save
+                              </Button>
+                            </Box>
+                          </Card>
+                        )}
+                      </>
+                    ))}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <Box width="100%">
+                      <FormControl fullWidth>
+                        <InputLabel id="userCompany">Internal Company</InputLabel>
+                        <Select
+                          label="Internal Company"
+                          value={userCompany ?? 0}
+                          onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
+                        >
+                          {internalCompanies?.map((company) => (
+                            <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Stack>
+                </Box>
               </Grid>
               {/* ) : null} */}
+
+              {userCompany !== null ? (
+                <Grid item xs={12} md={12}>
+                  <Card
+                    sx={{
+                      width: '100%',
+                      p: 4,
+                      boxShadow: '2',
+                      position: 'relative',
+                      backgroundColor: 'blue.50',
+                      borderRadius: 4,
+                    }}
+                  >
+                    <Typography fontSize={18} fontWeight="bold">
+                      Product Handled
+                    </Typography>
+                    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} mt={2}>
+                      {companyProducts &&
+                        companyProducts?.map((item, index) => (
+                          <Box gridColumn={`${index % 2 === 0 ? '1 / 2' : '2 / 4'}`}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                id={`item-${item?.id}`}
+                                onChange={() => onChangeProductFilter(item?.id)}
+                                checked={selectedProducts?.includes(item?.id)}
+                              />{' '}
+                              <Typography
+                                sx={{ cursor: 'pointer' }}
+                                component="label"
+                                htmlFor={`item-${item?.id}`}
+                              >
+                                {item?.name}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                    </Box>
+                    <Box
+                      display="flex"
+                      justifyContent="end"
+                      width="100%"
+                      sx={{
+                        mt: 4,
+                      }}
+                    >
+                      <Button
+                        size="small"
+                        onClick={onAddUserCompany}
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                          width: 120,
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </Box>
+                  </Card>
+                </Grid>
+              ) : null}
 
               <Grid item xs={12} md={12}>
                 <TextField
@@ -404,6 +654,11 @@ export function CreateUserView({ type }: CreateUserProps) {
           )}
         </Form>
       </Grid>
+      <RemoveAction
+        onRemove={onRemove}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

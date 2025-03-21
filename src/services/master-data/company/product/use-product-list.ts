@@ -9,5 +9,8 @@ export function useProductByCompanyId(companyId: number, isClientCompany?: boole
       );
   
       return response;
+    }, 
+    {
+      enabled: companyId !== null || companyId !== 0
     });
   }
