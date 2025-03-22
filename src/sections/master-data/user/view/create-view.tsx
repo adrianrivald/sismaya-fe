@@ -230,60 +230,115 @@ export function CreateUserView({ type }: CreateUserProps) {
                 ) : null
               ) : null}
 
-              {/* {type === 'internal' ? ( */}
-              <Grid item xs={12} md={12}>
-                <FormControl fullWidth>
-                  <Typography variant="h4" color="primary" mb={2}>
-                    Internal Company
-                  </Typography>
-                  <Card
-                    sx={{
-                      width: '100%',
-                      mt: 2,
-                      p: 4,
-                      boxShadow: '2',
-                      position: 'relative',
-                      backgroundColor: 'blue.50',
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Box display="flex" flexDirection="column" gap={2}>
-                      {internalCompanies?.map((item, index) => (
-                        <Box display="flex" alignItems="center" gap={1} key={index}>
-                          <Checkbox
-                            value={item?.id}
-                            id={`item-${item?.id}`}
-                            onChange={(e: SelectChangeEvent<number>) => {
-                              if (watch('internal_id')?.some((itm: number) => itm === item?.id)) {
-                                setValue(
-                                  'internal_id',
-                                  watch('internal_id')?.filter((itm: number) => itm !== item?.id)
-                                );
-                              } else {
-                                setValue('internal_id', [...watch('internal_id'), item?.id]);
-                              }
-                            }}
-                            checked={watch('internal_id')?.some((itm: number) => itm === item?.id)}
-                          />{' '}
-                          <Typography
-                            sx={{ cursor: 'pointer' }}
-                            component="label"
-                            htmlFor={`item-${item?.id}`}
-                          >
-                            {item?.name}
-                          </Typography>
+              {type === 'client' ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <Typography variant="h4" color="primary" mb={2}>
+                      Internal Company
+                    </Typography>
+                    <Card
+                      sx={{
+                        width: '100%',
+                        mt: 2,
+                        p: 4,
+                        boxShadow: '2',
+                        position: 'relative',
+                        backgroundColor: 'blue.50',
+                        borderRadius: 4,
+                      }}
+                    >
+                      <Box display="flex" flexDirection="column" gap={2}>
+                        {internalCompanies?.map((item, index) => (
+                          <Box display="flex" alignItems="center" gap={1} key={index}>
+                            <Checkbox
+                              value={item?.id}
+                              id={`item-${item?.id}`}
+                              onChange={(e: SelectChangeEvent<number>) => {
+                                if (watch('internal_id')?.some((itm: number) => itm === item?.id)) {
+                                  setValue(
+                                    'internal_id',
+                                    watch('internal_id')?.filter((itm: number) => itm !== item?.id)
+                                  );
+                                } else {
+                                  setValue('internal_id', [...watch('internal_id'), item?.id]);
+                                }
+                              }}
+                              checked={watch('internal_id')?.some(
+                                (itm: number) => itm === item?.id
+                              )}
+                            />{' '}
+                            <Typography
+                              sx={{ cursor: 'pointer' }}
+                              component="label"
+                              htmlFor={`item-${item?.id}`}
+                            >
+                              {item?.name}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Card>
+                  </FormControl>
+                  {formState?.errors?.internal_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.internal_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-outlined-label-type">
+                      Internal Company
+                    </InputLabel>
+                    <Select
+                      label="Internal Company"
+                      labelId="demo-simple-select-outlined-label-type"
+                      error={Boolean(formState?.errors?.internal_id)}
+                      id="internal_id"
+                      {...register('internal_id', {
+                        required: 'Internal Company must be filled out',
+                      })}
+                      multiple
+                      value={watch('internal_id')}
+                      input={
+                        <OutlinedInput
+                          error={Boolean(formState?.errors?.internal_id)}
+                          id="select-multiple-chip"
+                          label="Chip"
+                        />
+                      }
+                      renderValue={() => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {watch('internal_id').map((value: any) => (
+                            <Chip
+                              key={value}
+                              label={internalCompanies?.find((item) => item?.id === value)?.name}
+                            />
+                          ))}
                         </Box>
-                      ))}
-                    </Box>
-                  </Card>
-                </FormControl>
-                {formState?.errors?.internal_id && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.internal_id?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              {/* ) : null} */}
+                      )}
+                      MenuProps={MenuProps}
+                    >
+                      {internalCompanies &&
+                        internalCompanies?.map((company) => (
+                          <MenuItem
+                            key={company?.id}
+                            value={company?.id}
+                            style={getStyles(company?.id, watch('internal_id'), theme)}
+                          >
+                            {company?.name}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.internal_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.internal_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              )}
 
               <Grid item xs={12} md={12}>
                 <TextField

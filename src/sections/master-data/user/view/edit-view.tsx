@@ -179,45 +179,127 @@ function EditForm({
         <Typography variant="h4" color="primary" mb={2}>
           Internal Company
         </Typography>
-        <Card
-          sx={{
-            width: '100%',
-            mt: 2,
-            p: 4,
-            boxShadow: '2',
-            position: 'relative',
-            backgroundColor: 'blue.50',
-            borderRadius: 4,
-          }}
-        >
+        {type === 'client' ? (
+          <Card
+            sx={{
+              width: '100%',
+              mt: 2,
+              p: 4,
+              boxShadow: '2',
+              position: 'relative',
+              backgroundColor: 'blue.50',
+              borderRadius: 4,
+            }}
+          >
+            <Box display="flex" flexDirection="column" gap={2}>
+              {internalCompanies?.map((item, index) => (
+                <Box display="flex" alignItems="center" gap={1} key={index}>
+                  <Checkbox
+                    value={item?.id}
+                    id={`item-${item?.id}`}
+                    onChange={(e: SelectChangeEvent<number>) => {
+                      if (userCompanies?.some((itm) => item.id === itm.company_id)) {
+                        onClickRemove(
+                          userCompanies?.find((itm) => item.id === itm.company_id)?.id as number
+                        );
+                      } else {
+                        onAddCompany(item?.id);
+                      }
+                    }}
+                    checked={userCompanies?.some((itm) => item.id === itm.company_id)}
+                  />{' '}
+                  <Typography
+                    sx={{ cursor: 'pointer' }}
+                    component="label"
+                    htmlFor={`item-${item?.id}`}
+                  >
+                    {item?.name}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Card>
+        ) : (
           <Box display="flex" flexDirection="column" gap={2}>
-            {internalCompanies?.map((item, index) => (
-              <Box display="flex" alignItems="center" gap={1} key={index}>
-                <Checkbox
-                  value={item?.id}
-                  id={`item-${item?.id}`}
-                  onChange={(e: SelectChangeEvent<number>) => {
-                    if (userCompanies?.some((itm) => item.id === itm.company_id)) {
-                      onClickRemove(
-                        userCompanies?.find((itm) => item.id === itm.company_id)?.id as number
-                      );
-                    } else {
-                      onAddCompany(item?.id);
-                    }
+            {userCompanies?.map((item, index) => (
+              <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+                <Box width="100%">
+                  <FormControl fullWidth>
+                    <InputLabel id="type">Internal Company</InputLabel>
+                    <Select
+                      label="Internal Company"
+                      value={item?.company?.id}
+                      onChange={(e: SelectChangeEvent<number>) => onChangeUserCompany(e, item?.id)}
+                    >
+                      {internalCompanies?.map((company) => (
+                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+                <MenuList
+                  disablePadding
+                  sx={{
+                    p: 0.5,
+                    gap: 0.5,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    [`& .${menuItemClasses.root}`]: {
+                      px: 1,
+                      gap: 2,
+                      borderRadius: 0.75,
+                      [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                    },
                   }}
-                  checked={userCompanies?.some((itm) => item.id === itm.company_id)}
-                />{' '}
-                <Typography
-                  sx={{ cursor: 'pointer' }}
-                  component="label"
-                  htmlFor={`item-${item?.id}`}
                 >
-                  {item?.name}
-                </Typography>
-              </Box>
+                  <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                    Delete
+                  </MenuItem>
+                </MenuList>
+              </Stack>
             ))}
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <Box width="100%">
+                <FormControl fullWidth>
+                  <InputLabel id="userCompany">Internal Company</InputLabel>
+                  <Select
+                    label="Internal Company"
+                    value={userCompany}
+                    onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
+                  >
+                    {internalCompanies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={onAddUserCompany}
+                  sx={{ marginY: 2 }}
+                >
+                  Save
+                </Button>
+              </Box>
+            </Stack>
           </Box>
-        </Card>
+        )}
       </Grid>
 
       {type === 'client' ? (
