@@ -26,6 +26,7 @@ import React, { useEffect } from 'react';
 import {
   useAddUserCompany,
   useUpdateUser,
+  useUpdateUserChangeCompany,
   useUserById,
   useUserCompanyById,
 } from 'src/services/master-data/user';
@@ -87,6 +88,8 @@ interface EditFormProps {
   internalCompanies: Company[] | undefined;
   onClickRemove: (id: number) => void;
   onAddCompany: (id: number) => void;
+  onFetchRelationCompany: any;
+  companyRelations: any[];
 }
 
 function EditForm({
@@ -112,7 +115,11 @@ function EditForm({
   internalCompanies,
   onClickRemove,
   onAddCompany,
+  onFetchRelationCompany,
+  companyRelations,
 }: EditFormProps) {
+  const { mutate: updateUser } = useUpdateUserChangeCompany({ isRbac: false });
+  const { id } = useParams();
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('email', defaultValues?.email);
@@ -129,6 +136,65 @@ function EditForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divisions]);
+
+  const removeAllCompanies = async (internal_ids: number[]) => {
+    if (internal_ids.length === 0) return;
+    try {
+      // Create an array of promises for each deletion
+      const deletePromises = internal_ids.map(async (internal_id) => {
+        try {
+          await fetch(`${API_URL}/user-company/${internal_id}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${getSession()}`,
+            },
+          });
+          return { id, success: true };
+        } catch (error) {
+          return { id, success: false, error };
+        }
+      });
+
+      await Promise.allSettled(deletePromises);
+
+      toast.success('Successfully reset the company', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'light',
+        transition: Bounce,
+      });
+      setValue('internal_id', []);
+    } catch (error) {
+      toast.error('Failed to process deletions', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'light',
+        transition: Bounce,
+      });
+    }
+  };
+
+  const onSubmit = (formData: UserClientUpdateDTO) => {
+    const payload = {
+      ...formData,
+      id: Number(id),
+      user_type: type,
+    };
+    if (defaultValues?.profile_picture) {
+      Object.assign(payload, {
+        profile_picture: defaultValues?.profile_picture,
+      });
+    }
+    updateUser(payload);
+  };
 
   const onChangePhone = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -186,6 +252,9 @@ function EditForm({
                 required: 'Company must be filled out',
                 onChange: () => {
                   fetchDivision(watch('company_id') as number);
+                  onFetchRelationCompany(watch('company_id') as number);
+                  removeAllCompanies(userCompanies?.map((itm) => itm.id));
+                  onSubmit(watch());
                 },
               })}
               label="Company"
@@ -221,13 +290,13 @@ function EditForm({
             }}
           >
             <Box display="flex" flexDirection="column" gap={2}>
-              {internalCompanies?.map((item, index) => (
+              {companyRelations?.map((item, index) => (
                 <Box display="flex" alignItems="center" gap={1} key={index}>
                   <Checkbox
                     value={item?.id}
                     id={`item-${item?.id}`}
-                    onChange={(e: SelectChangeEvent<number>) => {
-                      if (userCompanies?.some((itm) => item.id === itm.company_id)) {
+                    onChange={(e) => {
+                      if (!e.target.checked) {
                         onClickRemove(
                           userCompanies?.find((itm) => item.id === itm.company_id)?.id as number
                         );
@@ -235,7 +304,7 @@ function EditForm({
                         onAddCompany(item?.id);
                       }
                     }}
-                    checked={userCompanies?.some((itm) => item.id === itm.company_id)}
+                    checked={watch('internal_id')?.some((itm: any) => item.id === itm)}
                   />{' '}
                   <Typography
                     sx={{ cursor: 'pointer' }}
@@ -472,6 +541,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
   const [userCompany, setUserCompany] = React.useState<number | null>(null);
   const [userCompanies, setUserCompanies] = React.useState<InternalCompany[]>([]);
+  const [companyRelations, setCompanyRelations] = React.useState<InternalCompany[]>([]);
 
   const defaultValues = {
     name: user?.user_info?.name,
@@ -481,15 +551,32 @@ export function EditUserView({ type }: EditUserProps) {
     profile_picture: user?.user_info?.profile_picture ?? '',
     company_id: user?.user_info?.company_id,
     department_id: user?.user_info?.department_id,
-    internal_id: user?.internal_companies?.map((item) => item?.id) ?? [],
+    internal_id: user?.internal_companies?.map((item) => item?.company_id) ?? [],
   };
 
   useEffect(() => {
     if (defaultValues?.company_id) {
       fetchDivision(defaultValues?.company_id);
+      fetchRelationCompany(defaultValues?.company_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues?.company_id]);
+
+  const fetchRelationCompany = async (companyId: number) => {
+    const data = await fetch(
+      `${API_URL}/company-relation?client_company_id=${companyId}&page_size=999`,
+      {
+        headers: { Authorization: `Bearer ${getSession()}` },
+      }
+    ).then((res) =>
+      res.json().then((value) => {
+        if (value?.data?.length > 0) {
+          setCompanyRelations(value?.data?.map((item: any) => item?.internal_company));
+        }
+      })
+    );
+    return data;
+  };
 
   const fetchDivision = async (companyId: number) => {
     const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
@@ -629,6 +716,8 @@ export function EditUserView({ type }: EditUserProps) {
               onClickDeleteUserCompany={onClickDeleteUserCompany}
               onClickRemove={onClickRemove}
               onAddCompany={onAddCompany}
+              companyRelations={companyRelations}
+              onFetchRelationCompany={fetchRelationCompany}
             />
           )}
         </Form>
