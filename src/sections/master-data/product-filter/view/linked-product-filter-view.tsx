@@ -144,11 +144,11 @@ export function ProductFilterLinkedView() {
           </Box>
         </Box>
 
-        <Box>
+        {/* <Box>
           <Button onClick={onClickAddNew} variant="contained" color="primary">
             Create New Vendor
           </Button>
-        </Box>
+        </Box> */}
       </Box>
 
       <Grid container spacing={3}>

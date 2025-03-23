@@ -15,11 +15,11 @@ import {
   MenuList,
   OutlinedInput,
   Select,
+  SelectChangeEvent,
   Stack,
   TextField,
   Theme,
   useTheme,
-  SelectChangeEvent,
   menuItemClasses,
 } from '@mui/material';
 
@@ -51,6 +51,7 @@ import {
 } from 'src/services/master-data/user/schemas/user-schema';
 import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
+import { Company } from 'src/services/request/types';
 import { RemoveAction } from './remove-action';
 
 const ITEM_HEIGHT = 48;
@@ -94,6 +95,8 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [selectedProductsTemp, setSelectedProductsTemp] = useState<number[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [companyRelation, setCompanyRelation] = useState<Company[]>([]);
+
   const defaultValues = { internal_id: [] };
 
   const fetchDivision = async (companyId: number) => {
@@ -107,14 +110,29 @@ export function CreateUserView({ type }: CreateUserProps) {
     return data;
   };
 
+  const fetchRelationCompany = async (companyId: number) => {
+    const data = await fetch(
+      `${API_URL}/company-relation?client_company_id=${companyId}&page_size=999`,
+      {
+        headers: { Authorization: `Bearer ${getSession()}` },
+      }
+    ).then((res) =>
+      res.json().then((value) => {
+        if (value?.data?.length > 0) {
+          setCompanyRelation(value?.data?.map((item: any) => item?.internal_company));
+        }
+      })
+    );
+    return data;
+  };
+
   const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
     setIsLoading(true);
-    // const { internal_id, ...restForm } = formData;
     try {
       addUser({
         ...formData,
         user_type: type,
-        internal_id: userCompanies,
+        internal_id: userCompanies?.length > 0 ? userCompanies : formData?.internal_id,
         product_id: selectedProducts,
       });
       setIsLoading(false);
@@ -148,10 +166,6 @@ export function CreateUserView({ type }: CreateUserProps) {
       return updatedUserCompanies;
     });
   };
-
-  // console.log(userCompanies, 'usercompanies');
-  console.log(selectedProducts, 'log: selectedProducts');
-  console.log(selectedProductsTemp, 'log: selectedproductstemp');
 
   const onClickEdit = (selectedItemId: number) => {
     setIsEditMode(true);
@@ -224,6 +238,7 @@ export function CreateUserView({ type }: CreateUserProps) {
       setSelectedProductsTemp(newArr);
     }
   };
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -277,6 +292,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                         required: 'Company must be filled out',
                         onChange: async () => {
                           await fetchDivision(watch('company_id'));
+                          await fetchRelationCompany(watch('company_id'));
                         },
                       })}
                       label="Company"
@@ -293,31 +309,6 @@ export function CreateUserView({ type }: CreateUserProps) {
                   )}
                 </Grid>
               ) : null}
-              {type === 'client' ? (
-                watch('company_id') ? (
-                  <Grid item xs={12} md={12}>
-                    <FormControl fullWidth>
-                      <InputLabel id="select-division">Division</InputLabel>
-                      <Select
-                        labelId="select-division"
-                        error={Boolean(formState?.errors?.department_id)}
-                        {...register('department_id', { required: 'Division must be filled out' })}
-                        label="Division"
-                      >
-                        {divisions?.map((division) => (
-                          <MenuItem value={division?.id}>{division?.name}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    {formState?.errors?.department_id && (
-                      <FormHelperText sx={{ color: 'error.main' }}>
-                        {String(formState?.errors?.department_id?.message)}
-                      </FormHelperText>
-                    )}
-                  </Grid>
-                ) : null
-              ) : null}
-
               {/* {type === 'internal' ? ( */}
               {type === 'internal' ? (
                 <Grid item xs={12} md={12}>
@@ -464,59 +455,87 @@ export function CreateUserView({ type }: CreateUserProps) {
                   </Box>
                 </Grid>
               ) : (
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-outlined-label-type">
+                companyRelation.length > 0 && (
+                  <Grid item xs={12} md={12}>
+                    <Typography variant="h4" color="primary" mb={2}>
                       Internal Company
-                    </InputLabel>
-                    <Select
-                      label="Internal Company"
-                      labelId="demo-simple-select-outlined-label-type"
-                      error={Boolean(formState?.errors?.internal_id)}
-                      id="internal_id"
-                      {...register('internal_id', {
-                        required: 'Internal Company must be filled out',
-                      })}
-                      multiple
-                      value={watch('internal_id')}
-                      input={
-                        <OutlinedInput
-                          error={Boolean(formState?.errors?.internal_id)}
-                          id="select-multiple-chip"
-                          label="Chip"
-                        />
-                      }
-                      renderValue={() => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {watch('internal_id').map((value: any) => (
-                            <Chip
-                              key={value}
-                              label={internalCompanies?.find((item) => item?.id === value)?.name}
-                            />
+                    </Typography>
+                    <FormControl fullWidth>
+                      <Card
+                        sx={{
+                          width: '100%',
+                          mt: 2,
+                          p: 4,
+                          boxShadow: '2',
+                          position: 'relative',
+                          backgroundColor: 'blue.50',
+                          borderRadius: 4,
+                        }}
+                      >
+                        <Box display="flex" flexDirection="column" gap={2}>
+                          {companyRelation?.map((item, index) => (
+                            <Box display="flex" alignItems="center" gap={1} key={index}>
+                              <Checkbox
+                                value={item?.id}
+                                id={`item-${item?.id}`}
+                                onChange={(e) => {
+                                  const currentIds = watch('internal_id') || [];
+                                  if (e.target.checked) {
+                                    setValue('internal_id', [...currentIds, item.id]);
+                                  } else {
+                                    setValue(
+                                      'internal_id',
+                                      currentIds.filter((id: number) => id !== item.id)
+                                    );
+                                  }
+                                }}
+                                checked={watch('internal_id')?.some((itm: any) => item.id === itm)}
+                              />{' '}
+                              <Typography
+                                sx={{ cursor: 'pointer' }}
+                                component="label"
+                                htmlFor={`item-${item?.id}`}
+                              >
+                                {item?.name}
+                              </Typography>
+                            </Box>
                           ))}
                         </Box>
-                      )}
-                      MenuProps={MenuProps}
-                    >
-                      {internalCompanies &&
-                        internalCompanies?.map((company) => (
-                          <MenuItem
-                            key={company?.id}
-                            value={company?.id}
-                            style={getStyles(company?.id, watch('internal_id'), theme)}
-                          >
-                            {company?.name}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl>
-                  {formState?.errors?.internal_id && (
-                    <FormHelperText sx={{ color: 'error.main' }}>
-                      {String(formState?.errors?.internal_id?.message)}
-                    </FormHelperText>
-                  )}
-                </Grid>
+                      </Card>
+                    </FormControl>
+                    {formState?.errors?.internal_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.internal_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                )
               )}
+
+              {type === 'client' ? (
+                watch('company_id') ? (
+                  <Grid item xs={12} md={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="select-division">Division</InputLabel>
+                      <Select
+                        labelId="select-division"
+                        error={Boolean(formState?.errors?.department_id)}
+                        {...register('department_id', { required: 'Division must be filled out' })}
+                        label="Division"
+                      >
+                        {divisions?.map((division) => (
+                          <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.department_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.department_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                ) : null
+              ) : null}
               {/* ) : null} */}
 
               {userCompany !== null && type === 'internal' ? (
