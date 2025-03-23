@@ -175,6 +175,35 @@ function EditForm({
         )}
       </Grid>
 
+      {type === 'client' ? (
+        <Grid item xs={12} md={12}>
+          <FormControl fullWidth>
+            <InputLabel id="select-company">Company</InputLabel>
+            <Select
+              labelId="select-company"
+              error={Boolean(formState?.errors?.company_id)}
+              {...register('company_id', {
+                required: 'Company must be filled out',
+                onChange: () => {
+                  fetchDivision(watch('company_id') as number);
+                },
+              })}
+              label="Company"
+              value={watch('company_id')}
+            >
+              {clientCompanies?.map((company) => (
+                <MenuItem value={company?.id}>{company?.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {formState?.errors?.company_id && (
+            <FormHelperText sx={{ color: 'error.main' }}>
+              {String(formState?.errors?.company_id?.message)}
+            </FormHelperText>
+          )}
+        </Grid>
+      ) : null}
+
       <Grid item xs={12} md={12}>
         <Typography variant="h4" color="primary" mb={2}>
           Internal Company
@@ -302,34 +331,6 @@ function EditForm({
         )}
       </Grid>
 
-      {type === 'client' ? (
-        <Grid item xs={12} md={12}>
-          <FormControl fullWidth>
-            <InputLabel id="select-company">Company</InputLabel>
-            <Select
-              labelId="select-company"
-              error={Boolean(formState?.errors?.company_id)}
-              {...register('company_id', {
-                required: 'Company must be filled out',
-                onChange: () => {
-                  fetchDivision(watch('company_id') as number);
-                },
-              })}
-              label="Company"
-              value={watch('company_id')}
-            >
-              {clientCompanies?.map((company) => (
-                <MenuItem value={company?.id}>{company?.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {formState?.errors?.company_id && (
-            <FormHelperText sx={{ color: 'error.main' }}>
-              {String(formState?.errors?.company_id?.message)}
-            </FormHelperText>
-          )}
-        </Grid>
-      ) : null}
       {type === 'client' ? (
         watch('company_id') ? (
           <Grid item xs={12} md={12}>
