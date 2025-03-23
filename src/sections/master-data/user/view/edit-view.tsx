@@ -14,8 +14,8 @@ import {
   menuItemClasses,
   Button,
   SelectChangeEvent,
-  Card,
   Checkbox,
+  Card,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -268,206 +268,6 @@ function EditForm({
         )}
       </Grid>
 
-      <Grid item xs={12} md={12}>
-        <Typography variant="h4" color="primary" mb={2}>
-          Internal Company
-        </Typography>
-        <Box display="flex" flexDirection="column" gap={2}>
-          {userCompanies?.map((item, index) => (
-            <>
-              <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-                <Box width="100%">
-                  <FormControl fullWidth>
-                    <InputLabel id="type">Internal Company</InputLabel>
-                    <Select
-                      label="Internal Company"
-                      value={item?.company?.id}
-                      onChange={(e: SelectChangeEvent<number>) => onChangeUserCompany(e, item?.id)}
-                    >
-                      {internalCompanies?.map((company) => (
-                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-                <MenuList
-                  disablePadding
-                  sx={{
-                    p: 0.5,
-                    gap: 0.5,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    [`& .${menuItemClasses.root}`]: {
-                      px: 1,
-                      gap: 2,
-                      borderRadius: 0.75,
-                      [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                    },
-                  }}
-                >
-                  {type === 'internal' && (
-                    <MenuItem onClick={() => onClickEdit(item?.company_id)}>
-                      <Iconify icon="solar:pen-bold" />
-                      Edit
-                    </MenuItem>
-                  )}
-                  <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                    Delete
-                  </MenuItem>
-                </MenuList>
-              </Stack>
-
-              {item?.company_id === selectedCompanyId && (
-                <Card
-                  sx={{
-                    width: '100%',
-                    p: 4,
-                    boxShadow: '2',
-                    position: 'relative',
-                    backgroundColor: 'blue.50',
-                    borderRadius: 4,
-                  }}
-                >
-                  <Typography fontSize={18} fontWeight="bold">
-                    Product Handled
-                  </Typography>
-                  <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} mt={2}>
-                    {existingCompanyProducts &&
-                      existingCompanyProducts?.map((existingItem, existingIndex) => (
-                        <Box gridColumn={`${existingIndex % 2 === 0 ? '1 / 2' : '2 / 4'}`}>
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <Checkbox
-                              id={`item-${existingItem?.id}`}
-                              onChange={() =>
-                                onChangeProductFilterEdit(
-                                  existingItem?.id,
-                                  user?.products_handled?.find(
-                                    (userProduct) => userProduct?.product_id === existingItem?.id
-                                  )?.id ?? 0
-                                )
-                              }
-                              checked={selectedProducts?.includes(existingItem?.id)}
-                            />{' '}
-                            <Typography
-                              sx={{ cursor: 'pointer' }}
-                              component="label"
-                              htmlFor={`item-${existingItem?.id}`}
-                            >
-                              {existingItem?.name}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      ))}
-                  </Box>
-                  {/* <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
-                    <Button
-                      size="small"
-                      onClick={onSaveUserCompany}
-                      variant="contained"
-                      color="primary"
-                      sx={{ width: 120 }}
-                    >
-                      Save
-                    </Button>
-                  </Box> */}
-                </Card>
-              )}
-            </>
-          ))}
-          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
-            <Box width="100%">
-              <FormControl fullWidth>
-                <InputLabel id="userCompany">Internal Company</InputLabel>
-                <Select
-                  label="Internal Company"
-                  value={userCompany}
-                  onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
-                >
-                  {internalCompanies?.map((company) => (
-                    <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <Box
-              sx={{
-                p: 0.5,
-                gap: 0.5,
-                display: 'flex',
-                flexDirection: 'row',
-                [`& .${menuItemClasses.root}`]: {
-                  px: 1,
-                  gap: 2,
-                  borderRadius: 0.75,
-                  [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                },
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={onAddUserCompany}
-                sx={{ marginY: 2 }}
-              >
-                Save
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
-      </Grid>
-
-      {/* {userCompany !== null && type === 'internal' ? (
-        <Grid item xs={12} md={12}>
-          <Card
-            sx={{
-              width: '100%',
-              p: 4,
-              boxShadow: '2',
-              position: 'relative',
-              backgroundColor: 'blue.50',
-              borderRadius: 4,
-            }}
-          >
-            <Typography fontSize={18} fontWeight="bold">
-              Product Handled
-            </Typography>
-            <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} mt={2}>
-              {companyProducts &&
-                companyProducts?.map((item, index) => (
-                  <Box gridColumn={`${index % 2 === 0 ? '1 / 2' : '2 / 4'}`}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Checkbox
-                        id={`item-${item?.id}`}
-                        onChange={() => onChangeProductFilterEdit(item?.id)}
-                        checked={selectedProducts?.includes(item?.id)}
-                      />{' '}
-                      <Typography
-                        sx={{ cursor: 'pointer' }}
-                        component="label"
-                        htmlFor={`item-${item?.id}`}
-                      >
-                        {item?.name}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-            </Box>
-            <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
-              <Button
-                size="small"
-                onClick={onAddUserCompany}
-                variant="contained"
-                color="primary"
-                sx={{ width: 120 }}
-              >
-                Save
-              </Button>
-            </Box>
-          </Card>
-        </Grid>
-      ) : null} */}
-
       {type === 'client' ? (
         <Grid item xs={12} md={12}>
           <FormControl fullWidth>
@@ -499,6 +299,205 @@ function EditForm({
           )}
         </Grid>
       ) : null}
+
+      <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={2}>
+          Internal Company
+        </Typography>
+        {type === 'client' ? (
+          <Card
+            sx={{
+              width: '100%',
+              mt: 2,
+              p: 4,
+              boxShadow: '2',
+              position: 'relative',
+              backgroundColor: 'blue.50',
+              borderRadius: 4,
+            }}
+          >
+            <Box display="flex" flexDirection="column" gap={2}>
+              {companyRelations?.map((item, index) => (
+                <Box display="flex" alignItems="center" gap={1} key={index}>
+                  <Checkbox
+                    value={item?.id}
+                    id={`item-${item?.id}`}
+                    onChange={(e) => {
+                      if (!e.target.checked) {
+                        onClickRemove(
+                          userCompanies?.find((itm) => item.id === itm.company_id)?.id as number
+                        );
+                      } else {
+                        onAddCompany(item?.id);
+                      }
+                    }}
+                    checked={watch('internal_id')?.some((itm: any) => item.id === itm)}
+                  />{' '}
+                  <Typography
+                    sx={{ cursor: 'pointer' }}
+                    component="label"
+                    htmlFor={`item-${item?.id}`}
+                  >
+                    {item?.name}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Card>
+        ) : (
+          <Box display="flex" flexDirection="column" gap={2}>
+            {userCompanies?.map((item, index) => (
+              <>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  spacing={3}
+                  alignItems="center"
+                >
+                  <Box width="100%">
+                    <FormControl fullWidth>
+                      <InputLabel id="type">Internal Company</InputLabel>
+                      <Select
+                        label="Internal Company"
+                        value={item?.company?.id}
+                        onChange={(e: SelectChangeEvent<number>) =>
+                          onChangeUserCompany(e, item?.id)
+                        }
+                      >
+                        {internalCompanies?.map((company) => (
+                          <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <MenuList
+                    disablePadding
+                    sx={{
+                      p: 0.5,
+                      gap: 0.5,
+                      display: 'flex',
+                      flexDirection: 'row',
+                      [`& .${menuItemClasses.root}`]: {
+                        px: 1,
+                        gap: 2,
+                        borderRadius: 0.75,
+                        [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                      },
+                    }}
+                  >
+                    {type === 'internal' && (
+                      <MenuItem onClick={() => onClickEdit(item?.company_id)}>
+                        <Iconify icon="solar:pen-bold" />
+                        Edit
+                      </MenuItem>
+                    )}
+                    <MenuItem onClick={() => onClickRemove(item?.id)} sx={{ color: 'error.main' }}>
+                      <Iconify icon="solar:trash-bin-trash-bold" />
+                      Delete
+                    </MenuItem>
+                  </MenuList>
+                </Stack>
+
+                {item?.company_id === selectedCompanyId && (
+                  <Card
+                    sx={{
+                      width: '100%',
+                      p: 4,
+                      boxShadow: '2',
+                      position: 'relative',
+                      backgroundColor: 'blue.50',
+                      borderRadius: 4,
+                    }}
+                  >
+                    <Typography fontSize={18} fontWeight="bold">
+                      Product Handled
+                    </Typography>
+                    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} mt={2}>
+                      {existingCompanyProducts &&
+                        existingCompanyProducts?.map((existingItem, existingIndex) => (
+                          <Box gridColumn={`${existingIndex % 2 === 0 ? '1 / 2' : '2 / 4'}`}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                id={`item-${existingItem?.id}`}
+                                onChange={() =>
+                                  onChangeProductFilterEdit(
+                                    existingItem?.id,
+                                    user?.products_handled?.find(
+                                      (userProduct) => userProduct?.product_id === existingItem?.id
+                                    )?.id ?? 0
+                                  )
+                                }
+                                checked={selectedProducts?.includes(existingItem?.id)}
+                              />{' '}
+                              <Typography
+                                sx={{ cursor: 'pointer' }}
+                                component="label"
+                                htmlFor={`item-${existingItem?.id}`}
+                              >
+                                {existingItem?.name}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                    </Box>
+                    {/* <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
+                    <Button
+                      size="small"
+                      onClick={onSaveUserCompany}
+                      variant="contained"
+                      color="primary"
+                      sx={{ width: 120 }}
+                    >
+                      Save
+                    </Button>
+                  </Box> */}
+                  </Card>
+                )}
+              </>
+            ))}
+            <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+              <Box width="100%">
+                <FormControl fullWidth>
+                  <InputLabel id="userCompany">Internal Company</InputLabel>
+                  <Select
+                    label="Internal Company"
+                    value={userCompany}
+                    onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
+                  >
+                    {internalCompanies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box
+                sx={{
+                  p: 0.5,
+                  gap: 0.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  [`& .${menuItemClasses.root}`]: {
+                    px: 1,
+                    gap: 2,
+                    borderRadius: 0.75,
+                    [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                  },
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={onAddUserCompany}
+                  sx={{ marginY: 2 }}
+                >
+                  Save
+                </Button>
+              </Box>
+            </Stack>
+          </Box>
+        )}
+      </Grid>
+
       {type === 'client' ? (
         watch('company_id') ? (
           <Grid item xs={12} md={12}>
