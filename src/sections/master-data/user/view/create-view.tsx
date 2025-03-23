@@ -83,11 +83,14 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
   const { mutate: addUser } = useAddUser({ isRbac: false });
   const { data: roles } = useRole();
+  const [isOpenCompanySelection, setIsOpenCompanySelection] = useState(false);
   const { data: companies } = useClientCompanies();
   const { data: internalCompanies } = useInternalCompanies();
   const [userCompany, setUserCompany] = React.useState<number | null>(null);
   const [existingUserCompany, setExistingUserCompany] = React.useState<number | null>(null);
-  const { data: companyProducts } = useProductByCompanyId(Number(userCompany));
+  const { data: companyProducts } = useProductByCompanyId(Number(userCompany), false, () =>
+    setIsOpenCompanySelection(false)
+  );
   const { data: existingCompanyProducts } = useProductByCompanyId(Number(existingUserCompany));
   const [userCompanies, setUserCompanies] = React.useState<number[]>([]);
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
@@ -119,12 +122,18 @@ export function CreateUserView({ type }: CreateUserProps) {
       addUser({
         ...formData,
         user_type: type,
+        internal_id: userCompanies,
+        product_id: selectedProducts,
       });
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setIsOpenCompanySelection(false);
+  }, [existingCompanyProducts, companyProducts]);
 
   const onChangePhone = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -153,6 +162,9 @@ export function CreateUserView({ type }: CreateUserProps) {
 
   const onClickEdit = (selectedItemId: number) => {
     if (selectedCompanyId === null) {
+      setSelectedCompanyId(selectedItemId);
+      setExistingUserCompany(selectedItemId);
+    } else if (selectedItemId !== selectedCompanyId) {
       setSelectedCompanyId(selectedItemId);
       setExistingUserCompany(selectedItemId);
     } else {
@@ -408,7 +420,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                                   >
                                     <Box display="flex" alignItems="center" gap={1}>
                                       <Checkbox
-                                        id={`item-${item?.id}`}
+                                        id={`item-${existingItem?.id}`}
                                         onChange={() => onChangeProductFilter(existingItem?.id)}
                                         checked={selectedProducts?.includes(existingItem?.id)}
                                       />{' '}
@@ -457,8 +469,11 @@ export function CreateUserView({ type }: CreateUserProps) {
                       <FormControl fullWidth>
                         <InputLabel id="userCompany">Internal Company</InputLabel>
                         <Select
+                          open={isOpenCompanySelection}
                           label="Internal Company"
                           value={userCompany ?? 0}
+                          onOpen={() => setIsOpenCompanySelection(true)}
+                          onClose={() => setIsOpenCompanySelection(false)}
                           onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
                         >
                           {internalCompanies?.map((company) => (
