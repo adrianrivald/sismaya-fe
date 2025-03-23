@@ -17,6 +17,10 @@ import { AssigneeChooserField, MultipleDropzoneField } from 'src/components/form
 import { Iconify } from 'src/components/iconify';
 import * as taskService from 'src/services/request/task';
 import * as formUtils from 'src/utils/form';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import { toast, Bounce } from 'react-toastify';
+import { useParams } from 'react-router-dom';
+import { useRequestById } from 'src/services/request';
 
 interface RequestTaskFormProps {
   children: React.ReactElement;
@@ -35,8 +39,11 @@ const defaultFormValues = taskService.RequestTask.fromJson({
 function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFormProps) {
   const { onClose } = Drawer.useDisclosure();
   const [_, assigneeFn] = taskService.useMutationAssignee(requestId);
+  const { id } = useParams();
+  const { data: requestDetail } = useRequestById(id ?? '');
   const [isUploadingOrDeletingFile, uploadOrDeleteFileFn] =
     taskService.useMutationAttachment(requestId);
+  const { data: userPermissionsList } = useUserPermissions();
   const [form, createOrUpdateFn] = taskService.useCreateOrUpdateTask(requestId, {
     defaultValues: task,
     onSuccess: () => {
@@ -50,6 +57,20 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
       form.reset({});
     },
   });
+
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
+  };
 
   useEffect(() => {
     form.reset({ ...task, requestId });
@@ -76,7 +97,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
             width="max-content"
           >
             <Typography color="#919EAB" fontWeight="bold" textAlign="center">
-              Request {requestNumber}
+              Request {requestDetail?.name || requestDetail?.number}
             </Typography>
           </Box>
 
@@ -141,12 +162,30 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
             label="Attachment"
             disabled={isUploadingOrDeletingFile}
             onDropAccepted={(files) => {
-              if (!task?.taskId) return;
-              uploadOrDeleteFileFn({ kind: 'create', taskId: task?.taskId, files });
+              if (
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              ) {
+                if (!task?.taskId) return;
+                uploadOrDeleteFileFn({ kind: 'create', taskId: task?.taskId, files });
+              } else {
+                onShowErrorToast();
+              }
             }}
+            disabledForm={
+              userPermissionsList?.includes('task:update') ||
+              userPermissionsList?.includes('task:create')
+            }
             onRemove={(fileId) => {
-              if (!task?.taskId) return;
-              uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
+              if (
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              ) {
+                if (!task?.taskId) return;
+                uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
+              } else {
+                onShowErrorToast();
+              }
             }}
             {...formUtils.getMultipleDropzoneProps(form, 'files')}
           />

@@ -53,7 +53,10 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
         size="small"
         variant="contained"
         onClick={() => {
-          if (userPermissionsList?.includes('task:update')) {
+          if (
+            userPermissionsList?.includes('task:update') ||
+            userPermissionsList?.includes('task:create')
+          ) {
             inputRef.current?.click();
           } else {
             onShowErrorToast();
@@ -74,8 +77,8 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
         onChange={(e) => {
           const files = Array.from(e.target.files || []);
           const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-          
-          const oversizedFiles = files.filter(file => file.size > MAX_SIZE);
+
+          const oversizedFiles = files.filter((file) => file.size > MAX_SIZE);
           if (oversizedFiles.length > 0) {
             toast.error('File size should not exceed 5MB', {
               position: 'top-right',
@@ -90,7 +93,7 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
             });
             return;
           }
-          
+
           handleUpload(files);
         }}
       />

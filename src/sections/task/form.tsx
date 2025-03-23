@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Divider,
   Box,
@@ -9,6 +9,8 @@ import {
   Button,
   IconButton,
   FormLabel,
+  Autocomplete,
+  FormHelperText,
 } from '@mui/material';
 import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
@@ -60,9 +62,9 @@ function Form({ request, task }: FormProps) {
     },
   });
 
-  const taskId = form.getValues('taskId') ?? 0;
-  const { data } = useTaskRequestList({ page: 1, page_size: 100 }, assigneeCompanyId ?? 0);
-  const requests = taskId ? [{ id: 0, name: request?.name }] : (data?.items ?? []);
+  const taskId = task?.id ?? 0;
+  const { data } = useTaskRequestList({ page: 1, page_size: 999 }, assigneeCompanyId ?? 0);
+  const requests = taskId ? [{ id: requestId, name: request?.name }] : (data?.items ?? []);
   const { data: userPermissionsList } = useUserPermissions();
   const [_, assigneeFn] = useMutationAssignee(requestId);
 
@@ -136,24 +138,28 @@ function Form({ request, task }: FormProps) {
         </Box>
 
         <Divider />
-
         <Stack p={2} spacing={3} flexGrow={1}>
           {/* TODO: when `task.id` is not provided: get request list and enable select */}
           <Stack spacing={1}>
-            <TextField
-              label="Request"
-              select
-              defaultValue={0}
-              sx={{ pb: '-10px' }}
+            <Autocomplete
+              disablePortal
+              popupIcon={null}
+              options={requests ?? []}
+              getOptionLabel={(option) => option?.name || `REQ${option?.number}`}
               disabled={taskId ? true : requests.length === 0}
-              {...formUtils.getTextProps(form, 'requestId')}
-            >
-              {requests?.map((r) => (
-                <MenuItem key={r.id} value={r.id} onClick={(e) => e.stopPropagation()}>
-                  {r?.name || `REQ${r.number}`}
-                </MenuItem>
-              ))}
-            </TextField>
+              value={requests?.find((r) => r?.id === form.watch('requestId'))}
+              onChange={(_event, newValue) => {
+                form.setValue('requestId', newValue?.id || '');
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Request"
+                  error={Boolean(form.formState.errors?.requestId)}
+                />
+              )}
+            />
+
             {form.watch('requestId') && String(form.watch('requestId')) !== '0' && (
               <FormLabel
                 onClick={() => {
