@@ -56,12 +56,7 @@ import { RemoveAction } from './remove-action';
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
+  PaperProps: { style: { maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP, width: 250 } },
 };
 
 function getStyles(id: number, selectedInternalCompanies: readonly number[], theme: Theme) {
@@ -98,15 +93,12 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [selectedProductsTemp, setSelectedProductsTemp] = useState<number[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
-  const defaultValues = {
-    internal_id: [],
-  };
+  const [isEditMode, setIsEditMode] = useState(false);
+  const defaultValues = { internal_id: [] };
 
   const fetchDivision = async (companyId: number) => {
     const data = await fetch(`${API_URL}/departments?company_id=${companyId}`, {
-      headers: {
-        Authorization: `Bearer ${getSession()}`,
-      },
+      headers: { Authorization: `Bearer ${getSession()}` },
     }).then((res) =>
       res.json().then((value) => {
         setDivisions(value?.data);
@@ -157,10 +149,13 @@ export function CreateUserView({ type }: CreateUserProps) {
     });
   };
 
-  console.log(userCompanies, 'usercompanies');
-  console.log(selectedProducts, 'usercompanies prod');
+  // console.log(userCompanies, 'usercompanies');
+  console.log(selectedProducts, 'log: selectedProducts');
+  console.log(selectedProductsTemp, 'log: selectedproductstemp');
 
   const onClickEdit = (selectedItemId: number) => {
+    setIsEditMode(true);
+    setSelectedProductsTemp(selectedProducts);
     if (selectedCompanyId === null) {
       setSelectedCompanyId(selectedItemId);
       setExistingUserCompany(selectedItemId);
@@ -174,7 +169,7 @@ export function CreateUserView({ type }: CreateUserProps) {
   };
 
   const onSaveUserCompany = () => {
-    // setSelectedProducts(selectedProductsTemp);
+    setSelectedProducts(selectedProductsTemp);
     setSelectedCompanyId(null);
     setExistingUserCompany(null);
   };
@@ -188,7 +183,7 @@ export function CreateUserView({ type }: CreateUserProps) {
         const updatedUserCompanies = [...prevUserCompanies, userCompany];
         return updatedUserCompanies;
       });
-      // setSelectedProducts(selectedProductsTemp);
+      setSelectedProducts(selectedProductsTemp);
       setUserCompany(null);
     } else {
       toast.error(`Company already selected`, {
@@ -221,15 +216,14 @@ export function CreateUserView({ type }: CreateUserProps) {
   };
 
   const onChangeProductFilter = (productFilterId: number) => {
-    const hasProduct = selectedProducts?.includes(productFilterId);
+    const hasProduct = selectedProductsTemp?.includes(productFilterId);
     if (!hasProduct) {
-      setSelectedProducts([...selectedProducts, productFilterId]);
+      setSelectedProductsTemp([...selectedProductsTemp, productFilterId]);
     } else {
-      const newArr = selectedProducts?.filter((item) => item !== productFilterId);
-      setSelectedProducts(newArr);
+      const newArr = selectedProductsTemp?.filter((item) => item !== productFilterId);
+      setSelectedProductsTemp(newArr);
     }
   };
-  console.log(selectedProductsTemp, 'selectedproductstemp');
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -246,11 +240,7 @@ export function CreateUserView({ type }: CreateUserProps) {
           width="100%"
           onSubmit={handleSubmit}
           schema={type === 'client' ? userClientSchema : userInternalSchema}
-          options={{
-            defaultValues: {
-              ...defaultValues,
-            },
-          }}
+          options={{ defaultValues: { ...defaultValues } }}
         >
           {({ register, control, watch, formState, setValue }) => (
             <Grid container spacing={3} xs={12}>
@@ -258,22 +248,15 @@ export function CreateUserView({ type }: CreateUserProps) {
                 <FieldDropzone
                   label="Upload Picture"
                   helperText="Picture maximum 5mb size"
-                  controller={{
-                    name: 'cover',
-                    control,
-                  }}
+                  controller={{ name: 'cover', control }}
                 />
               </Grid>
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.name)}
-                  sx={{
-                    width: '100%',
-                  }}
+                  sx={{ width: '100%' }}
                   label="Name"
-                  {...register('name', {
-                    required: 'Name must be filled out',
-                  })}
+                  {...register('name', { required: 'Name must be filled out' })}
                   autoComplete="off"
                 />
                 {formState?.errors?.name && (
@@ -318,9 +301,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                       <Select
                         labelId="select-division"
                         error={Boolean(formState?.errors?.department_id)}
-                        {...register('department_id', {
-                          required: 'Division must be filled out',
-                        })}
+                        {...register('department_id', { required: 'Division must be filled out' })}
                         label="Division"
                       >
                         {divisions?.map((division) => (
@@ -422,7 +403,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                                       <Checkbox
                                         id={`item-${existingItem?.id}`}
                                         onChange={() => onChangeProductFilter(existingItem?.id)}
-                                        checked={selectedProducts?.includes(existingItem?.id)}
+                                        checked={selectedProductsTemp?.includes(existingItem?.id)}
                                       />{' '}
                                       <Typography
                                         sx={{ cursor: 'pointer' }}
@@ -435,22 +416,13 @@ export function CreateUserView({ type }: CreateUserProps) {
                                   </Box>
                                 ))}
                             </Box>
-                            <Box
-                              display="flex"
-                              justifyContent="end"
-                              width="100%"
-                              sx={{
-                                mt: 4,
-                              }}
-                            >
+                            <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
                               <Button
                                 size="small"
                                 onClick={onSaveUserCompany}
                                 variant="contained"
                                 color="primary"
-                                sx={{
-                                  width: 120,
-                                }}
+                                sx={{ width: 120 }}
                               >
                                 Save
                               </Button>
@@ -510,7 +482,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                               <Checkbox
                                 id={`item-${item?.id}`}
                                 onChange={() => onChangeProductFilter(item?.id)}
-                                checked={selectedProducts?.includes(item?.id)}
+                                checked={selectedProductsTemp?.includes(item?.id)}
                               />{' '}
                               <Typography
                                 sx={{ cursor: 'pointer' }}
@@ -523,22 +495,13 @@ export function CreateUserView({ type }: CreateUserProps) {
                           </Box>
                         ))}
                     </Box>
-                    <Box
-                      display="flex"
-                      justifyContent="end"
-                      width="100%"
-                      sx={{
-                        mt: 4,
-                      }}
-                    >
+                    <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
                       <Button
                         size="small"
                         onClick={onAddUserCompany}
                         variant="contained"
                         color="primary"
-                        sx={{
-                          width: 120,
-                        }}
+                        sx={{ width: 120 }}
                       >
                         Save
                       </Button>
@@ -550,9 +513,7 @@ export function CreateUserView({ type }: CreateUserProps) {
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.email)}
-                  sx={{
-                    width: '100%',
-                  }}
+                  sx={{ width: '100%' }}
                   type="email"
                   label="Email"
                   {...register('email', {
@@ -573,13 +534,9 @@ export function CreateUserView({ type }: CreateUserProps) {
               <Grid item xs={12} md={12}>
                 <TextField
                   error={Boolean(formState?.errors?.phone)}
-                  sx={{
-                    width: '100%',
-                  }}
+                  sx={{ width: '100%' }}
                   label="Phone No."
-                  {...register('phone', {
-                    required: 'Phone Number must be filled out',
-                  })}
+                  {...register('phone', { required: 'Phone Number must be filled out' })}
                   value={watch('phone')}
                   onChange={(e) => onChangePhone(e, setValue, watch)}
                   autoComplete="off"
@@ -596,9 +553,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                   error={Boolean(formState?.errors?.password)}
                   fullWidth
                   label="Password"
-                  {...register('password', {
-                    required: 'Password must be filled out',
-                  })}
+                  {...register('password', { required: 'Password must be filled out' })}
                   InputLabelProps={{ shrink: true }}
                   type={showPassword ? 'text' : 'password'}
                   InputProps={{
@@ -627,9 +582,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                   <Select
                     labelId="select-role"
                     error={Boolean(formState?.errors?.role_id)}
-                    {...register('role_id', {
-                      required: 'Role must be filled out',
-                    })}
+                    {...register('role_id', { required: 'Role must be filled out' })}
                     label="Role"
                   >
                     {roles
@@ -643,14 +596,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                   </FormHelperText>
                 )}
               </Grid>
-              <Box
-                display="flex"
-                justifyContent="end"
-                width="100%"
-                sx={{
-                  mt: 4,
-                }}
-              >
+              <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
                 <LoadingButton
                   size="small"
                   loading={isLoading}
@@ -658,9 +604,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                   type="submit"
                   variant="contained"
                   color="primary"
-                  sx={{
-                    width: 120,
-                  }}
+                  sx={{ width: 120 }}
                 >
                   Submit
                 </LoadingButton>
