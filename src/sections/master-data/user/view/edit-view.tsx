@@ -98,6 +98,9 @@ interface EditFormProps {
   onChangeUserCompany: (e: SelectChangeEvent<number>, itemId: number) => void;
   internalCompanies: Company[] | undefined;
   onClickRemove: (id: number) => void;
+  onAddCompany: (id: number) => void;
+  onFetchRelationCompany: any;
+  companyRelations: any[];
   companyProducts: Products[] | undefined;
   selectedProducts: number[];
   onChangeProductFilter: (productFilterId: number) => void;
@@ -130,6 +133,9 @@ function EditForm({
   onClickDeleteUserCompany,
   internalCompanies,
   onClickRemove,
+  onAddCompany,
+  onFetchRelationCompany,
+  companyRelations,
   companyProducts,
   selectedProducts,
   onChangeProductFilter,
@@ -261,38 +267,6 @@ function EditForm({
           </FormHelperText>
         )}
       </Grid>
-
-      {type === 'client' ? (
-        <Grid item xs={12} md={12}>
-          <FormControl fullWidth>
-            <InputLabel id="select-company">Company</InputLabel>
-            <Select
-              labelId="select-company"
-              error={Boolean(formState?.errors?.company_id)}
-              {...register('company_id', {
-                required: 'Company must be filled out',
-                onChange: () => {
-                  fetchDivision(watch('company_id') as number);
-                  onFetchRelationCompany(watch('company_id') as number);
-                  removeAllCompanies(userCompanies?.map((itm) => itm.id));
-                  onSubmit(watch());
-                },
-              })}
-              label="Company"
-              value={watch('company_id')}
-            >
-              {clientCompanies?.map((company) => (
-                <MenuItem value={company?.id}>{company?.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {formState?.errors?.company_id && (
-            <FormHelperText sx={{ color: 'error.main' }}>
-              {String(formState?.errors?.company_id?.message)}
-            </FormHelperText>
-          )}
-        </Grid>
-      ) : null}
 
       <Grid item xs={12} md={12}>
         <Typography variant="h4" color="primary" mb={2}>
@@ -505,6 +479,9 @@ function EditForm({
                 required: 'Company must be filled out',
                 onChange: () => {
                   fetchDivision(watch('company_id') as number);
+                  onFetchRelationCompany(watch('company_id') as number);
+                  removeAllCompanies(userCompanies?.map((itm) => itm.id));
+                  onSubmit(watch());
                 },
               })}
               label="Company"
@@ -671,6 +648,7 @@ export function EditUserView({ type }: EditUserProps) {
   // const { data: userCompaniesData } = useUserCompanyById(Number(id));
   const { mutate: addUserCompany } = useAddUserCompany();
   const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
+  const [companyRelations, setCompanyRelations] = React.useState<InternalCompany[]>([]);
   const { mutate: addUserProduct } = useAddUserProduct();
   const { mutate: deleteUserProduct } = useDeleteUserProductById(Number(id));
   const { data: existingCompanyProducts } = useProductByCompanyId(Number(existingUserCompany));
@@ -898,6 +876,9 @@ export function EditUserView({ type }: EditUserProps) {
               internalCompanies={internalCompanies}
               onClickDeleteUserCompany={onClickDeleteUserCompany}
               onClickRemove={onClickRemove}
+              onAddCompany={onAddCompany}
+              companyRelations={companyRelations}
+              onFetchRelationCompany={fetchRelationCompany}
               companyProducts={companyProducts}
               onChangeProductFilter={onChangeProductFilter}
               selectedProducts={selectedProducts}
