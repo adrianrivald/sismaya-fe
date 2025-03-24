@@ -1,4 +1,4 @@
-import { Company, Department, InternalCompany } from "../company/types";
+import { Company, Department, InternalCompany, Products } from "../company/types";
 
 export interface User {
     id: number;
@@ -6,6 +6,17 @@ export interface User {
     phone: string;
     user_info: UserInfo;
     internal_companies?: InternalCompany[]
+    products_handled?: ProductsHandled[]
+}
+
+interface ProductsHandled {
+    created_at: string;
+    id: number;
+    product: Products;
+    product_id: number;
+    updated_at: string;
+    user: UserInfo;
+    user_id: number
 }
 
 interface Role {

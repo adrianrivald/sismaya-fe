@@ -6,7 +6,13 @@ import Button from '@mui/material/Button';
 import { useMutationAttachment } from 'src/services/task/task-management';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 
-export default function AddAttachment({ taskId }: { taskId?: number }) {
+export default function AddAttachment({
+  taskId,
+  userOnAssignee,
+}: {
+  taskId?: number;
+  userOnAssignee?: any;
+}) {
   const { data: userPermissionsList } = useUserPermissions();
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,8 +60,9 @@ export default function AddAttachment({ taskId }: { taskId?: number }) {
         variant="contained"
         onClick={() => {
           if (
-            userPermissionsList?.includes('task:update') ||
-            userPermissionsList?.includes('task:create')
+            (userPermissionsList?.includes('task:update') ||
+              userPermissionsList?.includes('task:create')) &&
+            userOnAssignee()
           ) {
             inputRef.current?.click();
           } else {

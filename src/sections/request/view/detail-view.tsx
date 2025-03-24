@@ -27,7 +27,7 @@ import {
   useRequestById,
 } from 'src/services/request';
 import { getFileExtension } from 'src/utils/get-file-format';
-import { useInternalUsers, useUsers } from 'src/services/master-data/user';
+import { useInternalProduct, useInternalUsers, useUsers } from 'src/services/master-data/user';
 import dayjs, { Dayjs } from 'dayjs';
 import { downloadFile } from 'src/utils/download';
 import { SvgColor } from 'src/components/svg-color';
@@ -43,18 +43,9 @@ import { ApproveAction } from '../approve-action';
 import { RejectAction } from '../reject-action';
 
 const priorities = [
-  {
-    name: 'Low',
-    id: 'low',
-  },
-  {
-    name: 'Medium',
-    id: 'medium',
-  },
-  {
-    name: 'High',
-    id: 'high',
-  },
+  { name: 'Low', id: 'low' },
+  { name: 'Medium', id: 'medium' },
+  { name: 'High', id: 'high' },
 ];
 
 export function RequestDetailView() {
@@ -67,7 +58,7 @@ export function RequestDetailView() {
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: cito } = useCitoById(String(requestDetail?.company?.id) ?? '');
-  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
+  const { data: internalUser } = useInternalProduct(String(requestDetail?.product?.id));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
@@ -128,10 +119,7 @@ export function RequestDetailView() {
   };
 
   const handleSubmit = (formData: { reason: string }) => {
-    const payload = {
-      ...formData,
-      id: Number(id),
-    };
+    const payload = { ...formData, id: Number(id) };
     rejectRequest(payload);
     setOpen(false);
   };
@@ -139,11 +127,7 @@ export function RequestDetailView() {
   const handleAddPicItem = (userId: number, userPicture: string, userName: string) => {
     setSelectedPic((prev: { id: number; picture: string; name: string }[] | undefined) => [
       ...(prev as []),
-      {
-        id: userId,
-        picture: userPicture,
-        name: userName,
-      },
+      { id: userId, picture: userPicture, name: userName },
     ]);
     setSelectedPicWarning(false);
   };
@@ -158,10 +142,7 @@ export function RequestDetailView() {
   };
 
   const handleAddPicItemFromDetail = (userId: number) => {
-    addRequestAssignee({
-      assignee_id: userId,
-      request_id: Number(id),
-    });
+    addRequestAssignee({ assignee_id: userId, request_id: Number(id) });
   };
   const handleApprove = (formData: any) => {
     const startDate = dayjs(dateValue).format('YYYY-MM-DD hh:mm:ss');
@@ -171,9 +152,7 @@ export function RequestDetailView() {
       start_date: startDate,
       end_date: endDate,
       id: Number(id),
-      assignees: selectedPic?.map((item) => ({
-        assignee_id: item?.id,
-      })),
+      assignees: selectedPic?.map((item) => ({ assignee_id: item?.id })),
     };
     if ((selectedPic ?? [])?.length > 0) {
       approveRequest(payload);
@@ -215,14 +194,7 @@ export function RequestDetailView() {
   const names = selectedPic?.slice(0, 5).map((item) => item.name);
 
   return (
-    <Box
-      p={3}
-      bgcolor="blue.50"
-      sx={{
-        borderRadius: 2,
-        marginTop: 2,
-      }}
-    >
+    <Box p={3} bgcolor="blue.50" sx={{ borderRadius: 2, marginTop: 2 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box display="flex" gap={1} alignItems="center">
           <Typography fontWeight="bold" color="primary">
@@ -238,12 +210,7 @@ export function RequestDetailView() {
         <Button
           onClick={onClickEdit}
           type="button"
-          sx={{
-            paddingY: 0.5,
-            border: 1,
-            borderColor: 'primary.main',
-            borderRadius: 1.5,
-          }}
+          sx={{ paddingY: 0.5, border: 1, borderColor: 'primary.main', borderRadius: 1.5 }}
           disabled={
             (userType === 'client' && requestDetail?.step?.toLowerCase() !== 'pending') ||
             requestDetail?.step === 'done'
@@ -283,6 +250,14 @@ export function RequestDetailView() {
               </TableCell>
               <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
                 {requestDetail?.creator?.name ?? 'Pending'}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
+                Request Title
+              </TableCell>
+              <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
+                {requestDetail?.name ?? '-'}
               </TableCell>
             </TableRow>
             <TableRow>

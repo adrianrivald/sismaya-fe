@@ -22,7 +22,12 @@ import { LoadingButton } from '@mui/lab';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestDTO } from 'src/services/request/schemas/request-schema';
-import { useInternalUsers, useUserById, useUsers } from 'src/services/master-data/user';
+import {
+  useInternalProduct,
+  useInternalUsers,
+  useUserById,
+  useUsers,
+} from 'src/services/master-data/user';
 import {
   useAddAttachment,
   useAddRequest,
@@ -53,12 +58,13 @@ export function EditRequestView() {
   const idCurrentCompany = user?.internal_companies?.find(
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
-  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
+
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: products } = useProductByCompanyId(
     userType === 'client' ? clientCompanyId : (requestDetail?.company?.id ?? 0),
     true
   );
+  const { data: internalUser } = useInternalProduct(String(requestDetail?.product?.id));
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [isLoading, setIsLoading] = React.useState(false);
   const [files, setFiles] = React.useState<FileList | any>([]);
