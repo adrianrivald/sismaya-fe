@@ -38,6 +38,7 @@ import {
   useCompanies,
   useDivisionByCompanyId,
   useInternalCompanies,
+  useNonInternalCompanies,
   useProductByCompanyId,
 } from 'src/services/master-data/company';
 import { API_URL } from 'src/constants';
@@ -80,7 +81,7 @@ export function CreateUserView({ type }: CreateUserProps) {
   const { mutate: addUser } = useAddUser({ isRbac: false });
   const { data: roles } = useRole();
   const [isOpenCompanySelection, setIsOpenCompanySelection] = useState(false);
-  const { data: companies } = useClientCompanies();
+  const { data: companies } = useNonInternalCompanies(true);
   const { data: internalCompanies } = useInternalCompanies();
   const [userCompany, setUserCompany] = React.useState<number | null>(null);
   const [existingUserCompany, setExistingUserCompany] = React.useState<number | null>(null);

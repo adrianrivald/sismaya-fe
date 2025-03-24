@@ -4,7 +4,7 @@ import { Company } from "./types";
 
 async function fetchCompanies(type : string, showAll?: boolean) {
     const { data } = await http<{data : Company[]}>(
-      !type ? `companies` :  type === "internal" ? `companies?type=internal${showAll ? "&page_size=100" : "&page_size=10"}` : `companies?type=holding${showAll ? "&page_size=100" : "&page_size=10"}`,
+      !type ? `companies` :  type === "internal" ? `companies?type=internal${showAll ? "&page_size=100" : "&page_size=10"}` : type === "client"  ? `companies?type=holding${showAll ? "&page_size=100" : "&page_size=10"}` : `companies?type=non_internal${showAll ? "&page_size=100" : "&page_size=10"}`,
     );
   
     return data;
@@ -32,6 +32,14 @@ async function fetchInternalCompanies() {
     const data = useQuery(
       ['client-company-items-all'],
       () => fetchCompanies("client", showAll)
+    );
+  
+    return data;
+  }
+  export function useNonInternalCompanies(showAll?: boolean) {
+    const data = useQuery(
+      ['non-internal-company-items-all'],
+      () => fetchCompanies("non-internal", showAll)
     );
   
     return data;
