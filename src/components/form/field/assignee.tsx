@@ -62,6 +62,7 @@ export function AssigneeList({
 export interface AssigneeChooserProps {
   requestId: string | number;
   isCreate?: boolean;
+  productId?: string;
   assignees?: Array<Assignee>;
   onAssign: (assignee: Assignee, index: number) => void;
   onUnassign: (assignee: Assignee, index: number) => void;
@@ -73,9 +74,11 @@ export function AssigneeChooser({
   assignees = [],
   onAssign,
   onUnassign,
+  productId,
 }: AssigneeChooserProps) {
   const [search, setSearch] = useState('');
-  const { data = [], isLoading } = useRequestAssignees(requestId.toString());
+
+  const { data = [], isLoading } = useRequestAssignees(productId || '');
   const items = (data as unknown as Array<Assignee>).filter((assignee) =>
     assignee.name.includes(search)
   );
@@ -179,6 +182,7 @@ export interface AssigneeChooserFieldProps<TFormFields extends FieldValues = Fie
     Partial<AssigneeChooserProps> {}
 
 export function AssigneeChooserField({
+  productId,
   isCreate,
   requestId = 0,
   assignees: defaultAssignees = [],
@@ -200,6 +204,7 @@ export function AssigneeChooserField({
         <AssigneeList assignees={assignees} />
         <Box flexGrow={1}>
           <AssigneeChooser
+            productId={productId}
             requestId={requestId}
             assignees={assignees}
             onAssign={(assignee, index) => {

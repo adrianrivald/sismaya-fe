@@ -177,6 +177,7 @@ function Form({ request, task }: FormProps) {
           <AssigneeChooserField
             name="assignees"
             isCreate={!taskId}
+            productId={String(request?.product?.id)}
             // @ts-ignore
             control={form.control}
             requestId={form.watch('requestId') || requestId}

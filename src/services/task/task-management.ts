@@ -59,7 +59,7 @@ export class TaskManagement {
       id: json.request?.id,
       name: json.request?.name || `REQ${json.request?.number}` || '-',
       product: {
-        id: json.request?.product?.id || null,
+        id: json.request?.product_id || null,
         name: json.request?.product?.name || '-',
       },
       priority: json.request?.priority || 'medium',

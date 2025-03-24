@@ -63,7 +63,7 @@ export function useInternalUsers(internalId?: string) {
   return data;
 }
 
-async function fetchInternalProduct(internalId?: string) {
+export async function fetchInternalProduct(internalId?: string) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/users-internal', baseUrl);
 
