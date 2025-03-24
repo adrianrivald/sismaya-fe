@@ -35,6 +35,7 @@ import { http } from 'src/utils/http';
 import { Bounce, toast } from 'react-toastify';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { SvgColor } from 'src/components/svg-color';
+import { getUser } from 'src/sections/auth/session/session';
 import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
@@ -56,6 +57,8 @@ export default function TaskDetailPage() {
   const { data: userPermissionsList } = useUserPermissions();
   const [modalAssignee, setModalAssignee] = useState(false);
   const [search, setSearch] = useState('');
+
+  const user = getUser();
 
   if (!data || error) {
     return null;
@@ -101,6 +104,11 @@ export default function TaskDetailPage() {
     setSearch(text);
   };
 
+  const userOnAssignee = () => {
+    const dataUser = JSON.parse(user || '');
+    return task.assignees.some((item) => item.userId === dataUser?.id);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Helmet>
@@ -136,7 +144,7 @@ export default function TaskDetailPage() {
             </Box>
           </Stack>
 
-          {userPermissionsList?.includes('task:update') ? (
+          {userPermissionsList?.includes('task:update') && userOnAssignee() ? (
             <TaskForm request={request} task={task}>
               <Button variant="outlined">Edit Task</Button>
             </TaskForm>
@@ -250,7 +258,7 @@ export default function TaskDetailPage() {
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h6">Attachments</Typography>
-                <AddAttachment taskId={Number(taskId)} />
+                <AddAttachment taskId={Number(taskId)} userOnAssignee={userOnAssignee} />
               </Box>
 
               <Stack spacing={2}>
@@ -316,7 +324,7 @@ export default function TaskDetailPage() {
                     >
                       <MenuItem
                         onClick={() => {
-                          if (userPermissionsList?.includes('task:read')) {
+                          if (userPermissionsList?.includes('task:read') && userOnAssignee()) {
                             downloadFile(attachment.url);
                             handleClose();
                           } else {
@@ -334,7 +342,7 @@ export default function TaskDetailPage() {
                       </MenuItem>
                       <MenuItem
                         onClick={() => {
-                          if (userPermissionsList?.includes('task:update')) {
+                          if (userPermissionsList?.includes('task:update') && userOnAssignee()) {
                             setDeleteModal({ isOpen: true, id: attachment.id });
                             handleClose();
                           } else {
