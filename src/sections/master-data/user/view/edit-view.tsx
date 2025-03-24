@@ -43,6 +43,7 @@ import {
 import {
   useClientCompanies,
   useInternalCompanies,
+  useNonInternalCompanies,
   useProductByCompanyId,
 } from 'src/services/master-data/company';
 import { getSession } from 'src/sections/auth/session/session';
@@ -641,7 +642,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
   const { mutate: updateUser } = useUpdateUser({ isRbac: false });
-  const { data: clientCompanies } = useClientCompanies(true);
+  const { data: clientCompanies } = useNonInternalCompanies(true);
   const { data: internalCompanies } = useInternalCompanies();
   const [selectedCompanyId, setSelectedCompanyId] = React.useState<number | null>(null);
   // const { data: userCompaniesData } = useUserCompanyById(Number(id));
