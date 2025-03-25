@@ -75,7 +75,7 @@ export default function AddAttachment({
 
       <input
         type="file"
-        accept="image/*"
+        accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf"
         name="attachment"
         id="attachment"
         style={{ display: 'none' }}
