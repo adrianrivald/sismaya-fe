@@ -41,7 +41,7 @@ import { AttachmentModal } from './attachment-modal';
 // ----------------------------------------------------------------------
 
 export default function TaskDetailPage() {
-  const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '' });
+  const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '', path: '' });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: 0 });
   const [menuState, setMenuState] = useState<{
     anchorEl: null | HTMLElement;
@@ -278,7 +278,11 @@ export default function TaskDetailPage() {
                       sx={{ cursor: 'pointer', flex: 1, width: '80%' }}
                       onClick={() => {
                         if (userPermissionsList?.includes('task:read')) {
-                          setAttachmentModal({ isOpen: true, url: attachment.url });
+                          setAttachmentModal({
+                            isOpen: true,
+                            url: attachment.url,
+                            path: attachment.name,
+                          });
                         } else {
                           onShowErrorToast();
                         }
@@ -375,8 +379,9 @@ export default function TaskDetailPage() {
             isOpen={attachmentModal.isOpen}
             url={attachmentModal.url}
             onClose={() => {
-              setAttachmentModal({ isOpen: false, url: '' });
+              setAttachmentModal({ isOpen: false, url: '', path: '' });
             }}
+            path={attachmentModal.path}
           />
         </Stack>
       </Stack>
