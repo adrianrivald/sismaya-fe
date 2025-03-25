@@ -16,9 +16,11 @@ import {
   useFieldArray,
   type FieldValues,
   type UseControllerProps,
+  useWatch,
 } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
 import { Iconify } from 'src/components/iconify';
+import { useState } from 'react';
 
 export interface MultipleDropzoneFieldProps<TFormFields extends FieldValues = FieldValues>
   extends DropzoneOptions,
@@ -28,12 +30,14 @@ export interface MultipleDropzoneFieldProps<TFormFields extends FieldValues = Fi
   disabledForm?: boolean;
   acceptForm?: string;
   maxSizeForm?: number;
+  onPreview?: any;
 }
 
 interface MultipleField {
   id: number;
   path: string;
   name: string;
+  size: string;
   // size: number;
 }
 
@@ -45,15 +49,20 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
   disabledForm,
   acceptForm = '*',
   maxSizeForm = 10,
+  onPreview,
   ...dropzoneOptions
 }: MultipleDropzoneFieldProps<TFormFields>) {
+  const [attachments, setAttachments] = useState([]);
   const theme = useTheme();
   const { fieldState } = useController({ control, name });
   const { fields, append, remove } = useFieldArray({ control, name: name as any, keyName: '_id' });
+  const watchFields = useWatch({
+    control,
+    name: name as any,
+  });
   const { getRootProps, getInputProps } = useDropzone({
     ...dropzoneOptions,
     multiple: true,
-
     onDropAccepted: (files, event) => {
       const MAX_SIZE = maxSizeForm * 1024 * 1024; // 5MB in bytes
       const oversizedFiles = files.filter((file) => file.size > MAX_SIZE);
@@ -74,13 +83,18 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
       }
 
       dropzoneOptions.onDropAccepted?.(files, event);
-      const existingFiles = fields.map((field) => field);
-      append([...existingFiles, ...files] as any);
+
+      // Just append the new files directly
+      append(files as any);
     },
   });
 
   const hasError = !!fieldState.error;
   const fieldError = fieldState.error?.message;
+
+  React.useEffect(() => {
+    setAttachments(watchFields);
+  }, [watchFields]);
 
   React.useEffect(() => {
     if (fieldError) {
@@ -152,55 +166,78 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
         ) : null}
       </Stack>
 
-      {fields.map((field, index) => {
-        const { id: fileId, name: savedFileName, path = '' } = field as unknown as MultipleField;
-        const fileName = savedFileName || path.split('/').pop();
+      {attachments?.length > 0 &&
+        attachments?.map((field: any, index) => {
+          const { id: fileId, name: savedFileName, path = '' } = field as unknown as MultipleField;
+          const fileName = savedFileName || path.split('/').pop();
 
-        return (
-          <Box
-            key={fileId}
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            border="1px solid rgba(145, 158, 171, 0.32)"
-            borderRadius={1}
-            px={1}
-            py={2}
-          >
-            <Stack direction="row" spacing={1} flexGrow={1} width="90%">
-              <Iconify icon="solar:document-outline" />
+          return (
+            <Box
+              key={fileId}
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              border="1px solid rgba(145, 158, 171, 0.32)"
+              borderRadius={1}
+              px={1}
+              py={2}
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                flexGrow={1}
+                width="90%"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onPreview) {
+                    const fileExtension = field.name?.toLowerCase().split('.').pop() || '';
+                    const nonPreviewableExtensions = ['xlsx', 'xls', 'doc', 'docx', 'csv'];
 
-              <Typography
-                fontWeight={500}
-                fontSize={14}
-                lineHeight="20px"
-                color="#212B36"
-                sx={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
+                    if (nonPreviewableExtensions.includes(fileExtension)) {
+                      return;
+                    }
+
+                    onPreview({
+                      isOpen: true,
+                      url: field.url || URL.createObjectURL(field),
+                      path: field.name,
+                    });
+                  }
                 }}
               >
-                {fileName}
-              </Typography>
-            </Stack>
+                <Iconify icon="solar:document-outline" />
 
-            <IconButton
-              aria-label={`remove ${fileName}`}
-              onClick={() => {
-                if (!disabledForm) {
-                  onShowErrorToast();
-                } else {
-                  remove(index);
-                  onRemove?.(fileId);
-                }
-              }}
-            >
-              <Iconify icon="mdi:close" />
-            </IconButton>
-          </Box>
-        );
-      })}
+                <Typography
+                  fontWeight={500}
+                  fontSize={14}
+                  lineHeight="20px"
+                  color="#212B36"
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {fileName}
+                </Typography>
+              </Stack>
+
+              <IconButton
+                aria-label={`remove ${fileName}`}
+                onClick={() => {
+                  if (!disabledForm) {
+                    onShowErrorToast();
+                  } else {
+                    remove(index);
+                    onRemove?.(fileId);
+                  }
+                }}
+              >
+                <Iconify icon="mdi:close" />
+              </IconButton>
+            </Box>
+          );
+        })}
 
       {/* {fields.length > 0 ? (
         <Box display="flex" justifyContent="flex-end">

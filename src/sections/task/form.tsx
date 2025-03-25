@@ -33,6 +33,7 @@ import { useTaskRequestList } from 'src/services/request/use-request-list';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { toast, Bounce } from 'react-toastify';
 import { useParams } from 'react-router-dom';
+import { AttachmentDialog } from 'src/pages/task/attachment-dialog';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -51,6 +52,7 @@ export function DueDatePicker({
 }
 
 function Form({ request, task }: FormProps) {
+  const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '', path: '' });
   const requestId = request?.id ?? 0;
   const { onClose, isOpen } = Drawer.useDisclosure();
   const assigneeCompanyId = useAssigneeCompanyId();
@@ -107,171 +109,182 @@ function Form({ request, task }: FormProps) {
   }, [task]);
 
   return (
-    <Drawer.Content anchor="right">
-      <Box
-        display="flex"
-        flexDirection="column"
-        component="form"
-        onSubmit={createOrUpdateFn}
-        role="presentation"
-        sx={{ width: 480, height: '100%' }}
-      >
-        <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
-          <Typography color="#919EAB" fontWeight="bold" textAlign="center">
-            {taskId ? 'Task Detail' : 'Create Task'}
-          </Typography>
+    <>
+      <Drawer.Content anchor="right">
+        <Box
+          display="flex"
+          flexDirection="column"
+          component="form"
+          onSubmit={createOrUpdateFn}
+          role="presentation"
+          sx={{ width: 480, height: '100%' }}
+        >
+          <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
+            <Typography color="#919EAB" fontWeight="bold" textAlign="center">
+              {taskId ? 'Task Detail' : 'Create Task'}
+            </Typography>
 
-          {taskId ? (
-            <Dialog.Root>
-              <Dialog.OpenButton>
-                <IconButton aria-label="delete task" color="error" disabled={isDeleting}>
-                  <Iconify icon="solar:trash-bin-trash-bold" />
-                </IconButton>
-              </Dialog.OpenButton>
-              <Dialog.AlertConfirmation
-                message="Are you sure you want to delete this task?"
-                onConfirm={() => deleteFn({ taskId })}
-                disabledAction={isDeleting}
-              />
-            </Dialog.Root>
-          ) : null}
-        </Box>
-
-        <Divider />
-        <Stack p={2} spacing={3} flexGrow={1}>
-          {/* TODO: when `task.id` is not provided: get request list and enable select */}
-          <Stack spacing={1}>
-            <Autocomplete
-              disablePortal
-              popupIcon={null}
-              options={requests ?? []}
-              getOptionLabel={(option) => option?.name || `REQ${option?.number}`}
-              disabled={taskId ? true : requests.length === 0}
-              value={requests?.find((r) => r?.id === form.watch('requestId'))}
-              onChange={(_event, newValue) => {
-                form.setValue('requestId', newValue?.id || '');
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Request"
-                  error={Boolean(form.formState.errors?.requestId)}
+            {taskId ? (
+              <Dialog.Root>
+                <Dialog.OpenButton>
+                  <IconButton aria-label="delete task" color="error" disabled={isDeleting}>
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                  </IconButton>
+                </Dialog.OpenButton>
+                <Dialog.AlertConfirmation
+                  message="Are you sure you want to delete this task?"
+                  onConfirm={() => deleteFn({ taskId })}
+                  disabledAction={isDeleting}
                 />
+              </Dialog.Root>
+            ) : null}
+          </Box>
+
+          <Divider />
+          <Stack p={2} spacing={3} flexGrow={1}>
+            {/* TODO: when `task.id` is not provided: get request list and enable select */}
+            <Stack spacing={1}>
+              <Autocomplete
+                disablePortal
+                popupIcon={null}
+                options={requests ?? []}
+                getOptionLabel={(option) => option?.name || `REQ${option?.number}`}
+                disabled={taskId ? true : requests.length === 0}
+                value={requests?.find((r) => r?.id === form.watch('requestId'))}
+                onChange={(_event, newValue) => {
+                  form.setValue('requestId', newValue?.id || '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Request"
+                    error={Boolean(form.formState.errors?.requestId)}
+                  />
+                )}
+              />
+
+              {form.watch('requestId') && String(form.watch('requestId')) !== '0' && (
+                <FormLabel
+                  onClick={() => {
+                    window.open(`/${vendor}/my-request/${form.watch('requestId')}`, '_blank');
+                  }}
+                  sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  View Request
+                </FormLabel>
               )}
+            </Stack>
+
+            <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
+
+            <AssigneeChooserField
+              name="assignees"
+              isCreate={!taskId}
+              productId={String(request?.product?.id)}
+              // @ts-ignore
+              control={form.control}
+              requestId={form.watch('requestId') || requestId}
+              assignees={task?.assignees ?? []}
+              onAssign={(assignee) =>
+                assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.userId })
+              }
+              onUnassign={(assignee) => {
+                const assigneeId = task?.assignees.filter(
+                  (item) => item.userId === assignee.userId
+                )?.[0];
+                if (assigneeId) {
+                  assigneeFn({ kind: 'unassign', assigneeId: assigneeId.id });
+                }
+              }}
             />
 
-            {form.watch('requestId') && String(form.watch('requestId')) !== '0' && (
-              <FormLabel
-                onClick={() => {
-                  window.open(`/${vendor}/my-request/${form.watch('requestId')}`, '_blank');
-                }}
-                sx={{ cursor: 'pointer', textDecoration: 'underline' }}
-              >
-                View Request
-              </FormLabel>
-            )}
+            <DueDatePicker
+              endDate={request?.end_date}
+              defaultValue={new Date()}
+              {...formUtils.getDatePickerProps(form, 'dueDate')}
+            />
+
+            <TextField
+              label="Status"
+              defaultValue={task?.status ?? 'to-do'}
+              disabled={taskId === undefined || taskId === 0}
+              {...formUtils.getSelectProps(form, 'status')}
+            >
+              {Object.entries(taskStatusMap).map(([key, value]) => (
+                <MenuItem key={key} value={key} children={value.label} />
+              ))}
+            </TextField>
+
+            <TextField
+              label="Description"
+              multiline
+              rows={3}
+              {...formUtils.getTextProps(form, 'description')}
+            />
+
+            <MultipleDropzoneField
+              acceptForm=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf"
+              label="Attachment"
+              maxSizeForm={5}
+              disabledForm={
+                userPermissionsList?.includes('task:update') ||
+                userPermissionsList?.includes('task:create')
+              }
+              onPreview={setAttachmentModal}
+              disabled={isUploadingOrDeletingFile}
+              onDropAccepted={(files) => {
+                if (
+                  userPermissionsList?.includes('task:update') ||
+                  userPermissionsList?.includes('task:create')
+                ) {
+                  if (!taskId) return;
+                  uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                } else {
+                  onShowErrorToast();
+                }
+              }}
+              onRemove={(fileId) => {
+                if (
+                  userPermissionsList?.includes('task:update') ||
+                  userPermissionsList?.includes('task:create')
+                ) {
+                  if (!taskId) return;
+                  uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
+                } else {
+                  onShowErrorToast();
+                }
+              }}
+              {...formUtils.getMultipleDropzoneProps(form, 'files')}
+            />
           </Stack>
 
-          <TextField label="Task Name" {...formUtils.getTextProps(form, 'title')} />
+          <Divider />
 
-          <AssigneeChooserField
-            name="assignees"
-            isCreate={!taskId}
-            productId={String(request?.product?.id)}
-            // @ts-ignore
-            control={form.control}
-            requestId={form.watch('requestId') || requestId}
-            assignees={task?.assignees ?? []}
-            onAssign={(assignee) =>
-              assigneeFn({ kind: 'assign', taskId, assigneeId: assignee.userId })
-            }
-            onUnassign={(assignee) => {
-              const assigneeId = task?.assignees.filter(
-                (item) => item.userId === assignee.userId
-              )?.[0];
-              if (assigneeId) {
-                assigneeFn({ kind: 'unassign', assigneeId: assigneeId.id });
-              }
-            }}
-          />
-
-          <DueDatePicker
-            endDate={request?.end_date}
-            defaultValue={new Date()}
-            {...formUtils.getDatePickerProps(form, 'dueDate')}
-          />
-
-          <TextField
-            label="Status"
-            defaultValue={task?.status ?? 'to-do'}
-            disabled={taskId === undefined || taskId === 0}
-            {...formUtils.getSelectProps(form, 'status')}
-          >
-            {Object.entries(taskStatusMap).map(([key, value]) => (
-              <MenuItem key={key} value={key} children={value.label} />
-            ))}
-          </TextField>
-
-          <TextField
-            label="Description"
-            multiline
-            rows={3}
-            {...formUtils.getTextProps(form, 'description')}
-          />
-
-          <MultipleDropzoneField
-            acceptForm="image/*"
-            label="Attachment"
-            maxSizeForm={5}
-            disabledForm={
-              userPermissionsList?.includes('task:update') ||
-              userPermissionsList?.includes('task:create')
-            }
-            disabled={isUploadingOrDeletingFile}
-            onDropAccepted={(files) => {
-              if (
-                userPermissionsList?.includes('task:update') ||
-                userPermissionsList?.includes('task:create')
-              ) {
-                if (!taskId) return;
-                uploadOrDeleteFileFn({ kind: 'create', taskId, files });
-              } else {
-                onShowErrorToast();
-              }
-            }}
-            onRemove={(fileId) => {
-              if (
-                userPermissionsList?.includes('task:update') ||
-                userPermissionsList?.includes('task:create')
-              ) {
-                if (!taskId) return;
-                uploadOrDeleteFileFn({ kind: 'delete', fileId: fileId ?? 'all' });
-              } else {
-                onShowErrorToast();
-              }
-            }}
-            {...formUtils.getMultipleDropzoneProps(form, 'files')}
-          />
-        </Stack>
-
-        <Divider />
-
-        <Stack p={2} spacing={1.5} direction="row" justifyContent="flex-end">
-          <Drawer.DismissButton>
-            <Button variant="outlined" type="reset">
-              Cancel
+          <Stack p={2} spacing={1.5} direction="row" justifyContent="flex-end">
+            <Drawer.DismissButton>
+              <Button variant="outlined" type="reset">
+                Cancel
+              </Button>
+            </Drawer.DismissButton>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={isDeleting || form.formState.isSubmitting}
+            >
+              {taskId ? 'Update' : 'Create'}
             </Button>
-          </Drawer.DismissButton>
-          <Button
-            variant="contained"
-            type="submit"
-            disabled={isDeleting || form.formState.isSubmitting}
-          >
-            {taskId ? 'Update' : 'Create'}
-          </Button>
-        </Stack>
-      </Box>
-    </Drawer.Content>
+          </Stack>
+        </Box>
+      </Drawer.Content>
+      <AttachmentDialog
+        isOpen={attachmentModal.isOpen}
+        url={attachmentModal.url}
+        onClose={() => {
+          setAttachmentModal({ isOpen: false, url: '', path: '' });
+        }}
+        path={attachmentModal.path}
+      />
+    </>
   );
 }
 
