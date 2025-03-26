@@ -32,6 +32,7 @@ export type NotificationsPopoverProps = IconButtonProps & {
   onClickViewAll: () => void;
   totalData: number | undefined;
   isLoading: boolean;
+  totalUnread: number;
 };
 
 export function NotificationsPopover({
@@ -40,12 +41,13 @@ export function NotificationsPopover({
   sx,
   totalData,
   isLoading,
+  totalUnread,
   ...other
 }: NotificationsPopoverProps) {
   const navigate = useNavigate();
   const { mutate: readNotification } = useReadNotification();
   const { mutate: readAllNotification } = useReadAllNotification();
-  const totalUnRead = data?.filter((item) => item.read_at === null).length;
+
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -94,7 +96,7 @@ export function NotificationsPopover({
         sx={sx}
         {...other}
       >
-        <Badge badgeContent={totalUnRead} color="error">
+        <Badge badgeContent={totalUnread} color="error">
           <Iconify width={24} icon="solar:bell-bing-bold-duotone" />
         </Badge>
       </IconButton>
@@ -119,14 +121,14 @@ export function NotificationsPopover({
         <Box display="flex" alignItems="center" sx={{ py: 2, pl: 2.5, pr: 1.5 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="subtitle1">Notifications</Typography>
-            {totalUnRead > 0 && (
+            {totalUnread > 0 && (
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                You have {totalUnRead} unread messages
+                You have {totalUnread} unread messages
               </Typography>
             )}
           </Box>
 
-          {totalUnRead > 0 && (
+          {totalUnread > 0 && (
             <Tooltip title=" Mark all as read">
               <IconButton color="primary" onClick={handleMarkAllAsRead}>
                 <Iconify icon="solar:check-read-outline" />
