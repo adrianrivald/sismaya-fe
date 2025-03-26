@@ -46,7 +46,9 @@ export function CreateRequestView() {
     (item) => item?.company?.name?.toLowerCase() === vendor
   )?.company?.id;
   const [selectedCompanyId, setSelectedCompanyId] = React.useState('');
-  const { data: cito } = useCitoById(selectedCompanyId);
+  const { data: cito } = useCitoById(
+    userType === 'client' ? clientCompanyId.toString() : selectedCompanyId
+  );
 
   const { data: products } = useProductByCompanyId(
     userType === 'client' ? clientCompanyId : (Number(selectedCompanyId) ?? 0),
@@ -431,8 +433,7 @@ export function CreateRequestView() {
                       )}
                       {user.user_info.user_type === 'client' && (
                         <Typography>
-                          {user?.user_info?.company?.cito_used}/
-                          {user?.user_info?.company?.cito_quota} used
+                          {cito?.used}/{cito?.quota} used
                         </Typography>
                       )}
                     </Box>
