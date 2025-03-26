@@ -107,12 +107,24 @@ export function CardActivity({
           <Typography color="rgba(145, 158, 171, 1)" variant="subtitle2">
             {requestName}
           </Typography>
+
           {isCurrentTimer &&
             store.state !== 'running' &&
             store.state !== 'idle' &&
             store.state !== 'idlePaused' && (
               <Button
                 onClick={() => {
+                  if (store.state === 'paused') {
+                    actionStore.send({
+                      type: 'idlePaused',
+                      taskId: store.taskId,
+                      activity: store.activity,
+                      request: store.request,
+                      timer: store.timer,
+                      name: store.name,
+                    });
+                    return;
+                  }
                   if (store.state !== 'running' && store.state !== 'idle') {
                     actionStore.send({
                       type: 'start',
