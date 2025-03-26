@@ -35,10 +35,12 @@ export type DashboardLayoutProps = {
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
   const theme = useTheme();
   const { user } = useAuth();
+  const roleId = user?.user_info?.role?.id;
   const [navOpen, setNavOpen] = useState(false);
   const [page, setPage] = useState(1);
   const { data } = useNotifications(page);
   const totalData = data?.meta?.total_data;
+  const totalUnreadCount = data?.meta?.unread_count ?? 0;
   const [notifications, setNotifications] = useState(data?.data);
   const [isLoading, setIsLoading] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
@@ -97,12 +99,15 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                <NotificationsPopover
-                  data={notifications}
-                  totalData={totalData}
-                  onClickViewAll={onClickViewAll}
-                  isLoading={isLoading}
-                />
+                {roleId !== 1 && (
+                  <NotificationsPopover
+                    data={notifications}
+                    totalData={totalData}
+                    totalUnread={totalUnreadCount}
+                    onClickViewAll={onClickViewAll}
+                    isLoading={isLoading}
+                  />
+                )}
                 <AccountPopover
                   data={[
                     {
