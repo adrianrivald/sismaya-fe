@@ -128,7 +128,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
             <AssigneeChooserField
               isCreate={task?.taskId === undefined || task?.taskId === 0}
               name="assignees"
-              // productId={}
+              productId={String(requestDetail?.product?.id)}
               // @ts-ignore
               control={form.control}
               requestId={requestId}
