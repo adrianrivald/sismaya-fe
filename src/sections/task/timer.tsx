@@ -23,6 +23,7 @@ type TimerActionButtonProps = {
   step?: any;
   refetch?: any;
   assigneeCompanyId?: number;
+  userAssignee?: boolean;
 };
 
 export function TimerActionButton({
@@ -37,12 +38,13 @@ export function TimerActionButton({
   step,
   refetch,
   assigneeCompanyId,
+  userAssignee = true,
 }: TimerActionButtonProps) {
   const mutation = useTimerAction();
   const { state, taskId: storeTaskId } = useTimerStore();
   const store = useTimerActionStore();
   const isCurrentTimer = storeTaskId === taskId;
-  const isDisabled = defaultState === 'stopped' || step === 'completed';
+  const isDisabled = defaultState === 'stopped' || step === 'completed' || !userAssignee;
 
   const changeState = async () => {
     const response = await http(`/tasks/${taskId}`, {

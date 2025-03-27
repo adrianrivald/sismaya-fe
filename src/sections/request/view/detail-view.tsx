@@ -260,6 +260,15 @@ export function RequestDetailView() {
                 {requestDetail?.name ?? '-'}
               </TableCell>
             </TableRow>
+
+            <TableRow>
+              <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
+                Product
+              </TableCell>
+              <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
+                {requestDetail?.product?.name ?? '-'}
+              </TableCell>
+            </TableRow>
             <TableRow>
               <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                 Company

@@ -69,6 +69,7 @@ export function CardActivity({
   step,
   refetch,
   assigneeCompanyId,
+  userAssignee = true,
 }: {
   taskId: number;
   requestName: string;
@@ -77,6 +78,7 @@ export function CardActivity({
   step?: string;
   refetch?: any;
   assigneeCompanyId?: number;
+  userAssignee?: boolean;
 }) {
   const lastActivity = useLastActivity({ taskId });
   const actionStore = useTimerActionStore();
@@ -164,6 +166,7 @@ export function CardActivity({
             step={step}
             refetch={refetch}
             assigneeCompanyId={assigneeCompanyId}
+            userAssignee={userAssignee}
           />
         </Box>
       </Stack>

@@ -373,6 +373,7 @@ export default function TaskDetailPage() {
             step={task.status}
             refetch={refetch}
             assigneeCompanyId={assigneeCompanyId}
+            userAssignee={userOnAssignee()}
           />
 
           <AttachmentModal
