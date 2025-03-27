@@ -32,6 +32,7 @@ import {
   useAddAttachment,
   useAddRequest,
   useAddRequestAssignee,
+  useCitoById,
   useDeleteAttachmentById,
   useDeleteRequestAssigneeById,
   useRequestById,
@@ -60,11 +61,17 @@ export function EditRequestView() {
   )?.company?.id;
 
   const { data: requestDetail } = useRequestById(id ?? '');
+  const { data: cito } = useCitoById(
+    userType === 'client'
+      ? clientCompanyId.toString()
+      : (requestDetail?.company?.id?.toString() ?? '')
+  );
+
   const { data: products } = useProductByCompanyId(
     userType === 'client' ? clientCompanyId : (requestDetail?.company?.id ?? 0),
     true
   );
-  const { data: internalUser } = useInternalProduct(String(requestDetail?.product?.id));
+  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [isLoading, setIsLoading] = React.useState(false);
   const [files, setFiles] = React.useState<FileList | any>([]);
@@ -415,8 +422,7 @@ export function EditRequestView() {
                         label="Request CITO"
                       />
                       <Typography>
-                        {requestDetail?.company?.cito_used}/{requestDetail?.company?.cito_quota}{' '}
-                        used
+                        {cito?.used}/{cito?.quota} used
                       </Typography>
                     </Box>
                   </Box>

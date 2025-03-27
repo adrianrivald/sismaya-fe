@@ -58,7 +58,7 @@ export function RequestDetailView() {
   )?.company?.id;
   const { data: requestDetail } = useRequestById(id ?? '');
   const { data: cito } = useCitoById(String(requestDetail?.company?.id) ?? '');
-  const { data: internalUser } = useInternalProduct(String(requestDetail?.product?.id));
+  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
   const { mutate: rejectRequest } = useRejectRequest();
   const { mutate: approveRequest } = useApproveRequest();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
