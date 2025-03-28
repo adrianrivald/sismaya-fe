@@ -40,6 +40,7 @@ import type { CompanyDTO } from 'src/services/master-data/company/schemas/compan
 import type { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import type { Company, Department } from 'src/services/master-data/company/types';
 import { RemoveAction } from './remove-action';
+import { toast } from 'react-toastify';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -508,6 +509,7 @@ function EditForm({
                 sx={{
                   width: '100%',
                 }}
+                required
                 label="Sub-Company Description"
                 value={subCompany?.abbreviation}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -596,16 +598,22 @@ export function EditClientCompanyView() {
   };
 
   const onAddSubCompany = () => {
-    addSubCompany({
-      name: subCompany?.name,
-      abbreviation: subCompany?.abbreviation,
-      parent_id: id?.toString(),
-      type: 'subsidiary',
-    });
-    setSubCompany({
-      name: '',
-      abbreviation: '',
-    });
+    if (subCompany.name === '') {
+      toast.error('Please fill out Sub-company name!');
+    } else if (subCompany.abbreviation === '') {
+      toast.error('Please fill out Sub-company description!');
+    } else {
+      addSubCompany({
+        name: subCompany?.name,
+        abbreviation: subCompany?.abbreviation,
+        parent_id: id?.toString(),
+        type: 'subsidiary',
+      });
+      setSubCompany({
+        name: '',
+        abbreviation: '',
+      });
+    }
   };
 
   const onClickRemove = (itemId?: number, type?: string) => {
