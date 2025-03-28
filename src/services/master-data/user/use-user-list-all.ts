@@ -63,12 +63,15 @@ export function useInternalUsers(internalId?: string) {
   return data;
 }
 
-export async function fetchInternalProduct(internalId?: string) {
+export async function fetchInternalProduct(internalId?: string, productId?: string) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/users-internal', baseUrl);
 
   if (internalId) {
-    endpointUrl.searchParams.append('product', internalId);
+    endpointUrl.searchParams.append('internal_company', internalId);
+  }
+  if (productId) {
+    endpointUrl.searchParams.append('product', productId);
   }
 
   const { data } = await http<{ data: User[] }>(endpointUrl.toString().replace(baseUrl, ''));
@@ -76,8 +79,8 @@ export async function fetchInternalProduct(internalId?: string) {
   return data;
 }
 
-export function useInternalProduct(internalId?: string) {
-  const data = useQuery(['internal-product-items-all'], () => fetchInternalProduct(internalId));
+export function useInternalProduct(internalId?: string, productId?: string) {
+  const data = useQuery(['internal-product-items-all'], () => fetchInternalProduct(internalId, productId));
 
   return data;
 }
