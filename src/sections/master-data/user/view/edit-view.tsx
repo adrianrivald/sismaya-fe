@@ -584,7 +584,9 @@ function EditForm({
             })}
             label="Role"
           >
-            {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
+            {roles
+              ?.filter((role) => (type === 'client' ? role?.id === 6 : role))
+              .map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
           </Select>
         </FormControl>
         {formState?.errors?.role_id && (
