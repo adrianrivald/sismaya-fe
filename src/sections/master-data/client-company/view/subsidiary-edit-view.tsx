@@ -29,6 +29,10 @@ import {
   useUpdateDivision,
   useDeleteCompanyById,
   useDivisionByCompanyId,
+  useInternalCompanies,
+  useUpdateCompanyRelation,
+  useAddCompanyRelation,
+  useDeleteCompanyRelation,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
 import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
@@ -69,6 +73,10 @@ interface EditFormProps {
   parentDepartments: Department[] | undefined;
   onAddDepartment: () => void;
   onClickRemove: (id: number, type: string) => void;
+  internalCompanies: Company[] | undefined;
+  onChangeVendors: any;
+  onAddVendors: any;
+  onRemoveVendors: any;
 }
 
 function EditForm({
@@ -87,12 +95,17 @@ function EditForm({
   onAddDepartment,
   onClickRemove,
   parentDepartments,
+  internalCompanies,
+  onChangeVendors,
+  onAddVendors,
+  onRemoveVendors,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('abbreviation', defaultValues?.abbreviation);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
+  const [internalCompanyId, setInternalCompanyId] = React.useState<number>(0);
   return (
     <Grid container spacing={3} xs={12}>
       <Grid item xs={12} md={12}>
@@ -227,6 +240,115 @@ function EditForm({
         </Box>
       </Grid>
 
+      <Grid item xs={12} md={12}>
+        <Typography variant="h4" color="primary" mb={2}>
+          Internal Company
+        </Typography>
+
+        {/* <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel> */}
+        <Box display="flex" flexDirection="column" gap={2}>
+          {data?.vendors &&
+            data?.vendors?.length > 0 &&
+            data?.vendors?.map((item, index) => (
+              <FormControl fullWidth>
+                <Stack
+                  key={index}
+                  direction="row"
+                  justifyContent="space-between"
+                  spacing={3}
+                  alignItems="center"
+                >
+                  <Box width="100%">
+                    <InputLabel id={`type-${item.id}`}>Internal Company</InputLabel>
+                    <Select
+                      id={String(item.id)}
+                      label="Internal Company"
+                      value={item?.internal_company_id}
+                      fullWidth
+                      onChange={(e: SelectChangeEvent<number>) => {
+                        onChangeVendors(item.id, item.internal_company_id);
+                      }}
+                    >
+                      {internalCompanies?.map((company) => (
+                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </Box>
+                  <MenuList
+                    disablePadding
+                    sx={{
+                      p: 0.5,
+                      gap: 0.5,
+                      display: 'flex',
+                      flexDirection: 'row',
+                      [`& .${menuItemClasses.root}`]: {
+                        px: 1,
+                        gap: 2,
+                        borderRadius: 0.75,
+                        [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                      },
+                    }}
+                  >
+                    <MenuItem onClick={() => onRemoveVendors(item.id)} sx={{ color: 'error.main' }}>
+                      <Iconify icon="solar:trash-bin-trash-bold" />
+                      Delete
+                    </MenuItem>
+                  </MenuList>
+                </Stack>
+              </FormControl>
+            ))}
+          <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
+            <Box width="100%">
+              <FormControl fullWidth>
+                <InputLabel id="userCompany">Internal Company</InputLabel>
+                <Select
+                  label="Internal Company"
+                  value={internalCompanyId}
+                  onChange={(e: SelectChangeEvent<number>) =>
+                    setInternalCompanyId(Number(e.target.value))
+                  }
+                >
+                  {internalCompanies?.map((company) => (
+                    <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                p: 0.5,
+                gap: 0.5,
+                display: 'flex',
+                flexDirection: 'row',
+                [`& .${menuItemClasses.root}`]: {
+                  px: 1,
+                  gap: 2,
+                  borderRadius: 0.75,
+                  [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
+                },
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  onAddVendors(internalCompanyId);
+                  setInternalCompanyId(0);
+                }}
+                sx={{ marginY: 2 }}
+              >
+                Save
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+        {formState?.errors?.internal_id && (
+          <FormHelperText sx={{ color: 'error.main' }}>
+            {String(formState?.errors?.internal_id?.message)}
+          </FormHelperText>
+        )}
+      </Grid>
+
       <Box
         display="flex"
         justifyContent="end"
@@ -246,7 +368,7 @@ function EditForm({
 export function EditClientSubCompanyView() {
   const { id, subId } = useParams();
   const navigate = useNavigate();
-  const { data } = useCompanyById(Number(subId));
+  const { data, refetch } = useCompanyById(Number(subId));
   const { mutate: addSubCompany } = useAddCompany();
   const { mutate: updateCompany } = useUpdateCompany();
   const { mutate: deleteCompany } = useDeleteCompanyById();
@@ -254,6 +376,10 @@ export function EditClientSubCompanyView() {
   const { mutate: deleteDivision } = useDeleteDivisionItem(Number(subId));
   const { mutate: addDivision } = useAddDivision();
   const { mutate: updateDivision } = useUpdateDivision();
+  const { data: internalCompanies } = useInternalCompanies();
+  const { mutate: addCompanyRelation } = useAddCompanyRelation();
+  const { mutate: updateCompanyRelation } = useUpdateCompanyRelation();
+  const { mutate: deleteCompanyRelation } = useDeleteCompanyRelation();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | undefined>();
 
@@ -368,6 +494,27 @@ export function EditClientSubCompanyView() {
     deleteDivision(divisionId);
   };
 
+  const onAddVendors = (internal_id: number) => {
+    addCompanyRelation({
+      client_company_id: Number(subId),
+      internal_company_id: internal_id,
+    });
+    refetch();
+  };
+
+  const onChangeVendors = (id_relation: number, internal_id: number) => {
+    updateCompanyRelation({
+      client_company_id: Number(subId),
+      internal_company_id: internal_id,
+      id_relation,
+    });
+    refetch();
+  };
+
+  const onRemoveVendors = (id_relation: number) => {
+    deleteCompanyRelation(id_relation);
+    refetch();
+  };
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
@@ -408,6 +555,10 @@ export function EditClientSubCompanyView() {
               onClickEdit={onClickEdit}
               onClickRemove={onClickRemove}
               parentDepartments={divisions}
+              internalCompanies={internalCompanies}
+              onChangeVendors={onChangeVendors}
+              onAddVendors={onAddVendors}
+              onRemoveVendors={onRemoveVendors}
             />
           )}
         </Form>
