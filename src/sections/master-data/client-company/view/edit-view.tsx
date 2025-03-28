@@ -39,8 +39,8 @@ import { Iconify } from 'src/components/iconify';
 import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import type { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import type { Company, Department } from 'src/services/master-data/company/types';
-import { RemoveAction } from './remove-action';
 import { toast } from 'react-toastify';
+import { RemoveAction } from './remove-action';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
