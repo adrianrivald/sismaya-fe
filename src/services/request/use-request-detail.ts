@@ -52,10 +52,14 @@ export function useMyRequestById(requestId: string, options: any = {}) {
   return data;
 }
 
-export function useRequestAssigneeProduct(productId: string, options: any = {}) {
+export function useRequestAssigneeProduct(
+  productId: string,
+  internal_id: string,
+  options: any = {}
+) {
   const data = useQuery(
     ['request-items-product', productId],
-    () => fetchInternalProduct(productId),
+    () => fetchInternalProduct(internal_id, productId),
     {
       enabled: productId !== undefined && productId !== '0',
       ...options,
@@ -65,8 +69,8 @@ export function useRequestAssigneeProduct(productId: string, options: any = {}) 
   return data;
 }
 
-export function useRequestAssignees(requestId: string) {
-  return useRequestAssigneeProduct(requestId, {
+export function useRequestAssignees(requestId: string, internal_id: string) {
+  return useRequestAssigneeProduct(requestId, internal_id, {
     staleTime: Infinity,
 
     // @ts-ignore

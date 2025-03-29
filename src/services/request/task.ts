@@ -23,6 +23,7 @@ export class RequestTask {
     public title: string = '',
     public dueDate: string = new Date().toISOString(),
     public endDate: string = new Date().toISOString(),
+    public requestData: any = {},
     public description: string = '',
     public status: keyof typeof RequestTask.statusMap = 'to-do',
     public assignees: Array<Assignee> = [],

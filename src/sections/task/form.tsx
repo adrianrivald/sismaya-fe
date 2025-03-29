@@ -93,6 +93,8 @@ function Form({ request, task }: FormProps) {
     });
   };
 
+  console.log('data request', request);
+
   useEffect(() => {
     // if (task?.id) {
     form.reset({
@@ -102,6 +104,7 @@ function Form({ request, task }: FormProps) {
       title: task?.name,
       dueDate: new Date().toISOString(),
       files: task?.attachments,
+      requestData: request,
     });
     // }
 
@@ -153,6 +156,7 @@ function Form({ request, task }: FormProps) {
                 value={requests?.find((r) => r?.id === form.watch('requestId'))}
                 onChange={(_event, newValue) => {
                   form.setValue('requestId', newValue?.id || '');
+                  form.setValue('requestData', newValue);
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -180,7 +184,8 @@ function Form({ request, task }: FormProps) {
             <AssigneeChooserField
               name="assignees"
               isCreate={!taskId}
-              productId={String(request?.product?.id)}
+              productId={String(form.watch('requestData')?.product?.id || '')}
+              internalId={String(form.watch('requestData')?.internal_company?.id || '')}
               // @ts-ignore
               control={form.control}
               requestId={form.watch('requestId') || requestId}
@@ -218,7 +223,8 @@ function Form({ request, task }: FormProps) {
             <TextField
               label="Description"
               multiline
-              rows={3}
+              minRows={3}
+              type="textarea"
               {...formUtils.getTextProps(form, 'description')}
             />
 
