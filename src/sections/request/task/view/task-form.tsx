@@ -76,9 +76,11 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
   };
 
   useEffect(() => {
-    form.reset({ ...task, requestId });
+    form.reset({ ...task, requestId, status: task.status.length > 0 ? task.status : 'to-do' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
+
+  console.log('dataa 123', form.watch());
 
   return (
     <>
@@ -146,7 +148,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
             />
             <TextField
               label="Status"
-              defaultValue={task?.status || 'to-do'}
+              defaultValue={form.watch('status')}
               disabled={task?.taskId === undefined || task?.taskId === 0}
               {...formUtils.getSelectProps(form, 'status')}
             >
@@ -179,7 +181,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
                   } else {
                     const result = await RequestTask.toJson({
                       ...form.watch(),
-                      files: files,
+                      files,
                     });
 
                     // Get existing files
@@ -194,7 +196,7 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
                     }[] = result.attachments.map((item: any, index: any) => ({
                       id: existingFiles.length + index, // Increment ID based on existing files
                       name: item.file_name,
-                      url: item.file_path + '/' + item.file_name,
+                      url: `${item.file_path}/${item.file_name}`,
                       path: item.file_path,
                       createdAt: new Date().toISOString(),
                       file: item,

@@ -47,7 +47,7 @@ export function TaskItem({ task, onClick }: TaskItemProps) {
 
           <Divider orientation="vertical" flexItem />
 
-          <TaskStatus status={task?.status || 'to-do'} />
+          <TaskStatus status={task?.status?.length > 0 ? task.status : 'to-do'} />
         </Stack>
 
         <TaskAttachment files={task?.files} />

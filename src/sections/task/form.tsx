@@ -247,7 +247,7 @@ function Form({ request, task }: FormProps) {
                   } else {
                     const result = await RequestTask.toJson({
                       ...form.watch(),
-                      files: files,
+                      files,
                     });
 
                     // Get existing files
@@ -262,7 +262,7 @@ function Form({ request, task }: FormProps) {
                     }[] = result.attachments.map((item: any, index: any) => ({
                       id: existingFiles.length + index, // Increment ID based on existing files
                       name: item.file_name,
-                      url: item.file_path + '/' + item.file_name,
+                      url: `${item.file_path}/${item.file_name}`,
                       path: item.file_path,
                       createdAt: new Date().toISOString(),
                       file: item,

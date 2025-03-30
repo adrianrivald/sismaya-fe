@@ -84,7 +84,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
 
       dropzoneOptions.onDropAccepted?.(files, event);
 
-      //append(files as any);
+      // append(files as any);
     },
   });
 
