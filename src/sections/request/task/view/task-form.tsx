@@ -22,6 +22,7 @@ import { toast, Bounce } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 import { useRequestById } from 'src/services/request';
 import { AttachmentDialog } from 'src/pages/task/attachment-dialog';
+import { RequestTask } from 'src/services/request/task';
 
 interface RequestTaskFormProps {
   children: React.ReactElement;
@@ -75,9 +76,11 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
   };
 
   useEffect(() => {
-    form.reset({ ...task, requestId });
+    form.reset({ ...task, requestId, status: task.status.length > 0 ? task.status : 'to-do' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]);
+
+  console.log('dataa 123', form.watch());
 
   return (
     <>
@@ -143,10 +146,9 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
               endDate={task?.endDate}
               {...formUtils.getDatePickerProps(form, 'dueDate')}
             />
-
             <TextField
               label="Status"
-              defaultValue={task?.status}
+              defaultValue={form.watch('status')}
               disabled={task?.taskId === undefined || task?.taskId === 0}
               {...formUtils.getSelectProps(form, 'status')}
             >
@@ -158,7 +160,8 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
             <TextField
               label="Description"
               multiline
-              rows={3}
+              minRows={3}
+              type="textarea"
               {...formUtils.getTextProps(form, 'description')}
             />
 
@@ -168,13 +171,39 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
               maxSizeForm={5}
               disabled={isUploadingOrDeletingFile}
               onPreview={setAttachmentModal}
-              onDropAccepted={(files) => {
+              onDropAccepted={async (files) => {
                 if (
                   userPermissionsList?.includes('task:update') ||
                   userPermissionsList?.includes('task:create')
                 ) {
-                  if (!task?.taskId) return;
-                  uploadOrDeleteFileFn({ kind: 'create', taskId: task?.taskId, files });
+                  if (task?.taskId) {
+                    uploadOrDeleteFileFn({ kind: 'create', taskId: task?.taskId, files });
+                  } else {
+                    const result = await RequestTask.toJson({
+                      ...form.watch(),
+                      files,
+                    });
+
+                    // Get existing files
+                    const existingFiles = form.watch('files') || [];
+
+                    const attachment: {
+                      id: number;
+                      name: string;
+                      url: string;
+                      createdAt: string;
+                      file: any;
+                    }[] = result.attachments.map((item: any, index: any) => ({
+                      id: existingFiles.length + index, // Increment ID based on existing files
+                      name: item.file_name,
+                      url: `${item.file_path}/${item.file_name}`,
+                      path: item.file_path,
+                      createdAt: new Date().toISOString(),
+                      file: item,
+                    }));
+                    // Combine existing files with new ones
+                    form.setValue('files', [...existingFiles, ...attachment]);
+                  }
                 } else {
                   onShowErrorToast();
                 }

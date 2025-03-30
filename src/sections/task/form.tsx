@@ -34,6 +34,7 @@ import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { toast, Bounce } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 import { AttachmentDialog } from 'src/pages/task/attachment-dialog';
+import { RequestTask } from 'src/services/request/task';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -102,6 +103,7 @@ function Form({ request, task }: FormProps) {
       title: task?.name,
       dueDate: new Date().toISOString(),
       files: task?.attachments,
+      requestData: request,
     });
     // }
 
@@ -153,6 +155,7 @@ function Form({ request, task }: FormProps) {
                 value={requests?.find((r) => r?.id === form.watch('requestId'))}
                 onChange={(_event, newValue) => {
                   form.setValue('requestId', newValue?.id || '');
+                  form.setValue('requestData', newValue);
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -180,7 +183,8 @@ function Form({ request, task }: FormProps) {
             <AssigneeChooserField
               name="assignees"
               isCreate={!taskId}
-              productId={String(request?.product?.id)}
+              productId={String(form.watch('requestData')?.product?.id || '')}
+              internalId={String(form.watch('requestData')?.internal_company?.id || '')}
               // @ts-ignore
               control={form.control}
               requestId={form.watch('requestId') || requestId}
@@ -218,7 +222,8 @@ function Form({ request, task }: FormProps) {
             <TextField
               label="Description"
               multiline
-              rows={3}
+              minRows={3}
+              type="textarea"
               {...formUtils.getTextProps(form, 'description')}
             />
 
@@ -232,13 +237,39 @@ function Form({ request, task }: FormProps) {
               }
               onPreview={setAttachmentModal}
               disabled={isUploadingOrDeletingFile}
-              onDropAccepted={(files) => {
+              onDropAccepted={async (files) => {
                 if (
                   userPermissionsList?.includes('task:update') ||
                   userPermissionsList?.includes('task:create')
                 ) {
-                  if (!taskId) return;
-                  uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                  if (taskId) {
+                    uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                  } else {
+                    const result = await RequestTask.toJson({
+                      ...form.watch(),
+                      files,
+                    });
+
+                    // Get existing files
+                    const existingFiles = form.watch('files') || [];
+
+                    const attachment: {
+                      id: number;
+                      name: string;
+                      url: string;
+                      createdAt: string;
+                      file: any;
+                    }[] = result.attachments.map((item: any, index: any) => ({
+                      id: existingFiles.length + index, // Increment ID based on existing files
+                      name: item.file_name,
+                      url: `${item.file_path}/${item.file_name}`,
+                      path: item.file_path,
+                      createdAt: new Date().toISOString(),
+                      file: item,
+                    }));
+                    // Combine existing files with new ones
+                    form.setValue('files', [...existingFiles, ...attachment]);
+                  }
                 } else {
                   onShowErrorToast();
                 }

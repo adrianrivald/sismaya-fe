@@ -39,8 +39,10 @@ export default function TaskLayout() {
 
   const [search, setSearch] = useSearchDebounce();
   useEffect(() => {
-    if (search) {
+    if (search.length > 0) {
       setSearchParams({ search }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
     }
   }, [search, setSearchParams]);
 
