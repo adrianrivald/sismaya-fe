@@ -24,6 +24,7 @@ export interface Request {
   start_date: string;
   end_date: string;
   assignee_company_id: number;
+  internal_company: { id: number };
 }
 
 export interface Task {
@@ -66,6 +67,7 @@ export class TaskManagement {
       start_date: json.request.start_date || '',
       end_date: json.request?.end_date || '',
       assignee_company_id: json.request?.assignee_company_id || 0,
+      internal_company: { id: json.request?.product?.company_id || 0 },
     } satisfies Request;
 
     const task = {
@@ -157,6 +159,7 @@ export interface TaskManagementParams {
   productId: number;
   companyId: number;
   assigneeCompanyId: number;
+  internal_company: {};
 }
 
 export type TaskManagementFilter = Partial<Omit<TaskManagementParams, 'page' | 'page_size'>>;

@@ -71,7 +71,10 @@ export function EditRequestView() {
     userType === 'client' ? clientCompanyId : (requestDetail?.company?.id ?? 0),
     true
   );
-  const { data: internalUser } = useInternalUsers(String(idCurrentCompany));
+  const { data: internalUser } = useInternalProduct(
+    String(idCurrentCompany),
+    String(requestDetail?.product?.id)
+  );
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [isLoading, setIsLoading] = React.useState(false);
   const [files, setFiles] = React.useState<FileList | any>([]);

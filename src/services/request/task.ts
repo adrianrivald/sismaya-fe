@@ -23,6 +23,7 @@ export class RequestTask {
     public title: string = '',
     public dueDate: string = new Date().toISOString(),
     public endDate: string = new Date().toISOString(),
+    public requestData: any = {},
     public description: string = '',
     public status: keyof typeof RequestTask.statusMap = 'to-do',
     public assignees: Array<Assignee> = [],
@@ -40,6 +41,7 @@ export class RequestTask {
       json.name,
       json.due_date,
       json.request?.end_date,
+      {},
       json?.description,
       json.step,
       json?.assignees?.map((assignee: any) => ({
@@ -169,7 +171,19 @@ export function useCreateOrUpdateTask(
         formData = await RequestTask.toJson({ ...task, requestId });
       } else {
         const reqId = form.watch('requestId');
-        formData = await RequestTask.toJson({ ...task, requestId: reqId });
+        formData = {
+          request_id: reqId,
+          id: task.taskId,
+          name: task.title,
+          step: task.status,
+          due_date: fDate(task.dueDate, 'YYYY-MM-DD'),
+          description: task.description,
+          assignees: task.assignees,
+          attachments: task.files.map((item: any) => ({
+            file_path: item.path,
+            file_name: item.name,
+          })),
+        };
       }
 
       return http(['/tasks', isEdit ? `/${form.watch().taskId}` : ''].join(''), {

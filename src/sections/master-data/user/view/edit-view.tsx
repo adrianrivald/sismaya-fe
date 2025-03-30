@@ -163,7 +163,7 @@ function EditForm({
       setValue('department_id', defaultValues?.department_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divisions]);
+  }, []);
 
   const removeAllCompanies = async (internal_ids: number[]) => {
     if (internal_ids.length === 0) return;
@@ -279,6 +279,7 @@ function EditForm({
               {...register('company_id', {
                 required: 'Company must be filled out',
                 onChange: () => {
+                  setValue('department_id', null);
                   fetchDivision(watch('company_id') as number);
                   onFetchRelationCompany(watch('company_id') as number);
                   removeAllCompanies(userCompanies?.map((itm) => itm.id));
@@ -583,7 +584,9 @@ function EditForm({
             })}
             label="Role"
           >
-            {roles?.map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
+            {roles
+              ?.filter((role) => (type === 'client' ? role?.id === 6 : role))
+              .map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
           </Select>
         </FormControl>
         {formState?.errors?.role_id && (

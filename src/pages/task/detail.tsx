@@ -252,7 +252,9 @@ export default function TaskDetailPage() {
           <Stack spacing={2} width="50%">
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
               <Typography variant="h6">Description</Typography>
-              <Typography variant="body1">{task.description}</Typography>
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                {task.description}
+              </Typography>
             </Paper>
 
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
