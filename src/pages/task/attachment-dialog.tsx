@@ -25,7 +25,7 @@ export function AttachmentDialog({ isOpen, onClose, url, path }: AttachmentModal
           },
         }}
       >
-        {path.toLowerCase().endsWith('.pdf') ? (
+        {path?.toLowerCase()?.endsWith('.pdf') ? (
           <Box
             sx={{
               position: 'relative',
@@ -47,7 +47,7 @@ export function AttachmentDialog({ isOpen, onClose, url, path }: AttachmentModal
             </IconButton>
             <PdfPreview pdfFile={`${url}`} />
           </Box>
-        ) : path.toLowerCase().endsWith('.xls') || path.toLowerCase().endsWith('.xlsx') ? (
+        ) : path?.toLowerCase()?.endsWith('.xls') || path.toLowerCase().endsWith('.xlsx') ? (
           <Box
             sx={{
               position: 'relative',
@@ -68,7 +68,7 @@ export function AttachmentDialog({ isOpen, onClose, url, path }: AttachmentModal
             </IconButton>
             <FilePreview fileUrl={`${url}`} />
           </Box>
-        ) : path.toLowerCase().endsWith('.doc') || path.toLowerCase().endsWith('.docx') ? (
+        ) : path?.toLowerCase()?.endsWith('.doc') || path.toLowerCase().endsWith('.docx') ? (
           <Box
             sx={{
               position: 'relative',

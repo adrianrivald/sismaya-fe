@@ -34,6 +34,7 @@ import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { toast, Bounce } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 import { AttachmentDialog } from 'src/pages/task/attachment-dialog';
+import { RequestTask } from 'src/services/request/task';
 
 interface TaskFormProps {
   children: React.ReactElement;
@@ -92,8 +93,6 @@ function Form({ request, task }: FormProps) {
       transition: Bounce,
     });
   };
-
-  console.log('data request', request);
 
   useEffect(() => {
     // if (task?.id) {
@@ -238,13 +237,39 @@ function Form({ request, task }: FormProps) {
               }
               onPreview={setAttachmentModal}
               disabled={isUploadingOrDeletingFile}
-              onDropAccepted={(files) => {
+              onDropAccepted={async (files) => {
                 if (
                   userPermissionsList?.includes('task:update') ||
                   userPermissionsList?.includes('task:create')
                 ) {
-                  if (!taskId) return;
-                  uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                  if (taskId) {
+                    uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                  } else {
+                    const result = await RequestTask.toJson({
+                      ...form.watch(),
+                      files: files,
+                    });
+
+                    // Get existing files
+                    const existingFiles = form.watch('files') || [];
+
+                    const attachment: {
+                      id: number;
+                      name: string;
+                      url: string;
+                      createdAt: string;
+                      file: any;
+                    }[] = result.attachments.map((item: any, index: any) => ({
+                      id: existingFiles.length + index, // Increment ID based on existing files
+                      name: item.file_name,
+                      url: item.file_path + '/' + item.file_name,
+                      path: item.file_path,
+                      createdAt: new Date().toISOString(),
+                      file: item,
+                    }));
+                    // Combine existing files with new ones
+                    form.setValue('files', [...existingFiles, ...attachment]);
+                  }
                 } else {
                   onShowErrorToast();
                 }

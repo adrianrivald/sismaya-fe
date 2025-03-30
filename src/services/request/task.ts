@@ -170,7 +170,19 @@ export function useCreateOrUpdateTask(
         formData = await RequestTask.toJson({ ...task, requestId });
       } else {
         const reqId = form.watch('requestId');
-        formData = await RequestTask.toJson({ ...task, requestId: reqId });
+        formData = {
+          request_id: reqId,
+          id: task.taskId,
+          name: task.title,
+          step: task.status,
+          due_date: fDate(task.dueDate, 'YYYY-MM-DD'),
+          description: task.description,
+          assignees: task.assignees,
+          attachments: task.files.map((item: any) => ({
+            file_path: item.path,
+            file_name: item.name,
+          })),
+        };
       }
 
       return http(['/tasks', isEdit ? `/${form.watch().taskId}` : ''].join(''), {

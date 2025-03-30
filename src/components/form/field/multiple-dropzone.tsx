@@ -84,8 +84,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
 
       dropzoneOptions.onDropAccepted?.(files, event);
 
-      // Just append the new files directly
-      append(files as any);
+      //append(files as any);
     },
   });
 
@@ -190,12 +189,12 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
                 onClick={(e) => {
                   e.stopPropagation();
                   if (onPreview) {
-                    const fileExtension = field.name?.toLowerCase().split('.').pop() || '';
-                    const nonPreviewableExtensions = ['xlsx', 'xls', 'doc', 'docx', 'csv'];
+                    // const fileExtension = field.name?.toLowerCase().split('.').pop() || '';
+                    // const nonPreviewableExtensions = ['xlsx', 'xls', 'doc', 'docx', 'csv'];
 
-                    if (nonPreviewableExtensions.includes(fileExtension)) {
-                      return;
-                    }
+                    // if (nonPreviewableExtensions.includes(fileExtension)) {
+                    //   return;
+                    // }
 
                     onPreview({
                       isOpen: true,
