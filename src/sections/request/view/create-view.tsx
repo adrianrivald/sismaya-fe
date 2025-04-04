@@ -36,6 +36,13 @@ import { Bounce, toast } from 'react-toastify';
 import ModalDialog from 'src/components/modal/modal';
 import { SvgColor } from 'src/components/svg-color';
 import PdfPreview from 'src/utils/pdf-viewer';
+import { uploadFilesBulk } from 'src/services/utils/upload-image';
+import FilePreview from 'src/utils/file-preview';
+
+interface Attachment {
+  file_path: string;
+  file_name: string;
+}
 
 export function CreateRequestView() {
   const { user } = useAuth();
@@ -61,28 +68,38 @@ export function CreateRequestView() {
 
   const [selectedCompany, setSelectedCompany] = React.useState('');
   const [selectedDepartment, setSelectedDepartment] = React.useState('');
-
+  const [attachments, setAttachments] = React.useState<Attachment[]>([]);
+  const [attachmentIdx, setAttachmentIdx] = React.useState(0);
   const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState('');
 
-  const onPreviewFile = (fileName: string) => {
+  const onPreviewFile = (fileName: string, index: number) => {
     const fileExtension = getFileExtension(fileName);
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    const pdfExtension = ['pdf'];
-    const isImage = imageExtensions.includes(fileExtension);
-    const isPdf = pdfExtension.includes(fileExtension);
-    if (isImage) {
+    const allowedExtensions = [
+      'jpg',
+      'jpeg',
+      'png',
+      'gif',
+      'bmp',
+      'webp',
+      'svg',
+      'xls',
+      'xlsx',
+      'doc',
+      'docx',
+      'pdf',
+    ];
+    const isAllowedExtensions = allowedExtensions.includes(fileExtension);
+
+    if (isAllowedExtensions) {
       setIsImagePreviewModal(true);
       setSelectedImage(fileName);
-    }
-    if (isPdf) {
-      setIsImagePreviewModal(true);
-      setSelectedImage(fileName);
+      setAttachmentIdx(index);
     }
   };
 
+  let payload = {};
   const handleSubmit = (formData: RequestDTO) => {
-    let payload = {};
     if (user?.user_info?.user_type === 'client') {
       payload = {
         ...formData,
@@ -91,20 +108,20 @@ export function CreateRequestView() {
         company_id: user?.user_info?.company?.id,
         department_id: user?.user_info?.department?.id,
         assignee_company_id: idCurrentCompany,
-        files,
+        attachments,
       };
     } else {
       payload = {
         ...formData,
         creator_id: user?.id,
         assignee_company_id: idCurrentCompany,
-        files,
+        attachments,
       };
     }
     addRequest(payload);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const size = e.target.files[0]?.size;
 
@@ -126,14 +143,28 @@ export function CreateRequestView() {
         const mergedFiles = [...files, ...selectedFiles];
         if (e.target.files) {
           setFiles(mergedFiles);
+          const filesData = new FormData();
+          filesData.append(`files`, e.target.files[0] as unknown as File);
+          const { data } = await uploadFilesBulk(filesData);
+          setAttachments((prev) => [
+            ...prev,
+            ...(data?.map((item) => ({
+              file_path: item?.path,
+              file_name: item?.filename,
+            })) || []),
+          ]);
         }
       }
     }
   };
 
+  console.log(attachments, 'attachments');
+
   const onRemoveFile = (index: number) => {
     const newFiles = files?.filter((file: any, indexItem: number) => indexItem !== index);
+    const newAttachments = attachments?.filter((_: any, indexItem: number) => indexItem !== index);
     setFiles(newFiles);
+    setAttachments(newAttachments);
   };
 
   const requesterList =
@@ -506,6 +537,11 @@ export function CreateRequestView() {
                                     <>
                                       {file?.type === 'application/pdf' ? (
                                         <PdfPreview pdfFile={URL.createObjectURL(file)} />
+                                      ) : file?.type === 'application/msword' ||
+                                        file?.type === 'application/vnd.ms-excel' ? (
+                                        <FilePreview
+                                          fileUrl={`${attachments[attachmentIdx].file_path}/${attachments[attachmentIdx].file_name}`}
+                                        />
                                       ) : (
                                         <Box
                                           component="img"
@@ -525,7 +561,7 @@ export function CreateRequestView() {
                               >
                                 <Box
                                   sx={{ cursor: 'pointer' }}
-                                  onClick={() => onPreviewFile(file?.name)}
+                                  onClick={() => onPreviewFile(file?.name, index)}
                                 >
                                   <Typography fontWeight="bold">{file?.name}</Typography>
                                   {(file.size / (1024 * 1024)).toFixed(2)} Mb
