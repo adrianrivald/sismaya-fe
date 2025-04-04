@@ -5,7 +5,7 @@ import { uploadFilesBulk, uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import { RequestDTO } from "./schemas/request-schema";
 
-export type StoreRequest = RequestDTO & {files?: any};
+export type StoreRequest = RequestDTO & {attachments?: any};
 
 export function useAddRequest() {
     const queryClient = useQueryClient();
@@ -18,22 +18,7 @@ export function useAddRequest() {
           ...form
         }
         
-          if(files) {
-            
-          const filesData = new FormData();
-          Array.from(files).forEach((file, index) => {
-          filesData.append(`files`, file as unknown as File);
-          });
-          const {data} = await uploadFilesBulk(
-            filesData
-          );
-          Object.assign(payload, {
-            attachments: data?.map(item => ({
-                file_path: item?.path,
-                file_name: item?.filename
-            }))
-          });
-          }
+       
         
         return http(`requests`, {
           data: payload
