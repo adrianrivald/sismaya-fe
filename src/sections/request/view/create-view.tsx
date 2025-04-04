@@ -540,7 +540,7 @@ export function CreateRequestView() {
                                       ) : file?.type === 'application/msword' ||
                                         file?.type === 'application/vnd.ms-excel' ? (
                                         <FilePreview
-                                          fileUrl={`${attachments[attachmentIdx].file_path}/${attachments[attachmentIdx].file_name}`}
+                                          fileUrl={`${attachments[attachmentIdx]?.file_path}/${attachments[attachmentIdx]?.file_name}`}
                                         />
                                       ) : (
                                         <Box
