@@ -40,6 +40,7 @@ import { toast } from 'react-toastify';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import FilePreview from 'src/utils/file-preview';
 import { StatusBadge } from '../request/status-badge';
 import { AddAssigneeModal } from '../request/add-assignee';
 import { ApproveAction } from '../request/approve-action';
@@ -197,15 +198,23 @@ export default function MyRequestTask() {
 
   const onPreviewFile = (filePath: string, fileName: string) => {
     const fileExtension = getFileExtension(fileName);
-    const pdfExtension = ['pdf'];
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    const isImage = imageExtensions.includes(fileExtension);
-    const isPdf = pdfExtension.includes(fileExtension);
-    if (isImage) {
-      setIsImagePreviewModal(true);
-      setSelectedImage(fileName);
-    }
-    if (isPdf) {
+    const allowedExtensions = [
+      'jpg',
+      'jpeg',
+      'png',
+      'gif',
+      'bmp',
+      'webp',
+      'svg',
+      'xls',
+      'xlsx',
+      'doc',
+      'docx',
+      'pdf',
+    ];
+    const isAllowedExtensions = allowedExtensions.includes(fileExtension);
+
+    if (isAllowedExtensions) {
       setIsImagePreviewModal(true);
       setSelectedImage(fileName);
     }
@@ -598,6 +607,16 @@ export default function MyRequestTask() {
                                     {file?.file_name?.toLowerCase().endsWith('.pdf') ? (
                                       <PdfPreview
                                         pdfFile={`${file?.file_path}/${file?.file_name}`}
+                                      />
+                                    ) : file?.file_name?.toLowerCase().endsWith('.xls') ||
+                                      file?.file_name?.toLowerCase().endsWith('.xlsx') ? (
+                                      <FilePreview
+                                        fileUrl={`${file?.file_path}/${file?.file_name}`}
+                                      />
+                                    ) : file?.file_name?.toLowerCase().endsWith('.doc') ||
+                                      file?.file_name?.toLowerCase().endsWith('.docx') ? (
+                                      <FilePreview
+                                        fileUrl={`${file?.file_path}/${file?.file_name}`}
                                       />
                                     ) : (
                                       <Box
