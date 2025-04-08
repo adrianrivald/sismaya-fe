@@ -142,15 +142,11 @@ function BoardItem({ item, index }: { item: TaskManagement; index: number }) {
                 lineHeight: '16px',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                width: '100%', // Ensure the width is constrained
-                display: 'block', // Make it a block element
+                width: '100%',
+                display: 'block',
               }}
             >
-              {item.task.description} lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-              do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-              veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-              consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-              dolore eu
+              {item.task.description}
             </Typography>
           </Stack>
 
