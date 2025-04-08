@@ -27,6 +27,18 @@ const columns = (popoverProps: PopoverProps, isInternalUserList: boolean) => [
     header: 'Name',
   }),
 
+  columnHelper.accessor((row) => row, {
+    header: 'Company',
+    cell: (info) => {
+      const internalCompanyName = info
+        .getValue()
+        .internal_companies?.map((item) => item?.company?.name);
+      const clientCompanyName = info.getValue().user_info?.company?.name;
+      const companyValue = isInternalUserList ? internalCompanyName?.join(', ') : clientCompanyName;
+      return <Typography>{companyValue}</Typography>;
+    },
+  }),
+
   columnHelper.accessor('email', {
     header: 'Email',
   }),
