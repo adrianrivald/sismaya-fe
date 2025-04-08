@@ -48,7 +48,13 @@ import dayjs, { Dayjs } from 'dayjs';
 import ModalDialog from 'src/components/modal/modal';
 import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 import PdfPreview from 'src/utils/pdf-viewer';
+import FilePreview from 'src/utils/file-preview';
 import { AddAssigneeModal } from '../add-assignee';
+
+interface Attachment {
+  file_path: string;
+  file_name: string;
+}
 
 export function EditRequestView() {
   const { user } = useAuth();
@@ -118,22 +124,33 @@ export function EditRequestView() {
       name: item?.assignee?.user_info?.name,
     }))
   );
+  const [attachments, setAttachments] = React.useState<Attachment[]>([]);
+  const [attachmentIdx, setAttachmentIdx] = React.useState(0);
   const [isCito, setIsCito] = React.useState(requestDetail?.is_cito);
   const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState('');
-  const onPreviewFile = (filePath: string, fileName: string) => {
+  const onPreviewFile = (fileName: string, index: number) => {
     const fileExtension = getFileExtension(fileName);
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    const pdfExtension = ['pdf'];
-    const isImage = imageExtensions.includes(fileExtension);
-    const isPdf = pdfExtension.includes(fileExtension);
-    if (isImage) {
+    const allowedExtensions = [
+      'jpg',
+      'jpeg',
+      'png',
+      'gif',
+      'bmp',
+      'webp',
+      'svg',
+      'xls',
+      'xlsx',
+      'doc',
+      'docx',
+      'pdf',
+    ];
+    const isAllowedExtensions = allowedExtensions.includes(fileExtension);
+
+    if (isAllowedExtensions) {
       setIsImagePreviewModal(true);
       setSelectedImage(fileName);
-    }
-    if (isPdf) {
-      setIsImagePreviewModal(true);
-      setSelectedImage(fileName);
+      setAttachmentIdx(index);
     }
   };
 
@@ -578,7 +595,7 @@ export function EditRequestView() {
                   <Typography mb={1}>Attachment</Typography>
                   {(requestDetail?.attachments ?? [])?.length > 0 || files?.length > 0 ? (
                     <>
-                      {requestDetail?.attachments?.map((attachment) => (
+                      {requestDetail?.attachments?.map((attachment, index) => (
                         <Box
                           display="flex"
                           flexWrap="wrap"
@@ -613,6 +630,13 @@ export function EditRequestView() {
                                         <PdfPreview
                                           pdfFile={`${attachment?.file_path}/${attachment?.file_name}`}
                                         />
+                                      ) : attachment?.file_name?.toLowerCase().endsWith('.xls') ||
+                                        attachment?.file_name?.toLowerCase().endsWith('.xlsx') ||
+                                        attachment?.file_name?.toLowerCase().endsWith('.doc') ||
+                                        attachment?.file_name?.toLowerCase().endsWith('.docx') ? (
+                                        <FilePreview
+                                          fileUrl={`${attachment?.file_path}/${attachment?.file_name}`}
+                                        />
                                       ) : (
                                         <Box
                                           component="img"
@@ -632,9 +656,7 @@ export function EditRequestView() {
                               >
                                 <Box
                                   sx={{ cursor: 'pointer' }}
-                                  onClick={() =>
-                                    onPreviewFile(attachment?.file_path, attachment?.file_name)
-                                  }
+                                  onClick={() => onPreviewFile(attachment?.file_name, index)}
                                 >
                                   <Typography fontWeight="bold">{attachment?.file_name}</Typography>
                                   {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
