@@ -135,9 +135,18 @@ function BoardItem({ item, index }: { item: TaskManagement; index: number }) {
             </Typography>
             <Typography
               color="#919EAB"
-              sx={{ fontWeight: 400, fontSize: '12px', lineHeight: '16px' }}
+              noWrap
+              sx={{
+                fontWeight: 400,
+                fontSize: '12px',
+                lineHeight: '16px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                width: '100%',
+                display: 'block',
+              }}
             >
-              {item.task.name}
+              {item.task.description}
             </Typography>
           </Stack>
 
