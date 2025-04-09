@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -23,7 +23,7 @@ import {
   type TableOptions,
   type PaginationState,
 } from '@tanstack/react-table';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SvgColor } from '../svg-color';
 
 interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'columns'> {
@@ -66,8 +66,42 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     },
     manualPagination: true,
   });
+  const location = useLocation();
 
+  // Extract the base path (like '/internal_user' or '/company_user')
+  const getBaseListKey = () => {
+    const path = location.pathname;
+    if (path.startsWith('/internal-user')) return 'internal_user';
+    if (path.startsWith('/client-user')) return 'client_user';
+    if (path.startsWith('/internal-company')) return 'internal_company';
+    if (path.startsWith('/client-company')) return 'client_company';
+    if (path.startsWith('/product-filter')) return 'product_filter';
+    return 'default';
+  };
+  const currentKey = getBaseListKey();
+  const pageKey = `table_page_${currentKey}`;
+
+  useEffect(() => {
+    // 💥 Remove all other pagination keys
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('table_page_') && key !== pageKey) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    // 👇 Restore or reset the current page
+    const savedPage = localStorage.getItem(pageKey);
+    if (savedPage !== null) {
+      table.setPageIndex(Number(savedPage));
+    } else {
+      table.setPageIndex(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentKey]);
+
+  // Save pagination state when page changes
   const onChangePage = (event: unknown, newPage: number) => {
+    localStorage.setItem(pageKey, newPage.toString());
     table.setPageIndex(newPage);
   };
 
