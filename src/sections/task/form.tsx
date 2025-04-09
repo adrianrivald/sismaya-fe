@@ -228,7 +228,7 @@ function Form({ request, task }: FormProps) {
             />
 
             <MultipleDropzoneField
-              acceptForm=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf"
+              acceptForm=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf,.mov,.mp4,.avi"
               label="Attachment"
               maxSizeForm={5}
               disabledForm={
