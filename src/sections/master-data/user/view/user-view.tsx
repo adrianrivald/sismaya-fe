@@ -35,7 +35,7 @@ const columns = (popoverProps: PopoverProps, isInternalUserList: boolean) => [
         .internal_companies?.map((item) => item?.company?.name);
       const clientCompanyName = info.getValue().user_info?.company?.name;
       const companyValue = isInternalUserList ? internalCompanyName?.join(', ') : clientCompanyName;
-      return <Typography>{companyValue}</Typography>;
+      return companyValue;
     },
   }),
 
