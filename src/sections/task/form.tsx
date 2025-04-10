@@ -228,7 +228,7 @@ function Form({ request, task }: FormProps) {
             />
 
             <MultipleDropzoneField
-              acceptForm=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf"
+              acceptForm=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf,.mov,.mp4,.avi"
               label="Attachment"
               maxSizeForm={5}
               disabledForm={
@@ -243,7 +243,9 @@ function Form({ request, task }: FormProps) {
                   userPermissionsList?.includes('task:create')
                 ) {
                   if (taskId) {
-                    uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                    if (files.length > 0) {
+                      uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                    }
                   } else {
                     const result = await RequestTask.toJson({
                       ...form.watch(),

@@ -21,6 +21,7 @@ import {
   TaskManagement,
   useTaskDetail,
   useAssigneeCompanyId,
+  useMutationAttachment,
 } from 'src/services/task/task-management';
 import { AssigneeList } from 'src/components/form/field/assignee';
 import { downloadFile } from 'src/utils/download';
@@ -30,15 +31,28 @@ import { CardActivity } from 'src/sections/task/activity';
 import { TaskForm } from 'src/sections/task/form';
 import AddAttachment from 'src/sections/task/add-attachment';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { http } from 'src/utils/http';
 import { Bounce, toast } from 'react-toastify';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { SvgColor } from 'src/components/svg-color';
 import { getUser } from 'src/sections/auth/session/session';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { queryClient } from 'src/utils/query-client';
 import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
+interface VideoFile {
+  id: string;
+  file: File;
+  originalSize: string;
+  compressedSize: string;
+  status: 'pending' | 'compressing' | 'done' | 'error';
+  errorMessage?: string;
+  originalUrl?: string;
+  compressedUrl?: string;
+}
 
 export default function TaskDetailPage() {
   const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, url: '', path: '' });
@@ -57,6 +71,12 @@ export default function TaskDetailPage() {
   const { data: userPermissionsList } = useUserPermissions();
   const [modalAssignee, setModalAssignee] = useState(false);
   const [search, setSearch] = useState('');
+  const [loaded, setLoaded] = useState(false);
+  const messageRef = useRef<HTMLParagraphElement | null>(null);
+  const ffmpegRef = useRef(new FFmpeg());
+  const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
+  const [videoFiles, setVideoFiles] = useState<VideoFile[]>([]);
+  const [_, uploadOrDeleteFileFn] = useMutationAttachment(Number(taskId) ?? 0);
 
   const user = getUser();
 
@@ -107,6 +127,164 @@ export default function TaskDetailPage() {
   const userOnAssignee = () => {
     const dataUser = JSON.parse(user || '');
     return task.assignees.some((item) => item.userId === dataUser?.id);
+  };
+
+  const load = async () => {
+    try {
+      // Check if FFmpeg is already loaded
+      if (ffmpegRef.current.loaded) {
+        setLoaded(true);
+        return;
+      }
+
+      setLoaded(true);
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
+      const ffmpeg = ffmpegRef.current;
+
+      // Try to load from cache first
+      const cacheKey = 'ffmpeg-core-cache';
+      let coreModule;
+      let wasmModule;
+      let workerModule;
+
+      try {
+        const cache = await caches.open(cacheKey);
+        coreModule = await cache.match(`${baseURL}/ffmpeg-core.js`);
+        wasmModule = await cache.match(`${baseURL}/ffmpeg-core.wasm`);
+        workerModule = await cache.match(`${baseURL}/ffmpeg-core.js`);
+      } catch (e) {
+        console.log('Cache not available:', e);
+      }
+
+      // Configure FFmpeg
+      ffmpeg.on('log', ({ message }) => {
+        if (messageRef.current) messageRef.current.innerText = message;
+      });
+
+      // Load FFmpeg with cached or new modules
+      await ffmpeg.load({
+        coreURL: coreModule
+          ? URL.createObjectURL(await coreModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: wasmModule
+          ? URL.createObjectURL(await wasmModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        workerURL: workerModule
+          ? URL.createObjectURL(await workerModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      });
+
+      // Cache the modules for future use
+      try {
+        const cache = await caches.open(cacheKey);
+        if (!coreModule) await cache.add(`${baseURL}/ffmpeg-core.js`);
+        if (!wasmModule) await cache.add(`${baseURL}/ffmpeg-core.wasm`);
+        if (!workerModule) await cache.add(`${baseURL}/ffmpeg-core.worker.js`);
+      } catch (e) {
+        console.log('Failed to cache FFmpeg modules:', e);
+      }
+
+      console.log('FFmpeg loaded successfully');
+      ffmpegRef.current = ffmpeg;
+      setLoaded(true);
+      setFfmpegLoaded(true);
+    } catch (errors) {
+      console.error('Failed to load FFmpeg:', errors);
+      setLoaded(false);
+      toast.error('Failed to initialize video compression');
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const transcode = async (videoFile: VideoFile) => {
+    try {
+      setVideoFiles((prev) =>
+        prev.map((f) => (f.id === videoFile.id ? { ...f, status: 'compressing' } : f))
+      );
+
+      const ffmpeg = ffmpegRef.current;
+      const inputFile = videoFile.file.name;
+      const outputFile = `compressed_${videoFile.file.name.split('.')[0]}.mp4`;
+
+      // Clean up any existing URLs and files
+      if (videoFile.compressedUrl) {
+        URL.revokeObjectURL(videoFile.compressedUrl);
+      }
+
+      // await ffmpeg.deleteFile(inputFile);
+      // await ffmpeg.deleteFile(outputFile);
+
+      const fileData = await fetchFile(videoFile.file);
+      await ffmpeg.writeFile(inputFile, fileData);
+
+      const result = await ffmpeg.exec([
+        '-i',
+        inputFile,
+        '-vf',
+        "scale='min(720,iw)':min'(720,ih)':force_original_aspect_ratio=decrease",
+        '-c:v',
+        'libx264',
+        '-crf',
+        '28',
+        '-preset',
+        'ultrafast',
+        '-tune',
+        'film',
+        '-c:a',
+        'aac',
+        '-b:a',
+        '128k',
+        '-movflags',
+        '+faststart',
+        '-threads',
+        '0',
+        outputFile,
+      ]);
+      const datas = await ffmpeg.readFile(outputFile);
+
+      // @ts-ignore
+      const blob = new Blob([datas.buffer], { type: 'video/mp4' });
+
+      const compressedFile = new File([blob], `compressed_${videoFile.file.name}`, {
+        type: 'video/mp4',
+        lastModified: new Date().getTime(),
+      });
+
+      setVideoFiles((prev) => prev.filter((f) => f.id !== videoFile.id));
+      await toast.promise(
+        uploadOrDeleteFileFn({
+          kind: 'create',
+          taskId: Number(taskId) || 0,
+          files: [compressedFile],
+        }),
+        {
+          pending: 'Uploading...',
+          error: {
+            // @ts-ignore @typescript-eslint/no-shadow
+            render: ({ data: resp }) => resp?.message || 'Upload failed',
+          },
+        }
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: taskId ? ['task', `task-detail=${taskId}`] : ['task'],
+      });
+
+      // Cleanup FFmpeg files
+      await ffmpeg.deleteFile(inputFile);
+      await ffmpeg.deleteFile(outputFile);
+    } catch (errors: any) {
+      console.error('Transcode failed:', errors);
+      setVideoFiles((prev) =>
+        prev.map((f) =>
+          f.id === videoFile.id ? { ...f, status: 'error', errorMessage: errors.message } : f
+        )
+      );
+      // toast.error(`Failed to compress video: ${error.message}`);
+    }
   };
 
   return (
@@ -260,10 +438,68 @@ export default function TaskDetailPage() {
             <Paper component={Stack} spacing={2} elevation={3} p={3}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h6">Attachments</Typography>
-                <AddAttachment taskId={Number(taskId)} userOnAssignee={userOnAssignee} />
+                <AddAttachment
+                  taskId={Number(taskId)}
+                  userOnAssignee={userOnAssignee}
+                  transcode={transcode}
+                  setVideoFiles={setVideoFiles}
+                />
               </Box>
 
               <Stack spacing={2}>
+                {videoFiles.length > 0 && (
+                  <Typography>Compressing the video, please wait...</Typography>
+                )}
+                {videoFiles?.length > 0 &&
+                  videoFiles?.map((item, index) => {
+                    const { id, status } = item;
+                    return (
+                      <Box
+                        key={index}
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        border="1px solid rgba(145, 158, 171, 0.32)"
+                        borderRadius={1}
+                        px={1}
+                        py={2}
+                      >
+                        <Stack direction="row" spacing={1} flexGrow={1} width="90%">
+                          <Iconify icon="solar:document-outline" />
+
+                          <Typography
+                            fontWeight={500}
+                            fontSize={14}
+                            lineHeight="20px"
+                            color="#212B36"
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {item.file.name}
+                          </Typography>
+                        </Stack>
+
+                        <IconButton
+                          aria-label={`status ${item.file.name}`}
+                          disabled={status === 'compressing'}
+                          onClick={() => {
+                            if (status !== 'compressing') {
+                              setVideoFiles((prev) => prev.filter((f) => f.id !== id));
+                            }
+                          }}
+                        >
+                          {status === 'compressing' ? (
+                            <Iconify icon="eos-icons:loading" className="animate-spin" />
+                          ) : (
+                            <Iconify icon="mdi:close" />
+                          )}
+                        </IconButton>
+                      </Box>
+                    );
+                  })}
                 {task.attachments.map((attachment) => (
                   <Stack
                     flexDirection="row"
@@ -280,11 +516,17 @@ export default function TaskDetailPage() {
                       sx={{ cursor: 'pointer', flex: 1, width: '80%' }}
                       onClick={() => {
                         if (userPermissionsList?.includes('task:read')) {
-                          setAttachmentModal({
-                            isOpen: true,
-                            url: attachment.url,
-                            path: attachment.name,
-                          });
+                          if (
+                            !['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(
+                              attachment.name.split('.')[attachment.name.split('.').length - 1]
+                            )
+                          ) {
+                            setAttachmentModal({
+                              isOpen: true,
+                              url: attachment.url,
+                              path: attachment.name,
+                            });
+                          }
                         } else {
                           onShowErrorToast();
                         }

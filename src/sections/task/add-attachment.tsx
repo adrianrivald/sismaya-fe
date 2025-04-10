@@ -1,17 +1,22 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Bounce, toast } from 'react-toastify';
 import { uploadFilesBulk as uploads } from 'src/services/utils/upload-image';
 import Button from '@mui/material/Button';
 import { useMutationAttachment } from 'src/services/task/task-management';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import { toBlobURL } from '@ffmpeg/util';
 
 export default function AddAttachment({
   taskId,
   userOnAssignee,
+  transcode,
+  setVideoFiles,
 }: {
   taskId?: number;
   userOnAssignee?: any;
+  transcode: any;
+  setVideoFiles: any;
 }) {
   const { data: userPermissionsList } = useUserPermissions();
   const queryClient = useQueryClient();
@@ -22,7 +27,37 @@ export default function AddAttachment({
   async function handleUpload(files: File[]) {
     const formData = new FormData();
 
-    files.forEach((file) => {
+    const videoFile: any = files
+      .filter((file) => {
+        const extension = file.name.toLowerCase().split('.').pop() || '';
+        return ['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(extension);
+      })
+      .map((file) => ({
+        id: Math.random().toString(36).substring(7),
+        file,
+        originalSize: file.size,
+        compressedSize: '',
+        status: 'pending' as const,
+        originalUrl: URL.createObjectURL(file),
+      }));
+
+    if (videoFile.length > 0) {
+      setVideoFiles((prev: any) => [...prev, ...videoFile]);
+      try {
+        // Process videos sequentially
+        await Promise.all(videoFile.map((newFile: any) => transcode(newFile)));
+      } catch (error) {
+        console.error('Error processing videos:', error);
+        toast.error('Failed to process video files');
+      }
+    }
+
+    const otherFile = files.filter((file) => {
+      const extension = file.name.toLowerCase().split('.').pop() || '';
+      return !['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(extension);
+    });
+
+    otherFile.forEach((file) => {
       formData.append('files', file);
     });
 
@@ -75,7 +110,7 @@ export default function AddAttachment({
 
       <input
         type="file"
-        accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf"
+        accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf,.mov,.mp4,.avi"
         name="attachment"
         id="attachment"
         style={{ display: 'none' }}
@@ -85,21 +120,21 @@ export default function AddAttachment({
           const files = Array.from(e.target.files || []);
           const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
-          const oversizedFiles = files.filter((file) => file.size > MAX_SIZE);
-          if (oversizedFiles.length > 0) {
-            toast.error('File size should not exceed 5MB', {
-              position: 'top-right',
-              autoClose: 5000,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-              transition: Bounce,
-            });
-            return;
-          }
+          // const oversizedFiles = files.filter((file) => file.size > MAX_SIZE);
+          // if (oversizedFiles.length > 0) {
+          //   toast.error('File size should not exceed 5MB', {
+          //     position: 'top-right',
+          //     autoClose: 5000,
+          //     hideProgressBar: true,
+          //     closeOnClick: true,
+          //     pauseOnHover: true,
+          //     draggable: true,
+          //     progress: undefined,
+          //     theme: 'light',
+          //     transition: Bounce,
+          //   });
+          //   return;
+          // }
 
           handleUpload(files);
         }}
