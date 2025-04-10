@@ -1,6 +1,6 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, SetStateAction } from 'react';
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -33,6 +33,7 @@ export type NotificationsPopoverProps = IconButtonProps & {
   totalData: number | undefined;
   isLoading: boolean;
   totalUnread: number;
+  setNotifications: React.Dispatch<SetStateAction<Notification[] | undefined>>;
 };
 
 export function NotificationsPopover({
@@ -42,6 +43,7 @@ export function NotificationsPopover({
   totalData,
   isLoading,
   totalUnread,
+  setNotifications,
   ...other
 }: NotificationsPopoverProps) {
   const navigate = useNavigate();
@@ -75,6 +77,11 @@ export function NotificationsPopover({
       readNotification({
         id: notificationId,
       });
+      setNotifications((prev) =>
+        prev?.map((item: any) =>
+          item?.id === notificationId ? { ...item, read_at: new Date().toISOString() } : item
+        )
+      );
     }
     if (refType === 'requests') {
       navigate(`/${companyName}/request/${refId}`);

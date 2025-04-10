@@ -57,7 +57,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     } else {
       setNotifications(data?.data);
     }
-  }, [data, page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   return (
     <LayoutSection
@@ -106,6 +107,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     totalUnread={totalUnreadCount}
                     onClickViewAll={onClickViewAll}
                     isLoading={isLoading}
+                    setNotifications={setNotifications}
                   />
                 )}
                 <AccountPopover
