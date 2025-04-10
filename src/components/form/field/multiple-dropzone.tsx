@@ -69,6 +69,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
   const [attachments, setAttachments] = useState([]);
   const theme = useTheme();
   const ffmpegRef = useRef(new FFmpeg());
+  const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
   const { fieldState } = useController({ control, name });
   const [loaded, setLoaded] = useState(false);
   const messageRef = useRef<HTMLParagraphElement | null>(null);
@@ -145,32 +146,67 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
     }
   }, [fieldError]);
 
+  // Add this near the top of the component
+
   const load = async () => {
     try {
+      // Check if FFmpeg is already loaded
+      if (ffmpegRef.current.loaded) {
+        setLoaded(true);
+        return;
+      }
+
       setLoaded(true);
       const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
       const ffmpeg = ffmpegRef.current;
+
+      // Try to load from cache first
+      const cacheKey = 'ffmpeg-core-cache';
+      let coreModule;
+      let wasmModule;
+      let workerModule;
+
+      try {
+        const cache = await caches.open(cacheKey);
+        coreModule = await cache.match(`${baseURL}/ffmpeg-core.js`);
+        wasmModule = await cache.match(`${baseURL}/ffmpeg-core.wasm`);
+        workerModule = await cache.match(`${baseURL}/ffmpeg-core.js`);
+      } catch (e) {
+        console.log('Cache not available:', e);
+      }
 
       // Configure FFmpeg
       ffmpeg.on('log', ({ message }) => {
         if (messageRef.current) messageRef.current.innerText = message;
       });
 
-      // Enable cross-origin isolation
+      // Load FFmpeg with cached or new modules
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-        workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'), // Fixed worker file name
+        coreURL: coreModule
+          ? URL.createObjectURL(await coreModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: wasmModule
+          ? URL.createObjectURL(await wasmModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        workerURL: workerModule
+          ? URL.createObjectURL(await workerModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
       });
 
-      // Verify loading
-      if (!ffmpeg.loaded) {
-        throw new Error('FFmpeg failed to load properly');
+      // Cache the modules for future use
+      try {
+        const cache = await caches.open(cacheKey);
+        if (!coreModule) await cache.add(`${baseURL}/ffmpeg-core.js`);
+        if (!wasmModule) await cache.add(`${baseURL}/ffmpeg-core.wasm`);
+        if (!workerModule) await cache.add(`${baseURL}/ffmpeg-core.worker.js`);
+      } catch (e) {
+        console.log('Failed to cache FFmpeg modules:', e);
       }
 
       console.log('FFmpeg loaded successfully');
       ffmpegRef.current = ffmpeg;
-      setLoaded(true); // Keep loaded state true if successful
+      setLoaded(true);
+      setFfmpegLoaded(true);
     } catch (error) {
       console.error('Failed to load FFmpeg:', error);
       setLoaded(false);
@@ -250,7 +286,6 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
         lastModified: new Date().getTime(),
       });
 
-      // Remove video from processing list and add to final list
       setVideoFiles((prev) => prev.filter((f) => f.id !== videoFile.id));
       dropzoneOptions.onDropAccepted?.([compressedFile], {} as any);
 
@@ -271,7 +306,12 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
   return (
     <Stack spacing={2}>
       <Stack spacing={2}>
-        <FormLabel sx={{ px: 2, py: 0 }}>{label ?? 'Attachment'}</FormLabel>
+        <FormLabel sx={{ py: 0 }}>{label ?? 'Attachment'}</FormLabel>
+        {loaded ? (
+          <Typography fontSize={14}>FFmpeg initialized successfully</Typography>
+        ) : (
+          <Typography fontSize={14}>Initializing video compression module...</Typography>
+        )}
         <input
           {...getInputProps()}
           style={{ display: 'none' }}
@@ -280,9 +320,6 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
           disabled={!disabledForm}
         />
 
-        {messageRef.current?.innerText !== 'Aborted()' && (
-          <p ref={messageRef} className="text-sm text-gray-600" />
-        )}
         <FormControl
           component="div"
           {...getRootProps({
@@ -320,6 +357,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
           <FormHelperText sx={{ color: 'error.main' }}>{fieldError}</FormHelperText>
         ) : null}
       </Stack>
+
       {videoFiles.length > 0 && <Typography>Compressing the video, please wait...</Typography>}
       {videoFiles?.length > 0 &&
         videoFiles?.map((item, index) => {

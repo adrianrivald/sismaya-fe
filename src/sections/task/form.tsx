@@ -243,7 +243,9 @@ function Form({ request, task }: FormProps) {
                   userPermissionsList?.includes('task:create')
                 ) {
                   if (taskId) {
-                    uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                    if (files.length > 0) {
+                      uploadOrDeleteFileFn({ kind: 'create', taskId, files });
+                    }
                   } else {
                     const result = await RequestTask.toJson({
                       ...form.watch(),
