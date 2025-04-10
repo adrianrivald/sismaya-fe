@@ -39,7 +39,7 @@ export function useReadNotification() {
     },
     {
         onSuccess: () => {
-        queryClient.invalidateQueries(['notifications']);
+        // queryClient.invalidateQueries(['notifications']);
 
       },
       onError: (error) => {
