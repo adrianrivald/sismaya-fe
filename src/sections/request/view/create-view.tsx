@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Typography from '@mui/material/Typography';
 import {
   Autocomplete,
@@ -15,6 +15,7 @@ import {
   Select,
   Stack,
   TextField,
+  IconButton,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -38,7 +39,20 @@ import { SvgColor } from 'src/components/svg-color';
 import PdfPreview from 'src/utils/pdf-viewer';
 import { uploadFilesBulk } from 'src/services/utils/upload-image';
 import FilePreview from 'src/utils/file-preview';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { Iconify } from 'src/components/iconify';
 
+interface VideoFile {
+  id: string;
+  file: File;
+  originalSize: string;
+  compressedSize: string;
+  status: 'pending' | 'compressing' | 'done' | 'error';
+  errorMessage?: string;
+  originalUrl?: string;
+  compressedUrl?: string;
+}
 interface Attachment {
   file_path: string;
   file_name: string;
@@ -72,6 +86,180 @@ export function CreateRequestView() {
   const [attachmentIdx, setAttachmentIdx] = React.useState(0);
   const [isImagePreviewModal, setIsImagePreviewModal] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState('');
+  const [loaded, setLoaded] = React.useState(false);
+  const messageRef = useRef<HTMLParagraphElement | null>(null);
+  const ffmpegRef = useRef(new FFmpeg());
+  const [ffmpegLoaded, setFfmpegLoaded] = React.useState(false);
+  const [videoFiles, setVideoFiles] = React.useState<VideoFile[]>([]);
+  // const [_, uploadOrDeleteFileFn] = useMutationAttachment(Number(taskId) ?? 0);
+  const load = async () => {
+    try {
+      // Check if FFmpeg is already loaded
+      if (ffmpegRef.current.loaded) {
+        setLoaded(true);
+        return;
+      }
+
+      setLoaded(true);
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
+      const ffmpeg = ffmpegRef.current;
+
+      // Try to load from cache first
+      const cacheKey = 'ffmpeg-core-cache';
+      let coreModule;
+      let wasmModule;
+      let workerModule;
+
+      try {
+        const cache = await caches.open(cacheKey);
+        coreModule = await cache.match(`${baseURL}/ffmpeg-core.js`);
+        wasmModule = await cache.match(`${baseURL}/ffmpeg-core.wasm`);
+        workerModule = await cache.match(`${baseURL}/ffmpeg-core.js`);
+      } catch (e) {
+        console.log('Cache not available:', e);
+      }
+
+      // Configure FFmpeg
+      ffmpeg.on('log', ({ message }) => {
+        if (messageRef.current) messageRef.current.innerText = message;
+      });
+
+      // Load FFmpeg with cached or new modules
+      await ffmpeg.load({
+        coreURL: coreModule
+          ? URL.createObjectURL(await coreModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: wasmModule
+          ? URL.createObjectURL(await wasmModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        workerURL: workerModule
+          ? URL.createObjectURL(await workerModule.blob())
+          : await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      });
+
+      // Cache the modules for future use
+      try {
+        const cache = await caches.open(cacheKey);
+        if (!coreModule) await cache.add(`${baseURL}/ffmpeg-core.js`);
+        if (!wasmModule) await cache.add(`${baseURL}/ffmpeg-core.wasm`);
+        if (!workerModule) await cache.add(`${baseURL}/ffmpeg-core.worker.js`);
+      } catch (e) {
+        console.log('Failed to cache FFmpeg modules:', e);
+      }
+
+      console.log('FFmpeg loaded successfully');
+      ffmpegRef.current = ffmpeg;
+      setLoaded(true);
+      setFfmpegLoaded(true);
+    } catch (errors) {
+      console.error('Failed to load FFmpeg:', errors);
+      setLoaded(false);
+      toast.error('Failed to initialize video compression');
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const transcode = async (videoFile: VideoFile) => {
+    try {
+      setVideoFiles((prev) =>
+        prev.map((f) => (f.id === videoFile.id ? { ...f, status: 'compressing' } : f))
+      );
+
+      const ffmpeg = ffmpegRef.current;
+      const inputFile = videoFile.file.name;
+      const outputFile = `compressed_${videoFile.file.name.split('.')[0]}.mp4`;
+
+      // Clean up any existing URLs and files
+      if (videoFile.compressedUrl) {
+        URL.revokeObjectURL(videoFile.compressedUrl);
+      }
+
+      // await ffmpeg.deleteFile(inputFile);
+      // await ffmpeg.deleteFile(outputFile);
+
+      const fileData = await fetchFile(videoFile.file);
+      await ffmpeg.writeFile(inputFile, fileData);
+
+      const result = await ffmpeg.exec([
+        '-i',
+        inputFile,
+        '-vf',
+        "scale='min(720,iw)':min'(720,ih)':force_original_aspect_ratio=decrease",
+        '-c:v',
+        'libx264',
+        '-crf',
+        '28',
+        '-preset',
+        'ultrafast',
+        '-tune',
+        'film',
+        '-c:a',
+        'aac',
+        '-b:a',
+        '128k',
+        '-movflags',
+        '+faststart',
+        '-threads',
+        '0',
+        outputFile,
+      ]);
+      const datas = await ffmpeg.readFile(outputFile);
+
+      // @ts-ignore
+      const blob = new Blob([datas.buffer], { type: 'video/mp4' });
+
+      const compressedFile = new File([blob], `compressed_${videoFile.file.name}`, {
+        type: 'video/mp4',
+        lastModified: new Date().getTime(),
+      });
+
+      setVideoFiles((prev: any) => prev.filter((f: any) => f.id !== videoFile.id));
+      setFiles((prev: any) => [...prev, compressedFile]);
+      const videoData = new FormData();
+      videoData.append(`files`, compressedFile as unknown as File);
+      const { data } = await uploadFilesBulk(videoData);
+      setAttachments((prev) => [
+        ...prev,
+        ...(data?.map((item) => ({
+          file_path: item?.path,
+          file_name: item?.filename,
+        })) || []),
+      ]);
+      // await toast.promise(
+      //   uploadOrDeleteFileFn({
+      //     kind: 'create',
+      //     taskId: Number(taskId) || 0,
+      //     files: [compressedFile],
+      //   }),
+      //   {
+      //     pending: 'Uploading...',
+      //     error: {
+      //       // @ts-ignore @typescript-eslint/no-shadow
+      //       render: ({ data: resp }) => resp?.message || 'Upload failed',
+      //     },
+      //   }
+      // );
+
+      // queryClient.invalidateQueries({
+      //   queryKey: taskId ? ['task', `task-detail=${taskId}`] : ['task'],
+      // });
+
+      // Cleanup FFmpeg files
+      await ffmpeg.deleteFile(inputFile);
+      await ffmpeg.deleteFile(outputFile);
+    } catch (errors: any) {
+      console.error('Transcode failed:', errors);
+      setVideoFiles((prev) =>
+        prev.map((f) =>
+          f.id === videoFile.id ? { ...f, status: 'error', errorMessage: errors.message } : f
+        )
+      );
+      // toast.error(`Failed to compress video: ${error.message}`);
+    }
+  };
 
   const onPreviewFile = (fileName: string, index: number) => {
     const fileExtension = getFileExtension(fileName);
@@ -122,6 +310,9 @@ export function CreateRequestView() {
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formData = new FormData();
+    const videoFilesData = Array.from(e.target.files || []);
+
     if (e.target.files) {
       const size = e.target.files[0]?.size;
 
@@ -139,26 +330,61 @@ export function CreateRequestView() {
           transition: Bounce,
         });
       } else {
-        const selectedFiles = Array.from(e.target.files as ArrayLike<File>);
-        const mergedFiles = [...files, ...selectedFiles];
-        if (e.target.files) {
-          setFiles(mergedFiles);
-          const filesData = new FormData();
-          filesData.append(`files`, e.target.files[0] as unknown as File);
-          const { data } = await uploadFilesBulk(filesData);
-          setAttachments((prev) => [
-            ...prev,
-            ...(data?.map((item) => ({
-              file_path: item?.path,
-              file_name: item?.filename,
-            })) || []),
-          ]);
+        const videoFile: any = videoFilesData
+          .filter((file) => {
+            const extension = file.name.toLowerCase().split('.').pop() || '';
+            return ['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(extension);
+          })
+          .map((file) => ({
+            id: Math.random().toString(36).substring(7),
+            file,
+            originalSize: file.size,
+            compressedSize: '',
+            status: 'pending' as const,
+            originalUrl: URL.createObjectURL(file),
+          }));
+
+        if (videoFile.length > 0) {
+          setVideoFiles((prev: any) => [...prev, ...videoFile]);
+          try {
+            // Process videos sequentially
+            await Promise.all(videoFile.map((newFile: any) => transcode(newFile)));
+          } catch (error) {
+            console.error('Error processing videos:', error);
+            toast.error('Failed to process video files');
+          }
+        }
+
+        const otherFile = videoFilesData.filter((file) => {
+          const extension = file.name.toLowerCase().split('.').pop() || '';
+          return !['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(extension);
+        });
+
+        otherFile.forEach((file) => {
+          formData.append('files', file);
+        });
+        const extension = e.target.files[0]?.name.toLowerCase().split('.').pop() || '';
+        const isVideo = ['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(extension);
+        if (!isVideo) {
+          const selectedFiles = Array.from(e.target.files as ArrayLike<File>);
+          const mergedFiles = [...files, ...selectedFiles];
+          if (e.target.files) {
+            setFiles(mergedFiles);
+            const filesData = new FormData();
+            filesData.append(`files`, e.target.files[0] as unknown as File);
+            const { data } = await uploadFilesBulk(filesData);
+            setAttachments((prev) => [
+              ...prev,
+              ...(data?.map((item) => ({
+                file_path: item?.path,
+                file_name: item?.filename,
+              })) || []),
+            ]);
+          }
         }
       }
     }
   };
-
-  console.log(attachments, 'attachments');
 
   const onRemoveFile = (index: number) => {
     const newFiles = files?.filter((file: any, indexItem: number) => indexItem !== index);
@@ -177,8 +403,6 @@ export function CreateRequestView() {
       department_id: clientUser?.user_info?.department_id,
       department_name: clientUser?.user_info?.department?.name,
     }));
-
-  console.log(files, 'filesnya');
 
   return (
     <DashboardContent maxWidth="xl">
@@ -504,6 +728,60 @@ export function CreateRequestView() {
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
                   <Typography mb={1}>Attachment</Typography>
+                  {videoFiles.length > 0 && (
+                    <Typography mb={2}>Compressing the video, please wait...</Typography>
+                  )}
+                  {videoFiles?.length > 0 &&
+                    videoFiles?.map((item, index) => {
+                      const { id, status } = item;
+                      return (
+                        <Box
+                          key={index}
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          border="1px solid rgba(145, 158, 171, 0.32)"
+                          borderRadius={1}
+                          px={1}
+                          py={2}
+                          mb={2}
+                        >
+                          <Stack direction="row" spacing={1} flexGrow={1} width="90%">
+                            <Iconify icon="solar:document-outline" />
+
+                            <Typography
+                              fontWeight={500}
+                              fontSize={14}
+                              lineHeight="20px"
+                              color="#212B36"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {item.file.name}
+                            </Typography>
+                          </Stack>
+
+                          <IconButton
+                            aria-label={`status ${item.file.name}`}
+                            disabled={status === 'compressing'}
+                            onClick={() => {
+                              if (status !== 'compressing') {
+                                setVideoFiles((prev) => prev.filter((f) => f.id !== id));
+                              }
+                            }}
+                          >
+                            {status === 'compressing' ? (
+                              <Iconify icon="eos-icons:loading" className="animate-spin" />
+                            ) : (
+                              <Iconify icon="mdi:close" />
+                            )}
+                          </IconButton>
+                        </Box>
+                      );
+                    })}
                   {files?.length > 0 ? (
                     <>
                       {Array.from(files)?.map((file: any, index: number) => (
@@ -582,6 +860,7 @@ export function CreateRequestView() {
                   {/* <InputLabel id="attachment-files">Attachment</InputLabel> */}
                   <input
                     type="file"
+                    accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.xls,.xlsx,.doc,.docx,.pdf,.mov,.mp4,.avi"
                     id="upload-files"
                     hidden
                     onChange={handleFileChange}
