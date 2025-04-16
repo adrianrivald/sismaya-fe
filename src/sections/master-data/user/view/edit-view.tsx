@@ -16,6 +16,7 @@ import {
   SelectChangeEvent,
   Checkbox,
   Card,
+  Autocomplete,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -56,6 +57,7 @@ import {
 } from 'src/services/master-data/company/types';
 import {
   Control,
+  Controller,
   FormState,
   UseFormRegister,
   UseFormSetValue,
@@ -272,27 +274,41 @@ function EditForm({
       {type === 'client' ? (
         <Grid item xs={12} md={12}>
           <FormControl fullWidth>
-            <InputLabel id="select-company">Company</InputLabel>
-            <Select
-              labelId="select-company"
-              error={Boolean(formState?.errors?.company_id)}
-              {...register('company_id', {
+            {/* <InputLabel id="select-company">Company</InputLabel> */}
+            <Controller
+              name="company_id"
+              control={control}
+              rules={{
                 required: 'Company must be filled out',
-                onChange: () => {
-                  setValue('department_id', null);
-                  fetchDivision(watch('company_id') as number);
-                  onFetchRelationCompany(watch('company_id') as number);
-                  removeAllCompanies(userCompanies?.map((itm) => itm.id));
-                  onSubmit(watch());
-                },
-              })}
-              label="Company"
-              value={watch('company_id')}
-            >
-              {clientCompanies?.map((company) => (
-                <MenuItem value={company?.id}>{company?.name}</MenuItem>
-              ))}
-            </Select>
+              }}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <Autocomplete
+                  options={clientCompanies || []}
+                  getOptionLabel={(option) => option?.name || ''}
+                  isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                  value={clientCompanies?.find((company) => company.id === value) || null}
+                  onChange={(_, selectedCompany) => {
+                    const selectedId = selectedCompany?.id || null;
+                    onChange(selectedId);
+                    setValue('department_id', null);
+                    if (selectedId) {
+                      fetchDivision(selectedId);
+                      onFetchRelationCompany(selectedId);
+                      removeAllCompanies(userCompanies?.map((itm) => itm.id));
+                      onSubmit(watch());
+                    }
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Company"
+                      error={!!error}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              )}
+            />
           </FormControl>
           {formState?.errors?.company_id && (
             <FormHelperText sx={{ color: 'error.main' }}>
@@ -358,18 +374,31 @@ function EditForm({
                 >
                   <Box width="100%">
                     <FormControl fullWidth>
-                      <InputLabel id="type">Internal Company</InputLabel>
-                      <Select
-                        label="Internal Company"
-                        value={item?.company?.id}
-                        onChange={(e: SelectChangeEvent<number>) =>
-                          onChangeUserCompany(e, item?.id)
-                        }
-                      >
-                        {internalCompanies?.map((company) => (
-                          <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                        ))}
-                      </Select>
+                      {/* <InputLabel id="type">Internal Company</InputLabel> */}
+
+                      <Autocomplete
+                        options={internalCompanies || []}
+                        getOptionLabel={(option) => option?.name || ''}
+                        isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                        value={internalCompanies?.find(
+                          (company) => company.id === item?.company?.id
+                        )}
+                        readOnly
+                        disableClearable
+                        disableCloseOnSelect
+                        open={false}
+                        onChange={() => {}}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Internal Company"
+                            InputProps={{
+                              ...params.InputProps,
+                              readOnly: true,
+                            }}
+                          />
+                        )}
+                      />
                     </FormControl>
                   </Box>
                   <MenuList
@@ -460,16 +489,19 @@ function EditForm({
             <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
               <Box width="100%">
                 <FormControl fullWidth>
-                  <InputLabel id="userCompany">Internal Company</InputLabel>
-                  <Select
-                    label="Internal Company"
-                    value={userCompany}
-                    onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
-                  >
-                    {internalCompanies?.map((company) => (
-                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                    ))}
-                  </Select>
+                  {/* <InputLabel id="userCompany">Internal Company</InputLabel> */}
+                  <Autocomplete
+                    options={internalCompanies || []}
+                    getOptionLabel={(option) => option?.name || ''}
+                    isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                    value={internalCompanies?.find((company) => company.id === userCompany) || null}
+                    onChange={(_, selectedCompany) => {
+                      if (selectedCompany) {
+                        onChangeUserCompanyNew({ target: { value: selectedCompany.id } } as any);
+                      }
+                    }}
+                    renderInput={(params) => <TextField {...params} label="Internal Company" />}
+                  />
                 </FormControl>
               </Box>
               <Box
