@@ -21,6 +21,7 @@ import {
   Theme,
   useTheme,
   menuItemClasses,
+  Autocomplete,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -50,7 +51,7 @@ import {
   userClientSchema,
   userInternalSchema,
 } from 'src/services/master-data/user/schemas/user-schema';
-import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { Controller, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
 import { Company } from 'src/services/request/types';
 import { RemoveAction } from './remove-action';
@@ -285,23 +286,39 @@ export function CreateUserView({ type }: CreateUserProps) {
               {type === 'client' ? (
                 <Grid item xs={12} md={12}>
                   <FormControl fullWidth>
-                    <InputLabel id="select-company">Company</InputLabel>
-                    <Select
-                      labelId="select-company"
-                      error={Boolean(formState?.errors?.company_id)}
-                      {...register('company_id', {
+                    {/* <InputLabel id="select-company">Company</InputLabel> */}
+
+                    <Controller
+                      name="company_id"
+                      control={control}
+                      rules={{
                         required: 'Company must be filled out',
-                        onChange: async () => {
-                          await fetchDivision(watch('company_id'));
-                          await fetchRelationCompany(watch('company_id'));
-                        },
-                      })}
-                      label="Company"
-                    >
-                      {companies?.map((company) => (
-                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                      ))}
-                    </Select>
+                      }}
+                      render={({ field: { onChange, value }, fieldState: { error } }) => (
+                        <Autocomplete
+                          options={companies || []}
+                          getOptionLabel={(option) => option?.name || ''}
+                          isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                          value={companies?.find((company) => company.id === value) || null}
+                          onChange={async (_, selectedCompany) => {
+                            const selectedIdCompany = selectedCompany?.id || null;
+                            onChange(selectedIdCompany);
+                            if (selectedIdCompany) {
+                              await fetchDivision(selectedIdCompany);
+                              await fetchRelationCompany(selectedIdCompany);
+                            }
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Company"
+                              error={!!error}
+                              helperText={error?.message}
+                            />
+                          )}
+                        />
+                      )}
+                    />
                   </FormControl>
                   {formState?.errors?.company_id && (
                     <FormHelperText sx={{ color: 'error.main' }}>
@@ -437,19 +454,29 @@ export function CreateUserView({ type }: CreateUserProps) {
                     >
                       <Box width="100%">
                         <FormControl fullWidth>
-                          <InputLabel id="userCompany">Internal Company</InputLabel>
-                          <Select
+                          {/* <InputLabel id="userCompany">Internal Company</InputLabel> */}
+                          <Autocomplete
+                            options={internalCompanies || []}
+                            getOptionLabel={(option) => option?.name || ''}
+                            isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                            value={
+                              internalCompanies?.find((company) => company.id === userCompany) ||
+                              null
+                            }
+                            onChange={(_, selectedCompany) => {
+                              if (selectedCompany) {
+                                onChangeUserCompanyNew({
+                                  target: { value: selectedCompany.id },
+                                } as any);
+                              }
+                            }}
                             open={isOpenCompanySelection}
-                            label="Internal Company"
-                            value={userCompany ?? 0}
                             onOpen={() => setIsOpenCompanySelection(true)}
                             onClose={() => setIsOpenCompanySelection(false)}
-                            onChange={(e: SelectChangeEvent<number>) => onChangeUserCompanyNew(e)}
-                          >
-                            {internalCompanies?.map((company) => (
-                              <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                            ))}
-                          </Select>
+                            renderInput={(params) => (
+                              <TextField {...params} label="Internal Company" />
+                            )}
+                          />
                         </FormControl>
                       </Box>
                     </Stack>
