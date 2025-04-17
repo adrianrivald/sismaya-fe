@@ -34,7 +34,8 @@ import { SvgColor } from 'src/components/svg-color';
 import ModalDialog from 'src/components/modal/modal';
 import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 import PdfPreview from 'src/utils/pdf-viewer';
-import { toast } from 'react-toastify';
+import { Bounce, toast } from 'react-toastify';
+import { AttachmentModal } from 'src/pages/task/attachment-modal';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import FilePreview from 'src/utils/file-preview';
 import { StatusBadge } from '../status-badge';
@@ -90,6 +91,11 @@ export function RequestDetailView() {
   const filteredInternalUser = internalUser?.filter((item) =>
     item?.user_info?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const [attachmentModal, setAttachmentModal] = React.useState({
+    isOpen: false,
+    url: '',
+    path: '',
+  });
 
   useEffect(() => {
     setSelectedPic(
@@ -170,28 +176,18 @@ export function RequestDetailView() {
   };
   const [selectedImage, setSelectedImage] = React.useState('');
 
-  const onPreviewFile = (filePath: string, fileName: string) => {
-    const fileExtension = getFileExtension(fileName);
-    const allowedExtensions = [
-      'jpg',
-      'jpeg',
-      'png',
-      'gif',
-      'bmp',
-      'webp',
-      'svg',
-      'xls',
-      'xlsx',
-      'doc',
-      'docx',
-      'pdf',
-    ];
-    const isAllowedExtensions = allowedExtensions.includes(fileExtension);
-
-    if (isAllowedExtensions) {
-      setIsImagePreviewModal(true);
-      setSelectedImage(fileName);
-    }
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
   };
 
   const names = selectedPic?.slice(0, 5).map((item) => item.name);
@@ -328,31 +324,6 @@ export function RequestDetailView() {
                         }
                       >
                         <Box sx={{ color: 'primary.main', cursor: 'pointer' }}>See All</Box>
-                        {/* <Box
-                          component="button"
-                          type="button"
-                          display="flex"
-                          justifyContent="center"
-                          alignItems="center"
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            cursor: 'pointer',
-                            paddingX: 1.5,
-                            paddingY: 1.5,
-                            border: 1,
-                            borderStyle: 'dashed',
-                            borderColor: 'grey.500',
-                            borderRadius: 100,
-                          }}
-                        >
-                          <SvgColor
-                            color="#637381"
-                            width={12}
-                            height={12}
-                            src="/assets/icons/ic-plus.svg"
-                          />
-                        </Box> */}
                       </ModalDialog>
                     )}
                   </Box>
@@ -404,58 +375,33 @@ export function RequestDetailView() {
                           sx={{ border: 1, borderRadius: 1, borderColor: 'grey.300' }}
                         >
                           <Box component="img" src="/assets/icons/file.png" />
-                          <ModalDialog
-                            onClose={() => {
-                              setIsImagePreviewModal(false);
-                              setSelectedImage('');
+
+                          <Box
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              if (userPermissions?.includes('request:read')) {
+                                if (
+                                  !['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(
+                                    file.file_name.split('.')[file.file_name.split('.').length - 1]
+                                  )
+                                ) {
+                                  setAttachmentModal({
+                                    isOpen: true,
+                                    url: `${file?.file_path}/${file?.file_name}`,
+                                    path: file.file_name,
+                                  });
+                                }
+                              } else {
+                                onShowErrorToast();
+                              }
                             }}
-                            open={isImagePreviewModal && selectedImage === file?.file_name}
-                            setOpen={setIsImagePreviewModal}
-                            minWidth={600}
-                            title="Preview"
-                            content={
-                              (
-                                <>
-                                  {file?.file_name?.toLowerCase().endsWith('.pdf') ? (
-                                    <PdfPreview pdfFile={`${file?.file_path}/${file?.file_name}`} />
-                                  ) : file?.file_name?.toLowerCase().endsWith('.xls') ||
-                                    file?.file_name?.toLowerCase().endsWith('.xlsx') ? (
-                                    <FilePreview
-                                      fileUrl={`${file?.file_path}/${file?.file_name}`}
-                                    />
-                                  ) : file?.file_name?.toLowerCase().endsWith('.doc') ||
-                                    file?.file_name?.toLowerCase().endsWith('.docx') ? (
-                                    <FilePreview
-                                      fileUrl={`${file?.file_path}/${file?.file_name}`}
-                                    />
-                                  ) : (
-                                    <Box
-                                      component="img"
-                                      sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        mt: 4,
-                                        maxHeight: '500px',
-                                        mx: 'auto',
-                                      }}
-                                      src={`${file?.file_path}/${file?.file_name}`}
-                                    />
-                                  )}
-                                </>
-                              ) as JSX.Element & string
-                            }
                           >
-                            <Box
-                              sx={{ cursor: 'pointer' }}
-                              onClick={() => onPreviewFile(file?.file_path, file?.file_name)}
-                            >
-                              <Typography fontWeight="bold">
-                                {file?.file_name?.length > 15
-                                  ? `${file?.file_name?.substring(0, 15)}...`
-                                  : file?.file_name}
-                              </Typography>
-                            </Box>
-                          </ModalDialog>
+                            <Typography fontWeight="bold">
+                              {file?.file_name?.length > 15
+                                ? `${file?.file_name?.substring(0, 15)}...`
+                                : file?.file_name}
+                            </Typography>
+                          </Box>
                           <SvgColor
                             sx={{ cursor: 'pointer' }}
                             onClick={(event) => {
@@ -497,6 +443,14 @@ export function RequestDetailView() {
           />
         </Box>
       )}
+      <AttachmentModal
+        isOpen={attachmentModal.isOpen}
+        url={attachmentModal.url}
+        onClose={() => {
+          setAttachmentModal({ isOpen: false, url: '', path: '' });
+        }}
+        path={attachmentModal.path}
+      />
     </Box>
   );
 }
