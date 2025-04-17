@@ -306,7 +306,10 @@ function EditForm({
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <Autocomplete
                   options={clientCompanies || []}
-                  getOptionLabel={(option) => option?.name || ''}
+                  getOptionLabel={(option) =>
+                    `${option?.parent?.name ? `${option?.parent?.name} - ` : ''}${option?.name}` ||
+                    ''
+                  }
                   isOptionEqualToValue={(option, val) => option?.id === val?.id}
                   value={clientCompanies?.find((company) => company.id === value) || null}
                   onChange={(_, selectedCompany) => {
