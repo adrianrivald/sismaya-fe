@@ -37,6 +37,7 @@ export interface Company {
       image: string;
     };
   }[];
+  parent: Company;
 }
 
 export interface Status {
