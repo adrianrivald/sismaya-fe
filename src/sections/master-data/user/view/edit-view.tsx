@@ -17,13 +17,15 @@ import {
   Checkbox,
   Card,
   Autocomplete,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
 import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import React, { useEffect } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   useAddUserCompany,
   useAddUserProduct,
@@ -67,6 +69,7 @@ import { User } from 'src/services/master-data/user/types';
 import { Iconify } from 'src/components/iconify';
 import { useDeleteUserCompanyById } from 'src/services/master-data/user/use-user-company-delete';
 import { Bounce, toast } from 'react-toastify';
+import ModalDialog from 'src/components/modal/modal';
 import { RemoveAction } from './remove-action';
 
 interface UserValues {
@@ -112,6 +115,10 @@ interface EditFormProps {
   selectedCompanyId: number | null;
   existingCompanyProducts: Products[] | undefined;
   onChangeProductFilterEdit: (productFilterId: number, productId?: number) => void;
+  isOpenResetPassword: boolean;
+  setIsOpenResetPassword: Dispatch<SetStateAction<boolean>>;
+  showPassword: boolean;
+  setShowPassword: Dispatch<SetStateAction<boolean>>;
 }
 
 function EditForm({
@@ -147,7 +154,12 @@ function EditForm({
   selectedCompanyId,
   existingCompanyProducts,
   onChangeProductFilterEdit,
+  isOpenResetPassword,
+  setIsOpenResetPassword,
+  showPassword,
+  setShowPassword,
 }: EditFormProps) {
+  const [tempPassword, setTempPassword] = useState('');
   const { mutate: updateUser } = useUpdateUserChangeCompany({ isRbac: false });
   const { id } = useParams();
   useEffect(() => {
@@ -212,6 +224,8 @@ function EditForm({
     }
   };
 
+  console.log(watch(), 'watch');
+
   const onSubmit = (formData: UserClientUpdateDTO) => {
     const payload = {
       ...formData,
@@ -236,6 +250,14 @@ function EditForm({
     if (numRegex.test(phoneValue) || watchPhone('phone').length === 1) {
       setValuePhone('phone', phoneValue);
     }
+  };
+  const onChangeTempPassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTempPassword(e.target.value);
+  };
+
+  const onSavePassword = () => {
+    setValue('password', tempPassword);
+    setIsOpenResetPassword(false);
   };
 
   return (
@@ -603,6 +625,71 @@ function EditForm({
           </FormHelperText>
         )}
       </Grid>
+      <Grid item xs={12} md={12}>
+        <ModalDialog
+          open={isOpenResetPassword}
+          setOpen={setIsOpenResetPassword}
+          minWidth={600}
+          title="Reset Password"
+          content={
+            (
+              <Box mt={2}>
+                <Box sx={{ mb: 3 }}>
+                  <Typography mb={1} fontWeight={500}>
+                    New Password
+                  </Typography>
+                  <TextField
+                    error={Boolean(formState?.errors?.password)}
+                    fullWidth
+                    {...register('password', {
+                      required: 'Password must be filled out',
+                    })}
+                    onChange={onChangeTempPassword}
+                    variant="outlined"
+                    InputLabelProps={{ shrink: false }}
+                    type={showPassword ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            <Iconify
+                              icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  {formState?.errors?.password && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.password?.message)}
+                    </FormHelperText>
+                  )}
+                </Box>
+                <Box display="flex" justifyContent="flex-end">
+                  <Button onClick={onSavePassword} variant="contained" color="primary">
+                    Save
+                  </Button>
+                </Box>
+              </Box>
+            ) as any
+          }
+        >
+          {/* Button Open Modal */}
+          <Button
+            type="button"
+            sx={{
+              paddingY: 0.5,
+              border: 1,
+              borderColor: 'primary.main',
+              borderRadius: 1.5,
+            }}
+          >
+            Reset Password
+          </Button>
+        </ModalDialog>
+      </Grid>
 
       <Grid item xs={12} md={12}>
         <FormControl fullWidth>
@@ -671,6 +758,9 @@ export function EditUserView({ type }: EditUserProps) {
   const { data: companyProducts } = useProductByCompanyId(Number(userCompany), false, () =>
     setIsOpenCompanySelection(false)
   );
+  const [isOpenResetPassword, setIsOpenResetPassword] = React.useState<boolean>(false);
+  const [showPassword, setShowPassword] = React.useState<boolean>(false);
+
   const [existingUserCompany, setExistingUserCompany] = React.useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = React.useState<number[]>([]);
   const [selectedProductsTemp, setSelectedProductsTemp] = React.useState<number[]>([]);
@@ -922,6 +1012,10 @@ export function EditUserView({ type }: EditUserProps) {
               selectedCompanyId={selectedCompanyId}
               existingCompanyProducts={existingCompanyProducts}
               onChangeProductFilterEdit={onChangeProductFilterEdit}
+              isOpenResetPassword={isOpenResetPassword}
+              setIsOpenResetPassword={setIsOpenResetPassword}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
             />
           )}
         </Form>
