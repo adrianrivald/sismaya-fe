@@ -53,6 +53,8 @@ import FilePreview from 'src/utils/file-preview';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { Iconify } from 'src/components/iconify';
+import { AttachmentModal } from 'src/pages/task/attachment-modal';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { AddAssigneeModal } from '../add-assignee';
 
 interface VideoFile {
@@ -72,6 +74,8 @@ interface Attachment {
 
 export function EditRequestView() {
   const { user } = useAuth();
+  const { data: userPermissions } = useUserPermissions();
+
   const userType = user?.user_info?.user_type;
   const clientCompanyId = user?.user_info?.company?.id;
   const navigate = useNavigate();
@@ -100,6 +104,11 @@ export function EditRequestView() {
   const [files, setFiles] = React.useState<FileList | any>([]);
   const [searchTerm, setSearchTerm] = useSearchDebounce();
 
+  const [attachmentModal, setAttachmentModal] = React.useState({
+    isOpen: false,
+    url: '',
+    path: '',
+  });
   const filteredInternalUser = internalUser?.filter((item) =>
     item?.user_info?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -451,6 +460,20 @@ export function EditRequestView() {
 
   const handleDeletePicItemFromDetail = (_userId: number, assigneeId?: number) => {
     if (assigneeId) deleteRequestAssignee(assigneeId);
+  };
+
+  const onShowErrorToast = () => {
+    toast.error(`You don't have permission`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce,
+    });
   };
 
   return (
@@ -871,56 +894,31 @@ export function EditRequestView() {
                           >
                             <Box display="flex" gap={1} alignItems="center">
                               <Box component="img" src="/assets/icons/file.png" />
-                              <ModalDialog
-                                onClose={() => {
-                                  setIsImagePreviewModal(false);
-                                  setSelectedImage('');
+
+                              <Box
+                                sx={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                  if (userPermissions?.includes('request:read')) {
+                                    if (
+                                      !['mp4', 'avi', 'mov', 'ogg', 'mkv'].includes(
+                                        attachment.file_name.split('.')[
+                                          attachment.file_name.split('.').length - 1
+                                        ]
+                                      )
+                                    ) {
+                                      setAttachmentModal({
+                                        isOpen: true,
+                                        url: `${attachment?.file_path}/${attachment?.file_name}`,
+                                        path: attachment.file_name,
+                                      });
+                                    }
+                                  } else {
+                                    onShowErrorToast();
+                                  }
                                 }}
-                                open={
-                                  isImagePreviewModal && selectedImage === attachment?.file_name
-                                }
-                                setOpen={setIsImagePreviewModal}
-                                minWidth={600}
-                                title="Preview"
-                                content={
-                                  (
-                                    <>
-                                      {attachment?.file_name?.toLowerCase().endsWith('.pdf') ? (
-                                        <PdfPreview
-                                          pdfFile={`${attachment?.file_path}/${attachment?.file_name}`}
-                                        />
-                                      ) : attachment?.file_name?.toLowerCase().endsWith('.xls') ||
-                                        attachment?.file_name?.toLowerCase().endsWith('.xlsx') ||
-                                        attachment?.file_name?.toLowerCase().endsWith('.doc') ||
-                                        attachment?.file_name?.toLowerCase().endsWith('.docx') ? (
-                                        <FilePreview
-                                          fileUrl={`${attachment?.file_path}/${attachment?.file_name}`}
-                                        />
-                                      ) : (
-                                        <Box
-                                          component="img"
-                                          sx={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            mt: 4,
-                                            maxHeight: '500px',
-                                            mx: 'auto',
-                                          }}
-                                          src={`${attachment?.file_path}/${attachment?.file_name}`}
-                                        />
-                                      )}
-                                    </>
-                                  ) as JSX.Element & string
-                                }
                               >
-                                <Box
-                                  sx={{ cursor: 'pointer' }}
-                                  onClick={() => onPreviewFile(attachment?.file_name, index)}
-                                >
-                                  <Typography fontWeight="bold">{attachment?.file_name}</Typography>
-                                  {/* {(file.size / (1024 * 1024)).toFixed(2)} Mb */}
-                                </Box>
-                              </ModalDialog>
+                                <Typography fontWeight="bold">{attachment?.file_name}</Typography>
+                              </Box>
                             </Box>
                             {userType === 'client' && (
                               <Box
@@ -1011,6 +1009,17 @@ export function EditRequestView() {
           )}
         </Form>
       </Grid>
+
+      {/* Attachment Modal */}
+
+      <AttachmentModal
+        isOpen={attachmentModal.isOpen}
+        url={attachmentModal.url}
+        onClose={() => {
+          setAttachmentModal({ isOpen: false, url: '', path: '' });
+        }}
+        path={attachmentModal.path}
+      />
     </DashboardContent>
   );
 }
