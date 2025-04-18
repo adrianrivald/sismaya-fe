@@ -64,10 +64,10 @@ const store = createStore({
       const storedData = window.localStorage.getItem(storageKey);
       const parsedData = storedData ? JSON.parse(storedData) : null;
 
-      // Prevent start timer when activity and request is not provided
-      if (event.activity && event.request) {
-        window.localStorage.setItem(storageKey, JSON.stringify(event));
-      }
+      // // Prevent start timer when activity and request is not provided
+      // if (event.activity && event.request) {
+      //   window.localStorage.setItem(storageKey, JSON.stringify(event));
+      // }
 
       // Update context either from event or from local storage
       const getItem = (key: keyof typeof event) => event[key] || parsedData?.[key] || context[key];
@@ -89,6 +89,7 @@ const store = createStore({
 
     idle: (context: { [x: string]: any }, event: Partial<EventStart>) => {
       const getItem = (key: keyof typeof event) => event[key] || context[key];
+
       return {
         state: 'idle' as TimerState,
         activity: getItem('activity'),
@@ -100,6 +101,7 @@ const store = createStore({
     },
     idlePaused: (context: { [x: string]: any }, event: Partial<EventStart>) => {
       const getItem = (key: keyof typeof event) => event[key] || context[key];
+      console.log('dataa idle paused', event);
       return {
         state: 'idlePaused' as TimerState,
         activity: getItem('activity'),
@@ -111,7 +113,7 @@ const store = createStore({
     },
     background: (context: { [x: string]: any }, event: Partial<EventStart>) => {
       const getItem = (key: keyof typeof event) => event[key] || context[key];
-
+      console.log('dataa background', event);
       return {
         state: 'background' as TimerState,
         activity: getItem('activity'),
@@ -134,12 +136,12 @@ export function useTimerStore() {
 }
 
 export function useTimer(taskId?: number, lastTimer = 0) {
-  const { timer, state } = useTimerStore();
-  const { taskId: storeTaskId } = useTimerStore();
+  const { timer, state, taskId: storeTaskId } = useTimerStore();
   const isPip = !taskId;
   const isCurrentTimer = isPip ? true : storeTaskId === taskId;
 
   const isCounting = state === 'running' || state === 'background'; // && isCurrentTimer;
+
   useEffect(() => {
     if (isCounting === false) {
       return;
@@ -253,6 +255,7 @@ export function useActivities(params: Partial<ActivitiesParams>) {
     queryKey: ['task', 'activity', params],
     queryFn: async () =>
       http('/tasks/get-all-timer', { params: { ...params, task_id: params.taskId } }),
+    staleTime: 0,
   });
 }
 
