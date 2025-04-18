@@ -48,7 +48,7 @@ export default function FloatingTimer() {
           {...getDragableProps()}
           sx={{
             width: '1rem',
-            cursor: 'move',
+            cursor: 'grab',
             borderTopLeftRadius: 16,
             borderBottomLeftRadius: 16,
             backgroundColor: 'rgba(0, 91, 127, 0.08)',
@@ -169,36 +169,47 @@ function useDragable() {
     lastTranslation: startingPosition,
   });
 
-  const { isDragging } = dragInfo;
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (dragInfo.isDragging) {
+        setDragInfo((prev) => ({
+          ...prev,
+          translation: {
+            x: Math.abs(e.clientX - (prev.origin.x + prev.lastTranslation.x)),
+            y: Math.abs(e.clientY - (prev.origin.y + prev.lastTranslation.y)),
+          },
+        }));
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (dragInfo.isDragging) {
+        setDragInfo((prev) => ({
+          ...prev,
+          isDragging: false,
+          lastTranslation: { x: prev.translation.x, y: prev.translation.y },
+        }));
+      }
+    };
+
+    if (dragInfo.isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragInfo.isDragging, dragInfo.origin, dragInfo.lastTranslation]);
+
   const handleMouseDown = ({ clientX, clientY }: React.MouseEvent) => {
-    if (!isDragging) {
+    if (!dragInfo.isDragging) {
       setDragInfo((prev) => ({
         ...prev,
-        isInitial: false,
+        // isInitial: false,
         isDragging: true,
         origin: { x: clientX, y: clientY },
-      }));
-    }
-  };
-
-  const handleMouseMove = ({ clientX, clientY }: React.MouseEvent) => {
-    if (isDragging) {
-      setDragInfo((prev) => ({
-        ...prev,
-        translation: {
-          x: Math.abs(clientX - (prev.origin.x + prev.lastTranslation.x)),
-          y: Math.abs(clientY - (prev.origin.y + prev.lastTranslation.y)),
-        },
-      }));
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (isDragging) {
-      setDragInfo((prev) => ({
-        ...prev,
-        isDragging: false,
-        lastTranslation: { x: prev.translation.x, y: prev.translation.y },
       }));
     }
   };
@@ -207,14 +218,7 @@ function useDragable() {
     dragInfo,
     getDragableProps: () => ({
       onMouseDown: handleMouseDown,
-      onMouseMove: handleMouseMove,
-      onMouseLeave: handleMouseMove,
-      onMouseUp: handleMouseUp,
-
-      onPointerDown: handleMouseDown,
-      onPointerMove: handleMouseMove,
-      onPointerLeave: handleMouseMove,
-      onPointerUp: handleMouseUp,
+      style: { cursor: 'grab' }, // Optional styling
     }),
   };
 }
