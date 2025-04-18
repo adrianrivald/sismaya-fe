@@ -1,18 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Box, Stack, Typography, Portal, TextField, Button } from '@mui/material';
-import {
-  useTimerStore,
-  useCheckTimer,
-  useLastActivity,
-  useTimerActionStore,
-} from 'src/services/task/timer';
+import { useTimerStore, useLastActivity, useTimerActionStore } from 'src/services/task/timer';
 import { Iconify } from 'src/components/iconify';
-import { useParams } from 'react-router-dom';
-import { useAssigneeCompanyId, useTaskDetail } from 'src/services/task/task-management';
 import { TimerActionButton, TimerCountdown } from './timer';
 
 export default function FloatingTimer() {
-  const timer = useCheckTimer();
   const store = useTimerStore();
   const actionStore = useTimerActionStore();
 
@@ -149,6 +141,11 @@ export default function FloatingTimer() {
               } else {
                 actionStore.send({
                   type: 'background',
+                  taskId: store.taskId,
+                  activity: store.activity,
+                  request: store.request,
+                  timer: store.timer,
+                  name: nameTask,
                 });
               }
             }}

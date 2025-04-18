@@ -125,6 +125,7 @@ export function CardActivity({
                       timer: store.timer,
                       name: store.name,
                     });
+
                     return;
                   }
                   if (store.state !== 'running' && store.state !== 'idle') {
@@ -154,14 +155,18 @@ export function CardActivity({
         </Typography>
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <TimerCountdown size="large" taskId={taskId} lastTimer={lastTimer} />
+          <TimerCountdown
+            size="large"
+            taskId={taskId}
+            lastTimer={isCurrentTimer ? store?.timer || lastTimer : lastTimer}
+          />
 
           <TimerActionButton
             activity={taskName}
             request={requestName}
             taskId={taskId}
             state={lastActivity?.state}
-            lastTimer={lastTimer}
+            lastTimer={isCurrentTimer ? store?.timer || lastTimer : lastTimer}
             name={lastActivity?.tmtName}
             step={step}
             refetch={refetch}

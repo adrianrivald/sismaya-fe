@@ -307,11 +307,7 @@ export function MultipleDropzoneField<TFormFields extends FieldValues = FieldVal
     <Stack spacing={2}>
       <Stack spacing={2}>
         <FormLabel sx={{ py: 0 }}>{label ?? 'Attachment'}</FormLabel>
-        {loaded ? (
-          <Typography fontSize={14}>FFmpeg initialized successfully</Typography>
-        ) : (
-          <Typography fontSize={14}>Initializing video compression module...</Typography>
-        )}
+        {!loaded && <Typography fontSize={14}>Initializing video compression module...</Typography>}
         <input
           {...getInputProps()}
           style={{ display: 'none' }}
