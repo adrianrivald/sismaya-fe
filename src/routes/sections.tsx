@@ -15,8 +15,13 @@ import MyRequestTask from 'src/sections/task/my-request';
 // ----------------------------------------------------------------------
 export const HomePage = lazy(() => import('src/pages/home'));
 
+// Dashboard
 export const DashboardInternalPage = lazy(() => import('src/pages/dashboard/dashboard-internal'));
 export const DashboardClientPage = lazy(() => import('src/pages/dashboard/dashboard-client'));
+
+// Report
+export const ReportRequestPage = lazy(() => import('src/pages/report/request'));
+export const ReportWorkAllocationPage = lazy(() => import('src/pages/report/work-allocation'));
 
 // Request
 export const RequestListPage = lazy(() => import('src/pages/request/list'));
@@ -146,6 +151,9 @@ const superAdminRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
+
+    { path: 'report/request', element: <ReportRequestPage /> },
+    { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
 
     // Master Data
     // Internal Company
