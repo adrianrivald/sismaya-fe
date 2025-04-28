@@ -40,6 +40,7 @@ import { getUser } from 'src/sections/auth/session/session';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { queryClient } from 'src/utils/query-client';
+import { useTimerActionStore, useTimerStore } from 'src/services/task/timer';
 import { AttachmentModal } from './attachment-modal';
 
 // ----------------------------------------------------------------------
@@ -77,6 +78,8 @@ export default function TaskDetailPage() {
   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
   const [videoFiles, setVideoFiles] = useState<VideoFile[]>([]);
   const [_, uploadOrDeleteFileFn] = useMutationAttachment(Number(taskId) ?? 0);
+  const actionStore = useTimerActionStore();
+  const store = useTimerStore();
 
   const user = getUser();
 
@@ -105,6 +108,13 @@ export default function TaskDetailPage() {
   //       console.log('👾 ~ TaskDetailPage ~ changeProgress ~ progress:', progress);
   //     },
   //   }) as const;
+
+  useEffect(() => {
+    if (store.state === 'idlePaused') {
+      actionStore.send({ type: 'reset' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onShowErrorToast = () => {
     toast.error(`You don't have permission`, {
@@ -612,8 +622,8 @@ export default function TaskDetailPage() {
           <CardActivity
             taskId={Number(taskId)}
             requestName={request.name}
-            taskName={task.name}
-            lastTimer={task.lastTimer}
+            taskName={task.name || ''}
+            lastTimer={task.lastTimer || 0}
             step={task.status}
             refetch={refetch}
             assigneeCompanyId={assigneeCompanyId}

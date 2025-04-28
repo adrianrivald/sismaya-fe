@@ -131,7 +131,7 @@ export function CardActivity({
                   if (store.state !== 'running' && store.state !== 'idle') {
                     actionStore.send({
                       type: 'start',
-                      taskId: store.taskId,
+                      taskId,
                       activity: store.activity,
                       request: store.request,
                       timer: store.timer,

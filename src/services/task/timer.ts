@@ -101,7 +101,7 @@ const store = createStore({
     },
     idlePaused: (context: { [x: string]: any }, event: Partial<EventStart>) => {
       const getItem = (key: keyof typeof event) => event[key] || context[key];
-      console.log('dataa idle paused', event);
+
       return {
         state: 'idlePaused' as TimerState,
         activity: getItem('activity'),
@@ -113,7 +113,7 @@ const store = createStore({
     },
     background: (context: { [x: string]: any }, event: Partial<EventStart>) => {
       const getItem = (key: keyof typeof event) => event[key] || context[key];
-      console.log('dataa background', event);
+
       return {
         state: 'background' as TimerState,
         activity: getItem('activity'),
@@ -260,7 +260,7 @@ export function useActivities(params: Partial<ActivitiesParams>) {
 }
 
 export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
-  const { data: activities } = useActivities({ ...params, page_size: 1 });
+  const { data: activities, refetch } = useActivities({ ...params, page_size: 1 });
   const { user } = useAuth();
   const { data: activitiesUser } = useActivities({ ...params, page_size: 1, user_id: user?.id });
 
@@ -282,6 +282,7 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
   }
 
   return {
+    refetch,
     state,
     timerName: activity?.name,
     name: activity?.task?.name,
@@ -289,10 +290,11 @@ export function useLastActivity(params: Pick<ActivitiesParams, 'taskId'>) {
     time: [fTime(activity?.started_at), fTime(activity?.ended_at)].join(' - '),
     diff: formatSecondToTime(dayjs(activity?.ended_at).diff(activity?.started_at, 'second')),
 
-    tmtName: activityUser
-      ? activityUser?.creator?.user_id !== user?.id
-        ? ''
-        : activityUser?.name
-      : '',
+    tmtName:
+      activityUser || ''
+        ? activityUser?.creator?.user_id !== user?.id
+          ? ''
+          : activityUser?.name || ''
+        : '',
   };
 }
