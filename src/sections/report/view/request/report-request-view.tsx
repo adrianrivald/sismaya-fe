@@ -7,8 +7,10 @@ import {
   capitalize,
   Divider,
   FormControl,
-  FormHelperText,
+  FormControlLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select,
   SelectChangeEvent,
 } from '@mui/material';
@@ -17,9 +19,17 @@ import dayjs, { Dayjs } from 'dayjs';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import { useNavigate } from 'react-router-dom';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { FormHelperText } from '@mui/material';
 import { Form } from 'src/components/form/form';
+
+const docTypeOptions = [
+  {
+    value: 'summary-detail',
+    label: 'Summary & Detail',
+  },
+];
 
 const timePeriodOptions = [
   {
@@ -48,9 +58,14 @@ const timePeriodOptions = [
   },
 ];
 
-export function ReportWorkAllocationView() {
+export function ReportRequestView() {
   const navigate = useNavigate();
   const [timePeriod, setTimePeriod] = useState('this-month');
+  const [docType, setDocType] = useState('summary-detail');
+  const [clientMode, setClientMode] = useState('all');
+  const [divisionMode, setDivisionMode] = useState('all');
+  const [requestStatusMode, setRequestStatusMode] = useState('all');
+
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
 
@@ -121,7 +136,7 @@ export function ReportWorkAllocationView() {
                 sx={{ cursor: 'pointer' }}
               >
                 <Iconify icon="solar:inbox-bold" />
-                <Typography color="grey.600">Requests</Typography>
+                <Typography>Requests</Typography>
               </Box>
 
               <Box
@@ -132,7 +147,7 @@ export function ReportWorkAllocationView() {
                 sx={{ cursor: 'pointer' }}
               >
                 <Iconify icon="solar:file-text-bold" />
-                <Typography>Work Allocation</Typography>
+                <Typography color="grey.600">Work Allocation</Typography>
               </Box>
 
               <Box
@@ -155,10 +170,9 @@ export function ReportWorkAllocationView() {
             >
               <Box p={2} pb={0}>
                 <Typography variant="h6" fontSize="18">
-                  Work Allocation
+                  Requests
                 </Typography>
               </Box>
-
               <Divider sx={{ mt: 2, borderStyle: 'dashed' }} />
 
               <Box p={2}>
@@ -243,6 +257,116 @@ export function ReportWorkAllocationView() {
                           </Grid>
                         )}
                       </Box>
+
+                      <FormControl sx={{ width: '100%', mt: 4 }}>
+                        <Typography fontWeight={600} mb={1} component="label" htmlFor="time-period">
+                          Client
+                        </Typography>
+
+                        <RadioGroup>
+                          <Box display="flex">
+                            {[
+                              { value: 'all', label: 'All' },
+                              { value: 'custom', label: 'Custom' },
+                            ].map((option) => (
+                              <FormControlLabel
+                                key={option.value}
+                                value={option.value}
+                                control={
+                                  <Radio
+                                    checked={clientMode.includes(option.value)}
+                                    onChange={() => setClientMode(option.value)}
+                                  />
+                                }
+                                label={option.label}
+                              />
+                            ))}
+                          </Box>
+                        </RadioGroup>
+                      </FormControl>
+
+                      <FormControl sx={{ width: '100%', mt: 4 }}>
+                        <Typography fontWeight={600} mb={1} component="label" htmlFor="time-period">
+                          Division
+                        </Typography>
+
+                        <RadioGroup>
+                          <Box display="flex">
+                            {[
+                              { value: 'all', label: 'All' },
+                              { value: 'custom', label: 'Custom' },
+                            ].map((option) => (
+                              <FormControlLabel
+                                key={option.value}
+                                value={option.value}
+                                control={
+                                  <Radio
+                                    checked={divisionMode.includes(option.value)}
+                                    onChange={() => setDivisionMode(option.value)}
+                                  />
+                                }
+                                label={option.label}
+                              />
+                            ))}
+                          </Box>
+                        </RadioGroup>
+                      </FormControl>
+
+                      <FormControl sx={{ width: '100%', mt: 4 }}>
+                        <Typography fontWeight={600} mb={1} component="label" htmlFor="time-period">
+                          Request Status
+                        </Typography>
+
+                        <RadioGroup>
+                          <Box display="flex">
+                            {[
+                              { value: 'all', label: 'All' },
+                              { value: 'custom', label: 'Custom' },
+                            ].map((option) => (
+                              <FormControlLabel
+                                key={option.value}
+                                value={option.value}
+                                control={
+                                  <Radio
+                                    checked={requestStatusMode.includes(option.value)}
+                                    onChange={() => setRequestStatusMode(option.value)}
+                                  />
+                                }
+                                label={option.label}
+                              />
+                            ))}
+                          </Box>
+                        </RadioGroup>
+                      </FormControl>
+
+                      <FormControl sx={{ width: '100%', mt: 4 }}>
+                        <Typography fontWeight={600} mb={1} component="label" htmlFor="doc-type">
+                          Document Type
+                        </Typography>
+
+                        <Select
+                          value={docType}
+                          sx={{
+                            height: 54,
+                            paddingY: 0.5,
+                            borderWidth: 0,
+                            borderRadius: 1.5,
+                            width: '100%',
+
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              border: 1,
+                            },
+                          }}
+                          onChange={(e: SelectChangeEvent<string>) => {
+                            setTimePeriod(e.target.value);
+                          }}
+                          id="time-period"
+                        >
+                          {docTypeOptions?.map((item) => (
+                            <MenuItem value={item.value}>{capitalize(`${item?.label}`)}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
 
                       <Box mt={24}>
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
