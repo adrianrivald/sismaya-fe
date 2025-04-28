@@ -205,42 +205,40 @@ export function ReportWorkAllocationView() {
                         </FormControl>
 
                         {timePeriod === 'custom' && (
-                          <Grid item xs={12} md={12}>
-                            <Box
-                              mt={2}
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                              gap={2}
-                            >
-                              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                  sx={{
-                                    width: '50%',
-                                  }}
-                                  label="Start From"
-                                  value={dateValue}
-                                  onChange={handleChangeDate}
-                                />
-                              </LocalizationProvider>
+                          <Box
+                            mt={2}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            gap={2}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DateTimePicker
+                                sx={{
+                                  width: '50%',
+                                }}
+                                label="Start From"
+                                value={dateValue}
+                                onChange={handleChangeDate}
+                              />
+                            </LocalizationProvider>
 
-                              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                  sx={{
-                                    width: '50%',
-                                  }}
-                                  label="Until"
-                                  value={endDateValue}
-                                  onChange={handleChangeEndDate}
-                                />
-                              </LocalizationProvider>
-                              {formState?.errors?.estimated_duration && (
-                                <FormHelperText sx={{ color: 'error.main' }}>
-                                  {String(formState?.errors?.estimated_duration?.message)}
-                                </FormHelperText>
-                              )}
-                            </Box>
-                          </Grid>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DateTimePicker
+                                sx={{
+                                  width: '50%',
+                                }}
+                                label="Until"
+                                value={endDateValue}
+                                onChange={handleChangeEndDate}
+                              />
+                            </LocalizationProvider>
+                            {formState?.errors?.estimated_duration && (
+                              <FormHelperText sx={{ color: 'error.main' }}>
+                                {String(formState?.errors?.estimated_duration?.message)}
+                              </FormHelperText>
+                            )}
+                          </Box>
                         )}
                       </Box>
 

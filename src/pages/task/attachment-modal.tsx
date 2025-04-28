@@ -36,7 +36,9 @@ export function AttachmentModal({ isOpen, onClose, url, path }: AttachmentModalP
           >
             <PdfPreview pdfFile={`${url}`} />
           </Box>
-        ) : path.toLowerCase().endsWith('.xls') || path.toLowerCase().endsWith('.xlsx') ? (
+        ) : path.toLowerCase().endsWith('.xls') ||
+          path.toLowerCase().endsWith('.xlsx') ||
+          path.toLowerCase().endsWith('.csv') ? (
           <Box
             sx={{
               position: 'relative',

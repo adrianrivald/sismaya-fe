@@ -167,7 +167,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                       ?.filter((permissionItem) => permissionItem !== 'chat')
                       .includes(listItem?.id)
                   : userPermissions?.includes(listItem?.id)
-                : ['dashboard', 'master-data', 'user group:read'].includes(listItem?.id)
+                : ['dashboard', 'master-data', 'user group:read', 'reports'].includes(listItem?.id)
             )
           )
           .map((menu) => (
@@ -193,7 +193,9 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                       ?.filter((item) =>
                         userRole !== 1
                           ? userPermissions?.includes(item?.id)
-                          : ['dashboard', 'master-data', 'user group:read'].includes(item?.id)
+                          : ['dashboard', 'master-data', 'user group:read', 'reports'].includes(
+                              item?.id
+                            )
                       )
                       .map((childMenu: any, index) => {
                         const isActived = childMenu.path === pathname;

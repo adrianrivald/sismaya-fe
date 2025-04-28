@@ -33,6 +33,13 @@ export const generalMenus = (internalCompaniesDashboard?: ChildMenus[], userType
         ? internalCompaniesDashboard?.filter((item) => item?.heading !== undefined)
         : [],
   },
+  {
+    heading: 'Reports',
+    id: 'reports',
+    path: '/report/request',
+    icon: icon('ic-file'),
+    list: [],
+  },
 ];
 
 export const managementMenus = (
