@@ -7,14 +7,19 @@ import {
   capitalize,
   Divider,
   FormControl,
+  FormHelperText,
   MenuItem,
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
+import { useNavigate } from 'react-router-dom';
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Form } from 'src/components/form/form';
 
 const timePeriodOptions = [
   {
@@ -25,10 +30,67 @@ const timePeriodOptions = [
     value: 'this-year',
     label: 'This year',
   },
+  {
+    value: 'last-30-days',
+    label: 'Last 30 days',
+  },
+  {
+    value: 'last-3-months',
+    label: 'Last 3 months',
+  },
+  {
+    value: 'last-6-months',
+    label: 'Last 6 months',
+  },
+  {
+    value: 'custom',
+    label: 'Custom period',
+  },
 ];
 
 export function ReportWorkAllocationView() {
+  const navigate = useNavigate();
   const [timePeriod, setTimePeriod] = useState('this-month');
+  const [dateValue, setDateValue] = useState<Dayjs | null>(null);
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
+
+  const handleChangeDate = (newValue: Dayjs | null) => {
+    setDateValue(newValue);
+  };
+
+  const handleChangeEndDate = (newValue: Dayjs | null) => {
+    setEndDateValue(newValue);
+  };
+
+  const handleSubmit = (formData: any) => {
+    console.log(formData, 'log: formData report request');
+    // setIsLoading(true);
+    // const payload = {
+    //   ...formData,
+    //   company_id: String(idCurrentCompany),
+    //   is_custom: isCustom === 'true',
+    // };
+    // if (isCustom === 'true') {
+    //   Object.assign(payload, {
+    //     start_date: dateValue?.format('YYYY-MM-DD hh:mm'),
+    //     end_date: endDateValue?.format('YYYY-MM-DD hh:mm'),
+    //   });
+    // }
+    // try {
+    //   if (defaultValue) {
+    //     updateAutoResponse({
+    //       ...payload,
+    //       id: defaultValue?.id,
+    //     });
+    //   } else {
+    //     addAutoResponse(payload);
+    //   }
+    //   setIsLoading(false);
+    // } catch (error) {
+    //   setIsLoading(false);
+    // }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -51,17 +113,35 @@ export function ReportWorkAllocationView() {
               width="30%"
               gap={2}
             >
-              <Box display="flex" alignItems="center" gap={2} sx={{ cursor: 'pointer' }}>
+              <Box
+                onClick={() => navigate('/report/request')}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                sx={{ cursor: 'pointer' }}
+              >
                 <Iconify icon="solar:inbox-bold" />
                 <Typography color="grey.600">Requests</Typography>
               </Box>
 
-              <Box display="flex" alignItems="center" gap={2} sx={{ cursor: 'pointer' }}>
+              <Box
+                onClick={() => navigate('/report/work-allocation')}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                sx={{ cursor: 'pointer' }}
+              >
                 <Iconify icon="solar:file-text-bold" />
                 <Typography>Work Allocation</Typography>
               </Box>
 
-              <Box display="flex" alignItems="center" gap={2} sx={{ cursor: 'pointer' }}>
+              <Box
+                onClick={() => navigate('/report/work-performance')}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                sx={{ cursor: 'pointer' }}
+              >
                 <Iconify icon="solar:users-group-rounded-bold" />
                 <Typography color="grey.600">Work Performance</Typography>
               </Box>
@@ -77,45 +157,99 @@ export function ReportWorkAllocationView() {
                 <Typography variant="h6" fontSize="18">
                   Work Allocation
                 </Typography>
-
-                <Divider sx={{ mt: 2, borderStyle: 'dashed' }} />
               </Box>
 
+              <Divider sx={{ mt: 2, borderStyle: 'dashed' }} />
+
               <Box p={2}>
-                <FormControl sx={{ width: '100%' }}>
-                  <Typography fontWeight={600} mb={1} component="label" htmlFor="time-period">
-                    Time Period
-                  </Typography>
+                <Form
+                  width="100%"
+                  onSubmit={handleSubmit}
+                  //  schema={autoResponseSchema}
+                >
+                  {({ register, control, watch, formState, setValue }) => (
+                    <>
+                      <Box>
+                        <FormControl sx={{ width: '100%' }}>
+                          <Typography
+                            fontWeight={600}
+                            mb={1}
+                            component="label"
+                            htmlFor="time-period"
+                          >
+                            Time Period
+                          </Typography>
 
-                  <Select
-                    value={timePeriod}
-                    sx={{
-                      height: 54,
-                      paddingY: 0.5,
-                      borderWidth: 0,
-                      borderRadius: 1.5,
-                      width: '100%',
+                          <Select
+                            value={timePeriod}
+                            sx={{
+                              height: 54,
+                              paddingY: 0.5,
+                              borderWidth: 0,
+                              borderRadius: 1.5,
+                              width: '100%',
 
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        border: 1,
-                      },
-                    }}
-                    onChange={(e: SelectChangeEvent<string>) => {
-                      setTimePeriod(e.target.value);
-                    }}
-                    id="time-period"
-                  >
-                    {timePeriodOptions?.map((item) => (
-                      <MenuItem value={item.value}>{capitalize(`${item?.label}`)}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                border: 1,
+                              },
+                            }}
+                            onChange={(e: SelectChangeEvent<string>) => {
+                              setTimePeriod(e.target.value);
+                            }}
+                            id="time-period"
+                          >
+                            {timePeriodOptions?.map((item) => (
+                              <MenuItem value={item.value}>{capitalize(`${item?.label}`)}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
 
-                <Box mt={24}>
-                  <Button sx={{ width: '100%' }} type="submit" variant="contained">
-                    Generate & Download Report
-                  </Button>
-                </Box>
+                        {timePeriod === 'custom' && (
+                          <Box
+                            mt={2}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            gap={2}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DateTimePicker
+                                sx={{
+                                  width: '50%',
+                                }}
+                                label="Start From"
+                                value={dateValue}
+                                onChange={handleChangeDate}
+                              />
+                            </LocalizationProvider>
+
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DateTimePicker
+                                sx={{
+                                  width: '50%',
+                                }}
+                                label="Until"
+                                value={endDateValue}
+                                onChange={handleChangeEndDate}
+                              />
+                            </LocalizationProvider>
+                            {formState?.errors?.estimated_duration && (
+                              <FormHelperText sx={{ color: 'error.main' }}>
+                                {String(formState?.errors?.estimated_duration?.message)}
+                              </FormHelperText>
+                            )}
+                          </Box>
+                        )}
+                      </Box>
+
+                      <Box mt={24}>
+                        <Button sx={{ width: '100%' }} type="submit" variant="contained">
+                          Generate & Download Report
+                        </Button>
+                      </Box>
+                    </>
+                  )}
+                </Form>
               </Box>
             </Box>
           </Box>

@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { DashboardInternalView } from 'src/sections/overview/view/general-dashboard/dashboard-internal-general-view';
+import { ReportRequestView } from 'src/sections/report/view/request/report-request-view';
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ export default function ReportRequestPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      {/* <DashboardInternalView /> */}
+      <ReportRequestView />
     </>
   );
 }
