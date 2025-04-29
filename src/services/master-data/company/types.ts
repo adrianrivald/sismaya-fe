@@ -67,6 +67,7 @@ export interface Categories {
 export interface Products {
   id: number;
   name: string;
+  company: Company
   company_id: number;
 }
 
