@@ -29,7 +29,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
 import { Form } from 'src/components/form/form';
-import { useDivisionByCompanyId, useInternalCompanies } from 'src/services/master-data/company';
+import {
+  useDivisionByCompanyId,
+  useInternalCompanies,
+  useNonInternalCompanies,
+} from 'src/services/master-data/company';
+import { useAuth } from 'src/sections/auth/providers/auth';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -60,23 +65,23 @@ const docTypeOptions = [
 
 const timePeriodOptions = [
   {
-    value: 'this-month',
+    value: 'month',
     label: 'This month',
   },
   {
-    value: 'this-year',
+    value: 'year',
     label: 'This year',
   },
   {
-    value: 'last-30-days',
+    value: '30-days',
     label: 'Last 30 days',
   },
   {
-    value: 'last-3-months',
+    value: '3-months',
     label: 'Last 3 months',
   },
   {
-    value: 'last-6-months',
+    value: '6-months',
     label: 'Last 6 months',
   },
   {
@@ -89,9 +94,13 @@ export function ReportRequestView() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { vendor } = useParams();
-  const { data: internalCompanies } = useInternalCompanies();
+  const { user } = useAuth();
+  const idCurrentCompany =
+    user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
+      ?.id ?? 0;
+  const { data: clientCompanies } = useNonInternalCompanies(true);
   const { data: divisions } = useDivisionByCompanyId(1);
-  const [timePeriod, setTimePeriod] = useState('this-month');
+  const [timePeriod, setTimePeriod] = useState('month');
   const [docType, setDocType] = useState('summary-detail');
   const [clientMode, setClientMode] = useState('all');
   const [divisionMode, setDivisionMode] = useState('all');
@@ -99,7 +108,7 @@ export function ReportRequestView() {
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
   const defaultValues = {
-    internal_id: [],
+    client_company_id: [],
     division_id: [],
   };
   const handleChangeDate = (newValue: Dayjs | null) => {
@@ -113,30 +122,23 @@ export function ReportRequestView() {
   const handleSubmit = (formData: any) => {
     console.log(formData, 'log: formData report request');
     // setIsLoading(true);
-    // const payload = {
-    //   ...formData,
-    //   company_id: String(idCurrentCompany),
-    //   is_custom: isCustom === 'true',
-    // };
-    // if (isCustom === 'true') {
-    //   Object.assign(payload, {
-    //     start_date: dateValue?.format('YYYY-MM-DD hh:mm'),
-    //     end_date: endDateValue?.format('YYYY-MM-DD hh:mm'),
-    //   });
-    // }
-    // try {
-    //   if (defaultValue) {
-    //     updateAutoResponse({
-    //       ...payload,
-    //       id: defaultValue?.id,
-    //     });
-    //   } else {
-    //     addAutoResponse(payload);
-    //   }
-    //   setIsLoading(false);
-    // } catch (error) {
-    //   setIsLoading(false);
-    // }
+    const payload = {
+      ...formData,
+      internalCompanyId: String(idCurrentCompany),
+      period: timePeriod ?? '',
+    };
+    if (timePeriod === 'custom') {
+      Object.assign(payload, {
+        from: dateValue?.format('YYYY-MM-DD hh:mm'),
+        to: endDateValue?.format('YYYY-MM-DD hh:mm'),
+      });
+    }
+    console.log(payload, 'payload');
+    try {
+      // generateReportWorkAllocation(payload);
+    } catch (error) {
+      // setIsLoading(false);
+    }
   };
 
   return (
@@ -331,16 +333,16 @@ export function ReportRequestView() {
                               <InputLabel id="select-company">Select Client</InputLabel>
 
                               <Select
-                                label="Internal Company"
+                                label="Company"
                                 labelId="demo-simple-select-outlined-label-type"
-                                error={Boolean(formState?.errors?.internal_id)}
-                                id="internal_id"
-                                {...register('internal_id')}
+                                error={Boolean(formState?.errors?.client_company_id)}
+                                id="client_company_id"
+                                {...register('client_company_id')}
                                 multiple
-                                value={watch('internal_id')}
+                                value={watch('client_company_id')}
                                 input={
                                   <OutlinedInput
-                                    error={Boolean(formState?.errors?.internal_id)}
+                                    error={Boolean(formState?.errors?.client_company_id)}
                                     id="select-multiple-chip"
                                     label="Chip"
                                   />
@@ -350,7 +352,7 @@ export function ReportRequestView() {
                                 }}
                                 renderValue={() => (
                                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                    {watch('internal_id')?.map((value: any) => (
+                                    {watch('client_company_id')?.map((value: any) => (
                                       <Chip
                                         sx={{
                                           bgcolor: '#D6F3F9',
@@ -358,8 +360,7 @@ export function ReportRequestView() {
                                         }}
                                         key={value}
                                         label={
-                                          internalCompanies?.find((item) => item?.id === value)
-                                            ?.name
+                                          clientCompanies?.find((item) => item?.id === value)?.name
                                         }
                                       />
                                     ))}
@@ -368,14 +369,14 @@ export function ReportRequestView() {
                                 MenuProps={MenuProps}
                                 inputProps={{ 'aria-label': 'Without label' }}
                               >
-                                {internalCompanies &&
-                                  internalCompanies?.map((company) => (
+                                {clientCompanies &&
+                                  clientCompanies?.map((company) => (
                                     <MenuItem
                                       key={company?.id}
                                       value={company?.id}
                                       style={getStyles(
                                         company?.id,
-                                        watch('internal_id') ?? [],
+                                        watch('client_company_id') ?? [],
                                         theme
                                       )}
                                     >
@@ -384,9 +385,9 @@ export function ReportRequestView() {
                                   ))}
                               </Select>
                             </FormControl>
-                            {formState?.errors?.internal_id && (
+                            {formState?.errors?.client_company_id && (
                               <FormHelperText sx={{ color: 'error.main' }}>
-                                {String(formState?.errors?.internal_id?.message)}
+                                {String(formState?.errors?.client_company_id?.message)}
                               </FormHelperText>
                             )}
                           </>
@@ -435,7 +436,7 @@ export function ReportRequestView() {
                                 label="Internal Company"
                                 labelId="demo-simple-select-outlined-label-type"
                                 error={Boolean(formState?.errors?.division_id)}
-                                id="internal_id"
+                                id="division_id"
                                 {...register('division_id')}
                                 multiple
                                 value={watch('division_id')}
@@ -482,9 +483,9 @@ export function ReportRequestView() {
                                   ))}
                               </Select>
                             </FormControl>
-                            {formState?.errors?.internal_id && (
+                            {formState?.errors?.division_id && (
                               <FormHelperText sx={{ color: 'error.main' }}>
-                                {String(formState?.errors?.internal_id?.message)}
+                                {String(formState?.errors?.division_id?.message)}
                               </FormHelperText>
                             )}
                           </>

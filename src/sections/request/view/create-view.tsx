@@ -632,9 +632,11 @@ export function CreateRequestView() {
                         })}
                         label="Product"
                       >
-                        {products?.map((product) => (
-                          <MenuItem value={product?.id}>{product?.name}</MenuItem>
-                        ))}
+                        {products
+                          ?.filter((product) => product.company.id === idCurrentCompany)
+                          ?.map((product) => (
+                            <MenuItem value={product?.id}>{product?.name}</MenuItem>
+                          ))}
                       </Select>
                     </FormControl>
                     {formState?.errors?.product_id && (
