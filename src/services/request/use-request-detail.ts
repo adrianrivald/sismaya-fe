@@ -85,6 +85,8 @@ export function useRequestAssignees(requestId: string, internal_id: string) {
         name: val?.user_info?.name,
         avatar: val?.user_info?.profile_picture,
         assigneeId: val?.id,
+        roleName: val?.user_info?.role.name,
+        email: val?.email,
       }));
     },
   });

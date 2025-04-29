@@ -47,6 +47,7 @@ export function AddAssigneeModal({
           onChange={onSearchUser}
         />
       </Box>
+      {console.log('data', internalUsers)}
       <Box sx={{ maxHeight: '50vh', overflow: 'auto' }}>
         {internalUsers
           ?.filter((item) =>
@@ -74,8 +75,15 @@ export function AddAssigneeModal({
                   }}
                 />
                 <Box>
-                  <Typography>{internalUser?.user_info?.name}</Typography>
-                  <Typography color="grey.600">{internalUser?.email}</Typography>
+                  <Typography variant="subtitle2" color="#1C252E">
+                    {internalUser?.user_info?.name}
+                  </Typography>
+                  <Typography variant="body2" color="#637381">
+                    {internalUser?.email || '-'}
+                  </Typography>
+                  <Typography variant="body2" color="#637381">
+                    {internalUser?.user_info?.role.name || '-'}
+                  </Typography>
                 </Box>
               </Box>
               {isAssignable && (

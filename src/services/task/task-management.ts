@@ -86,6 +86,7 @@ export class TaskManagement {
             name: assignee?.assignee_info?.name,
             email: assignee?.assignee_info?.email,
             avatar: assignee?.assignee_info?.profile_picture,
+            roleName: assignee?.assignee_info?.role?.name,
           }) satisfies Assignee
       ),
       attachments:
