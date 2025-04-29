@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable new-cap */
+import { useEffect, useRef, useState } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import type { SelectChangeEvent } from '@mui/material';
@@ -23,6 +27,7 @@ import { Form } from 'src/components/form/form';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import type { ReportWorkAllocationDTO } from 'src/services/report/work-allocation/schemas/work-allocation-schema';
 import { useReportWorkAllocation } from 'src/services/report/work-allocation/use-report-work-allocation';
+import ReportWorkAllocationPDF from './report-pdf';
 
 const timePeriodOptions = [
   {
@@ -61,9 +66,27 @@ export function ReportWorkAllocationView() {
   const [timePeriod, setTimePeriod] = useState('month');
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
-  const { mutate: generateReportWorkAllocation } = useReportWorkAllocation();
+  const { mutate: generateReportWorkAllocation, data: reportData } = useReportWorkAllocation();
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+  };
+
+  const [pdfData, setPdfData] = useState<any>({});
+  const hiddenRef = useRef<HTMLDivElement>(null);
+
+  const generatePdf = async () => {
+    const element = hiddenRef.current;
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF();
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save('generated.pdf');
   };
 
   const handleChangeEndDate = (newValue: Dayjs | null) => {
@@ -90,6 +113,17 @@ export function ReportWorkAllocationView() {
       // setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (reportData) {
+      setPdfData(reportData?.data);
+      generatePdf();
+    }
+  }, [reportData]);
+
+  console.log(pdfData, 'pdfData ');
+
+  console.log(reportData, 'reportData');
 
   return (
     <DashboardContent maxWidth="xl">
@@ -246,6 +280,14 @@ export function ReportWorkAllocationView() {
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
                           Generate & Download Report
                         </Button>
+                        <ReportWorkAllocationPDF
+                          timePeriod={timePeriod}
+                          vendor={vendor?.toUpperCase() ?? ''}
+                          data={{
+                            summary: reportData?.data?.summary,
+                          }}
+                          hiddenRef={hiddenRef}
+                        />
                       </Box>
                     </>
                   )}
