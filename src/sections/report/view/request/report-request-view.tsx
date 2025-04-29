@@ -24,9 +24,9 @@ import dayjs from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
 import { Form } from 'src/components/form/form';
 import { useDivisionByCompanyId, useInternalCompanies } from 'src/services/master-data/company';
@@ -88,7 +88,7 @@ const timePeriodOptions = [
 export function ReportRequestView() {
   const navigate = useNavigate();
   const theme = useTheme();
-
+  const { vendor } = useParams();
   const { data: internalCompanies } = useInternalCompanies();
   const { data: divisions } = useDivisionByCompanyId(1);
   const [timePeriod, setTimePeriod] = useState('this-month');
@@ -162,7 +162,7 @@ export function ReportRequestView() {
               gap={2}
             >
               <Box
-                onClick={() => navigate('/report/request')}
+                onClick={() => navigate(`/${vendor}/report/request`)}
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -173,7 +173,7 @@ export function ReportRequestView() {
               </Box>
 
               <Box
-                onClick={() => navigate('/report/work-allocation')}
+                onClick={() => navigate(`/${vendor}/report/work-allocation`)}
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -184,7 +184,7 @@ export function ReportRequestView() {
               </Box>
 
               <Box
-                onClick={() => navigate('/report/work-performance')}
+                onClick={() => navigate(`/${vendor}/report/work-performance`)}
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -265,7 +265,7 @@ export function ReportRequestView() {
                             gap={2}
                           >
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DateTimePicker
+                              <DatePicker
                                 sx={{
                                   width: '50%',
                                 }}
@@ -276,7 +276,7 @@ export function ReportRequestView() {
                             </LocalizationProvider>
 
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DateTimePicker
+                              <DatePicker
                                 sx={{
                                   width: '50%',
                                 }}

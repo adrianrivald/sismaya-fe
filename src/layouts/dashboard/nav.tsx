@@ -145,6 +145,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     path: `/${item?.company?.name.toLowerCase()}/auto-response`,
   }));
 
+  const internalCompaniesReport = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/report/request`,
+  }));
+
   return (
     <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />
@@ -157,6 +162,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           internalCompaniesRequest,
           internalCompaniesTask,
           internalCompaniesAutoResponse,
+          internalCompaniesReport,
           userType
         )
           ?.filter((item) =>

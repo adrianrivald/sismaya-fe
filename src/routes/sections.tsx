@@ -197,6 +197,10 @@ const internalRoutes: NonIndexRouteObject = {
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
 
+    // Report
+
+    { path: '/:vendor/report/request', element: <ReportRequestPage /> },
+    { path: '/:vendor/report/work-allocation', element: <ReportWorkAllocationPage /> },
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/:vendor/request/unresolved-cito', element: <UnresolvedCitoListPage /> },

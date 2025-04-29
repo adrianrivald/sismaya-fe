@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
@@ -10,36 +11,38 @@ import {
   FormHelperText,
   MenuItem,
   Select,
-  SelectChangeEvent,
 } from '@mui/material';
-import dayjs, { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
-import { useNavigate } from 'react-router-dom';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { useNavigate, useParams } from 'react-router-dom';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Form } from 'src/components/form/form';
+import { useAuth } from 'src/sections/auth/providers/auth';
+import type { ReportWorkAllocationDTO } from 'src/services/report/work-allocation/schemas/work-allocation-schema';
+import { useReportWorkAllocation } from 'src/services/report/work-allocation/use-report-work-allocation';
 
 const timePeriodOptions = [
   {
-    value: 'this-month',
+    value: 'month',
     label: 'This month',
   },
   {
-    value: 'this-year',
+    value: 'year',
     label: 'This year',
   },
   {
-    value: 'last-30-days',
+    value: '30-days',
     label: 'Last 30 days',
   },
   {
-    value: 'last-3-months',
+    value: '3-months',
     label: 'Last 3 months',
   },
   {
-    value: 'last-6-months',
+    value: '6-months',
     label: 'Last 6 months',
   },
   {
@@ -50,10 +53,15 @@ const timePeriodOptions = [
 
 export function ReportWorkAllocationView() {
   const navigate = useNavigate();
-  const [timePeriod, setTimePeriod] = useState('this-month');
+  const { vendor } = useParams();
+  const { user } = useAuth();
+  const idCurrentCompany =
+    user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
+      ?.id ?? 0;
+  const [timePeriod, setTimePeriod] = useState('month');
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
-
+  const { mutate: generateReportWorkAllocation } = useReportWorkAllocation();
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
   };
@@ -62,33 +70,25 @@ export function ReportWorkAllocationView() {
     setEndDateValue(newValue);
   };
 
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = (formData: ReportWorkAllocationDTO) => {
     console.log(formData, 'log: formData report request');
     // setIsLoading(true);
-    // const payload = {
-    //   ...formData,
-    //   company_id: String(idCurrentCompany),
-    //   is_custom: isCustom === 'true',
-    // };
-    // if (isCustom === 'true') {
-    //   Object.assign(payload, {
-    //     start_date: dateValue?.format('YYYY-MM-DD hh:mm'),
-    //     end_date: endDateValue?.format('YYYY-MM-DD hh:mm'),
-    //   });
-    // }
-    // try {
-    //   if (defaultValue) {
-    //     updateAutoResponse({
-    //       ...payload,
-    //       id: defaultValue?.id,
-    //     });
-    //   } else {
-    //     addAutoResponse(payload);
-    //   }
-    //   setIsLoading(false);
-    // } catch (error) {
-    //   setIsLoading(false);
-    // }
+    const payload = {
+      internalCompanyId: String(idCurrentCompany),
+      period: timePeriod ?? '',
+    };
+    console.log(payload, 'payload');
+    if (timePeriod === 'custom') {
+      Object.assign(payload, {
+        from: dateValue?.format('YYYY-MM-DD hh:mm'),
+        to: endDateValue?.format('YYYY-MM-DD hh:mm'),
+      });
+    }
+    try {
+      generateReportWorkAllocation(payload);
+    } catch (error) {
+      // setIsLoading(false);
+    }
   };
 
   return (
@@ -114,7 +114,7 @@ export function ReportWorkAllocationView() {
               gap={2}
             >
               <Box
-                onClick={() => navigate('/report/request')}
+                onClick={() => navigate(`/${vendor}/report/request`)}
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -125,7 +125,7 @@ export function ReportWorkAllocationView() {
               </Box>
 
               <Box
-                onClick={() => navigate('/report/work-allocation')}
+                onClick={() => navigate(`/${vendor}/report/work-allocation`)}
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -136,7 +136,7 @@ export function ReportWorkAllocationView() {
               </Box>
 
               <Box
-                onClick={() => navigate('/report/work-performance')}
+                onClick={() => navigate(`/${vendor}/report/work-performance`)}
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -213,7 +213,7 @@ export function ReportWorkAllocationView() {
                             gap={2}
                           >
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DateTimePicker
+                              <DatePicker
                                 sx={{
                                   width: '50%',
                                 }}
@@ -224,7 +224,7 @@ export function ReportWorkAllocationView() {
                             </LocalizationProvider>
 
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DateTimePicker
+                              <DatePicker
                                 sx={{
                                   width: '50%',
                                 }}
