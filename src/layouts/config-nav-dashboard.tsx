@@ -22,7 +22,11 @@ interface ChildMenus {
   path: string;
 }
 
-export const generalMenus = (internalCompaniesDashboard?: ChildMenus[], userType?: string) => [
+export const generalMenus = (
+  internalCompaniesDashboard?: ChildMenus[],
+  internalCompaniesReport?: ChildMenus[],
+  userType?: string
+) => [
   {
     heading: 'Dashboard',
     id: 'dashboard',
@@ -35,10 +39,13 @@ export const generalMenus = (internalCompaniesDashboard?: ChildMenus[], userType
   },
   {
     heading: 'Reports',
-    id: 'reports',
-    path: '/report/request',
+    id: 'report',
+    // path: '/report/request',
     icon: icon('ic-file'),
-    list: [],
+    list:
+      userType === 'internal'
+        ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
+        : [],
   },
 ];
 
@@ -111,12 +118,13 @@ export const menuItems = (
   internalCompaniesRequest?: ChildMenus[],
   internalCompaniesTask?: ChildMenus[],
   internalCompaniesAutoResponse?: ChildMenus[],
+  internalCompaniesReport?: ChildMenus[],
   userType?: string
 ) => [
   {
     heading: 'GENERAL',
     id: 'general',
-    list: generalMenus(internalCompaniesDashboard, userType),
+    list: generalMenus(internalCompaniesDashboard, internalCompaniesReport, userType),
   },
   {
     heading: 'MANAGEMENT',
