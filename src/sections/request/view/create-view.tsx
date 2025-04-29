@@ -73,7 +73,9 @@ export function CreateRequestView() {
 
   const { data: products } = useProductByCompanyId(
     userType === 'client' ? clientCompanyId : (Number(selectedCompanyId) ?? 0),
-    true
+    true,
+    () => {},
+    idCurrentCompany
   );
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
@@ -632,11 +634,9 @@ export function CreateRequestView() {
                         })}
                         label="Product"
                       >
-                        {products
-                          ?.filter((product) => product.company.id === idCurrentCompany)
-                          ?.map((product) => (
-                            <MenuItem value={product?.id}>{product?.name}</MenuItem>
-                          ))}
+                        {products?.map((product) => (
+                          <MenuItem value={product?.id}>{product?.name}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                     {formState?.errors?.product_id && (
