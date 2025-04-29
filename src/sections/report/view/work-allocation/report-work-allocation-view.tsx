@@ -86,7 +86,13 @@ export function ReportWorkAllocationView() {
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save('generated.pdf');
+    // pdf.save('generated.pdf');
+    // Generate a Blob from the PDF and create a Blob URL
+    const blob = pdf.output('blob');
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Open the Blob URL in a new tab
+    window.open(blobUrl, '_blank');
   };
 
   const handleChangeEndDate = (newValue: Dayjs | null) => {
