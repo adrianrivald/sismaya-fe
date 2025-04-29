@@ -30,6 +30,7 @@ export interface Assignee {
   email?: string;
   avatar: string;
   assigneeId?: number;
+  roleName?: string;
 }
 
 export function AssigneeList({
@@ -138,6 +139,9 @@ export function AssigneeChooser({
                         </Typography>
                         <Typography variant="body2" color="#637381">
                           {assignee.email}
+                        </Typography>
+                        <Typography variant="body2" color="#637381">
+                          {assignee.roleName}
                         </Typography>
                       </Stack>
                     </Stack>

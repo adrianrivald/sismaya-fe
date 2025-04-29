@@ -747,8 +747,15 @@ export default function TaskDetailPage() {
                       }}
                     />
                     <Box>
-                      <Typography>{item.name}</Typography>
-                      <Typography color="grey.600">{item.email}</Typography>
+                      <Typography variant="subtitle2" color="#1C252E">
+                        {item?.name}
+                      </Typography>
+                      <Typography variant="body2" color="#637381">
+                        {item?.email || '-'}
+                      </Typography>
+                      <Typography variant="body2" color="#637381">
+                        {item?.roleName || '-'}
+                      </Typography>
                     </Box>
                   </Box>
                 </Box>
