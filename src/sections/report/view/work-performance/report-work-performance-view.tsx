@@ -26,7 +26,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Form } from 'src/components/form/form';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import type { ReportWorkAllocationDTO } from 'src/services/report/work-allocation/schemas/work-allocation-schema';
-import { useReportWorkAllocation } from 'src/services/report/work-allocation/use-report-work-allocation';
+import { useReportWorkPerformance } from 'src/services/report/work-performance/use-report-work-performance';
 import ReportWorkAllocationPDF from './report-pdf';
 
 const timePeriodOptions = [
@@ -56,7 +56,22 @@ const timePeriodOptions = [
   },
 ];
 
-export function ReportWorkAllocationView() {
+const reportTypeOptions = [
+  {
+    value: 'overall',
+    label: 'Overall Performance',
+  },
+  {
+    value: 'division',
+    label: 'Division Performance',
+  },
+  {
+    value: 'individual',
+    label: 'Individual Performance',
+  },
+];
+
+export function ReportWorkPerformanceView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
@@ -64,9 +79,10 @@ export function ReportWorkAllocationView() {
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
   const [timePeriod, setTimePeriod] = useState('month');
+  const [reportType, setReportType] = useState('overall');
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
-  const { mutate: generateReportWorkAllocation, data: reportData } = useReportWorkAllocation();
+  const { mutate: generateReportWorkPerformance, data: reportData } = useReportWorkPerformance();
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
   };
@@ -102,7 +118,7 @@ export function ReportWorkAllocationView() {
     console.log(formData, 'log: formData report request');
     // setIsLoading(true);
     const payload = {
-      internalCompanyId: String(idCurrentCompany),
+      userId: String(idCurrentCompany),
       period: timePeriod ?? '',
     };
     console.log(payload, 'payload');
@@ -113,7 +129,7 @@ export function ReportWorkAllocationView() {
       });
     }
     try {
-      generateReportWorkAllocation(payload);
+      generateReportWorkPerformance(payload);
     } catch (error) {
       // setIsLoading(false);
     }
@@ -166,7 +182,7 @@ export function ReportWorkAllocationView() {
                 sx={{ cursor: 'pointer' }}
               >
                 <Iconify icon="solar:file-text-bold" />
-                <Typography>Work Allocation</Typography>
+                <Typography color="grey.600">Work Allocation</Typography>
               </Box>
 
               <Box
@@ -177,7 +193,7 @@ export function ReportWorkAllocationView() {
                 sx={{ cursor: 'pointer' }}
               >
                 <Iconify icon="solar:users-group-rounded-bold" />
-                <Typography color="grey.600">Work Performance</Typography>
+                <Typography>Work Performance</Typography>
               </Box>
             </Box>
             <Box
@@ -189,7 +205,7 @@ export function ReportWorkAllocationView() {
             >
               <Box p={2} pb={0}>
                 <Typography variant="h6" fontSize="18">
-                  Work Allocation
+                  Work Performance
                 </Typography>
               </Box>
 
@@ -274,6 +290,41 @@ export function ReportWorkAllocationView() {
                             )}
                           </Box>
                         )}
+                      </Box>
+                      <Box mt={4}>
+                        <FormControl sx={{ width: '100%' }}>
+                          <Typography
+                            fontWeight={600}
+                            mb={1}
+                            component="label"
+                            htmlFor="time-period"
+                          >
+                            Report Type
+                          </Typography>
+
+                          <Select
+                            value={reportType}
+                            sx={{
+                              height: 54,
+                              paddingY: 0.5,
+                              borderWidth: 0,
+                              borderRadius: 1.5,
+                              width: '100%',
+
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                border: 1,
+                              },
+                            }}
+                            onChange={(e: SelectChangeEvent<string>) => {
+                              setReportType(e.target.value);
+                            }}
+                            id="time-period"
+                          >
+                            {reportTypeOptions?.map((item) => (
+                              <MenuItem value={item.value}>{capitalize(`${item?.label}`)}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </Box>
 
                       <Box mt={24}>

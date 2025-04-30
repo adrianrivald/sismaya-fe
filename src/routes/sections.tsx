@@ -22,6 +22,7 @@ export const DashboardClientPage = lazy(() => import('src/pages/dashboard/dashbo
 // Report
 export const ReportRequestPage = lazy(() => import('src/pages/report/request'));
 export const ReportWorkAllocationPage = lazy(() => import('src/pages/report/work-allocation'));
+export const ReportWorkPerformancePage = lazy(() => import('src/pages/report/work-performance'));
 
 // Request
 export const RequestListPage = lazy(() => import('src/pages/request/list'));
@@ -154,6 +155,7 @@ const superAdminRoutes: NonIndexRouteObject = {
 
     { path: 'report/request', element: <ReportRequestPage /> },
     { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
+    { path: 'report/work-performance', element: <ReportWorkPerformancePage /> },
 
     // Master Data
     // Internal Company
@@ -201,6 +203,7 @@ const internalRoutes: NonIndexRouteObject = {
 
     { path: '/:vendor/report/request', element: <ReportRequestPage /> },
     { path: '/:vendor/report/work-allocation', element: <ReportWorkAllocationPage /> },
+    { path: '/:vendor/report/work-performance', element: <ReportWorkPerformancePage /> },
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/:vendor/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
