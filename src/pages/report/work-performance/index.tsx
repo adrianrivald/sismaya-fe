@@ -1,15 +1,15 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { ReportWorkAllocationView } from 'src/sections/report/view/work-allocation/report-work-allocation-view';
+import { ReportWorkPerformanceView } from 'src/sections/report/view/work-performance/report-work-performance-view';
 
 // ----------------------------------------------------------------------
 
-export default function ReportWorkAllocationPage() {
+export default function ReportWorkPerformancePage() {
   return (
     <>
       <Helmet>
-        <title> {`Report Work Allocation - ${CONFIG.appName}`}</title>
+        <title> {`Report Work Performance - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -17,7 +17,7 @@ export default function ReportWorkAllocationPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <ReportWorkAllocationView />
+      <ReportWorkPerformanceView />
     </>
   );
 }
