@@ -5,7 +5,8 @@ export const reportWorkPerformanceSchema = z
     from: z.any().optional(),
     to: z.any().optional(),
     period: z.string().optional(),
-    type: z.string()
+    type: z.string(),
+    user_id: z.string().array().optional()
   })
   .partial();
 
