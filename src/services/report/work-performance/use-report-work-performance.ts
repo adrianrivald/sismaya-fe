@@ -3,10 +3,13 @@ import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
 interface WorkPerformanceParams {
-  userId: string;
+  internalCompanyId: string;
+  userId?: string[];
   period: string;
   from?: string;
   to?: string;
+  reportType: string;
+
 }
 
 
@@ -15,19 +18,26 @@ export function useReportWorkPerformance() {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: WorkPerformanceParams) => {
+        const {reportType, ...form} = formData
+
+        const stringifiedUserIds = form.userId?.map(String)
+        console.log(stringifiedUserIds?.join(','),'useridddd');
         const params =  {
-          user_id: formData.userId,
-          period: formData.period
+          internal_company_id: form.internalCompanyId,
+          user_id: stringifiedUserIds?.join(','),
+          period: form.period
         }
+
+        console.log(params,'paramsparams')
         
         if (formData.from) {
           Object.assign(params, {
-            from: formData.from,
-            to: formData.to
+            from: form.from,
+            to: form.to
           })
         }
         
-        return http(`performance-report/overall`, {
+        return http(`performance-report/${reportType}`, {
           method: "GET",
           params: {...params}
         });
