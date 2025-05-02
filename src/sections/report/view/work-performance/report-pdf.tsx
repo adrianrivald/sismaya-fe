@@ -94,11 +94,11 @@ const ReportWorkPerformancePDF = ({
 
   return (
     <div>
-      {/* <div
+      <div
         ref={hiddenRef}
         style={{ position: 'absolute', left: '-99300px', padding: '20px', width: '900px' }}
-      > */}
-      <div ref={hiddenRef} style={{ padding: '20px', width: '900px', maxHeight: '100vh' }}>
+      >
+        {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px', maxHeight: '100vh' }}> */}
         <Box>
           <Typography fontSize={20} fontWeight="bold">
             Employee Performance Report: {capitalize(reportType)} Performance
@@ -119,6 +119,32 @@ const ReportWorkPerformancePDF = ({
                     <tr>
                       <th colSpan={4} style={headerStyle}>
                         {report?.employee}&apos;s Monthly Performance
+                      </th>
+                    </tr>
+                    <tr>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {report?.performance_report?.map((row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle}>{row.period_name}</td>
+                        <td style={cellStyle}>{row.task_count}</td>
+                        <td style={cellStyle}>{row.working_hours}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <table style={{ ...tableStyle, marginTop: 8 }}>
+                  <thead>
+                    <tr>
+                      <th colSpan={4} style={headerStyle}>
+                        {report?.employee}&apos;s Work Distribution
                       </th>
                     </tr>
                     <tr>
