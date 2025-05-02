@@ -149,16 +149,16 @@ const ReportWorkPerformancePDF = ({
                     </tr>
                     <tr>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Product</th>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {report?.performance_report?.map((row: any, indexItem: number) => (
+                    {report?.distribution_report?.map((row: any, indexItem: number) => (
                       <tr key={indexItem + 1}>
                         <td style={cellStyle}>{indexItem + 1}</td>
-                        <td style={cellStyle}>{row.period_name}</td>
+                        <td style={cellStyle}>{row.product_name}</td>
                         <td style={cellStyle}>{row.task_count}</td>
                         <td style={cellStyle}>{row.working_hours}</td>
                       </tr>
