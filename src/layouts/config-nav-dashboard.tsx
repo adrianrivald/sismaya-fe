@@ -109,6 +109,10 @@ export const masterDataMenus = () => [
         heading: 'Product Filter',
         path: '/product-filter',
       },
+      {
+        heading: 'FAQ',
+        path: '/master-faq',
+      },
     ],
   },
 ];

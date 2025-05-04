@@ -11,6 +11,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import PageListTimer from 'src/sections/task/page-list-timer';
 import MyRequestTask from 'src/sections/task/my-request';
+import MasterFaqPage from 'src/pages/master-data/master-faq';
 
 // ----------------------------------------------------------------------
 export const HomePage = lazy(() => import('src/pages/home'));
@@ -191,6 +192,9 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'product-filter/:id', element: <ProductFilterLinkedPage /> },
     { path: 'product-filter/:id/:vendorId/edit', element: <ProductFilterEditPage /> },
     { path: 'product-filter/:id/create', element: <CompanyRelationCreatePage /> },
+
+    // FAQ
+    { path: 'master-faq', element: <MasterFaqPage /> },
   ],
 };
 
