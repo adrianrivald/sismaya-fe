@@ -99,14 +99,20 @@ const ReportWorkPerformancePDF = ({
         style={{ position: 'absolute', left: '-99300px', padding: '20px', width: '900px' }}
       >
         {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px', maxHeight: '100vh' }}> */}
-        <Box>
-          <Typography fontSize={20} fontWeight="bold">
-            Employee Performance Report: {capitalize(reportType)} Performance
-          </Typography>
-          <Typography mt={1} color="grey.600">
-            {renderPeriod(timePeriod)}
-          </Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Box>
+            <Typography fontSize={20} fontWeight="bold">
+              Employee Performance Report: {capitalize(reportType)} Performance
+            </Typography>
+            <Typography mt={1} color="grey.600">
+              {renderPeriod(timePeriod)}
+            </Typography>
+          </Box>
+          <Box>
+            <img src={data?.image} alt="logo" height={100} crossOrigin="anonymous" />
+          </Box>
         </Box>
+
         <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
           <Box width="50%">
             {data?.reportData?.map((report: any, index: number) => (

@@ -77,7 +77,9 @@ export function ReportWorkAllocationView() {
     const element = hiddenRef.current;
     if (!element) return;
 
-    const canvas = await html2canvas(element);
+    const canvas = await html2canvas(element, {
+      useCORS: true,
+    });
     const imgData = canvas.toDataURL('image/png');
 
     const pdf = new jsPDF();
@@ -285,6 +287,7 @@ export function ReportWorkAllocationView() {
                           vendor={vendor?.toUpperCase() ?? ''}
                           data={{
                             summary: reportData?.data?.summary,
+                            image: reportData?.meta?.company_image,
                           }}
                           hiddenRef={hiddenRef}
                         />
