@@ -125,7 +125,9 @@ export function ReportWorkPerformanceView() {
     const element = hiddenRef.current;
     if (!element) return;
 
-    const canvas = await html2canvas(element);
+    const canvas = await html2canvas(element, {
+      useCORS: true,
+    });
     const imgData = canvas.toDataURL('image/png');
 
     const pdf = new jsPDF();
@@ -438,6 +440,7 @@ export function ReportWorkPerformanceView() {
                           vendor={vendor?.toUpperCase() ?? ''}
                           data={{
                             reportData: reportData?.data,
+                            image: reportData?.meta?.company_image,
                           }}
                           hiddenRef={hiddenRef}
                           reportType={reportType}
