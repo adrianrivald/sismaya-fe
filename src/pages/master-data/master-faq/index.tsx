@@ -1,13 +1,32 @@
-import { Box, Button, Grid, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import { Iconify } from 'src/components/iconify';
 import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useState } from 'react';
+import { SvgColor } from 'src/components/svg-color';
+import { useNavigate } from 'react-router-dom';
 import { DialogArrange } from './DialogArrange';
 
 export default function MasterFaqPage() {
   const [dialogArrange, setDialogArrange] = useState({ isOpen: false });
+  const [selectedProduct, setSelectedProduct] = useState<string>('');
+  const [search, setSearch] = useState('');
+  const navigation = useNavigate();
   return (
     <>
       <Helmet>
@@ -35,6 +54,9 @@ export default function MasterFaqPage() {
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="material-symbols-light:add" />}
+              onClick={() => {
+                navigation('/master-faq/create');
+              }}
             >
               Create FAQ
             </Button>
@@ -48,11 +70,54 @@ export default function MasterFaqPage() {
             </Button>
           </Stack>
         </Box>
-        <Grid container spacing={3}>
-          <Grid xs={12}>
-            <Typography>TBD Table</Typography>
-          </Grid>
-        </Grid>
+        <Card>
+          <CardContent>
+            <Grid container rowSpacing={3} columnSpacing={2}>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth sx={{ mt: 3 }}>
+                  <TextField
+                    sx={{ width: '100%' }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SvgColor width={18} height={24} src="/assets/icons/ic-search.svg" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    value={search}
+                    placeholder="Search..."
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth sx={{ mt: 3 }}>
+                  <InputLabel id="select-product">Product</InputLabel>
+                  <Select
+                    fullWidth
+                    labelId="select-product"
+                    id="select-product"
+                    value={selectedProduct}
+                    label="Product"
+                    onChange={(e) => {
+                      setSelectedProduct(e.target.value);
+                    }}
+                    variant="outlined"
+                  >
+                    <MenuItem value="-" disabled selected>
+                      Choose Product
+                    </MenuItem>
+                    <MenuItem value="all">All Products</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography>TBD Table</Typography>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
 
         <DialogArrange
           open={dialogArrange.isOpen}

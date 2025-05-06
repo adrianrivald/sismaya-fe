@@ -11,7 +11,6 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import PageListTimer from 'src/sections/task/page-list-timer';
 import MyRequestTask from 'src/sections/task/my-request';
-import MasterFaqPage from 'src/pages/master-data/master-faq';
 
 // ----------------------------------------------------------------------
 export const HomePage = lazy(() => import('src/pages/home'));
@@ -134,6 +133,10 @@ export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
+// MASTER FAQ
+export const MasterFaqPage = lazy(() => import('src/pages/master-data/master-faq'));
+export const MasterFaqCreatePage = lazy(() => import('src/pages/master-data/master-faq/create'));
+
 // ----------------------------------------------------------------------
 
 const renderFallback = (
@@ -195,6 +198,7 @@ const superAdminRoutes: NonIndexRouteObject = {
 
     // FAQ
     { path: 'master-faq', element: <MasterFaqPage /> },
+    { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
   ],
 };
 
