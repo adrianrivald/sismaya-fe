@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable new-cap */
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -32,7 +32,8 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import { useReportWorkPerformance } from 'src/services/report/work-performance/use-report-work-performance';
 import { useInternalUsers } from 'src/services/master-data/user';
 import type { ReportWorkPerformanceDTO } from 'src/services/report/work-performance/schemas/work-performance-schema';
-import ReportWorkPerformancePDF from './report-pdf';
+import ReportWorkPerformanceIndividualPDF from './individual-report-pdf';
+import ReportWorkPerformanceOverallPDF from './overall-report-pdf';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -124,6 +125,17 @@ export function ReportWorkPerformanceView() {
   const generatePdf = async () => {
     const element = hiddenRef.current;
     if (!element) return;
+
+    // html2pdf()
+    //   .set({
+    //     margin: 0.5,
+    //     filename: 'generated.pdf',
+    //     image: { type: 'jpeg', quality: 0.98 },
+    //     html2canvas: { scale: 1, useCORS: true },
+    //     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+    //   })
+    //   .from(element)
+    //   .save();
 
     const canvas = await html2canvas(element, {
       useCORS: true,
@@ -435,16 +447,34 @@ export function ReportWorkPerformanceView() {
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
                           Generate & Download Report
                         </Button>
-                        <ReportWorkPerformancePDF
-                          timePeriod={timePeriod}
-                          vendor={vendor?.toUpperCase() ?? ''}
-                          data={{
-                            reportData: reportData?.data,
-                            image: reportData?.meta?.company_image,
-                          }}
-                          hiddenRef={hiddenRef}
-                          reportType={reportType}
-                        />
+                        {reportType === 'individual' && (
+                          <Suspense>
+                            <ReportWorkPerformanceIndividualPDF
+                              timePeriod={timePeriod}
+                              vendor={vendor?.toUpperCase() ?? ''}
+                              data={{
+                                reportData: reportData?.data,
+                                image: reportData?.meta?.company_image,
+                              }}
+                              hiddenRef={hiddenRef}
+                              reportType={reportType}
+                            />
+                          </Suspense>
+                        )}
+                        {reportType === 'overall' && (
+                          <Suspense>
+                            <ReportWorkPerformanceOverallPDF
+                              timePeriod={timePeriod}
+                              vendor={vendor?.toUpperCase() ?? ''}
+                              data={{
+                                reportData: reportData?.data,
+                                image: reportData?.meta?.company_image,
+                              }}
+                              hiddenRef={hiddenRef}
+                              reportType={reportType}
+                            />
+                          </Suspense>
+                        )}
                       </Box>
                     </>
                   )}
