@@ -17,13 +17,16 @@ import {
 } from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
+import QuillEditor from 'src/components/editor/quill-editor';
 import { Form } from 'src/components/form/form';
 import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { FaqDTO } from 'src/services/master-data/faq/schemas/faq-schema';
+import { FaqDTO, faqSchema } from 'src/services/master-data/faq/schemas/faq-schema';
 
 export default function CreateMasterFaq() {
-  const handleSubmit = (formData: FaqDTO) => {};
+  const handleSubmit = (formData: FaqDTO) => {
+    console.log('Form submitted:', formData);
+  };
   return (
     <>
       <Helmet>
@@ -50,7 +53,7 @@ export default function CreateMasterFaq() {
         <Card>
           <CardContent>
             <Grid container sx={{ my: 2 }}>
-              <Form width="100%" onSubmit={handleSubmit}>
+              <Form width="100%" onSubmit={handleSubmit} schema={faqSchema}>
                 {({ register, watch, formState, setValue, control }) => (
                   <Grid container spacing={2} xs={12}>
                     <Grid item xs={12} md={12}>
@@ -95,6 +98,12 @@ export default function CreateMasterFaq() {
                       <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
                         Answer
                       </Typography>
+                      <QuillEditor
+                        control={control}
+                        name="answer"
+                        error={Boolean(formState?.errors?.answer)}
+                        helperText={(formState?.errors?.answer?.message || '') as any}
+                      />
                     </Grid>
                     <Grid item xs={12} md={12}>
                       <FormControlLabel

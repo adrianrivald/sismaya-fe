@@ -157,6 +157,7 @@ const superAdminRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
+    { path: 'faq', element: <FAQPage /> },
 
     { path: 'report/request', element: <ReportRequestPage /> },
     { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
@@ -281,7 +282,7 @@ const clientRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardClientPage /> },
-
+    { path: 'faq', element: <FAQPage /> },
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
