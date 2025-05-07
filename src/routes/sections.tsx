@@ -136,6 +136,7 @@ export const Page404 = lazy(() => import('src/pages/page-not-found'));
 // MASTER FAQ
 export const MasterFaqPage = lazy(() => import('src/pages/master-data/master-faq'));
 export const MasterFaqCreatePage = lazy(() => import('src/pages/master-data/master-faq/create'));
+export const FAQPage = lazy(() => import('src/pages/faq'));
 
 // ----------------------------------------------------------------------
 
@@ -206,6 +207,7 @@ const internalRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
+    { path: 'faq', element: <FAQPage /> },
 
     // Report
 
