@@ -95,6 +95,11 @@ export function ListProductView() {
     company: 'all',
   });
   const { getDataTableProps } = useProductCompanyList({}, '31');
+  const [selectedProducts, setSelectedProducts] = useState<ProductTypes[]>([]);
+
+  const handleSelectionChange = (selected: ProductTypes[]) => {
+    setSelectedProducts(selected);
+  };
 
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
@@ -196,6 +201,8 @@ export function ListProductView() {
           </Grid>
           <DataTable
             columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            enableSelection
+            onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
           />
         </CardContent>
