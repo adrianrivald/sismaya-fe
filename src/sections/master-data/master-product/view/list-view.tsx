@@ -18,13 +18,16 @@ import {
 } from '@mui/material';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { DataTable } from 'src/components/table/data-tables';
-import { useProductCompanyList } from 'src/services/master-data/company';
+import { useDeleteProduct, useProductCompanyList } from 'src/services/master-data/company';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useAuth } from 'src/sections/auth/providers/auth';
+import useDebounce from 'src/utils/use-debounce';
 import { ProductTypes } from '../type/types';
+import { RemoveAction } from '../../internal-company/view/remove-action';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
@@ -36,9 +39,30 @@ const columnHelper = createColumnHelper<ProductTypes>();
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
     header: 'Product Name',
+    cell: (info) => (
+      <Typography fontSize={14} width="30vw">
+        {info.getValue()}
+      </Typography>
+    ),
   }),
   columnHelper.accessor('name', {
     header: 'Status',
+    cell: (info) => (
+      <Box
+        sx={{ bgcolor: info.getValue() === 'true' ? '#00B8D929' : '#FF563029', borderRadius: 2 }}
+      >
+        <Typography
+          fontSize={14}
+          px={1}
+          py={1}
+          textAlign="center"
+          color={info.getValue() === 'true' ? '#006C9C' : '#B71D18'}
+          fontWeight={500}
+        >
+          {info.getValue() === 'true' ? 'Active' : 'Inactive'}
+        </Typography>
+      </Box>
+    ),
   }),
   columnHelper.display({
     header: 'Actions',
@@ -56,6 +80,7 @@ function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: 
     if (itemId) setSelectedId(itemId);
     setOpenRemoveModal(true);
   };
+
   return (
     <MenuList
       disablePadding
@@ -72,7 +97,7 @@ function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: 
         },
       }}
     >
-      <MenuItem onClick={() => console.log('data')}>
+      <MenuItem onClick={() => handleEdit(companyId)}>
         <Iconify icon="solar:pen-bold" />
         Edit
       </MenuItem>
@@ -87,16 +112,28 @@ function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: 
 
 export function ListProductView() {
   const navigate = useNavigate();
+  const { vendor } = useParams();
+  const { user } = useAuth();
+  const idCurrentCompany =
+    user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
+      ?.id ?? 0;
+  const { mutate: deleteProductById } = useDeleteProduct();
   const [openRemoveModal, setOpenRemoveModal] = useState(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [form, setForm] = useState({
     search: '',
     status: 'all',
     company: 'all',
   });
-  const { getDataTableProps } = useProductCompanyList({}, '31');
-  const [selectedProducts, setSelectedProducts] = useState<ProductTypes[]>([]);
 
+  const debounceSearch = useDebounce(form.search, 1000);
+  const { getDataTableProps } = useProductCompanyList(
+    {
+      search: debounceSearch,
+    },
+    String(idCurrentCompany)
+  );
+  const [selectedProducts, setSelectedProducts] = useState<ProductTypes[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const handleSelectionChange = (selected: ProductTypes[]) => {
     setSelectedProducts(selected);
   };
@@ -106,7 +143,10 @@ export function ListProductView() {
       navigate(`${id}/edit`);
     };
 
-    const handleDelete = () => {};
+    const handleDelete = () => {
+      deleteProductById(Number(selectedId));
+      setOpenRemoveModal(false);
+    };
 
     return { handleEdit, handleDelete };
   };
@@ -207,6 +247,11 @@ export function ListProductView() {
           />
         </CardContent>
       </Card>
+      <RemoveAction
+        onRemove={popoverFuncs().handleDelete}
+        openRemoveModal={openRemoveModal}
+        setOpenRemoveModal={setOpenRemoveModal}
+      />
     </DashboardContent>
   );
 }

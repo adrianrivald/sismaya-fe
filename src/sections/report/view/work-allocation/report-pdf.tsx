@@ -59,6 +59,24 @@ const ReportWorkAllocationPDF = ({ data, hiddenRef, vendor, timePeriod }: Report
     }
   };
 
+  const tableStyle: React.CSSProperties | undefined = {
+    borderCollapse: 'collapse',
+    fontFamily: 'Arial, sans-serif',
+    width: '100%',
+    textAlign: 'center',
+    margin: '20px auto',
+  };
+
+  const subHeaderStyle = {
+    backgroundColor: '#DFE3E8',
+    padding: '8px',
+  };
+
+  const cellStyle = {
+    padding: '8px',
+    border: '1px solid #ccc',
+  };
+
   const colorMapping = ['#FFB185', '#00BCD4', '#FFD580', '#C79EFF'];
 
   const pieData = data?.summary?.map((client: any, index: number) => ({
@@ -75,13 +93,18 @@ const ReportWorkAllocationPDF = ({ data, hiddenRef, vendor, timePeriod }: Report
         style={{ position: 'absolute', left: '-99300px', padding: '20px', width: '900px' }}
       >
         {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px' }}> */}
-        <Box>
-          <Typography fontSize={20} fontWeight="bold">
-            PT {vendor} Work Allocation Report
-          </Typography>
-          <Typography mt={1} color="grey.600">
-            {renderPeriod(timePeriod)}
-          </Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Box>
+            <Typography fontSize={20} fontWeight="bold">
+              PT {vendor} Work Allocation Report
+            </Typography>
+            <Typography mt={1} color="grey.600">
+              {renderPeriod(timePeriod)}
+            </Typography>
+          </Box>
+          <Box>
+            <img src={data?.image} alt="logo" height={100} crossOrigin="anonymous" />
+          </Box>
         </Box>
         <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
           <Box width="50%" border={1} borderColor="grey.300" borderRadius={2} p={4}>
@@ -103,41 +126,35 @@ const ReportWorkAllocationPDF = ({ data, hiddenRef, vendor, timePeriod }: Report
           </Box>
           <Box width="50%">
             <Typography mb={2}>Total Work allocation per Client</Typography>
-            <TableContainer component={Paper} sx={{ maxWidth: 600, margin: 'auto' }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <strong>No.</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>Client</strong>
-                    </TableCell>
-                    <TableCell align="center">
-                      <strong>Total Requests</strong>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.summary?.map((row: any, index: number) => (
-                    <TableRow key={index + 1}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{row.company_name}</TableCell>
-                      <TableCell align="center">{row.request_count}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow>
-                    <TableCell />
-                    <TableCell align="center">
-                      <strong>Total</strong>
-                    </TableCell>
-                    <TableCell align="center">
-                      <strong>{totalRequests}</strong>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
+
+            <table style={tableStyle}>
+              <thead>
+                <tr>
+                  <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                  <th style={{ ...subHeaderStyle, ...cellStyle }}>Client</th>
+                  <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Requests</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.summary?.map((row: any, indexItem: number) => (
+                  <tr key={indexItem + 1}>
+                    <td style={cellStyle}>{indexItem + 1}</td>
+                    <td style={cellStyle}>{row.company_name}</td>
+                    <td style={cellStyle}>{row.request_count}</td>
+                  </tr>
+                ))}
+
+                <tr>
+                  <td style={cellStyle} />
+                  <td style={cellStyle} align="center">
+                    <strong>Total</strong>
+                  </td>
+                  <td style={cellStyle} align="center">
+                    <strong>{totalRequests}</strong>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </Box>
         </Box>
       </div>

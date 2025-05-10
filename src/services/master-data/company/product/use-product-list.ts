@@ -35,6 +35,7 @@ export function useProductByCompanyId(
 }
 
 export function fetchProductList(params: Partial<any>, company_id?: string) {
+  console.log('daraa', params);
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/products', baseUrl);
 
@@ -42,9 +43,12 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
     endpointUrl.searchParams.append('company_id', company_id);
   }
 
+  if (params.search) {
+    endpointUrl.searchParams.append('search', params.search);
+  }
+
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
-
     ...params,
   });
 
@@ -52,7 +56,8 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
 }
 
 export function useProductCompanyList(params: Partial<any>, company_id?: string) {
-  return usePaginationQuery(['product-list', params.keyword], (paginationState) =>
+  console.log('dataa', params);
+  return usePaginationQuery(['product-list', params.search, company_id], (paginationState) =>
     fetchProductList({ ...params, ...paginationState }, company_id)
   );
 }

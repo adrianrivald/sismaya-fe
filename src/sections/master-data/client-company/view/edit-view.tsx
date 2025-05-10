@@ -509,7 +509,7 @@ function EditForm({
                 sx={{
                   width: '100%',
                 }}
-                required
+                // required
                 label="Sub-Company Description"
                 value={subCompany?.abbreviation}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

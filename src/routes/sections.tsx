@@ -166,9 +166,6 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
     { path: 'report/work-performance', element: <ReportWorkPerformancePage /> },
 
-    // Master Data
-    { path: 'master-product', element: <MasterProductPage /> },
-
     // Internal Company
     { path: 'internal-company', element: <InternalCompanyListPage /> },
     { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
@@ -216,7 +213,6 @@ const internalRoutes: NonIndexRouteObject = {
     { path: 'faq', element: <FAQPage /> },
 
     // Report
-
     { path: '/:vendor/report/request', element: <ReportRequestPage /> },
     { path: '/:vendor/report/work-allocation', element: <ReportWorkAllocationPage /> },
     { path: '/:vendor/report/work-performance', element: <ReportWorkPerformancePage /> },
@@ -269,6 +265,27 @@ const internalRoutes: NonIndexRouteObject = {
       element: <MonitorPersonalLoadPage />,
     },
 
+    // Master Data
+    // Internal Company
+    { path: 'internal-company', element: <InternalCompanyListPage /> },
+    { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
+    { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
+    // Client Company
+    { path: 'client-company', element: <ClientCompanyListPage /> },
+    { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
+    { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
+    { path: 'client-company/:id/:subId/edit', element: <ClientSubCompanyEditPage /> },
+
+    // Internal User
+    { path: 'internal-user', element: <UserInternalListPage /> },
+    { path: 'internal-user/create', element: <UserInternalCreatePage /> },
+    { path: 'internal-user/:id/edit', element: <UserInternalEditPage /> },
+
+    // Internal User
+    { path: 'client-user', element: <UserClientListPage /> },
+    { path: 'client-user/create', element: <UserClientCreatePage /> },
+    { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
+
     // Access Control User List
     { path: 'access-control/user-list', element: <AccessControlUserListPage /> },
     { path: 'access-control/user-list/:id/edit', element: <AccessControlUserListEditPage /> },
@@ -280,6 +297,14 @@ const internalRoutes: NonIndexRouteObject = {
 
     // Auto Reponse
     { path: '/:vendor/auto-response', element: <AutoResponsePage /> },
+
+    // Admin Master Data
+    { path: '/:vendor/product', element: <MasterProductPage /> },
+    { path: '/:vendor/category', element: <>category content here</> },
+    { path: '/:vendor/status', element: <>status content here</> },
+    { path: '/:vendor/title', element: <>titles content here</> },
+    { path: '/:vendor/division', element: <>division content here</> },
+    { path: '/:vendor/faq', element: <>faq content here</> },
   ],
 };
 

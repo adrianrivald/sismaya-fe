@@ -21,7 +21,7 @@ interface ReportProps {
   reportType: string;
 }
 
-const ReportWorkPerformancePDF = ({
+const ReportWorkPerformanceIndividualPDF = ({
   data,
   hiddenRef,
   vendor,
@@ -114,7 +114,7 @@ const ReportWorkPerformancePDF = ({
         </Box>
 
         <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
-          <Box width="50%">
+          <Box width="100%">
             {data?.reportData?.map((report: any, index: number) => (
               <Box mb={4}>
                 <Typography mb={1}>
@@ -138,7 +138,9 @@ const ReportWorkPerformancePDF = ({
                     {report?.performance_report?.map((row: any, indexItem: number) => (
                       <tr key={indexItem + 1}>
                         <td style={cellStyle}>{indexItem + 1}</td>
-                        <td style={cellStyle}>{row.period_name}</td>
+                        <td style={cellStyle} align="left">
+                          {row.period_name}
+                        </td>
                         <td style={cellStyle}>{row.task_count}</td>
                         <td style={cellStyle}>{row.working_hours}</td>
                       </tr>
@@ -180,4 +182,4 @@ const ReportWorkPerformancePDF = ({
   );
 };
 
-export default ReportWorkPerformancePDF;
+export default ReportWorkPerformanceIndividualPDF;
