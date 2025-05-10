@@ -138,6 +138,9 @@ export const MasterFaqPage = lazy(() => import('src/pages/master-data/master-faq
 export const MasterFaqCreatePage = lazy(() => import('src/pages/master-data/master-faq/create'));
 export const FAQPage = lazy(() => import('src/pages/faq'));
 
+// Master product
+export const MasterProductPage = lazy(() => import('src/pages/master-data/master-product/list'));
+
 // ----------------------------------------------------------------------
 
 const renderFallback = (
@@ -164,6 +167,8 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'report/work-performance', element: <ReportWorkPerformancePage /> },
 
     // Master Data
+    { path: 'master-product', element: <MasterProductPage /> },
+
     // Internal Company
     { path: 'internal-company', element: <InternalCompanyListPage /> },
     { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },

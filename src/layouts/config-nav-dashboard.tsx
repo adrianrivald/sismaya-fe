@@ -98,6 +98,10 @@ export const masterDataMenus = () => [
     icon: <Iconify icon="solar:database-bold" />,
     list: [
       {
+        heading: 'Product',
+        path: '/master-product',
+      },
+      {
         heading: 'Internal Company',
         path: '/internal-company',
       },
