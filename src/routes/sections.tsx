@@ -289,7 +289,7 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/product', element: <>product content here</> },
     { path: '/:vendor/category', element: <>category content here</> },
     { path: '/:vendor/status', element: <>status content here</> },
-    { path: '/:vendor/titles', element: <>titles content here</> },
+    { path: '/:vendor/title', element: <>titles content here</> },
     { path: '/:vendor/division', element: <>division content here</> },
     { path: '/:vendor/faq', element: <>faq content here</> },
   ],
