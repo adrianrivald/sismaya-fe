@@ -133,6 +133,17 @@ export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
+// MASTER FAQ
+export const MasterFaqPage = lazy(() => import('src/pages/master-data/master-faq'));
+export const MasterFaqCreatePage = lazy(() => import('src/pages/master-data/master-faq/create'));
+export const FAQPage = lazy(() => import('src/pages/faq'));
+
+// Master product
+export const MasterProductPage = lazy(() => import('src/pages/master-data/master-product/list'));
+export const MasterCreateProductPage = lazy(
+  () => import('src/pages/master-data/master-product/create')
+);
+
 // ----------------------------------------------------------------------
 
 const renderFallback = (
@@ -152,12 +163,12 @@ const superAdminRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
+    { path: 'faq', element: <FAQPage /> },
 
     { path: 'report/request', element: <ReportRequestPage /> },
     { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
     { path: 'report/work-performance', element: <ReportWorkPerformancePage /> },
 
-    // Master Data
     // Internal Company
     { path: 'internal-company', element: <InternalCompanyListPage /> },
     { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
@@ -191,6 +202,10 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'product-filter/:id', element: <ProductFilterLinkedPage /> },
     { path: 'product-filter/:id/:vendorId/edit', element: <ProductFilterEditPage /> },
     { path: 'product-filter/:id/create', element: <CompanyRelationCreatePage /> },
+
+    // FAQ
+    { path: 'master-faq', element: <MasterFaqPage /> },
+    { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
   ],
 };
 
@@ -198,6 +213,7 @@ const internalRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
+    { path: 'faq', element: <FAQPage /> },
 
     // Report
     { path: '/:vendor/report/request', element: <ReportRequestPage /> },
@@ -286,7 +302,11 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/auto-response', element: <AutoResponsePage /> },
 
     // Admin Master Data
-    { path: '/:vendor/product', element: <>product content here</> },
+    // Product
+    { path: '/:vendor/product', element: <MasterProductPage /> },
+    { path: '/:vendor/product/create', element: <MasterCreateProductPage /> },
+    { path: '/:vendor/product/:id/edit', element: <MasterCreateProductPage /> },
+
     { path: '/:vendor/category', element: <>category content here</> },
     { path: '/:vendor/status', element: <>status content here</> },
     { path: '/:vendor/title', element: <>titles content here</> },
@@ -299,7 +319,7 @@ const clientRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardClientPage /> },
-
+    { path: 'faq', element: <FAQPage /> },
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/request/unresolved-cito', element: <UnresolvedCitoListPage /> },

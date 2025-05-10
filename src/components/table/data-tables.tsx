@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Box,
   Card,
+  Checkbox,
   TableBody,
   TableCell,
   TableHead,
@@ -34,6 +35,8 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   withPagination?: boolean;
   withViewAll?: boolean;
   viewAllHref?: string;
+  enableSelection?: boolean;
+  onSelectionChange?: (selectedRows: TData[]) => void;
   //   pageLinks: MetaLink[];
 }
 
@@ -47,7 +50,10 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     withPagination = true,
     withViewAll = false,
     viewAllHref,
+    enableSelection = false,
+    onSelectionChange,
   } = props;
+  const [selectedRows, setSelectedRows] = React.useState<TData[]>([]);
   const table = useReactTable({
     data,
     columns,
@@ -66,6 +72,38 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     },
     manualPagination: true,
   });
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setSelectedRows(data);
+      onSelectionChange?.(data);
+    } else {
+      setSelectedRows([]);
+      onSelectionChange?.([]);
+    }
+  };
+
+  const handleSelectOne = (row: TData) => {
+    const selectedIndex = selectedRows.indexOf(row);
+    let newSelected: TData[] = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedRows, row);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedRows.slice(1));
+    } else if (selectedIndex === selectedRows.length - 1) {
+      newSelected = newSelected.concat(selectedRows.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selectedRows.slice(0, selectedIndex),
+        selectedRows.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelectedRows(newSelected);
+    onSelectionChange?.(newSelected);
+  };
+
   const location = useLocation();
 
   // Extract the base path (like '/internal_user' or '/company_user')
@@ -123,6 +161,15 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
             <TableHead>
               {table.getHeaderGroups().map((headerGroup, index) => (
                 <TableRow key={index}>
+                  {enableSelection && (
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={data.length > 0 && selectedRows.length === data.length}
+                        indeterminate={selectedRows.length > 0 && selectedRows.length < data.length}
+                        onChange={handleSelectAll}
+                      />
+                    </TableCell>
+                  )}
                   {headerGroup.headers.map((header) => (
                     // <Th
                     //   data-testid="th"
@@ -164,7 +211,20 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
             </TableHead>
             <TableBody>
               {table.getRowModel().rows.map((row) => (
-                <TableRow hover data-testid="trBody" key={row.id}>
+                <TableRow
+                  hover
+                  data-testid="trBody"
+                  key={row.id}
+                  selected={selectedRows.indexOf(row.original) !== -1}
+                >
+                  {enableSelection && (
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedRows.indexOf(row.original) !== -1}
+                        onChange={() => handleSelectOne(row.original)}
+                      />
+                    </TableCell>
+                  )}
                   {row.getVisibleCells().map((cell) => (
                     <TableCell data-testid="td" key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

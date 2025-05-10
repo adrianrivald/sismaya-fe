@@ -37,6 +37,7 @@ export const generalMenus = (
         ? internalCompaniesDashboard?.filter((item) => item?.heading !== undefined)
         : [],
   },
+
   {
     heading: 'Reports',
     id: 'report',
@@ -46,6 +47,13 @@ export const generalMenus = (
       userType === 'internal'
         ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
         : [],
+  },
+  {
+    heading: 'FAQ',
+    id: 'dashboard',
+    path: '/faq',
+    icon: icon('ic-file'),
+    list: [],
   },
 ];
 
