@@ -73,7 +73,7 @@ const columns = (popoverProps: PopoverProps) => [
 
 function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
-  const companyId = row.original.company.id;
+  const companyId = row.original.id;
   const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
 
   const onClickRemove = (itemId?: number) => {
@@ -126,7 +126,7 @@ export function ListProductView() {
   });
 
   const debounceSearch = useDebounce(form.search, 1000);
-  const { getDataTableProps } = useProductCompanyList(
+  const { getDataTableProps, refetch } = useProductCompanyList(
     {
       search: debounceSearch,
     },
@@ -146,6 +146,7 @@ export function ListProductView() {
     const handleDelete = () => {
       deleteProductById(Number(selectedId));
       setOpenRemoveModal(false);
+      refetch();
     };
 
     return { handleEdit, handleDelete };
@@ -170,7 +171,7 @@ export function ListProductView() {
             color="primary"
             startIcon={<Iconify icon="material-symbols-light:add" />}
             onClick={() => {
-              // navigation('/master-faq/create');
+              navigate(`/${vendor}/product/create`);
             }}
           >
             New Products

@@ -140,6 +140,9 @@ export const FAQPage = lazy(() => import('src/pages/faq'));
 
 // Master product
 export const MasterProductPage = lazy(() => import('src/pages/master-data/master-product/list'));
+export const MasterCreateProductPage = lazy(
+  () => import('src/pages/master-data/master-product/create')
+);
 
 // ----------------------------------------------------------------------
 
@@ -299,7 +302,11 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/auto-response', element: <AutoResponsePage /> },
 
     // Admin Master Data
+    // Product
     { path: '/:vendor/product', element: <MasterProductPage /> },
+    { path: '/:vendor/product/create', element: <MasterCreateProductPage /> },
+    { path: '/:vendor/product/:id/edit', element: <MasterCreateProductPage /> },
+
     { path: '/:vendor/category', element: <>category content here</> },
     { path: '/:vendor/status', element: <>status content here</> },
     { path: '/:vendor/title', element: <>titles content here</> },

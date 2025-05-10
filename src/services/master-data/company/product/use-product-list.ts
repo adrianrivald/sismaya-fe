@@ -35,7 +35,6 @@ export function useProductByCompanyId(
 }
 
 export function fetchProductList(params: Partial<any>, company_id?: string) {
-  console.log('daraa', params);
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/products', baseUrl);
 
@@ -56,7 +55,6 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
 }
 
 export function useProductCompanyList(params: Partial<any>, company_id?: string) {
-  console.log('dataa', params);
   return usePaginationQuery(['product-list', params.search, company_id], (paginationState) =>
     fetchProductList({ ...params, ...paginationState }, company_id)
   );
