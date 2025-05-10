@@ -19,7 +19,7 @@ export const icon = (name: string) => (
 );
 interface ChildMenus {
   heading: string;
-  path: string;
+  path?: string;
 }
 
 export const generalMenus = (
@@ -67,7 +67,17 @@ export const managementMenus = (
   },
 ];
 
-export const settingMenus = (internalCompaniesAutoResponse?: ChildMenus[]) => [
+export const settingMenus = (
+  internalCompaniesAutoResponse?: ChildMenus[],
+  internalCompaniesMasterData?: ChildMenus[],
+  isAdmin?: boolean
+) => [
+  {
+    heading: 'Auto-Reponse',
+    id: 'chat',
+    icon: icon('ic-chat'),
+    list: internalCompaniesAutoResponse,
+  },
   {
     heading: 'Access Control',
     id: 'user group:read',
@@ -76,42 +86,37 @@ export const settingMenus = (internalCompaniesAutoResponse?: ChildMenus[]) => [
     list: [],
   },
   {
-    heading: 'Auto-Reponse',
-    id: 'chat',
-    icon: icon('ic-chat'),
-    list: internalCompaniesAutoResponse,
-  },
-];
-
-export const masterDataMenus = () => [
-  {
     heading: 'Master Data',
     id: 'master-data',
     icon: <Iconify icon="solar:database-bold" />,
-    list: [
-      {
-        heading: 'Internal Company',
-        path: '/internal-company',
-      },
-      {
-        heading: 'Client Company',
-        path: '/client-company',
-      },
-      {
-        heading: 'Internal User',
-        path: '/internal-user',
-      },
-      {
-        heading: 'Client User',
-        path: '/client-user',
-      },
-      {
-        heading: 'Product Filter',
-        path: '/product-filter',
-      },
-    ],
+    list: isAdmin
+      ? internalCompaniesMasterData
+      : [
+          {
+            heading: 'Internal Company',
+            path: '/internal-company',
+          },
+          {
+            heading: 'Client Company',
+            path: '/client-company',
+          },
+          {
+            heading: 'Internal User',
+            path: '/internal-user',
+          },
+          {
+            heading: 'Client User',
+            path: '/client-user',
+          },
+          {
+            heading: 'Product Filter',
+            path: '/product-filter',
+          },
+        ],
   },
 ];
+
+export const masterDataMenus = () => [];
 
 export const menuItems = (
   internalCompaniesDashboard?: ChildMenus[],
@@ -119,7 +124,9 @@ export const menuItems = (
   internalCompaniesTask?: ChildMenus[],
   internalCompaniesAutoResponse?: ChildMenus[],
   internalCompaniesReport?: ChildMenus[],
-  userType?: string
+  internalCompaniesMasterData?: ChildMenus[],
+  userType?: string,
+  isAdmin?: boolean
 ) => [
   {
     heading: 'GENERAL',
@@ -135,7 +142,7 @@ export const menuItems = (
   {
     heading: 'SETTINGS',
     id: 'settings',
-    list: settingMenus(internalCompaniesAutoResponse),
+    list: settingMenus(internalCompaniesAutoResponse, internalCompaniesMasterData, isAdmin),
   },
 
   {

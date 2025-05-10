@@ -30,11 +30,14 @@ import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pi
 
 import { Form } from 'src/components/form/form';
 import {
+  useCompanyRelation,
   useDivisionByCompanyId,
   useInternalCompanies,
   useNonInternalCompanies,
 } from 'src/services/master-data/company';
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { useDepartmentName } from 'src/services/report/request/use-department-name';
+import { useDepartmentId } from 'src/services/report/request/use-department-id';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -98,8 +101,12 @@ export function ReportRequestView() {
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
-  const { data: clientCompanies } = useNonInternalCompanies(true);
-  const { data: divisions } = useDivisionByCompanyId(1);
+  const { mutate: getDepartmentName, data: departmentNames } = useDepartmentName();
+  const { mutate: getDepartmentId, data: departmentIds } = useDepartmentId();
+  const divisions = departmentNames?.data;
+  const divisionIds = departmentIds?.data;
+  const { data: companyRelations } = useCompanyRelation({ internal_company_id: idCurrentCompany });
+  const clientCompanies = companyRelations?.items;
   const [timePeriod, setTimePeriod] = useState('month');
   const [docType, setDocType] = useState('summary-detail');
   const [clientMode, setClientMode] = useState('all');
@@ -124,8 +131,7 @@ export function ReportRequestView() {
     // setIsLoading(true);
     const payload = {
       ...formData,
-      internalCompanyId: String(idCurrentCompany),
-      period: timePeriod ?? '',
+      department_id: divisionIds.join(',') ?? '',
     };
     if (timePeriod === 'custom') {
       Object.assign(payload, {
@@ -337,7 +343,11 @@ export function ReportRequestView() {
                                 labelId="demo-simple-select-outlined-label-type"
                                 error={Boolean(formState?.errors?.client_company_id)}
                                 id="client_company_id"
-                                {...register('client_company_id')}
+                                {...register('client_company_id', {
+                                  onChange: (e) => {
+                                    getDepartmentName(e.target.value.join(','));
+                                  },
+                                })}
                                 multiple
                                 value={watch('client_company_id')}
                                 input={
@@ -360,7 +370,9 @@ export function ReportRequestView() {
                                         }}
                                         key={value}
                                         label={
-                                          clientCompanies?.find((item) => item?.id === value)?.name
+                                          clientCompanies?.find(
+                                            (item) => item?.client_company?.id === value
+                                          )?.client_company?.name
                                         }
                                       />
                                     ))}
@@ -372,15 +384,15 @@ export function ReportRequestView() {
                                 {clientCompanies &&
                                   clientCompanies?.map((company) => (
                                     <MenuItem
-                                      key={company?.id}
-                                      value={company?.id}
+                                      key={company?.client_company?.id}
+                                      value={company?.client_company?.id}
                                       style={getStyles(
-                                        company?.id,
+                                        company?.client_company?.id,
                                         watch('client_company_id') ?? [],
                                         theme
                                       )}
                                     >
-                                      {company?.name}
+                                      {company?.client_company?.name}
                                     </MenuItem>
                                   ))}
                               </Select>
@@ -437,7 +449,14 @@ export function ReportRequestView() {
                                 labelId="demo-simple-select-outlined-label-type"
                                 error={Boolean(formState?.errors?.division_id)}
                                 id="division_id"
-                                {...register('division_id')}
+                                {...register('division_id', {
+                                  onChange: (e) => {
+                                    getDepartmentId({
+                                      companyId: watch('client_company_id').join(','),
+                                      departmentName: e.target.value.join(','),
+                                    });
+                                  },
+                                })}
                                 multiple
                                 value={watch('division_id')}
                                 input={
@@ -459,7 +478,11 @@ export function ReportRequestView() {
                                           color: 'info.dark',
                                         }}
                                         key={value}
-                                        label={divisions?.find((item) => item?.id === value)?.name}
+                                        label={
+                                          divisions?.find(
+                                            (item: any) => item?.department_name === value
+                                          )?.department_name
+                                        }
                                       />
                                     ))}
                                   </Box>
@@ -468,17 +491,17 @@ export function ReportRequestView() {
                                 inputProps={{ 'aria-label': 'Without label' }}
                               >
                                 {divisions &&
-                                  divisions?.map((division) => (
+                                  divisions?.map((division: any) => (
                                     <MenuItem
-                                      key={division?.id}
-                                      value={division?.id}
+                                      key={division?.department_name}
+                                      value={division?.department_name}
                                       style={getStyles(
-                                        division?.id,
+                                        division?.department_name,
                                         watch('division_id') ?? [],
                                         theme
                                       )}
                                     >
-                                      {division?.name}
+                                      {division?.department_name}
                                     </MenuItem>
                                   ))}
                               </Select>

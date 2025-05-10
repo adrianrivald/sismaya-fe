@@ -21,14 +21,11 @@ export function useReportWorkPerformance() {
         const {reportType, ...form} = formData
 
         const stringifiedUserIds = form.userId?.map(String)
-        console.log(stringifiedUserIds?.join(','),'useridddd');
         const params =  {
           internal_company_id: form.internalCompanyId,
           user_id: stringifiedUserIds?.join(','),
           period: form.period
         }
-
-        console.log(params,'paramsparams')
         
         if (formData.from) {
           Object.assign(params, {
