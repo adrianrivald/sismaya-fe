@@ -126,33 +126,42 @@ export function ReportWorkPerformanceView() {
     const element = hiddenRef.current;
     if (!element) return;
 
-    // html2pdf()
-    //   .set({
-    //     margin: 0.5,
-    //     filename: 'generated.pdf',
-    //     image: { type: 'jpeg', quality: 0.98 },
-    //     html2canvas: { scale: 1, useCORS: true },
-    //     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-    //   })
-    //   .from(element)
-    //   .save();
-
     const canvas = await html2canvas(element, {
       useCORS: true,
+      scale: 2, // optional: higher resolution
     });
+
     const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'pt', 'a4'); // pt = points
 
-    const pdf = new jsPDF();
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    // pdf.save('generated.pdf');
-    // Generate a Blob from the PDF and create a Blob URL
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const imgHeight = (pdfWidth * canvasHeight) / canvasWidth;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // First page
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+    heightLeft -= pdfHeight;
+
+    const marginTop = 40; // Adjust as needed
+
+    // Add remaining pages
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
+
+    // Either open in new tab or save
     const blob = pdf.output('blob');
     const blobUrl = URL.createObjectURL(blob);
-
-    // Open the Blob URL in a new tab
     window.open(blobUrl, '_blank');
   };
 
