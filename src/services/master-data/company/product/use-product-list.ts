@@ -59,3 +59,37 @@ export function useProductCompanyList(params: Partial<any>, company_id?: string)
     fetchProductList({ ...params, ...paginationState }, company_id)
   );
 }
+
+export function useProductCompany(company_id?: string, page_size?: number, search?: string) {
+  return useQuery(
+    ['product-list', company_id, page_size, search],
+    async () => {
+      const baseUrl = window.location.origin;
+      const endpointUrl = new URL('/products', baseUrl);
+
+      if (company_id) {
+        endpointUrl.searchParams.append('company_id', company_id);
+      }
+
+      if (page_size) {
+        endpointUrl.searchParams.append('page_size', String(page_size));
+      }
+
+      if (search) {
+        endpointUrl.searchParams.append('search', search);
+      }
+
+      const { data: response } = await http<{ data: Products[] }>(
+        endpointUrl.toString().replace(baseUrl, '')
+      );
+
+      return response;
+    },
+    {
+      enabled: !!company_id,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  );
+}

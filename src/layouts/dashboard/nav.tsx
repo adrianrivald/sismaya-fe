@@ -174,7 +174,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
         heading: 'Divisions',
       },
       {
-        path: `/${item?.company?.name.toLowerCase()}/faq`,
+        path: `/${item?.company?.name.toLowerCase()}/master-faq`,
         heading: 'FAQ',
       },
     ],

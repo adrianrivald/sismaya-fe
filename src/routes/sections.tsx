@@ -204,8 +204,8 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'product-filter/:id/create', element: <CompanyRelationCreatePage /> },
 
     // FAQ
-    { path: 'master-faq', element: <MasterFaqPage /> },
-    { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
+    // { path: 'master-faq', element: <MasterFaqPage /> },
+    // { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
   ],
 };
 
@@ -307,11 +307,14 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/product/create', element: <MasterCreateProductPage /> },
     { path: '/:vendor/product/:id/edit', element: <MasterCreateProductPage /> },
 
+    // FAQ
+    { path: '/:vendor/master-faq', element: <MasterFaqPage /> },
+    { path: '/:vendor/master-faq/create', element: <MasterFaqCreatePage /> },
+
     { path: '/:vendor/category', element: <>category content here</> },
     { path: '/:vendor/status', element: <>status content here</> },
     { path: '/:vendor/title', element: <>titles content here</> },
     { path: '/:vendor/division', element: <>division content here</> },
-    { path: '/:vendor/faq', element: <>faq content here</> },
   ],
 };
 

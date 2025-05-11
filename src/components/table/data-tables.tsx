@@ -10,7 +10,11 @@ import {
   TableRow,
   TableSortLabel,
   Typography,
+  Collapse,
+  IconButton,
 } from '@mui/material';
+// import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+// import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Scrollbar } from 'src/components/scrollbar';
 import TableContainer from '@mui/material/TableContainer';
 import TableMui from '@mui/material/Table';
@@ -26,6 +30,7 @@ import {
 } from '@tanstack/react-table';
 import React, { useEffect } from 'react';
 import { SvgColor } from '../svg-color';
+import { Iconify } from '../iconify';
 
 interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'columns'> {
   // pageCount: number;
@@ -38,6 +43,8 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   enableSelection?: boolean;
   onSelectionChange?: (selectedRows: TData[]) => void;
   //   pageLinks: MetaLink[];
+  enableCollapse?: boolean;
+  renderCollapse?: (row: TData) => React.ReactNode;
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
@@ -52,8 +59,12 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     viewAllHref,
     enableSelection = false,
     onSelectionChange,
+    enableCollapse = false,
+    renderCollapse,
   } = props;
+
   const [selectedRows, setSelectedRows] = React.useState<TData[]>([]);
+  const [openRows, setOpenRows] = React.useState<Record<string | number, boolean>>({});
   const table = useReactTable({
     data,
     columns,
@@ -152,6 +163,13 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     // onResetPage();
   };
 
+  const handleCollapseToggle = (rowId: string | number) => {
+    setOpenRows((prev) => ({
+      ...prev,
+      [rowId]: !prev[rowId],
+    }));
+  };
+
   //   const notFound = !dataFiltered.length && !!filterName;
   return (
     <Card>
@@ -170,6 +188,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
                       />
                     </TableCell>
                   )}
+                  {enableCollapse && <TableCell style={{ width: 50 }} />}
                   {headerGroup.headers.map((header) => (
                     // <Th
                     //   data-testid="th"
@@ -211,26 +230,54 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
             </TableHead>
             <TableBody>
               {table.getRowModel().rows.map((row) => (
-                <TableRow
-                  hover
-                  data-testid="trBody"
-                  key={row.id}
-                  selected={selectedRows.indexOf(row.original) !== -1}
-                >
-                  {enableSelection && (
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedRows.indexOf(row.original) !== -1}
-                        onChange={() => handleSelectOne(row.original)}
-                      />
-                    </TableCell>
+                <React.Fragment key={row.id}>
+                  <TableRow
+                    hover
+                    data-testid="trBody"
+                    selected={selectedRows.indexOf(row.original) !== -1}
+                  >
+                    {enableSelection && (
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedRows.indexOf(row.original) !== -1}
+                          onChange={() => handleSelectOne(row.original)}
+                        />
+                      </TableCell>
+                    )}
+                    {enableCollapse && (
+                      <TableCell style={{ width: 50 }}>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => handleCollapseToggle(row.id)}
+                        >
+                          {openRows[row.id] ? (
+                            <Iconify icon="ri:arrow-up-s-line" />
+                          ) : (
+                            <Iconify icon="ri:arrow-down-s-line" />
+                          )}
+                        </IconButton>
+                      </TableCell>
+                    )}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell data-testid="td" key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {enableCollapse && renderCollapse && (
+                    <TableRow>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={columns.length + (enableSelection ? 2 : 1)}
+                      >
+                        <Collapse in={openRows[row.id]} timeout="auto" unmountOnExit>
+                          <Box sx={{ margin: 1 }}>{renderCollapse(row.original)}</Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
                   )}
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell data-testid="td" key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                </React.Fragment>
               ))}
 
               {/* <TableEmptyRows

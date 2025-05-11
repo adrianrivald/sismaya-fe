@@ -239,6 +239,15 @@ export function ListProductView() {
                 />
               </FormControl>
             </Grid>
+            {selectedProducts.length > 0 && (
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button variant="contained" color="error">
+                    Delete All
+                  </Button>
+                </Box>
+              </Grid>
+            )}
           </Grid>
           <DataTable
             columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
