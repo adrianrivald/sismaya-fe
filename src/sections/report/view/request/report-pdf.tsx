@@ -56,13 +56,6 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
     margin: '20px auto',
   };
 
-  const headerStyle = {
-    backgroundColor: '#DFE3E8',
-    fontWeight: 'bold',
-    padding: '10px',
-    border: '1px solid #ccc',
-  };
-
   const subHeaderStyle = {
     backgroundColor: '#DFE3E8',
     padding: '8px',
@@ -79,7 +72,7 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
         ref={hiddenRef}
         style={{ position: 'absolute', left: '-99300px', padding: '20px', width: '900px' }}
       >
-        {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px', maxHeight: '100vh' }}> */}
+        {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px' }}> */}
         <Box display="flex" justifyContent="space-between">
           <Box>
             <Typography fontSize={20} fontWeight="bold">
@@ -140,7 +133,6 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                 </tbody>
               </table>
             </Box>
-
             <Box my={4}>
               <Typography mb={1}>2. TOTAL REQUEST PER MONTH</Typography>
               <table style={tableStyle}>
@@ -161,24 +153,9 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                       <td style={cellStyle}>{row?.request_count}</td>
                     </tr>
                   ))}
-                  <tr>
-                    <td style={cellStyle} />
-                    <td style={cellStyle} align="center">
-                      <strong>Total</strong>
-                    </td>
-
-                    <td style={cellStyle} align="center">
-                      <strong>
-                        {data?.reportData?.report_per_year?.reduce(
-                          (a: any, b: any) => a.request_count + b.request_count
-                        )}
-                      </strong>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </Box>
-
             <Box my={4}>
               <Typography mb={1}>3. TOTAL REQUEST PER CATEGORY</Typography>
               <table style={tableStyle}>
@@ -199,20 +176,100 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                       <td style={cellStyle}>{row?.request_count}</td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </Box>
+            <Box my={4}>
+              <Typography mb={1}>3. TOTAL REQUEST PER PRIORITY</Typography>
+              <table style={tableStyle}>
+                <thead>
                   <tr>
-                    <td style={cellStyle} />
-                    <td style={cellStyle} align="center">
-                      <strong>Total</strong>
-                    </td>
-
-                    <td style={cellStyle} align="center">
-                      <strong>
-                        {data?.reportData?.report_per_year?.reduce(
-                          (a: any, b: any) => a.request_count + b.request_count
-                        )}
-                      </strong>
-                    </td>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Priority</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Requests</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {data?.reportData?.report_per_priority?.map((row: any, indexItem: number) => (
+                    <tr key={indexItem + 1}>
+                      <td style={cellStyle}>{indexItem + 1}</td>
+                      <td style={cellStyle} align="left">
+                        {row?.priority_name}
+                      </td>
+                      <td style={cellStyle}>{row?.request_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+            <Box my={4}>
+              <Typography mb={1}>4. TOTAL REQUEST PER STATUS</Typography>
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Status</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Requests</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.reportData?.report_per_status?.map((row: any, indexItem: number) => (
+                    <tr key={indexItem + 1}>
+                      <td style={cellStyle}>{indexItem + 1}</td>
+                      <td style={cellStyle} align="left">
+                        {row?.progress_status_name}
+                      </td>
+                      <td style={cellStyle}>{row?.request_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+
+            <Box my={4}>
+              <Typography mb={1}>5. TOTAL REQUEST PER DIVISION</Typography>
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Division</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Requests</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.reportData?.report_per_division?.map((row: any, indexItem: number) => (
+                    <tr key={indexItem + 1}>
+                      <td style={cellStyle}>{indexItem + 1}</td>
+                      <td style={cellStyle} align="left">
+                        {row?.department_name}
+                      </td>
+                      <td style={cellStyle}>{row?.request_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+
+            <Box my={4}>
+              <Typography mb={1}>5. TOTAL REQUEST PER COMPANY</Typography>
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Company</th>
+                    <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Requests</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.reportData?.report_per_company?.map((row: any, indexItem: number) => (
+                    <tr key={indexItem + 1}>
+                      <td style={cellStyle}>{indexItem + 1}</td>
+                      <td style={cellStyle} align="left">
+                        {row?.company_name}
+                      </td>
+                      <td style={cellStyle}>{row?.request_count}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </Box>
