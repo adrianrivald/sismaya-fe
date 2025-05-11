@@ -1,7 +1,4 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Button,
   Card,
@@ -26,18 +23,19 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { SvgColor } from 'src/components/svg-color';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from 'src/sections/auth/providers/auth';
-
 import { FaqType } from 'src/services/master-data/faq/types/type';
 import { createColumnHelper, CellContext } from '@tanstack/react-table';
 import { DataTable } from 'src/components/table/data-tables';
 import { useFaqList } from 'src/services/master-data/faq/use-faq-list';
 import useDebounce from 'src/utils/use-debounce';
 import { useProductCompany } from 'src/services/master-data/company';
+import { Icon } from '@iconify/react';
+import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
+import { useBulkDeleteFaq } from 'src/services/master-data/faq/use-faq-bulk-delete';
 import { DialogArrange } from './DialogArrange';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
@@ -86,12 +84,7 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<FaqType, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
-
-  const onClickRemove = (itemId?: number) => {
-    if (itemId) setSelectedId(itemId);
-    setOpenRemoveModal(true);
-  };
+  const { handleEdit } = popoverProps;
 
   return (
     <MenuList
@@ -113,11 +106,6 @@ function ButtonActions(props: CellContext<FaqType, unknown>, popoverProps: Popov
         <Iconify icon="solar:pen-bold" />
         Edit
       </MenuItem>
-
-      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
-      </MenuItem>
     </MenuList>
   );
 }
@@ -132,7 +120,8 @@ export default function MasterFaqPage() {
       ?.id ?? 0;
   const { data } = useProductCompany(String(idCurrentCompany), 99999, '');
   const [dialogArrange, setDialogArrange] = useState({ isOpen: false });
-  const [openRemoveModal, setOpenRemoveModal] = useState(false);
+  const [openBulkDelete, setOpenBulkDelete] = useState(false);
+  const { mutate: mutateBulkDeleteFaq } = useBulkDeleteFaq();
   const [form, setForm] = useState({
     search: '',
     status: 'all',
@@ -156,18 +145,33 @@ export default function MasterFaqPage() {
       navigation(`${id}/edit`);
     };
 
-    const handleDelete = () => {
-      // deleteProductById(Number(selectedId));
-      setOpenRemoveModal(false);
-      refetch();
-    };
-
-    return { handleEdit, handleDelete };
+    return { handleEdit };
   };
 
   useEffect(() => {
     refetch();
   }, [form.product, refetch]);
+
+  const onBulkDelete = () => {
+    const faqData = selectedFaq.map((item) => item.id).join(',');
+    mutateBulkDeleteFaq(faqData, {
+      onSuccess: () => {
+        setOpenBulkDelete(false);
+        refetch();
+
+        setTimeout(() => {
+          setSelectedFaq([]);
+        }, 500);
+      },
+      onError: () => {
+        setOpenBulkDelete(false);
+        refetch();
+        setTimeout(() => {
+          setSelectedFaq([]);
+        }, 500);
+      },
+    });
+  };
   return (
     <>
       <Helmet>
@@ -257,9 +261,22 @@ export default function MasterFaqPage() {
                   </Select>
                 </FormControl>
               </Grid>
+              {selectedFaq.length > 0 && (
+                <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+                  <Button
+                    onClick={() => {
+                      setOpenBulkDelete(true);
+                    }}
+                    startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                    color="error"
+                  >
+                    Delete ({selectedFaq.length})
+                  </Button>
+                </Grid>
+              )}
             </Grid>
             <DataTable
-              columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+              columns={columns({ ...popoverFuncs(), setSelectedId })}
               enableSelection
               onSelectionChange={handleSelectionChange}
               {...getDataTableProps()}
@@ -305,6 +322,14 @@ export default function MasterFaqPage() {
         <DialogArrange
           open={dialogArrange.isOpen}
           onClose={() => setDialogArrange({ isOpen: false })}
+        />
+        <DialogBulkDelete
+          open={openBulkDelete}
+          onClose={() => setOpenBulkDelete(false)}
+          title={`Delete ${selectedFaq.length} FAQs?`}
+          onClick={() => {
+            onBulkDelete();
+          }}
         />
       </DashboardContent>
     </>

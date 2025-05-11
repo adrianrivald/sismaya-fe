@@ -145,7 +145,7 @@ export function CreateProductView() {
                   variant="contained"
                   color="primary"
                 >
-                  Create New Product
+                  {id ? 'Update' : 'Create'} New Product
                 </LoadingButton>
               </Box>
             </Box>

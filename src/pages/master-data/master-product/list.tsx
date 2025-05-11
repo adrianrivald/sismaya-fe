@@ -2,8 +2,6 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 import { ListProductView } from 'src/sections/master-data/master-product/view/list-view';
-import { ProductFilterView } from 'src/sections/master-data/product-filter/view/product-filter-view';
-import { ProductsView } from 'src/sections/product/view';
 
 // ----------------------------------------------------------------------
 

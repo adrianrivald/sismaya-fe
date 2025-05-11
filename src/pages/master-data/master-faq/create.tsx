@@ -24,22 +24,44 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import { useProductCompany } from 'src/services/master-data/company';
 import { FaqDTO, faqSchema } from 'src/services/master-data/faq/schemas/faq-schema';
 import { useAddMasterFaq } from 'src/services/master-data/faq/use-faq-create';
+import { useFaqById } from 'src/services/master-data/faq/use-faq-detail';
+import { useUpdateMasterFaq } from 'src/services/master-data/faq/use-faq-update';
 
 export default function CreateMasterFaq() {
   const navigate = useNavigate();
-  const { vendor } = useParams();
+  const { vendor, id } = useParams();
   const { user } = useAuth();
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
+  const { data: dataFaq } = useFaqById(Number(id) || 0);
   const { data } = useProductCompany(String(idCurrentCompany), 99999, '');
   const { mutate: addFaq } = useAddMasterFaq();
+  const { mutate: updateFaq } = useUpdateMasterFaq(Number(id));
   const handleSubmit = (formData: FaqDTO) => {
-    addFaq(formData, {
-      onSuccess: () => {
-        navigate(`/${vendor}/master-faq`);
-      },
-    });
+    if (id) {
+      updateFaq(
+        { ...formData, productId: [...new Set(formData.productId)] },
+        {
+          onSuccess: () => {
+            navigate(`/${vendor}/master-faq`);
+          },
+        }
+      );
+    } else {
+      addFaq(formData, {
+        onSuccess: () => {
+          navigate(`/${vendor}/master-faq`);
+        },
+      });
+    }
+  };
+
+  const defaultValues: FaqDTO = {
+    question: dataFaq?.question || '',
+    answer: dataFaq?.answer || '',
+    is_active: dataFaq?.is_active || false,
+    productId: dataFaq?.products?.map((item) => Number(item.id)) || [],
   };
 
   return (
@@ -61,7 +83,7 @@ export default function CreateMasterFaq() {
             <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
               <Typography>Master Data</Typography>
               <Typography color="grey.500">•</Typography>
-              <Typography color="grey.500">Create New FAQ</Typography>
+              <Typography color="grey.500">{id ? 'Update' : 'Create'} New FAQ</Typography>
             </Box>
           </Box>
         </Box>
@@ -72,11 +94,9 @@ export default function CreateMasterFaq() {
                 width="100%"
                 onSubmit={handleSubmit}
                 schema={faqSchema}
-                // options={{
-                //   defaultValues: {
-                //     answer: ``,
-                //   },
-                // }}
+                options={{
+                  defaultValues,
+                }}
               >
                 {({ register, watch, formState, setValue, control }) => (
                   <Grid container spacing={2} xs={12}>
@@ -165,6 +185,7 @@ export default function CreateMasterFaq() {
                             onChange={(_, checked) => {
                               setValue('is_active', checked);
                             }}
+                            checked={watch('is_active')}
                           />
                         }
                         label="Set status as Active"
@@ -186,7 +207,7 @@ export default function CreateMasterFaq() {
                         variant="contained"
                         color="primary"
                       >
-                        Create New FAQ
+                        {id ? 'Update' : 'Create'} New FAQ
                       </LoadingButton>
                     </Box>
                   </Grid>

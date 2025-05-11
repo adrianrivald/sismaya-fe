@@ -310,6 +310,7 @@ const internalRoutes: NonIndexRouteObject = {
     // FAQ
     { path: '/:vendor/master-faq', element: <MasterFaqPage /> },
     { path: '/:vendor/master-faq/create', element: <MasterFaqCreatePage /> },
+    { path: '/:vendor/master-faq/:id/edit', element: <MasterFaqCreatePage /> },
 
     { path: '/:vendor/category', element: <>category content here</> },
     { path: '/:vendor/status', element: <>status content here</> },
