@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable new-cap */
+import React, { useEffect, useRef, useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import type { SelectChangeEvent, Theme } from '@mui/material';
@@ -38,6 +40,10 @@ import {
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { useDepartmentName } from 'src/services/report/request/use-department-name';
 import { useDepartmentId } from 'src/services/report/request/use-department-id';
+import { useReportRequest } from 'src/services/report/request/use-report-request';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import ReportRequestPDF from './report-pdf';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -103,6 +109,7 @@ export function ReportRequestView() {
       ?.id ?? 0;
   const { mutate: getDepartmentName, data: departmentNames } = useDepartmentName();
   const { mutate: getDepartmentId, data: departmentIds } = useDepartmentId();
+  const { mutate: generateReportRequest, data: reportData } = useReportRequest();
   const divisions = departmentNames?.data;
   const divisionIds = departmentIds?.data;
   const { data: companyRelations } = useCompanyRelation({ internal_company_id: idCurrentCompany });
@@ -118,6 +125,32 @@ export function ReportRequestView() {
     client_company_id: [],
     division_id: [],
   };
+
+  const hiddenRef = useRef<HTMLDivElement>(null);
+
+  const generatePdf = async () => {
+    const element = hiddenRef.current;
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      useCORS: true,
+    });
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF();
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    // pdf.save('generated.pdf');
+    // Generate a Blob from the PDF and create a Blob URL
+    const blob = pdf.output('blob');
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Open the Blob URL in a new tab
+    window.open(blobUrl, '_blank');
+  };
+
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
   };
@@ -127,11 +160,11 @@ export function ReportRequestView() {
   };
 
   const handleSubmit = (formData: any) => {
-    console.log(formData, 'log: formData report request');
     // setIsLoading(true);
     const payload = {
-      ...formData,
-      department_id: divisionIds.join(',') ?? '',
+      internalCompanyId: String(idCurrentCompany),
+      departmentId: divisionIds.join(',') ?? '',
+      period: timePeriod ?? '',
     };
     if (timePeriod === 'custom') {
       Object.assign(payload, {
@@ -139,13 +172,18 @@ export function ReportRequestView() {
         to: endDateValue?.format('YYYY-MM-DD hh:mm'),
       });
     }
-    console.log(payload, 'payload');
     try {
-      // generateReportWorkAllocation(payload);
+      generateReportRequest(payload);
     } catch (error) {
       // setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (reportData) {
+      generatePdf();
+    }
+  }, [reportData]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -575,6 +613,15 @@ export function ReportRequestView() {
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
                           Generate & Download Report
                         </Button>
+                        <ReportRequestPDF
+                          timePeriod={timePeriod}
+                          vendor={vendor?.toUpperCase() ?? ''}
+                          data={{
+                            reportData: reportData?.data,
+                            image: reportData?.meta?.company_image,
+                          }}
+                          hiddenRef={hiddenRef}
+                        />
                       </Box>
                     </>
                   )}

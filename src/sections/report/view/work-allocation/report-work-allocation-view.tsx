@@ -107,7 +107,6 @@ export function ReportWorkAllocationView() {
       internalCompanyId: String(idCurrentCompany),
       period: timePeriod ?? '',
     };
-    console.log(payload, 'payload');
     if (timePeriod === 'custom') {
       Object.assign(payload, {
         from: dateValue?.format('YYYY-MM-DD hh:mm'),
