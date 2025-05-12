@@ -140,7 +140,7 @@ export function CreateCategoryView() {
                   variant="contained"
                   color="primary"
                 >
-                  Create New Category
+                  {data !== undefined ? 'Save Category' : 'Create New Category'}
                 </LoadingButton>
               </Box>
             </Box>

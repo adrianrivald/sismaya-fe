@@ -160,7 +160,7 @@ export function CreateStatusView() {
                   variant="contained"
                   color="primary"
                 >
-                  Create New Status
+                  {data !== undefined ? 'Save Status' : 'Create New Status'}
                 </LoadingButton>
               </Box>
             </Box>
