@@ -336,10 +336,6 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/master-faq/create', element: <MasterFaqCreatePage /> },
     { path: '/:vendor/master-faq/:id/edit', element: <MasterFaqCreatePage /> },
 
-    { path: '/:vendor/category', element: <>category content here</> },
-    { path: '/:vendor/status', element: <>status content here</> },
-    { path: '/:vendor/title', element: <>titles content here</> },
-    { path: '/:vendor/division', element: <>division content here</> },
     // Category
     { path: '/:vendor/category', element: <MasterCategoryPage /> },
     { path: '/:vendor/category/create', element: <MasterCreateCategoryPage /> },
@@ -359,8 +355,6 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/title', element: <MasterTitlePage /> },
     { path: '/:vendor/title/create', element: <MasterCreateTitlePage /> },
     { path: '/:vendor/title/:id/edit', element: <MasterCreateTitlePage /> },
-
-    { path: '/:vendor/faq', element: <>faq content here</> },
   ],
 };
 
