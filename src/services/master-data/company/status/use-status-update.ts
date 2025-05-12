@@ -8,6 +8,7 @@ export type UpdateStatus = {
   company_id: number;
   step: string;
   sort: number
+  is_active?: boolean;
 };
 
 export function useUpdateStatus() {
