@@ -7,6 +7,7 @@ export type UpdateCategory = {
   name: string;
   id: number;
   company_id: number
+  is_active?: boolean;
 };
 
 export function useUpdateCategory() {
