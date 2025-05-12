@@ -7,6 +7,7 @@ export type StoreDeparment = {
   name?:string;
   company_id?: number
   is_show_all?: boolean
+  is_active?:boolean
 };
 
 export function useAddDivision() {
@@ -14,14 +15,15 @@ export function useAddDivision() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreDeparment) => {
-        const { name, company_id, is_show_all } = formData;
+        const { name, company_id, is_show_all, is_active } = formData;
   
   
         return http(`departments`, {
           data: {
             name,
             company_id,
-            is_show_all
+            is_show_all,
+            is_active
           },
         });
       },

@@ -5,7 +5,8 @@ import { http } from "src/utils/http";
 
 export type StoreCategory = {
   name:string;
-  company_id?: number
+  company_id?: number;
+  is_active?:boolean;
 };
 
 export function useAddCategory() {
@@ -13,13 +14,14 @@ export function useAddCategory() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreCategory) => {
-        const { name, company_id } = formData;
+        const { name, company_id, is_active } = formData;
   
   
         return http(`categories`, {
           data: {
             name,
-            company_id
+            company_id,
+            is_active
           },
         });
       },

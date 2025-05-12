@@ -14,14 +14,15 @@ export function useUpdateTitle() {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: UpdateTitle) => {
-        const { name, id, company_id } = formData;
+        const { name, id, company_id, is_active } = formData;
   
   
         return http(`categories/${id}`, {
         method: "PUT",
           data: {
             name,
-            company_id
+            company_id,
+            is_active
           },
         });
       },

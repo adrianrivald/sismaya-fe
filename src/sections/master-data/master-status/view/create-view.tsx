@@ -60,6 +60,7 @@ export function CreateStatusView() {
           company_id: idCurrentCompany,
           sort: 1,
           step: formData.step,
+          is_active: formData.is_active,
         },
         {
           onSuccess: () => {
@@ -133,7 +134,7 @@ export function CreateStatusView() {
                         control={
                           <Switch
                             onChange={(_, checked) => {
-                              setValue('isActive', checked);
+                              setValue('is_active', checked);
                             }}
                           />
                         }

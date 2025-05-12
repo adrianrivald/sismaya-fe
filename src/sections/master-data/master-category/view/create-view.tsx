@@ -54,6 +54,7 @@ export function CreateCategoryView() {
         {
           name: formData.name,
           company_id: idCurrentCompany,
+          is_active: formData.is_active,
         },
         {
           onSuccess: () => {
@@ -113,7 +114,7 @@ export function CreateCategoryView() {
                         control={
                           <Switch
                             onChange={(_, checked) => {
-                              setValue('isActive', checked);
+                              setValue('is_active', checked);
                             }}
                           />
                         }
