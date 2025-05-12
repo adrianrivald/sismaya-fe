@@ -1,28 +1,25 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
-export type UpdateDepartment = {
+export type StoreTitle = {
   name:string;
-  id: number;
-  company_id: number
-  is_show_all?: boolean;
-  is_active?: boolean;
+  company_id?: number
 };
 
-export function useUpdateDivision() {
+export function useAddTitle() {
     const queryClient = useQueryClient();
+    const navigate = useNavigate()
     return useMutation(
-      async (formData: UpdateDepartment) => {
-        const { name, id, company_id, is_show_all } = formData;
+      async (formData: StoreTitle) => {
+        const { name, company_id } = formData;
   
   
-        return http(`departments/${id}`, {
-        method: "PUT",
+        return http(`titles`, {
           data: {
             name,
-            company_id,
-            is_show_all
+            company_id
           },
         });
       },
@@ -30,8 +27,8 @@ export function useUpdateDivision() {
           onSuccess: (res: any) => {
           const companyId = res?.data?.company_id
           queryClient.invalidateQueries({queryKey: ['company-items', companyId]});
-          queryClient.invalidateQueries(['division-items', companyId]);
-          toast.success('Data updated successfully', {
+          queryClient.invalidateQueries(['title-items', companyId]);
+          toast.success('Data added successfully', {
             position: 'top-right',
             autoClose: 5000,
             hideProgressBar: true,

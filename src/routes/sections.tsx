@@ -156,6 +156,18 @@ export const MasterCreateStatusPage = lazy(
   () => import('src/pages/master-data/master-status/create')
 );
 
+// Master division
+export const MasterDivisionPage = lazy(() => import('src/pages/master-data/master-division/list'));
+export const MasterCreateDivisionPage = lazy(
+  () => import('src/pages/master-data/master-division/create')
+);
+
+// Master title
+export const MasterTitlePage = lazy(() => import('src/pages/master-data/master-title/list'));
+export const MasterCreateTitlePage = lazy(
+  () => import('src/pages/master-data/master-title/create')
+);
+
 // ----------------------------------------------------------------------
 
 const renderFallback = (
@@ -329,9 +341,16 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/status/create', element: <MasterCreateStatusPage /> },
     { path: '/:vendor/status/:id/edit', element: <MasterCreateStatusPage /> },
 
-    { path: '/:vendor/status', element: <>status content here</> },
-    { path: '/:vendor/title', element: <>titles content here</> },
-    { path: '/:vendor/division', element: <>division content here</> },
+    // Division
+    { path: '/:vendor/division', element: <MasterDivisionPage /> },
+    { path: '/:vendor/division/create', element: <MasterCreateDivisionPage /> },
+    { path: '/:vendor/division/:id/edit', element: <MasterCreateDivisionPage /> },
+
+    // Title
+    { path: '/:vendor/title', element: <MasterTitlePage /> },
+    { path: '/:vendor/title/create', element: <MasterCreateTitlePage /> },
+    { path: '/:vendor/title/:id/edit', element: <MasterCreateTitlePage /> },
+
     { path: '/:vendor/faq', element: <>faq content here</> },
   ],
 };
