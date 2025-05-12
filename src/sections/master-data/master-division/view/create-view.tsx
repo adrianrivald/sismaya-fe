@@ -52,6 +52,7 @@ export function CreateDivisionView() {
         {
           name: formData.name,
           company_id: idCurrentCompany,
+          is_active: formData.is_active,
         },
         {
           onSuccess: () => {
@@ -111,7 +112,7 @@ export function CreateDivisionView() {
                         control={
                           <Switch
                             onChange={(_, checked) => {
-                              setValue('isActive', checked);
+                              setValue('is_active', checked);
                             }}
                           />
                         }

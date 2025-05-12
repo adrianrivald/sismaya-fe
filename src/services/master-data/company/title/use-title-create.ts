@@ -5,7 +5,8 @@ import { http } from "src/utils/http";
 
 export type StoreTitle = {
   name:string;
-  company_id?: number
+  company_id?: number;
+  is_active?:boolean;
 };
 
 export function useAddTitle() {
@@ -13,13 +14,14 @@ export function useAddTitle() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreTitle) => {
-        const { name, company_id } = formData;
+        const { name, company_id, is_active} = formData;
   
   
         return http(`titles`, {
           data: {
             name,
-            company_id
+            company_id,
+            is_active
           },
         });
       },
