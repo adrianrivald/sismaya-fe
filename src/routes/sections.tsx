@@ -150,6 +150,12 @@ export const MasterCreateCategoryPage = lazy(
   () => import('src/pages/master-data/master-category/create')
 );
 
+// Master status
+export const MasterStatusPage = lazy(() => import('src/pages/master-data/master-status/list'));
+export const MasterCreateStatusPage = lazy(
+  () => import('src/pages/master-data/master-status/create')
+);
+
 // ----------------------------------------------------------------------
 
 const renderFallback = (
@@ -317,6 +323,11 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/category', element: <MasterCategoryPage /> },
     { path: '/:vendor/category/create', element: <MasterCreateCategoryPage /> },
     { path: '/:vendor/category/:id/edit', element: <MasterCreateCategoryPage /> },
+
+    // Status
+    { path: '/:vendor/status', element: <MasterStatusPage /> },
+    { path: '/:vendor/status/create', element: <MasterCreateStatusPage /> },
+    { path: '/:vendor/status/:id/edit', element: <MasterCreateStatusPage /> },
 
     { path: '/:vendor/status', element: <>status content here</> },
     { path: '/:vendor/title', element: <>titles content here</> },
