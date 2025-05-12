@@ -7,7 +7,8 @@ export type StoreStatus = {
   name?:string;
   company_id?: number
   step?: string;
-  sort: number
+  sort: number;
+  is_active?:boolean;
 };
 
 export function useAddStatus() {
@@ -15,7 +16,7 @@ export function useAddStatus() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreStatus) => {
-        const { name, company_id, step, sort } = formData;
+        const { name, company_id, step, sort, is_active } = formData;
   
   
         return http(`progress-status`, {
@@ -23,7 +24,8 @@ export function useAddStatus() {
             name,
             company_id,
             step,
-            sort
+            sort,
+            is_active
           },
         });
       },

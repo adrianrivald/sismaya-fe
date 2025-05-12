@@ -6,14 +6,15 @@ export type UpdateDepartment = {
   name:string;
   id: number;
   company_id: number
-  is_show_all: boolean;
+  is_show_all?: boolean;
+  is_active?: boolean;
 };
 
 export function useUpdateDivision() {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: UpdateDepartment) => {
-        const { name, id, company_id, is_show_all } = formData;
+        const { name, id, company_id, is_show_all, is_active } = formData;
   
   
         return http(`departments/${id}`, {
@@ -21,7 +22,8 @@ export function useUpdateDivision() {
           data: {
             name,
             company_id,
-            is_show_all
+            is_show_all,
+            is_active
           },
         });
       },

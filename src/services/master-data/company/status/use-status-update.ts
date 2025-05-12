@@ -8,13 +8,14 @@ export type UpdateStatus = {
   company_id: number;
   step: string;
   sort: number
+  is_active?: boolean;
 };
 
 export function useUpdateStatus() {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: UpdateStatus) => {
-        const { name, id, company_id, step, sort } = formData;
+        const { name, id, company_id, step, sort, is_active } = formData;
   
   
         return http(`progress-status/${id}`, {
@@ -23,7 +24,8 @@ export function useUpdateStatus() {
             name,
             company_id,
             step,
-            sort
+            sort,
+            is_active
           },
         });
       },

@@ -13,13 +13,14 @@ export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation(
     async (formData: UpdateProduct) => {
-      const { name, id, company_id } = formData;
+      const { name, id, company_id, is_active } = formData;
 
       return http(`products/${id}`, {
         method: 'PUT',
         data: {
           name,
           company_id,
+          is_active
         },
       });
     },

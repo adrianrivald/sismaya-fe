@@ -5,7 +5,8 @@ import { http } from "src/utils/http";
 
 export type StoreProduct = {
   name:string;
-  company_id?: number
+  company_id?: number;
+  is_active?:boolean;
 };
 
 export function useAddProduct() {
@@ -13,13 +14,14 @@ export function useAddProduct() {
     const navigate = useNavigate()
     return useMutation(
       async (formData: StoreProduct) => {
-        const { name, company_id } = formData;
+        const { name, company_id, is_active } = formData;
   
   
         return http(`products`, {
           data: {
             name,
-            company_id
+            company_id,
+            is_active
           },
         });
       },

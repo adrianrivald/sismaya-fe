@@ -55,6 +55,7 @@ export function CreateProductView() {
         {
           name: formData.name,
           company_id: idCurrentCompany,
+          is_active: formData.is_active,
         },
         {
           onSuccess: () => {
@@ -114,7 +115,7 @@ export function CreateProductView() {
                         control={
                           <Switch
                             onChange={(_, checked) => {
-                              setValue('isActive', checked);
+                              setValue('is_active', checked);
                             }}
                           />
                         }
@@ -145,7 +146,7 @@ export function CreateProductView() {
                   variant="contained"
                   color="primary"
                 >
-                  {id ? 'Update' : 'Create'} New Product
+                  {data !== undefined ? 'Save Product' : 'Create New Product'}
                 </LoadingButton>
               </Box>
             </Box>

@@ -7,20 +7,22 @@ export type UpdateCategory = {
   name: string;
   id: number;
   company_id: number
+  is_active?: boolean;
 };
 
 export function useUpdateCategory() {
     const queryClient = useQueryClient();
     return useMutation(
       async (formData: UpdateCategory) => {
-        const { name, id, company_id } = formData;
+        const { name, id, company_id, is_active } = formData;
   
   
         return http(`categories/${id}`, {
         method: "PUT",
           data: {
             name,
-            company_id
+            company_id,
+            is_active
           },
         });
       },
