@@ -130,6 +130,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     path: `/${item?.company?.name.toLowerCase()}/dashboard`,
   }));
 
+  const internalCompaniesFaq = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/faq`,
+  }));
+
   const internalCompaniesRequest = user?.internal_companies?.map((item) => ({
     heading: item?.company?.name,
     path: `/${item?.company?.name.toLowerCase()}/request`,
@@ -175,7 +180,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
       },
       {
         path: `/${item?.company?.name.toLowerCase()}/master-faq`,
-        heading: 'FAQ',
+        heading: 'Master FAQ',
       },
     ],
     // path: `/${item?.company?.name.toLowerCase()}/report/request`,
@@ -195,6 +200,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           internalCompaniesAutoResponse,
           internalCompaniesReport,
           internalCompaniesMasterData,
+          internalCompaniesFaq,
           userType,
           userRole === 2
         )

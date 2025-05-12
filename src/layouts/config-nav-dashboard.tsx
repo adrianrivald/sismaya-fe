@@ -25,6 +25,7 @@ interface ChildMenus {
 export const generalMenus = (
   internalCompaniesDashboard?: ChildMenus[],
   internalCompaniesReport?: ChildMenus[],
+  internalCompaniesFaq?: ChildMenus[],
   userType?: string
 ) => [
   {
@@ -37,7 +38,6 @@ export const generalMenus = (
         ? internalCompaniesDashboard?.filter((item) => item?.heading !== undefined)
         : [],
   },
-
   {
     heading: 'Reports',
     id: 'report',
@@ -48,13 +48,17 @@ export const generalMenus = (
         ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
         : [],
   },
-  {
-    heading: 'FAQ',
-    id: 'dashboard',
-    path: '/faq',
-    icon: icon('ic-file'),
-    list: [],
-  },
+  ...(userType !== 'internal'
+    ? [
+        {
+          heading: 'FAQ',
+          id: 'faq',
+          path: '/faq',
+          icon: icon('ic-file'),
+          list: internalCompaniesFaq?.filter((item) => item?.heading !== undefined),
+        },
+      ]
+    : []),
 ];
 
 export const managementMenus = (
@@ -133,13 +137,19 @@ export const menuItems = (
   internalCompaniesAutoResponse?: ChildMenus[],
   internalCompaniesReport?: ChildMenus[],
   internalCompaniesMasterData?: ChildMenus[],
+  internalCompaniesFaq?: ChildMenus[],
   userType?: string,
   isAdmin?: boolean
 ) => [
   {
     heading: 'GENERAL',
     id: 'general',
-    list: generalMenus(internalCompaniesDashboard, internalCompaniesReport, userType),
+    list: generalMenus(
+      internalCompaniesDashboard,
+      internalCompaniesReport,
+      internalCompaniesFaq,
+      userType
+    ),
   },
   {
     heading: 'MANAGEMENT',

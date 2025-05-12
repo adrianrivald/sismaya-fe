@@ -163,7 +163,6 @@ const superAdminRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
-    { path: 'faq', element: <FAQPage /> },
 
     { path: 'report/request', element: <ReportRequestPage /> },
     { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
@@ -236,6 +235,7 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
     { path: '/:vendor/dashboard', element: <DashboardInternalCompanyPage /> },
+    { path: '/:vendor/faq', element: <FAQPage /> },
 
     // Task Management
     {
@@ -324,6 +324,7 @@ const clientRoutes: NonIndexRouteObject = {
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardClientPage /> },
     { path: 'faq', element: <FAQPage /> },
+    { path: '/:vendor/faq', element: <FAQPage /> },
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
