@@ -139,7 +139,7 @@ export function CreateTitleView() {
                   variant="contained"
                   color="primary"
                 >
-                  Create New Title
+                  {data !== undefined ? 'Save Title' : 'Create New Title'}
                 </LoadingButton>
               </Box>
             </Box>

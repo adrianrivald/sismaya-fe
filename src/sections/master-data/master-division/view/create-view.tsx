@@ -138,7 +138,7 @@ export function CreateDivisionView() {
                   variant="contained"
                   color="primary"
                 >
-                  Create New Division
+                  {data !== undefined ? 'Save Division' : 'Create New Division'}
                 </LoadingButton>
               </Box>
             </Box>

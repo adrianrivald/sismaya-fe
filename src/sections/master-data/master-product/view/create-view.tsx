@@ -146,7 +146,7 @@ export function CreateProductView() {
                   variant="contained"
                   color="primary"
                 >
-                  Create New Product
+                  {data !== undefined ? 'Save Product' : 'Create New Product'}
                 </LoadingButton>
               </Box>
             </Box>
