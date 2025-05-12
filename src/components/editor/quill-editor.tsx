@@ -6,6 +6,7 @@ import 'react-quill/dist/quill.snow.css';
 import { styled } from '@mui/material/styles';
 import { useCallback, useRef } from 'react';
 import { Controller } from 'react-hook-form';
+import { uploadFilesBulk } from 'src/services/utils/upload-image';
 
 // ----------------------------------------------------------------------
 
@@ -30,6 +31,11 @@ const StyledEditor = styled(Box)(({ theme }) => ({
       padding: theme.spacing(2),
       borderRadius: theme.shape.borderRadius,
       backgroundColor: theme.palette.grey[900],
+    },
+    '& img': {
+      width: '300px !important',
+      height: '300px !important',
+      objectFit: 'cover !important',
     },
   },
   '& .ql-toolbar': {
@@ -91,9 +97,18 @@ export const modules = {
       },
       redo: function () {
         // @ts-ignore
-
         const quill = this.quill;
         quill.history.redo();
+      },
+      image: function () {
+        // @ts-ignore
+        const quill = this.quill;
+        const range = quill.getSelection();
+        // @ts-ignore
+        const handleImageUpload = this.options.handlers.handleImageUpload;
+        if (handleImageUpload) {
+          handleImageUpload();
+        }
       },
     },
   },
@@ -136,15 +151,28 @@ export default function QuillEditor({
       const file = input.files?.[0];
       if (file) {
         try {
-          const mockUploadResponse = {
-            url: URL.createObjectURL(file),
-          };
+          const formData = new FormData();
+          formData.append('files', file);
+
+          const response = await uploadFilesBulk(formData);
+          const uploadedFile = response.data[0];
+          const imageUrl = [uploadedFile.path, uploadedFile.filename].join('/');
 
           const quill = quillRef.current?.getEditor();
           const range = quill?.getSelection();
 
           if (quill && range) {
-            quill.insertEmbed(range.index, 'image', mockUploadResponse.url);
+            quill.insertEmbed(range.index, 'image', imageUrl);
+
+            const imageNode = quill.root.querySelector(`img[src="${imageUrl}"]`);
+            if (imageNode) {
+              // @ts-ignore
+              imageNode.style.width = '200px';
+              // @ts-ignore
+              imageNode.style.height = '200px';
+              // @ts-ignore
+              imageNode.style.objectFit = 'cover';
+            }
           }
         } catch (err) {
           console.error('Error uploading image:', err);
@@ -152,6 +180,17 @@ export default function QuillEditor({
       }
     };
   }, []);
+
+  const customModules = {
+    ...modules,
+    toolbar: {
+      ...modules.toolbar,
+      handlers: {
+        ...modules.toolbar.handlers,
+        handleImageUpload,
+      },
+    },
+  };
 
   return (
     <Controller
@@ -169,7 +208,7 @@ export default function QuillEditor({
             ref={quillRef}
             value={field.value}
             onChange={field.onChange}
-            modules={modules}
+            modules={customModules}
             formats={[
               'header',
               'font',

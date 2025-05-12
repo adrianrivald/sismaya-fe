@@ -187,7 +187,6 @@ const superAdminRoutes: NonIndexRouteObject = {
   children: [
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardInternalPage /> },
-    { path: 'faq', element: <FAQPage /> },
 
     { path: 'report/request', element: <ReportRequestPage /> },
     { path: 'report/work-allocation', element: <ReportWorkAllocationPage /> },
@@ -228,8 +227,8 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'product-filter/:id/create', element: <CompanyRelationCreatePage /> },
 
     // FAQ
-    { path: 'master-faq', element: <MasterFaqPage /> },
-    { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
+    // { path: 'master-faq', element: <MasterFaqPage /> },
+    // { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
   ],
 };
 
@@ -260,6 +259,7 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
     { path: '/:vendor/dashboard', element: <DashboardInternalCompanyPage /> },
+    { path: '/:vendor/faq', element: <FAQPage /> },
 
     // Task Management
     {
@@ -331,6 +331,15 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/product/create', element: <MasterCreateProductPage /> },
     { path: '/:vendor/product/:id/edit', element: <MasterCreateProductPage /> },
 
+    // FAQ
+    { path: '/:vendor/master-faq', element: <MasterFaqPage /> },
+    { path: '/:vendor/master-faq/create', element: <MasterFaqCreatePage /> },
+    { path: '/:vendor/master-faq/:id/edit', element: <MasterFaqCreatePage /> },
+
+    { path: '/:vendor/category', element: <>category content here</> },
+    { path: '/:vendor/status', element: <>status content here</> },
+    { path: '/:vendor/title', element: <>titles content here</> },
+    { path: '/:vendor/division', element: <>division content here</> },
     // Category
     { path: '/:vendor/category', element: <MasterCategoryPage /> },
     { path: '/:vendor/category/create', element: <MasterCreateCategoryPage /> },
@@ -360,6 +369,7 @@ const clientRoutes: NonIndexRouteObject = {
     { element: <HomePage />, index: true },
     { path: 'dashboard', element: <DashboardClientPage /> },
     { path: 'faq', element: <FAQPage /> },
+    { path: '/:vendor/faq', element: <FAQPage /> },
     // Request
     { path: '/:vendor/request', element: <RequestListPage /> },
     { path: '/request/unresolved-cito', element: <UnresolvedCitoListPage /> },
