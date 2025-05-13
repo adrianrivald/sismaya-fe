@@ -6,5 +6,5 @@ export interface TitleTypes {
     name: string;
     type: string;
   };
-  isActive: boolean;
+  is_active: boolean;
 }

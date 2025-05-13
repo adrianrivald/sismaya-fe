@@ -66,7 +66,7 @@ export function CreateTitleView() {
   };
   const defaultValues: TitleDTO = {
     name: data?.name || '',
-    is_active: false,
+    is_active: data?.is_active || false,
   };
 
   return (
@@ -115,6 +115,7 @@ export function CreateTitleView() {
                             onChange={(_, checked) => {
                               setValue('is_active', checked);
                             }}
+                            defaultChecked={defaultValues?.is_active}
                           />
                         }
                         label="Set status as Active"

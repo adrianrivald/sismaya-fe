@@ -17,7 +17,7 @@ export function useUpdateTitle() {
         const { name, id, company_id, is_active } = formData;
   
   
-        return http(`categories/${id}`, {
+        return http(`titles/${id}`, {
         method: "PUT",
           data: {
             name,

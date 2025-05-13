@@ -73,7 +73,7 @@ export function CreateStatusView() {
   };
   const defaultValues: StatusDTO = {
     name: data?.name || '',
-    is_active: false,
+    is_active: data?.is_active || false,
     step: data?.step || '',
   };
 
@@ -136,6 +136,7 @@ export function CreateStatusView() {
                             onChange={(_, checked) => {
                               setValue('is_active', checked);
                             }}
+                            defaultChecked={defaultValues?.is_active}
                           />
                         }
                         label="Set status as Active"

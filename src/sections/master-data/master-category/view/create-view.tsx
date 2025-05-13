@@ -67,7 +67,7 @@ export function CreateCategoryView() {
   };
   const defaultValues: CategoryDTO = {
     name: data?.name || '',
-    is_active: false,
+    is_active: data?.is_active || false,
   };
 
   return (
@@ -116,6 +116,7 @@ export function CreateCategoryView() {
                             onChange={(_, checked) => {
                               setValue('is_active', checked);
                             }}
+                            defaultChecked={defaultValues?.is_active}
                           />
                         }
                         label="Set status as Active"
