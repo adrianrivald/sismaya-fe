@@ -68,7 +68,7 @@ export function CreateProductView() {
   };
   const defaultValues: ProductDTO = {
     name: data?.name || '',
-    is_active: false,
+    is_active: data?.is_active || false,
   };
 
   return (
@@ -117,6 +117,7 @@ export function CreateProductView() {
                             onChange={(_, checked) => {
                               setValue('is_active', checked);
                             }}
+                            defaultChecked={defaultValues?.is_active}
                           />
                         }
                         label="Set status as Active"

@@ -6,7 +6,7 @@ import { usePaginationQuery } from "src/utils/hooks/use-pagination-query";
 
   export function fetchTitleList(params: Partial<any>, company_id?: string) {
     const baseUrl = window.location.origin;
-    const endpointUrl = new URL('/titles', baseUrl);
+    const endpointUrl = new URL('/titles?is_active=all', baseUrl);
   
     if (company_id) {
       endpointUrl.searchParams.append('company_id', company_id);

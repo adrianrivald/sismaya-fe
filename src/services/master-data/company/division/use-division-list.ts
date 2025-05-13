@@ -26,7 +26,7 @@ export function useDivisionByCompanyId(companyId: number) {
 
   export function fetchDivisionList(params: Partial<any>, company_id?: string) {
     const baseUrl = window.location.origin;
-    const endpointUrl = new URL('/departments', baseUrl);
+    const endpointUrl = new URL('/departments?is_active=all', baseUrl);
   
     if (company_id) {
       endpointUrl.searchParams.append('company_id', company_id);

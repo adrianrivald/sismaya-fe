@@ -18,7 +18,7 @@ export function useStatusByCompanyId(companyId: number) {
   
     export function fetchStatusList(params: Partial<any>, company_id?: string) {
       const baseUrl = window.location.origin;
-      const endpointUrl = new URL('/progress-status', baseUrl);
+      const endpointUrl = new URL('/progress-status?is_active=all', baseUrl);
     
       if (company_id) {
         endpointUrl.searchParams.append('company_id', company_id);

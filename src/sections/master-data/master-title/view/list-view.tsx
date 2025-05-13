@@ -47,21 +47,19 @@ const columns = (popoverProps: PopoverProps) => [
       </Typography>
     ),
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('is_active', {
     header: 'Status',
     cell: (info) => (
-      <Box
-        sx={{ bgcolor: info.getValue() === 'true' ? '#00B8D929' : '#FF563029', borderRadius: 2 }}
-      >
+      <Box sx={{ bgcolor: info.getValue() === true ? '#00B8D929' : '#FF563029', borderRadius: 2 }}>
         <Typography
           fontSize={14}
           px={1}
           py={1}
           textAlign="center"
-          color={info.getValue() === 'true' ? '#006C9C' : '#B71D18'}
+          color={info.getValue() === true ? '#006C9C' : '#B71D18'}
           fontWeight={500}
         >
-          {info.getValue() === 'true' ? 'Active' : 'Inactive'}
+          {info.getValue() === true ? 'Active' : 'Inactive'}
         </Typography>
       </Box>
     ),

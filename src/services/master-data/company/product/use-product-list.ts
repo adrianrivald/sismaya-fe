@@ -36,7 +36,7 @@ export function useProductByCompanyId(
 
 export function fetchProductList(params: Partial<any>, company_id?: string) {
   const baseUrl = window.location.origin;
-  const endpointUrl = new URL('/products', baseUrl);
+  const endpointUrl = new URL('/products?is_active=all', baseUrl);
 
   if (company_id) {
     endpointUrl.searchParams.append('company_id', company_id);
