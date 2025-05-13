@@ -131,10 +131,14 @@ export default function MasterFaqPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const debounceSearch = useDebounce(form.search, 1000);
-  const { getDataTableProps, refetch } = useFaqList({
-    search: debounceSearch,
-    product_id: form.product === 'all' ? null : Number(form.product),
-  });
+  const { getDataTableProps, refetch } = useFaqList(
+    {
+      search: debounceSearch,
+      product_id: form.product === 'all' ? null : Number(form.product),
+      company_id: idCurrentCompany,
+    },
+    String(idCurrentCompany)
+  );
 
   const handleSelectionChange = (selected: FaqType[]) => {
     setSelectedFaq(selected);
@@ -148,9 +152,9 @@ export default function MasterFaqPage() {
     return { handleEdit };
   };
 
-  useEffect(() => {
-    refetch();
-  }, [form.product, refetch]);
+  // useEffect(() => {
+  //   refetch();
+  // }, [form.product, refetch]);
 
   const onBulkDelete = () => {
     const faqData = selectedFaq.map((item) => item.id).join(',');
