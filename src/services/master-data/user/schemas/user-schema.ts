@@ -63,7 +63,8 @@ export const userClientUpdateSchema = z
     profile_picture: z.string().optional(),
     company_id: z.number().nullable(),
     department_id: z.number().nullable(),
-    internal_id: z.number().array().optional()
+    internal_id: z.number().array().optional(),
+    title_id: z.number().nullable(),
   })
   .partial();
 

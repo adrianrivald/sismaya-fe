@@ -90,8 +90,10 @@ interface EditFormProps {
   watch: UseFormWatch<UserClientUpdateDTO>;
   defaultValues: UserValues;
   fetchDivision: (companyId: number) => void;
+  fetchTitles: (companyId: number) => void;
   clientCompanies: Company[] | undefined;
   divisions: Department[] | [];
+  titles: any[] | [];
   roles: Role[] | undefined;
   isLoading: boolean;
   user: User | undefined;
@@ -129,8 +131,10 @@ function EditForm({
   watch,
   defaultValues,
   fetchDivision,
+  fetchTitles,
   clientCompanies,
   divisions,
+  titles,
   roles,
   isLoading,
   user,
@@ -454,6 +458,56 @@ function EditForm({
                   </MenuList>
                 </Stack>
 
+                {item?.company_id === selectedCompanyId ? (
+                  <Grid item xs={12} md={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="select-division">Division</InputLabel>
+                      <Select
+                        labelId="select-division"
+                        error={Boolean(formState?.errors?.department_id)}
+                        {...register('department_id', {
+                          required: 'Division must be filled out',
+                        })}
+                        label="Division"
+                      >
+                        {divisions?.map((division) => (
+                          <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.department_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.department_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                ) : null}
+
+                {item?.company_id === selectedCompanyId ? (
+                  <Grid item xs={12} md={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="select-division">Title</InputLabel>
+                      <Select
+                        labelId="select-title"
+                        error={Boolean(formState?.errors?.title_id)}
+                        {...register('title_id', {
+                          required: 'Title must be filled out',
+                        })}
+                        label="Title"
+                      >
+                        {titles?.map((title) => (
+                          <MenuItem value={title?.id}>{title?.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {formState?.errors?.title_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.title_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                ) : null}
+
                 {item?.company_id === selectedCompanyId && (
                   <Card
                     sx={{
@@ -752,6 +806,7 @@ export function EditUserView({ type }: EditUserProps) {
   const { id } = useParams();
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const [titles, setTitles] = React.useState<any[] | []>([]);
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | undefined>();
   const [isOpenCompanySelection, setIsOpenCompanySelection] = React.useState(false);
@@ -826,6 +881,19 @@ export function EditUserView({ type }: EditUserProps) {
     }).then((res) =>
       res.json().then((value) => {
         setDivisions(value?.data);
+      })
+    );
+    return data;
+  };
+
+  const fetchTitles = async (companyId: number) => {
+    const data = await fetch(`${API_URL}/titles?company_id=${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+      },
+    }).then((res) =>
+      res.json().then((value) => {
+        setTitles(value?.data);
       })
     );
     return data;
@@ -990,6 +1058,8 @@ export function EditUserView({ type }: EditUserProps) {
               watch={watch}
               defaultValues={defaultValues}
               fetchDivision={fetchDivision}
+              fetchTitles={fetchTitles}
+              titles={titles}
               clientCompanies={clientCompanies}
               divisions={divisions}
               roles={roles}

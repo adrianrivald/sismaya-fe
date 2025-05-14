@@ -79,6 +79,7 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
+  const [titles, setTitles] = React.useState<any[] | []>([]);
   const { mutate: addUser } = useAddUser({ isRbac: false });
   const { data: roles } = useRole();
   const [isOpenCompanySelection, setIsOpenCompanySelection] = useState(false);
@@ -107,6 +108,17 @@ export function CreateUserView({ type }: CreateUserProps) {
     }).then((res) =>
       res.json().then((value) => {
         setDivisions(value?.data);
+      })
+    );
+    return data;
+  };
+
+  const fetchTitles = async (companyId: number) => {
+    const data = await fetch(`${API_URL}/titles?company_id=${companyId}`, {
+      headers: { Authorization: `Bearer ${getSession()}` },
+    }).then((res) =>
+      res.json().then((value) => {
+        setTitles(value?.data);
       })
     );
     return data;
@@ -389,6 +401,56 @@ export function CreateUserView({ type }: CreateUserProps) {
                             </MenuList>
                           </Stack>
 
+                          {item?.id === selectedCompanyId ? (
+                            <Grid item xs={12} md={12}>
+                              <FormControl fullWidth>
+                                <InputLabel id="select-division">Division</InputLabel>
+                                <Select
+                                  labelId="select-division"
+                                  error={Boolean(formState?.errors?.department_id)}
+                                  {...register('department_id', {
+                                    required: 'Division must be filled out',
+                                  })}
+                                  label="Division"
+                                >
+                                  {divisions?.map((division) => (
+                                    <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                              {formState?.errors?.department_id && (
+                                <FormHelperText sx={{ color: 'error.main' }}>
+                                  {String(formState?.errors?.department_id?.message)}
+                                </FormHelperText>
+                              )}
+                            </Grid>
+                          ) : null}
+
+                          {item?.id === selectedCompanyId ? (
+                            <Grid item xs={12} md={12}>
+                              <FormControl fullWidth>
+                                <InputLabel id="select-division">Title</InputLabel>
+                                <Select
+                                  labelId="select-title"
+                                  error={Boolean(formState?.errors?.title_id)}
+                                  {...register('title_id', {
+                                    required: 'Title must be filled out',
+                                  })}
+                                  label="Title"
+                                >
+                                  {titles?.map((title) => (
+                                    <MenuItem value={title?.id}>{title?.name}</MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                              {formState?.errors?.title_id && (
+                                <FormHelperText sx={{ color: 'error.main' }}>
+                                  {String(formState?.errors?.title_id?.message)}
+                                </FormHelperText>
+                              )}
+                            </Grid>
+                          ) : null}
+
                           {item?.id === selectedCompanyId && (
                             <Card
                               sx={{
@@ -463,11 +525,13 @@ export function CreateUserView({ type }: CreateUserProps) {
                               internalCompanies?.find((company) => company.id === userCompany) ||
                               null
                             }
-                            onChange={(_, selectedCompany) => {
+                            onChange={async (_, selectedCompany) => {
                               if (selectedCompany) {
-                                onChangeUserCompanyNew({
+                                await onChangeUserCompanyNew({
                                   target: { value: selectedCompany.id },
                                 } as any);
+                                await fetchDivision(selectedCompany?.id);
+                                await fetchTitles(selectedCompany?.id);
                               }
                             }}
                             open={isOpenCompanySelection}
@@ -565,6 +629,50 @@ export function CreateUserView({ type }: CreateUserProps) {
                 ) : null
               ) : null}
               {/* ) : null} */}
+
+              {userCompany !== null && type === 'internal' ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-division">Division</InputLabel>
+                    <Select
+                      labelId="select-division"
+                      error={Boolean(formState?.errors?.department_id)}
+                      {...register('department_id', { required: 'Division must be filled out' })}
+                      label="Division"
+                    >
+                      {divisions?.map((division) => (
+                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.department_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.department_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
+
+              {userCompany !== null && type === 'internal' && watch('department_id') !== null ? (
+                <Grid item xs={12} md={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-division">Title</InputLabel>
+                    <Select
+                      labelId="select-title"
+                      error={Boolean(formState?.errors?.title_id)}
+                      {...register('title_id', { required: 'Title must be filled out' })}
+                      label="Title"
+                    >
+                      {titles?.map((title) => <MenuItem value={title?.id}>{title?.name}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                  {formState?.errors?.title_id && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.title_id?.message)}
+                    </FormHelperText>
+                  )}
+                </Grid>
+              ) : null}
 
               {userCompany !== null && type === 'internal' ? (
                 <Grid item xs={12} md={12}>
