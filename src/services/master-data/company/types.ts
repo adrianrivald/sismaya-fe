@@ -87,6 +87,8 @@ export interface InternalCompany {
   updated_at: string;
   // user: UserInfo;
   user_id: number;
+  department_id: number;
+  title_id: number;
 }
 
 export interface CompanyInInternal {
