@@ -27,7 +27,8 @@ export const userClientSchema = z
     role_id: z.number().min(1, 'Required'),
     cover: z.any(),
     internal_id: z.number().array().optional(),
-    product_id: z.number().array().optional()
+    product_id: z.number().array().optional(),
+    title_id: z.number().nullable()
   })
   .partial();
 

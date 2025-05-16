@@ -1,4 +1,5 @@
 import Typography from '@mui/material/Typography';
+import type { SelectChangeEvent, Theme } from '@mui/material';
 import {
   Box,
   Button,
@@ -15,10 +16,8 @@ import {
   MenuList,
   OutlinedInput,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
-  Theme,
   useTheme,
   menuItemClasses,
   Autocomplete,
@@ -96,6 +95,10 @@ export function CreateUserView({ type }: CreateUserProps) {
   const [selectedId, setSelectedId] = React.useState<number | undefined>();
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [selectedProductsTemp, setSelectedProductsTemp] = useState<number[]>([]);
+  const [selectedDivision, setSelectedDivision] = useState<number | null>(null);
+  const [selectedDivisionTemp, setSelectedDivisionTemp] = useState<number | null>(null);
+  const [selectedTitle, setSelectedTitle] = useState<number | null>(null);
+  const [selectedTitleTemp, setSelectedTitleTemp] = useState<number | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [companyRelation, setCompanyRelation] = useState<Company[]>([]);
@@ -142,13 +145,15 @@ export function CreateUserView({ type }: CreateUserProps) {
 
   const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
     setIsLoading(true);
+    const payload = {
+      ...formData,
+      user_type: type,
+      internal_id: userCompanies?.length > 0 ? userCompanies : formData?.internal_id,
+      product_id: selectedProducts,
+      internal_arr: internalCompanyData,
+    };
     try {
-      addUser({
-        ...formData,
-        user_type: type,
-        internal_id: userCompanies?.length > 0 ? userCompanies : formData?.internal_id,
-        product_id: selectedProducts,
-      });
+      addUser(payload);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -181,9 +186,17 @@ export function CreateUserView({ type }: CreateUserProps) {
     });
   };
 
-  const onClickEdit = (selectedItemId: number) => {
+  const onClickEdit = async (selectedItemId: number) => {
+    await fetchDivision(selectedItemId);
+    await fetchTitles(selectedItemId);
     setIsEditMode(true);
     setSelectedProductsTemp(selectedProducts);
+    setSelectedDivisionTemp(
+      internalCompanyData?.find((item) => item?.internal_id === selectedItemId).department_id
+    );
+    setSelectedTitleTemp(
+      internalCompanyData?.find((item) => item?.internal_id === selectedItemId).title_id
+    );
     if (selectedCompanyId === null) {
       setSelectedCompanyId(selectedItemId);
       setExistingUserCompany(selectedItemId);
@@ -196,10 +209,43 @@ export function CreateUserView({ type }: CreateUserProps) {
     }
   };
 
-  const onSaveUserCompany = () => {
-    setSelectedProducts(selectedProductsTemp);
+  const [internalCompanyData, setInternalCompanyData] = useState<any[]>([]);
+
+  const onSaveUserCompany = async (index: number) => {
+    await setSelectedProducts(selectedProductsTemp);
+    await setSelectedDivision(selectedDivisionTemp);
+    setSelectedTitle(selectedTitleTemp);
+    const hasInternalIdIncluded = internalCompanyData?.some(
+      (item) => item?.internal_id === userCompanies[index]
+    );
+    if (!hasInternalIdIncluded) {
+      setInternalCompanyData((prev) => [
+        ...prev,
+        {
+          internal_id: userCompanies[index],
+          department_id: selectedDivisionTemp,
+          title_id: selectedTitleTemp,
+        },
+      ]);
+    } else {
+      const filteredData = internalCompanyData
+        // ?.filter((item) => item?.internal_id === userCompanies[index])
+        ?.map((item) => {
+          if (item?.internal_id === userCompanies[index]) {
+            return {
+              internal_id: userCompanies[index],
+              department_id: selectedDivisionTemp,
+              title_id: selectedTitleTemp,
+            };
+          }
+          return item;
+        });
+      setInternalCompanyData(filteredData);
+    }
     setSelectedCompanyId(null);
     setExistingUserCompany(null);
+    setSelectedDivisionTemp(null);
+    setSelectedTitleTemp(null);
   };
 
   // User Company
@@ -212,7 +258,19 @@ export function CreateUserView({ type }: CreateUserProps) {
         return updatedUserCompanies;
       });
       setSelectedProducts(selectedProductsTemp);
+      setSelectedDivision(selectedDivisionTemp);
+      setSelectedTitle(selectedTitleTemp);
+      setInternalCompanyData((prev) => [
+        ...prev,
+        {
+          internal_id: userCompany,
+          department_id: selectedDivisionTemp,
+          title_id: selectedTitleTemp,
+        },
+      ]);
       setUserCompany(null);
+      setSelectedDivisionTemp(null);
+      setSelectedTitleTemp(null);
     } else {
       toast.error(`Company already selected`, {
         position: 'top-right',
@@ -235,7 +293,11 @@ export function CreateUserView({ type }: CreateUserProps) {
 
   const onRemove = () => {
     const newCompanies = userCompanies?.filter((item) => item !== selectedId);
+    const newInternalCompanyData = internalCompanyData?.filter(
+      (item) => item?.internal_id !== selectedId
+    );
     setUserCompanies(newCompanies);
+    setInternalCompanyData(newInternalCompanyData);
     setOpenRemoveModal(false);
   };
 
@@ -251,6 +313,13 @@ export function CreateUserView({ type }: CreateUserProps) {
       const newArr = selectedProductsTemp?.filter((item) => item !== productFilterId);
       setSelectedProductsTemp(newArr);
     }
+  };
+
+  const onChangeDivision = (e: SelectChangeEvent) => {
+    setSelectedDivisionTemp(Number(e.target.value));
+  };
+  const onChangeTitle = (e: SelectChangeEvent) => {
+    setSelectedTitleTemp(Number(e.target.value));
   };
 
   return (
@@ -387,12 +456,12 @@ export function CreateUserView({ type }: CreateUserProps) {
                                 },
                               }}
                             >
-                              <MenuItem onClick={() => onClickEdit(item?.id)}>
+                              <MenuItem onClick={() => onClickEdit(userCompanies[index])}>
                                 <Iconify icon="solar:pen-bold" />
                                 Edit
                               </MenuItem>
                               <MenuItem
-                                onClick={() => onClickRemove(item?.id)}
+                                onClick={() => onClickRemove(userCompanies[index])}
                                 sx={{ color: 'error.main' }}
                               >
                                 <Iconify icon="solar:trash-bin-trash-bold" />
@@ -401,20 +470,21 @@ export function CreateUserView({ type }: CreateUserProps) {
                             </MenuList>
                           </Stack>
 
-                          {item?.id === selectedCompanyId ? (
+                          {userCompanies[index] === selectedCompanyId ? (
                             <Grid item xs={12} md={12}>
                               <FormControl fullWidth>
                                 <InputLabel id="select-division">Division</InputLabel>
                                 <Select
                                   labelId="select-division"
                                   error={Boolean(formState?.errors?.department_id)}
-                                  {...register('department_id', {
-                                    required: 'Division must be filled out',
-                                  })}
+                                  onChange={onChangeDivision}
+                                  value={selectedDivisionTemp?.toString()}
                                   label="Division"
                                 >
                                   {divisions?.map((division) => (
-                                    <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                                    <MenuItem value={division?.id.toString()}>
+                                      {division?.name}
+                                    </MenuItem>
                                   ))}
                                 </Select>
                               </FormControl>
@@ -426,20 +496,19 @@ export function CreateUserView({ type }: CreateUserProps) {
                             </Grid>
                           ) : null}
 
-                          {item?.id === selectedCompanyId ? (
+                          {userCompanies[index] === selectedCompanyId ? (
                             <Grid item xs={12} md={12}>
                               <FormControl fullWidth>
                                 <InputLabel id="select-division">Title</InputLabel>
                                 <Select
                                   labelId="select-title"
                                   error={Boolean(formState?.errors?.title_id)}
-                                  {...register('title_id', {
-                                    required: 'Title must be filled out',
-                                  })}
+                                  onChange={onChangeTitle}
+                                  value={selectedTitleTemp?.toString()}
                                   label="Title"
                                 >
                                   {titles?.map((title) => (
-                                    <MenuItem value={title?.id}>{title?.name}</MenuItem>
+                                    <MenuItem value={title?.id.toString()}>{title?.name}</MenuItem>
                                   ))}
                                 </Select>
                               </FormControl>
@@ -451,7 +520,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                             </Grid>
                           ) : null}
 
-                          {item?.id === selectedCompanyId && (
+                          {userCompanies[index] === selectedCompanyId && (
                             <Card
                               sx={{
                                 width: '100%',
@@ -496,7 +565,7 @@ export function CreateUserView({ type }: CreateUserProps) {
                               <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
                                 <Button
                                   size="small"
-                                  onClick={onSaveUserCompany}
+                                  onClick={() => onSaveUserCompany(index)}
                                   variant="contained"
                                   color="primary"
                                   sx={{ width: 120 }}
@@ -637,11 +706,12 @@ export function CreateUserView({ type }: CreateUserProps) {
                     <Select
                       labelId="select-division"
                       error={Boolean(formState?.errors?.department_id)}
-                      {...register('department_id', { required: 'Division must be filled out' })}
+                      onChange={onChangeDivision}
+                      value={selectedDivisionTemp?.toString()}
                       label="Division"
                     >
                       {divisions?.map((division) => (
-                        <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                        <MenuItem value={division?.id.toString()}>{division?.name}</MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -660,10 +730,13 @@ export function CreateUserView({ type }: CreateUserProps) {
                     <Select
                       labelId="select-title"
                       error={Boolean(formState?.errors?.title_id)}
-                      {...register('title_id', { required: 'Title must be filled out' })}
+                      onChange={onChangeTitle}
+                      value={selectedTitleTemp?.toString()}
                       label="Title"
                     >
-                      {titles?.map((title) => <MenuItem value={title?.id}>{title?.name}</MenuItem>)}
+                      {titles?.map((title) => (
+                        <MenuItem value={title?.id.toString()}>{title?.name}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                   {formState?.errors?.title_id && (

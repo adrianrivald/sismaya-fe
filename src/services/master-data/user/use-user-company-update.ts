@@ -3,19 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import { http } from "src/utils/http";
 
-export type StoreUserCompany = {
+export type UpdateUserCompany = {
   user_id: number;
   company_id?: number | null
   title_id?: number | null;
   department_id?: number | null;
+  relation_id: number;
 };
 
-export function useAddUserCompany() {
+export function useUpdateUserCompany() {
     const queryClient = useQueryClient();
     const navigate = useNavigate()
     return useMutation(
-      async (formData: StoreUserCompany) => {
-         const { user_id, company_id, department_id, title_id } = formData;
+      async (formData: UpdateUserCompany) => {
+        const { user_id, company_id, department_id, title_id,relation_id } = formData;
         const payload = {
           user_id,
           company_id
@@ -31,7 +32,8 @@ export function useAddUserCompany() {
             title_id
           })
         }
-        return http(`user-company`, {
+        return http(`user-company/${relation_id}`, {
+          method: "PUT",
           data: {...payload},
         });
       },

@@ -32,6 +32,7 @@ import {
   useDeleteUserProductById,
   useUpdateUser,
   useUpdateUserChangeCompany,
+  useUpdateUserCompany,
   useUserById,
   useUserCompanyById,
 } from 'src/services/master-data/user';
@@ -111,12 +112,16 @@ interface EditFormProps {
   companyRelations: any[];
   companyProducts: Products[] | undefined;
   selectedProducts: number[];
+  selectedDivision: number | null;
+  selectedTitle: number | null;
   onChangeProductFilter: (productFilterId: number) => void;
   onClickEdit: (selectedItemId: number) => void;
   onSaveUserCompany: () => void;
   selectedCompanyId: number | null;
   existingCompanyProducts: Products[] | undefined;
   onChangeProductFilterEdit: (productFilterId: number, productId?: number) => void;
+  onChangeTitleEdit: (e: SelectChangeEvent, itemId: number) => void;
+  onChangeDivisionEdit: (e: SelectChangeEvent, itemId: number) => void;
   isOpenResetPassword: boolean;
   setIsOpenResetPassword: Dispatch<SetStateAction<boolean>>;
   showPassword: boolean;
@@ -158,10 +163,14 @@ function EditForm({
   selectedCompanyId,
   existingCompanyProducts,
   onChangeProductFilterEdit,
+  onChangeTitleEdit,
+  onChangeDivisionEdit,
   isOpenResetPassword,
   setIsOpenResetPassword,
   showPassword,
   setShowPassword,
+  selectedDivision,
+  selectedTitle,
 }: EditFormProps) {
   const [tempPassword, setTempPassword] = useState('');
   const { mutate: updateUser } = useUpdateUserChangeCompany({ isRbac: false });
@@ -465,13 +474,12 @@ function EditForm({
                       <Select
                         labelId="select-division"
                         error={Boolean(formState?.errors?.department_id)}
-                        {...register('department_id', {
-                          required: 'Division must be filled out',
-                        })}
+                        onChange={(e) => onChangeDivisionEdit(e, item?.id)}
+                        value={selectedDivision?.toString()}
                         label="Division"
                       >
                         {divisions?.map((division) => (
-                          <MenuItem value={division?.id}>{division?.name}</MenuItem>
+                          <MenuItem value={division?.id.toString()}>{division?.name}</MenuItem>
                         ))}
                       </Select>
                     </FormControl>
@@ -490,13 +498,12 @@ function EditForm({
                       <Select
                         labelId="select-title"
                         error={Boolean(formState?.errors?.title_id)}
-                        {...register('title_id', {
-                          required: 'Title must be filled out',
-                        })}
+                        onChange={(e) => onChangeTitleEdit(e, item?.id)}
+                        value={selectedTitle?.toString()}
                         label="Title"
                       >
                         {titles?.map((title) => (
-                          <MenuItem value={title?.id}>{title?.name}</MenuItem>
+                          <MenuItem value={title?.id.toString()}>{title?.name}</MenuItem>
                         ))}
                       </Select>
                     </FormControl>
@@ -822,6 +829,8 @@ export function EditUserView({ type }: EditUserProps) {
   const [existingUserCompany, setExistingUserCompany] = React.useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = React.useState<number[]>([]);
   const [selectedProductsTemp, setSelectedProductsTemp] = React.useState<number[]>([]);
+  const [selectedDivision, setSelectedDivision] = React.useState<number | null>(null);
+  const [selectedTitle, setSelectedTitle] = React.useState<number | null>(null);
   const { data: user } = useUserById(Number(id));
   const { data: roles } = useRole();
   const { mutate: updateUser } = useUpdateUser({ isRbac: false });
@@ -830,13 +839,12 @@ export function EditUserView({ type }: EditUserProps) {
   const [selectedCompanyId, setSelectedCompanyId] = React.useState<number | null>(null);
   // const { data: userCompaniesData } = useUserCompanyById(Number(id));
   const { mutate: addUserCompany } = useAddUserCompany();
+  const { mutate: updateUserCompany } = useUpdateUserCompany();
   const { mutate: deleteUserCompany } = useDeleteUserCompanyById(Number(id));
   const [companyRelations, setCompanyRelations] = React.useState<InternalCompany[]>([]);
   const { mutate: addUserProduct } = useAddUserProduct();
   const { mutate: deleteUserProduct } = useDeleteUserProductById(Number(id));
   const { data: existingCompanyProducts } = useProductByCompanyId(Number(existingUserCompany));
-
-  console.log(userCompanies, 'userCompanies');
 
   const defaultValues = {
     name: user?.user_info?.name,
@@ -899,8 +907,17 @@ export function EditUserView({ type }: EditUserProps) {
     return data;
   };
 
-  const onClickEdit = (selectedItemId: number) => {
+  const onClickEdit = async (selectedItemId: number) => {
+    await fetchDivision(selectedItemId);
+    await fetchTitles(selectedItemId);
     setSelectedProductsTemp(selectedProducts);
+    setSelectedDivision(
+      user?.internal_companies?.find((item) => item?.company_id === selectedItemId)
+        ?.department_id ?? 0
+    );
+    setSelectedTitle(
+      user?.internal_companies?.find((item) => item?.company_id === selectedItemId)?.title_id ?? 0
+    );
     if (selectedCompanyId === null) {
       setSelectedCompanyId(selectedItemId);
       setExistingUserCompany(selectedItemId);
@@ -990,8 +1007,15 @@ export function EditUserView({ type }: EditUserProps) {
 
   React.useEffect(() => {
     setUserCompanies(user?.internal_companies ?? []);
-    console.log('hitt');
     setSelectedProducts(user?.products_handled?.map((item) => item?.product_id) ?? []);
+    setSelectedDivision(
+      user?.internal_companies?.find((item) => item?.company_id === selectedCompanyId)
+        ?.department_id ?? 0
+    );
+    setSelectedTitle(
+      user?.internal_companies?.find((item) => item?.company_id === selectedCompanyId)?.title_id ??
+        0
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -1010,6 +1034,48 @@ export function EditUserView({ type }: EditUserProps) {
       });
     }
     setUserProduct(null);
+  };
+
+  const onChangeDivisionEdit = (e: SelectChangeEvent, itemId: number) => {
+    const divisionId = e.target.value;
+    const departmentValue = user?.internal_companies?.find(
+      (item) => item?.company_id === selectedCompanyId
+    )?.department_id;
+    if (departmentValue === null) {
+      addUserCompany({
+        user_id: Number(id),
+        company_id: selectedCompanyId,
+        department_id: Number(divisionId),
+      });
+    } else {
+      updateUserCompany({
+        relation_id: itemId,
+        user_id: Number(id),
+        company_id: selectedCompanyId,
+        department_id: Number(divisionId),
+      });
+    }
+  };
+
+  const onChangeTitleEdit = (e: SelectChangeEvent, itemId: number) => {
+    const titleId = e.target.value;
+    const titleValue = user?.internal_companies?.find(
+      (item) => item?.company_id === selectedCompanyId
+    )?.title_id;
+    if (titleValue === null) {
+      addUserCompany({
+        user_id: Number(id),
+        company_id: selectedCompanyId,
+        title_id: Number(titleId),
+      });
+    } else {
+      updateUserCompany({
+        relation_id: itemId,
+        user_id: Number(id),
+        company_id: selectedCompanyId,
+        title_id: Number(titleId),
+      });
+    }
   };
 
   const onChangeProductFilter = (productFilterId: number) => {
@@ -1085,10 +1151,14 @@ export function EditUserView({ type }: EditUserProps) {
               selectedCompanyId={selectedCompanyId}
               existingCompanyProducts={existingCompanyProducts}
               onChangeProductFilterEdit={onChangeProductFilterEdit}
+              onChangeDivisionEdit={onChangeDivisionEdit}
+              onChangeTitleEdit={onChangeTitleEdit}
               isOpenResetPassword={isOpenResetPassword}
               setIsOpenResetPassword={setIsOpenResetPassword}
               showPassword={showPassword}
               setShowPassword={setShowPassword}
+              selectedDivision={selectedDivision}
+              selectedTitle={selectedTitle}
             />
           )}
         </Form>
