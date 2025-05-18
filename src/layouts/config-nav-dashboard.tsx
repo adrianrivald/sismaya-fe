@@ -51,12 +51,9 @@ export const generalMenus = (
   {
     heading: 'FAQ',
     id: 'dashboard',
-    path: '/faq',
+    // path: '/faq',
     icon: icon('ic-file'),
-    list:
-      userType === 'internal'
-        ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
-        : [],
+    list: internalCompaniesFaq?.filter((item) => item?.heading !== undefined),
   },
 ];
 
