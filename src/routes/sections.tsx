@@ -196,6 +196,14 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'internal-company', element: <InternalCompanyListPage /> },
     { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
     { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
+    { path: 'internal-company/companies', element: <>Content Here</> },
+    { path: 'internal-company/product', element: <>Content Here</> },
+    { path: 'internal-company/category', element: <>Content Here</> },
+    { path: 'internal-company/status', element: <>Content Here</> },
+    { path: 'internal-company/division', element: <>Content Here</> },
+    { path: 'internal-company/title', element: <>Content Here</> },
+    { path: 'internal-company/faq', element: <>Content Here</> },
+
     // Client Company
     { path: 'client-company', element: <ClientCompanyListPage /> },
     { path: 'client-company/create', element: <ClientCompanyCreatePage /> },

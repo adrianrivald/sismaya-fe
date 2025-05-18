@@ -27,12 +27,13 @@ import { useDeleteStatus, useStatusCompanyList } from 'src/services/master-data/
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import useDebounce from 'src/utils/use-debounce';
+import { Icon } from '@iconify/react';
+import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
+import { useBulkDeleteStatus } from 'src/services/master-data/company/status/use-status-bulk-delete';
 import type { StatusTypes } from '../type/types';
-import { RemoveAction } from '../../internal-company/view/remove-action';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
@@ -73,12 +74,7 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<StatusTypes, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
-
-  const onClickRemove = (itemId?: number) => {
-    if (itemId) setSelectedId(itemId);
-    setOpenRemoveModal(true);
-  };
+  const { handleEdit } = popoverProps;
 
   return (
     <MenuList
@@ -100,11 +96,6 @@ function ButtonActions(props: CellContext<StatusTypes, unknown>, popoverProps: P
         <Iconify icon="solar:pen-bold" />
         Edit
       </MenuItem>
-
-      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
-      </MenuItem>
     </MenuList>
   );
 }
@@ -117,12 +108,13 @@ export function ListStatusView() {
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
   const { mutate: deleteStatysById } = useDeleteStatus();
-  const [openRemoveModal, setOpenRemoveModal] = useState(false);
+  const [openBulkDelete, setOpenBulkDelete] = useState(false);
   const [form, setForm] = useState({
     search: '',
     status: 'all',
     company: 'all',
   });
+  const { mutate: mutateBulkDeleteStatus } = useBulkDeleteStatus();
 
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useStatusCompanyList(
@@ -144,11 +136,30 @@ export function ListStatusView() {
 
     const handleDelete = () => {
       deleteStatysById(Number(selectedId));
-      setOpenRemoveModal(false);
       refetch();
     };
 
-    return { handleEdit, handleDelete };
+    return { handleEdit };
+  };
+  const onBulkDelete = () => {
+    const categoryData = selectedStatuses.map((item) => item.id).join(',');
+    mutateBulkDeleteStatus(categoryData, {
+      onSuccess: () => {
+        setOpenBulkDelete(false);
+        refetch();
+
+        setTimeout(() => {
+          setSelectedStatuses([]);
+        }, 500);
+      },
+      onError: () => {
+        setOpenBulkDelete(false);
+        refetch();
+        setTimeout(() => {
+          setSelectedStatuses([]);
+        }, 500);
+      },
+    });
   };
 
   return (
@@ -238,19 +249,37 @@ export function ListStatusView() {
                 />
               </FormControl>
             </Grid>
+
+            {selectedStatuses.length > 0 && (
+              <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+                <Button
+                  onClick={() => {
+                    setOpenBulkDelete(true);
+                  }}
+                  startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                  color="error"
+                >
+                  Delete ({selectedStatuses.length})
+                </Button>
+              </Grid>
+            )}
           </Grid>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            columns={columns({ ...popoverFuncs(), setSelectedId })}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
           />
         </CardContent>
       </Card>
-      <RemoveAction
-        onRemove={popoverFuncs().handleDelete}
-        openRemoveModal={openRemoveModal}
-        setOpenRemoveModal={setOpenRemoveModal}
+
+      <DialogBulkDelete
+        open={openBulkDelete}
+        onClose={() => setOpenBulkDelete(false)}
+        title={`Delete ${selectedStatuses.length} Request Statuses?`}
+        onClick={() => {
+          onBulkDelete();
+        }}
       />
     </DashboardContent>
   );

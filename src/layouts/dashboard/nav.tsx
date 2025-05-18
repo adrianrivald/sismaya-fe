@@ -186,6 +186,37 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     // path: `/${item?.company?.name.toLowerCase()}/report/request`,
   }));
 
+  const internalCompaniesMasterDataSuperAdmin = [
+    {
+      path: `/internal-company/companies`,
+      heading: 'Companies',
+    },
+    {
+      path: `/internal-company/product`,
+      heading: 'Products',
+    },
+    {
+      path: `/internal-company/category`,
+      heading: 'Request Categories',
+    },
+    {
+      path: `/internal-company/status`,
+      heading: 'Request Status',
+    },
+    {
+      path: `/internal-company/title`,
+      heading: 'Titles',
+    },
+    {
+      path: `/internal-company/division`,
+      heading: 'Divisions',
+    },
+    {
+      path: `/internal-company/master-faq`,
+      heading: 'Master FAQ',
+    },
+  ];
+
   return (
     <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />
@@ -200,6 +231,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           internalCompaniesAutoResponse,
           internalCompaniesReport,
           internalCompaniesMasterData,
+          internalCompaniesMasterDataSuperAdmin,
           internalCompaniesFaq,
           userType,
           userRole === 2
@@ -309,6 +341,110 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                                   {childMenu?.list?.map((item: any, childIndex: number) => {
                                     const isMenuActived = pathname.includes(item.path);
                                     if (childMenu?.heading === 'Master Data' && userRole === 2) {
+                                      return (
+                                        <Accordion
+                                          key={index}
+                                          defaultExpanded={item?.path === currentMenu}
+                                          sx={{
+                                            borderTop: 'none', // removes top border
+                                            borderBottom: 'none', // if needed
+                                            '&:before': {
+                                              display: 'none', // removes the default divider line
+                                            },
+                                          }}
+                                        >
+                                          <AccordionSummary
+                                            sx={{
+                                              p: 0,
+                                              '& .MuiAccordionSummary-content': {
+                                                margin: 0,
+                                              },
+                                            }}
+                                            aria-controls="panel-content"
+                                            id=""
+                                          >
+                                            <ListItem disableGutters disablePadding key="request">
+                                              <ListItemButton
+                                                disableGutters
+                                                sx={{
+                                                  pl: 2,
+                                                  py: 1,
+                                                  gap: 2,
+                                                  pr: 1.5,
+                                                  borderRadius: 0.75,
+                                                  typography: 'body2',
+                                                  fontWeight: 'fontWeightMedium',
+                                                  color: 'var(--layout-nav-item-color)',
+                                                  minHeight: 'var(--layout-nav-item-height)',
+                                                }}
+                                                onClick={() => onClickParentAccordion(item?.path)}
+                                              >
+                                                <Box component="span" flexGrow={1}>
+                                                  {item?.heading}
+                                                </Box>
+
+                                                {/* {item.info && item.info} */}
+                                              </ListItemButton>
+                                            </ListItem>
+                                          </AccordionSummary>
+
+                                          <AccordionDetails>
+                                            {item?.list?.map(
+                                              (
+                                                masterDataItem: any,
+                                                masterDataItemIndex: number
+                                              ) => {
+                                                const isMenuMasterDataActived = pathname.includes(
+                                                  masterDataItem.path
+                                                );
+                                                return (
+                                                  <ListItem
+                                                    disableGutters
+                                                    disablePadding
+                                                    key={masterDataItemIndex}
+                                                  >
+                                                    <ListItemButton
+                                                      disableGutters
+                                                      component={RouterLink}
+                                                      href={masterDataItem.path}
+                                                      sx={{
+                                                        pl: 2,
+                                                        py: 1,
+                                                        gap: 2,
+                                                        pr: 1.5,
+                                                        borderRadius: 0.75,
+                                                        typography: 'body2',
+                                                        fontWeight: 'fontWeightMedium',
+                                                        color: 'var(--layout-nav-item-color)',
+                                                        minHeight: 'var(--layout-nav-item-height)',
+                                                        ...(isMenuMasterDataActived && {
+                                                          fontWeight: 'fontWeightSemiBold',
+                                                          bgcolor:
+                                                            'var(--layout-nav-item-active-bg)',
+                                                          color:
+                                                            'var(--layout-nav-item-active-color)',
+                                                          '&:hover': {
+                                                            bgcolor:
+                                                              'var(--layout-nav-item-hover-bg)',
+                                                          },
+                                                        }),
+                                                      }}
+                                                    >
+                                                      <Box component="span" flexGrow={1}>
+                                                        {masterDataItem.heading}
+                                                      </Box>
+
+                                                      {masterDataItem.info && masterDataItem.info}
+                                                    </ListItemButton>
+                                                  </ListItem>
+                                                );
+                                              }
+                                            )}
+                                          </AccordionDetails>
+                                        </Accordion>
+                                      );
+                                    }
+                                    if (userRole === 1 && item?.heading === 'Internal Company') {
                                       return (
                                         <Accordion
                                           key={index}
