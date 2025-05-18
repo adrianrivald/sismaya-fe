@@ -7,8 +7,7 @@ import { WithPagination } from 'src/utils/types';
 export function fetchFaqList(params: Partial<any>) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/faq', baseUrl);
-
-  if (params.product_id) {
+  if (params.product_id !== null) {
     endpointUrl.searchParams.append('product_id', params.product_id);
   }
 

@@ -152,10 +152,6 @@ export default function MasterFaqPage() {
     return { handleEdit };
   };
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [form.product, refetch]);
-
   const onBulkDelete = () => {
     const faqData = selectedFaq.map((item) => item.id).join(',');
     mutateBulkDeleteFaq(faqData, {
@@ -176,6 +172,7 @@ export default function MasterFaqPage() {
       },
     });
   };
+
   return (
     <>
       <Helmet>
@@ -250,6 +247,9 @@ export default function MasterFaqPage() {
                     label="Product"
                     onChange={(e) => {
                       setForm({ ...form, product: e.target.value });
+                      setTimeout(() => {
+                        refetch();
+                      }, 500);
                     }}
                     variant="outlined"
                   >

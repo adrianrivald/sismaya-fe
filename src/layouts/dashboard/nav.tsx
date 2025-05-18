@@ -248,7 +248,9 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                         listItem?.id
                       )
                     : userPermissions?.includes(listItem?.id)
-                : ['dashboard', 'master-data', 'user group:read', 'reports'].includes(listItem?.id)
+                : ['dashboard', 'master-data', 'user group:read', 'reports', 'faq'].includes(
+                    listItem?.id
+                  )
             )
           )
           .map((menu) => (
