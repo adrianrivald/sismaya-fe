@@ -28,6 +28,7 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import useDebounce from 'src/utils/use-debounce';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { Icon } from '@iconify/react';
+import { useBulkDeleteProduct } from 'src/services/master-data/company/product/use-product-bulk-delete';
 import { ProductTypes } from '../type/types';
 
 interface PopoverProps {
@@ -113,6 +114,7 @@ export function ListProductView() {
     status: 'all',
     company: 'all',
   });
+  const { mutate: mutateBulkDeleteProduct } = useBulkDeleteProduct();
 
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useProductCompanyList(
@@ -135,7 +137,26 @@ export function ListProductView() {
     return { handleEdit };
   };
 
-  const onBulkDelete = () => {};
+  const onBulkDelete = () => {
+    const productData = selectedProducts.map((item) => item.id).join(',');
+    mutateBulkDeleteProduct(productData, {
+      onSuccess: () => {
+        setOpenBulkDelete(false);
+        refetch();
+
+        setTimeout(() => {
+          setSelectedProducts([]);
+        }, 500);
+      },
+      onError: () => {
+        setOpenBulkDelete(false);
+        refetch();
+        setTimeout(() => {
+          setSelectedProducts([]);
+        }, 500);
+      },
+    });
+  };
 
   return (
     <DashboardContent maxWidth="xl">

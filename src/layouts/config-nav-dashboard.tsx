@@ -82,6 +82,7 @@ export const managementMenus = (
 export const settingMenus = (
   internalCompaniesAutoResponse?: ChildMenus[],
   internalCompaniesMasterData?: ChildMenus[],
+  internalCompaniesMasterDataSuperAdmin?: ChildMenus[],
   isAdmin?: boolean
 ) => [
   {
@@ -106,7 +107,7 @@ export const settingMenus = (
       : [
           {
             heading: 'Internal Company',
-            path: '/internal-company',
+            list: internalCompaniesMasterDataSuperAdmin,
           },
           {
             heading: 'Client Company',
@@ -137,6 +138,7 @@ export const menuItems = (
   internalCompaniesAutoResponse?: ChildMenus[],
   internalCompaniesReport?: ChildMenus[],
   internalCompaniesMasterData?: ChildMenus[],
+  internalCompaniesMasterDataSuperAdmin?: ChildMenus[],
   internalCompaniesFaq?: ChildMenus[],
   userType?: string,
   isAdmin?: boolean
@@ -160,7 +162,12 @@ export const menuItems = (
   {
     heading: 'SETTINGS',
     id: 'settings',
-    list: settingMenus(internalCompaniesAutoResponse, internalCompaniesMasterData, isAdmin),
+    list: settingMenus(
+      internalCompaniesAutoResponse,
+      internalCompaniesMasterData,
+      internalCompaniesMasterDataSuperAdmin,
+      isAdmin
+    ),
   },
 
   {

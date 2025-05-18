@@ -10,14 +10,15 @@ import {
   MenuItem,
   MenuList,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
   menuItemClasses,
 } from '@mui/material';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
-import { Dispatch, SetStateAction, useState } from 'react';
+import type { CellContext } from '@tanstack/react-table';
+import { createColumnHelper } from '@tanstack/react-table';
+import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
@@ -26,12 +27,13 @@ import { useCategoryCompanyList, useDeleteCategory } from 'src/services/master-d
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import useDebounce from 'src/utils/use-debounce';
+import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
+import { useBulkDeleteCategory } from 'src/services/master-data/company/category/use-category-bulk-delete';
+import { Icon } from '@iconify/react';
 import type { CategoryTypes } from '../type/types';
-import { RemoveAction } from '../../internal-company/view/remove-action';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
@@ -72,12 +74,7 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<CategoryTypes, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
-
-  const onClickRemove = (itemId?: number) => {
-    if (itemId) setSelectedId(itemId);
-    setOpenRemoveModal(true);
-  };
+  const { handleEdit } = popoverProps;
 
   return (
     <MenuList
@@ -99,11 +96,6 @@ function ButtonActions(props: CellContext<CategoryTypes, unknown>, popoverProps:
         <Iconify icon="solar:pen-bold" />
         Edit
       </MenuItem>
-
-      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
-      </MenuItem>
     </MenuList>
   );
 }
@@ -115,13 +107,14 @@ export function ListCategoryView() {
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
-  const { mutate: deleteCategoryById } = useDeleteCategory();
-  const [openRemoveModal, setOpenRemoveModal] = useState(false);
+  useDeleteCategory();
+  const [openBulkDelete, setOpenBulkDelete] = useState(false);
   const [form, setForm] = useState({
     search: '',
     status: 'all',
     company: 'all',
   });
+  const { mutate: mutateBulkDeleteCategory } = useBulkDeleteCategory();
 
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useCategoryCompanyList(
@@ -141,15 +134,29 @@ export function ListCategoryView() {
       navigate(`${id}/edit`);
     };
 
-    const handleDelete = () => {
-      deleteCategoryById(Number(selectedId));
-      setOpenRemoveModal(false);
-      refetch();
-    };
-
-    return { handleEdit, handleDelete };
+    return { handleEdit };
   };
 
+  const onBulkDelete = () => {
+    const categoryData = selectedCategories.map((item) => item.id).join(',');
+    mutateBulkDeleteCategory(categoryData, {
+      onSuccess: () => {
+        setOpenBulkDelete(false);
+        refetch();
+
+        setTimeout(() => {
+          setSelectedCategories([]);
+        }, 500);
+      },
+      onError: () => {
+        setOpenBulkDelete(false);
+        refetch();
+        setTimeout(() => {
+          setSelectedCategories([]);
+        }, 500);
+      },
+    });
+  };
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -237,19 +244,37 @@ export function ListCategoryView() {
                 />
               </FormControl>
             </Grid>
+
+            {selectedCategories.length > 0 && (
+              <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+                <Button
+                  onClick={() => {
+                    setOpenBulkDelete(true);
+                  }}
+                  startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                  color="error"
+                >
+                  Delete ({selectedCategories.length})
+                </Button>
+              </Grid>
+            )}
           </Grid>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            columns={columns({ ...popoverFuncs(), setSelectedId })}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
           />
         </CardContent>
       </Card>
-      <RemoveAction
-        onRemove={popoverFuncs().handleDelete}
-        openRemoveModal={openRemoveModal}
-        setOpenRemoveModal={setOpenRemoveModal}
+
+      <DialogBulkDelete
+        open={openBulkDelete}
+        onClose={() => setOpenBulkDelete(false)}
+        title={`Delete ${selectedCategories.length} Categories?`}
+        onClick={() => {
+          onBulkDelete();
+        }}
       />
     </DashboardContent>
   );
