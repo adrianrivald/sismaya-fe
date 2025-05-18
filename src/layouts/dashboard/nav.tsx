@@ -188,7 +188,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
 
   const internalCompaniesMasterDataSuperAdmin = [
     {
-      path: `/internal-company/companies`,
+      path: `/internal-company`,
       heading: 'Companies',
     },
     {
