@@ -120,11 +120,13 @@ export function ListProductView() {
   const { getDataTableProps, refetch } = useProductCompanyList(
     {
       search: debounceSearch,
+      is_active: form.status,
     },
     String(idCurrentCompany)
   );
   const [selectedProducts, setSelectedProducts] = useState<ProductTypes[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
   const handleSelectionChange = (selected: ProductTypes[]) => {
     setSelectedProducts(selected);
   };
@@ -158,6 +160,8 @@ export function ListProductView() {
     });
   };
 
+  console.log('dataa', form.status);
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -189,21 +193,24 @@ export function ListProductView() {
           <Grid container spacing={2} mt={0} mb={3}>
             <Grid item xs={12} md={3}>
               <FormControl fullWidth>
-                <InputLabel id="select-product">Product</InputLabel>
+                <InputLabel id="select-product">Status</InputLabel>
                 <Select
                   value={form.status}
                   defaultValue="all"
                   fullWidth
                   placeholder="All"
-                  // onChange={(e: SelectChangeEvent<any>) => {
-                  //   setValue('productId', e.target.value);
-                  // }}
+                  onChange={(e: SelectChangeEvent<any>) => {
+                    setForm({ ...form, status: e.target.value });
+                    setTimeout(() => {
+                      refetch();
+                    }, 500);
+                  }}
                 >
                   <MenuItem value="all" selected>
                     All
                   </MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
+                  <MenuItem value="1">Active</MenuItem>
+                  <MenuItem value="0">Inactive</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

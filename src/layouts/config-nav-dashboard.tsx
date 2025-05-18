@@ -48,17 +48,16 @@ export const generalMenus = (
         ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
         : [],
   },
-  ...(userType !== 'internal'
-    ? [
-        {
-          heading: 'FAQ',
-          id: 'faq',
-          path: '/faq',
-          icon: icon('ic-file'),
-          list: internalCompaniesFaq?.filter((item) => item?.heading !== undefined),
-        },
-      ]
-    : []),
+  {
+    heading: 'FAQ',
+    id: 'dashboard',
+    path: '/faq',
+    icon: icon('ic-file'),
+    list:
+      userType === 'internal'
+        ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
+        : [],
+  },
 ];
 
 export const managementMenus = (

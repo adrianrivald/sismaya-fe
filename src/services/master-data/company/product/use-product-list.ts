@@ -36,7 +36,7 @@ export function useProductByCompanyId(
 
 export function fetchProductList(params: Partial<any>, company_id?: string) {
   const baseUrl = window.location.origin;
-  const endpointUrl = new URL('/products?is_active=all', baseUrl);
+  const endpointUrl = new URL('/products', baseUrl);
 
   if (company_id) {
     endpointUrl.searchParams.append('company_id', company_id);
@@ -45,6 +45,8 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
   if (params.search) {
     endpointUrl.searchParams.append('search', params.search);
   }
+
+  endpointUrl.searchParams.append('is_active', params.is_active || 'all');
 
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
