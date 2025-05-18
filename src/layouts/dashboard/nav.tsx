@@ -282,9 +282,13 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                                 ...(userPermissions ?? []),
                               ]?.includes(item?.id)
                             : userPermissions?.includes(item?.id)
-                          : ['dashboard', 'master-data', 'user group:read', 'reports'].includes(
-                              item?.id
-                            )
+                          : [
+                              'dashboard',
+                              'master-data',
+                              'user group:read',
+                              'reports',
+                              'faq',
+                            ].includes(item?.id)
                       )
                       .map((childMenu: any, index) => {
                         const isActived = childMenu.path === pathname;
