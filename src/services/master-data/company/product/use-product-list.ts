@@ -38,7 +38,7 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/products', baseUrl);
 
-  if (company_id) {
+  if (company_id && params.is_super_admin === false) {
     endpointUrl.searchParams.append('company_id', company_id);
   }
 
