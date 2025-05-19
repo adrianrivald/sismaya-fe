@@ -35,6 +35,7 @@ import type { StatusTypes } from '../type/types';
 interface PopoverProps {
   handleEdit: (id: number) => void;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
+  isSuperAdmin: boolean;
 }
 
 const columnHelper = createColumnHelper<StatusTypes>();
@@ -47,6 +48,15 @@ const columns = (popoverProps: PopoverProps) => [
       </Typography>
     ),
   }),
+
+  ...(popoverProps.isSuperAdmin
+    ? [
+        columnHelper.accessor('company', {
+          header: 'Company Name',
+          cell: (info) => <Typography fontSize={14}>{info.getValue()?.name ?? '-'}</Typography>,
+        }),
+      ]
+    : []),
   columnHelper.accessor('is_active', {
     header: 'Status',
     cell: (info) => (
@@ -100,7 +110,7 @@ function ButtonActions(props: CellContext<StatusTypes, unknown>, popoverProps: P
   );
 }
 
-export function ListStatusView() {
+export function ListStatusView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
@@ -120,6 +130,7 @@ export function ListStatusView() {
   const { getDataTableProps, refetch } = useStatusCompanyList(
     {
       search: debounceSearch,
+      is_super_admin: isSuperAdmin,
     },
     String(idCurrentCompany)
   );
@@ -265,7 +276,7 @@ export function ListStatusView() {
             )}
           </Grid>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setSelectedId })}
+            columns={columns({ ...popoverFuncs(), setSelectedId, isSuperAdmin })}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}

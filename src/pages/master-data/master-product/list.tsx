@@ -17,7 +17,7 @@ export default function MasterProductPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <ListProductView />
+      <ListProductView isSuperAdmin />
     </>
   );
 }

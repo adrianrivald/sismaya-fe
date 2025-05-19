@@ -17,7 +17,7 @@ export default function MasterTitlePage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <ListTitleView />
+      <ListTitleView isSuperAdmin />
     </>
   );
 }

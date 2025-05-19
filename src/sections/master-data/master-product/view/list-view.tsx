@@ -33,8 +33,8 @@ import { ProductTypes } from '../type/types';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-
   setSelectedId: Dispatch<SetStateAction<number | null>>;
+  isSuperAdmin: boolean;
 }
 
 const columnHelper = createColumnHelper<ProductTypes>();
@@ -47,6 +47,15 @@ const columns = (popoverProps: PopoverProps) => [
       </Typography>
     ),
   }),
+
+  ...(popoverProps.isSuperAdmin
+    ? [
+        columnHelper.accessor('company', {
+          header: 'Company Name',
+          cell: (info) => <Typography fontSize={14}>{info.getValue()?.name ?? '-'}</Typography>,
+        }),
+      ]
+    : []),
   columnHelper.accessor('is_active', {
     header: 'Status',
     cell: (info) => (
@@ -100,7 +109,7 @@ function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: 
   );
 }
 
-export function ListProductView() {
+export function ListProductView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
@@ -121,6 +130,7 @@ export function ListProductView() {
     {
       search: debounceSearch,
       is_active: form.status,
+      is_super_admin: isSuperAdmin,
     },
     String(idCurrentCompany)
   );
@@ -267,7 +277,7 @@ export function ListProductView() {
             )}
           </Grid>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setSelectedId })}
+            columns={columns({ ...popoverFuncs(), setSelectedId, isSuperAdmin })}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}

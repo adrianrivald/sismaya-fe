@@ -197,11 +197,32 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
     { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
     // { path: 'internal-company/companies', element: <InternalCompanyListPage /> },
-    { path: 'internal-company/product', element: <>Content Here</> },
-    { path: 'internal-company/category', element: <>Content Here</> },
-    { path: 'internal-company/status', element: <>Content Here</> },
-    { path: 'internal-company/division', element: <>Content Here</> },
-    { path: 'internal-company/title', element: <>Content Here</> },
+
+    // Product
+    { path: '/internal-company/product', element: <MasterProductPage /> },
+    { path: '/internal-company/product/create', element: <MasterCreateProductPage /> },
+    { path: '/internal-company/product/:id/edit', element: <MasterCreateProductPage /> },
+
+    // Category
+    { path: '/:vendor/category', element: <MasterCategoryPage /> },
+    { path: '/:vendor/category/create', element: <MasterCreateCategoryPage /> },
+    { path: '/:vendor/category/:id/edit', element: <MasterCreateCategoryPage /> },
+
+    // Status
+    { path: '/:vendor/status', element: <MasterStatusPage /> },
+    { path: '/:vendor/status/create', element: <MasterCreateStatusPage /> },
+    { path: '/:vendor/status/:id/edit', element: <MasterCreateStatusPage /> },
+
+    // Division
+    { path: '/:vendor/division', element: <MasterDivisionPage /> },
+    { path: '/:vendor/division/create', element: <MasterCreateDivisionPage /> },
+    { path: '/:vendor/division/:id/edit', element: <MasterCreateDivisionPage /> },
+
+    // Title
+    { path: '/:vendor/title', element: <MasterTitlePage /> },
+    { path: '/:vendor/title/create', element: <MasterCreateTitlePage /> },
+    { path: '/:vendor/title/:id/edit', element: <MasterCreateTitlePage /> },
+
     { path: 'internal-company/faq', element: <>Content Here</> },
 
     // Client Company

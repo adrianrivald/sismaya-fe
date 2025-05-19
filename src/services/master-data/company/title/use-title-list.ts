@@ -8,7 +8,7 @@ import { usePaginationQuery } from "src/utils/hooks/use-pagination-query";
     const baseUrl = window.location.origin;
     const endpointUrl = new URL('/titles?is_active=all', baseUrl);
   
-    if (company_id) {
+    if (company_id && params.is_super_admin === false) {
       endpointUrl.searchParams.append('company_id', company_id);
     }
   
