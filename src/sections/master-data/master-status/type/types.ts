@@ -7,4 +7,6 @@ export interface StatusTypes {
     type: string;
   };
   is_active: boolean;
+  step: string;
+  sort: number;
 }

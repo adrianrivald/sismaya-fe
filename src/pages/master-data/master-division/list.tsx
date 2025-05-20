@@ -17,7 +17,7 @@ export default function MasterDivisionPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <ListDivisionView isSuperAdmin />
+      <ListDivisionView />
     </>
   );
 }

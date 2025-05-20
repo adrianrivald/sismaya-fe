@@ -13,6 +13,7 @@ import {
   Stack,
   TextField,
   Typography,
+  capitalize,
   menuItemClasses,
 } from '@mui/material';
 import type { CellContext } from '@tanstack/react-table';
@@ -46,6 +47,12 @@ const columns = (popoverProps: PopoverProps) => [
       <Typography fontSize={14} width="30vw">
         {info.getValue()}
       </Typography>
+    ),
+  }),
+  columnHelper.accessor('step', {
+    header: 'Step',
+    cell: (info) => (
+      <Typography fontSize={14}>{capitalize(info.getValue()?.replaceAll('_', ' '))}</Typography>
     ),
   }),
 
@@ -110,10 +117,11 @@ function ButtonActions(props: CellContext<StatusTypes, unknown>, popoverProps: P
   );
 }
 
-export function ListStatusView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
+export function ListStatusView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
@@ -143,11 +151,6 @@ export function ListStatusView({ isSuperAdmin = false }: { isSuperAdmin?: boolea
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
       navigate(`${id}/edit`);
-    };
-
-    const handleDelete = () => {
-      deleteStatysById(Number(selectedId));
-      refetch();
     };
 
     return { handleEdit };

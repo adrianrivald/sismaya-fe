@@ -109,10 +109,11 @@ function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: 
   );
 }
 
-export function ListProductView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
+export function ListProductView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
@@ -191,7 +192,7 @@ export function ListProductView({ isSuperAdmin = false }: { isSuperAdmin?: boole
             color="primary"
             startIcon={<Iconify icon="material-symbols-light:add" />}
             onClick={() => {
-              navigate(`/${vendor}/product/create`);
+              navigate(`/${vendor ?? 'internal-company'}/product/create`);
             }}
           >
             New Products

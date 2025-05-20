@@ -10,14 +10,15 @@ import {
   MenuItem,
   MenuList,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
   menuItemClasses,
 } from '@mui/material';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
-import { Dispatch, SetStateAction, useState } from 'react';
+import type { CellContext } from '@tanstack/react-table';
+import { createColumnHelper } from '@tanstack/react-table';
+import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
@@ -109,10 +110,11 @@ function ButtonActions(props: CellContext<DivisionTypes, unknown>, popoverProps:
   );
 }
 
-export function ListDivisionView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
+export function ListDivisionView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
@@ -142,11 +144,6 @@ export function ListDivisionView({ isSuperAdmin = false }: { isSuperAdmin?: bool
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
       navigate(`${id}/edit`);
-    };
-
-    const handleDelete = () => {
-      deleteDivisionById(Number(selectedId));
-      refetch();
     };
 
     return { handleEdit };

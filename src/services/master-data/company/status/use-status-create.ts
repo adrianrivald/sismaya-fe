@@ -7,7 +7,7 @@ export type StoreStatus = {
   name?:string;
   company_id?: number
   step?: string;
-  sort: number;
+  sort?: number;
   is_active?:boolean;
 };
 

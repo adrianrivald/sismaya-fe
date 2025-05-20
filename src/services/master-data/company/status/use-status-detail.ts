@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
-import { StatusDTO } from './schema/status-schema';
+import type { StatusTypes } from 'src/sections/master-data/master-status/type/types';
 
 export function useStatusDetail(id: number) {
   const { data, isLoading, isError } = useQuery({
@@ -9,7 +9,7 @@ export function useStatusDetail(id: number) {
     queryFn: () => http(`progress-status/${id}`),
   });
   return {
-    data: data?.data as StatusDTO,
+    data: data?.data as StatusTypes,
     isLoading,
     isError,
   };

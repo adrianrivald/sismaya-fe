@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
-import { CategoryDTO } from './schema/category-schema';
+import type { CategoryTypes } from 'src/sections/master-data/master-category/type/types';
 
 export function useCategoryDetail(id: number) {
   const { data, isLoading, isError } = useQuery({
@@ -9,7 +9,7 @@ export function useCategoryDetail(id: number) {
     queryFn: () => http(`categories/${id}`),
   });
   return {
-    data: data?.data as CategoryDTO,
+    data: data?.data as CategoryTypes,
     isLoading,
     isError,
   };

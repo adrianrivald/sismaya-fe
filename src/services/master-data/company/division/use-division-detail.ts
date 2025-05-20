@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
-import type { DivisionDTO } from './schema/division-schema';
+import type { DivisionTypes } from 'src/sections/master-data/master-division/type/types';
 
 export function useDivisionDetail(id: number) {
   const { data, isLoading, isError } = useQuery({
@@ -9,7 +9,7 @@ export function useDivisionDetail(id: number) {
     queryFn: () => http(`departments/${id}`),
   });
   return {
-    data: data?.data as DivisionDTO,
+    data: data?.data as DivisionTypes,
     isLoading,
     isError,
   };

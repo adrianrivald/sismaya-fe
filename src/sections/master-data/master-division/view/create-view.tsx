@@ -1,22 +1,35 @@
 import { LoadingButton } from '@mui/lab';
 import {
+  Autocomplete,
   Box,
   Card,
   CardContent,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   Grid,
   Switch,
   TextField,
   Typography,
 } from '@mui/material';
+import { Controller } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form } from 'src/components/form/form';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useAddDivision, useUpdateDivision } from 'src/services/master-data/company';
-import type { DivisionDTO } from 'src/services/master-data/company/division/schema/division-schema';
-import { divisionSchema } from 'src/services/master-data/company/division/schema/division-schema';
+import {
+  useAddDivision,
+  useInternalCompanies,
+  useUpdateDivision,
+} from 'src/services/master-data/company';
+import type {
+  DivisionDTO,
+  DivisionSuperDTO,
+} from 'src/services/master-data/company/division/schema/division-schema';
+import {
+  divisionSchema,
+  divisionSuperAdminSchema,
+} from 'src/services/master-data/company/division/schema/division-schema';
 import { useDivisionDetail } from 'src/services/master-data/company/division/use-division-detail';
 
 export function CreateDivisionView() {
@@ -25,24 +38,29 @@ export function CreateDivisionView() {
   const navigate = useNavigate();
   const { vendor, id } = useParams();
   const { user } = useAuth();
+  const { data: internalCompanies } = useInternalCompanies();
+
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
 
   const { data } = useDivisionDetail(Number(id) || 0);
 
-  const handleSubmit = (formData: DivisionDTO) => {
+  const handleSubmit = (formData: DivisionDTO | DivisionSuperDTO) => {
+    const superAdminData = formData as DivisionSuperDTO;
+    console.log(superAdminData, 'superAdminData');
     if (id) {
       updateDivision(
         {
           id: Number(id),
           name: formData.name,
-          company_id: idCurrentCompany,
+          company_id: !isSuperAdmin ? idCurrentCompany : data?.company?.id,
           is_active: formData.is_active,
         },
         {
           onSuccess: () => {
-            navigate(`/${vendor}/division`);
+            navigate(`/${vendor ?? 'internal-company'}/division`);
           },
           onError: () => {},
         }
@@ -50,22 +68,23 @@ export function CreateDivisionView() {
     } else {
       addDivision(
         {
-          name: formData.name,
-          company_id: idCurrentCompany,
-          is_active: formData.is_active,
+          name: superAdminData.name,
+          company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
+          is_active: superAdminData.is_active,
         },
         {
           onSuccess: () => {
-            navigate(`/${vendor}/division`);
+            navigate(`/${vendor ?? 'internal-company'}/division`);
           },
           onError: () => {},
         }
       );
     }
   };
-  const defaultValues: DivisionDTO = {
+  const defaultValues: DivisionDTO | DivisionSuperDTO = {
     name: data?.name || '',
     is_active: data?.is_active || false,
+    company_id: data?.company?.id,
   };
 
   return (
@@ -87,14 +106,14 @@ export function CreateDivisionView() {
         <Form
           width="100%"
           onSubmit={handleSubmit}
-          schema={divisionSchema}
+          schema={isSuperAdmin ? divisionSuperAdminSchema : divisionSchema}
           options={{
             defaultValues: {
               ...defaultValues,
             },
           }}
         >
-          {({ register, setValue }) => (
+          {({ register, setValue, control, formState }) => (
             <Box>
               <Card>
                 <CardContent>
@@ -107,6 +126,48 @@ export function CreateDivisionView() {
                         <TextField fullWidth label="Division Name" {...register('name')} />
                       </FormControl>
                     </Grid>
+
+                    {isSuperAdmin && (
+                      <Grid item xs={12} md={12}>
+                        <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
+                          Company Name
+                        </Typography>
+                        <FormControl fullWidth>
+                          {/* <InputLabel id="select-company">Company</InputLabel> */}
+
+                          <Controller
+                            name="company_id"
+                            control={control}
+                            rules={{
+                              required: 'Company must be filled out',
+                            }}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                              <Autocomplete
+                                options={internalCompanies || []}
+                                getOptionLabel={(option) => option?.name || ''}
+                                isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                                value={
+                                  internalCompanies?.find((company) => company.id === value) || null
+                                }
+                                disabled={id !== undefined}
+                                onChange={async (_, selectedCompany) => {
+                                  const selectedIdCompany = selectedCompany?.id || null;
+                                  onChange(selectedIdCompany);
+                                }}
+                                renderInput={(params) => (
+                                  <TextField {...params} label="Company" error={!!error} />
+                                )}
+                              />
+                            )}
+                          />
+                        </FormControl>
+                        {formState?.errors?.company_id && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.company_id?.message)}
+                          </FormHelperText>
+                        )}
+                      </Grid>
+                    )}
                     <Grid item xs={12} md={12}>
                       <FormControlLabel
                         control={
