@@ -110,10 +110,11 @@ function ButtonActions(props: CellContext<CategoryTypes, unknown>, popoverProps:
   );
 }
 
-export function ListCategoryView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
+export function ListCategoryView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;

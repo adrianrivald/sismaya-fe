@@ -111,10 +111,11 @@ function ButtonActions(props: CellContext<TitleTypes, unknown>, popoverProps: Po
   );
 }
 
-export function ListTitleView({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
+export function ListTitleView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
@@ -144,11 +145,6 @@ export function ListTitleView({ isSuperAdmin = false }: { isSuperAdmin?: boolean
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
       navigate(`${id}/edit`);
-    };
-
-    const handleDelete = () => {
-      deleteTitleById(Number(selectedId));
-      refetch();
     };
 
     return { handleEdit };

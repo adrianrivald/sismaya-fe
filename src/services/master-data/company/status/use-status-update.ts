@@ -7,7 +7,7 @@ export type UpdateStatus = {
   id: number;
   company_id: number;
   step: string;
-  sort: number
+  sort?: number
   is_active?: boolean;
 };
 

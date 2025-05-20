@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
-import { ProductDTO } from './schema/product-schema';
+import type { ProductTypes } from 'src/sections/master-data/master-product/type/types';
 
 export function useProductDetail(id: number) {
   const { data, isLoading, isError } = useQuery({
@@ -9,7 +9,7 @@ export function useProductDetail(id: number) {
     queryFn: () => http(`products/${id}`),
   });
   return {
-    data: data?.data as ProductDTO,
+    data: data?.data as ProductTypes,
     isLoading,
     isError,
   };

@@ -1,11 +1,12 @@
 import { LoadingButton } from '@mui/lab';
-import type { SelectChangeEvent } from '@mui/material';
 import {
+  Autocomplete,
   Box,
   Card,
   CardContent,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   Grid,
   InputLabel,
   MenuItem,
@@ -14,13 +15,24 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { Controller } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form } from 'src/components/form/form';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useAddStatus, useUpdateStatus } from 'src/services/master-data/company';
-import type { StatusDTO } from 'src/services/master-data/company/status/schema/status-schema';
-import { statusSchema } from 'src/services/master-data/company/status/schema/status-schema';
+import {
+  useAddStatus,
+  useInternalCompanies,
+  useUpdateStatus,
+} from 'src/services/master-data/company';
+import type {
+  StatusDTO,
+  StatusSuperDTO,
+} from 'src/services/master-data/company/status/schema/status-schema';
+import {
+  statusSchema,
+  statusSuperAdminSchema,
+} from 'src/services/master-data/company/status/schema/status-schema';
 import { useStatusDetail } from 'src/services/master-data/company/status/use-status-detail';
 
 export function CreateStatusView() {
@@ -29,26 +41,30 @@ export function CreateStatusView() {
   const navigate = useNavigate();
   const { vendor, id } = useParams();
   const { user } = useAuth();
+  const { data: internalCompanies } = useInternalCompanies();
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
 
   const { data } = useStatusDetail(Number(id) || 0);
 
-  const handleSubmit = (formData: StatusDTO) => {
+  const handleSubmit = (formData: StatusDTO | StatusSuperDTO) => {
+    const superAdminData = formData as StatusSuperDTO;
+
     if (id) {
       updateStatus(
         {
           id: Number(id),
           name: formData.name,
-          company_id: idCurrentCompany,
+          company_id: !isSuperAdmin ? idCurrentCompany : data?.company?.id,
           is_active: formData.is_active,
           step: formData.step,
-          sort: 1,
+          sort: 1, // TODO: Fix this hardcoded sort
         },
         {
           onSuccess: () => {
-            navigate(`/${vendor}/status`);
+            navigate(`/${vendor ?? 'internal-company'}/status`);
           },
           onError: () => {},
         }
@@ -56,25 +72,27 @@ export function CreateStatusView() {
     } else {
       addStatus(
         {
-          name: formData.name,
-          company_id: idCurrentCompany,
-          sort: 1,
-          step: formData.step,
-          is_active: formData.is_active,
+          name: superAdminData.name,
+          company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
+          step: superAdminData.step,
+          is_active: superAdminData.is_active,
+          sort: 1, // TODO: Fix this hardcoded sort
         },
         {
           onSuccess: () => {
-            navigate(`/${vendor}/status`);
+            navigate(`/${vendor ?? 'internal-company'}/status`);
           },
           onError: () => {},
         }
       );
     }
   };
-  const defaultValues: StatusDTO = {
+  const defaultValues: StatusDTO | StatusSuperDTO = {
     name: data?.name || '',
     is_active: data?.is_active || false,
     step: data?.step || '',
+    sort: data?.sort || 0,
+    company_id: data?.company?.id,
   };
 
   return (
@@ -96,14 +114,14 @@ export function CreateStatusView() {
         <Form
           width="100%"
           onSubmit={handleSubmit}
-          schema={statusSchema}
+          schema={isSuperAdmin ? statusSuperAdminSchema : statusSchema}
           options={{
             defaultValues: {
               ...defaultValues,
             },
           }}
         >
-          {({ register, watch, setValue }) => (
+          {({ register, setValue, watch, control, formState }) => (
             <Box>
               <Card>
                 <CardContent>
@@ -129,6 +147,48 @@ export function CreateStatusView() {
                         </Select>
                       </FormControl>
                     </Grid>
+
+                    {isSuperAdmin && (
+                      <Grid item xs={12} md={12}>
+                        <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
+                          Company Name
+                        </Typography>
+                        <FormControl fullWidth>
+                          {/* <InputLabel id="select-company">Company</InputLabel> */}
+
+                          <Controller
+                            name="company_id"
+                            control={control}
+                            rules={{
+                              required: 'Company must be filled out',
+                            }}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                              <Autocomplete
+                                options={internalCompanies || []}
+                                getOptionLabel={(option) => option?.name || ''}
+                                isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                                value={
+                                  internalCompanies?.find((company) => company.id === value) || null
+                                }
+                                disabled={id !== undefined}
+                                onChange={async (_, selectedCompany) => {
+                                  const selectedIdCompany = selectedCompany?.id || null;
+                                  onChange(selectedIdCompany);
+                                }}
+                                renderInput={(params) => (
+                                  <TextField {...params} label="Company" error={!!error} />
+                                )}
+                              />
+                            )}
+                          />
+                        </FormControl>
+                        {formState?.errors?.company_id && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.company_id?.message)}
+                          </FormHelperText>
+                        )}
+                      </Grid>
+                    )}
                     <Grid item xs={12} md={12}>
                       <FormControlLabel
                         control={

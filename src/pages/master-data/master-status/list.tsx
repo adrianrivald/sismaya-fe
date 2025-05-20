@@ -17,7 +17,7 @@ export default function MasterStatusPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <ListStatusView isSuperAdmin />
+      <ListStatusView />
     </>
   );
 }
