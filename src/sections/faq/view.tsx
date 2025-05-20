@@ -34,8 +34,6 @@ export default function FAQView() {
   const { data: dataFAQ } = useProductFAQ({ search: debouncedSearch }, String(idCurrentCompany));
   const searchRef = useRef<HTMLInputElement>(null);
 
-  console.log('dataa', dataFAQ);
-
   const handleCategoryChange = (category: string) => {
     setExpandedCategories((prev) =>
       prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]

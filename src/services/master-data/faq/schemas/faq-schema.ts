@@ -8,4 +8,10 @@ export const faqSchema = z.object({
   is_active: z.boolean().optional(),
 });
 
+export const faqSchemaSuperAdmin = faqSchema.extend({
+  company_id: z.string().min(1, 'Required'),
+});
+
 export type FaqDTO = z.infer<typeof faqSchema>;
+
+export type FaqDTOSuperAdmin = z.infer<typeof faqSchemaSuperAdmin>;

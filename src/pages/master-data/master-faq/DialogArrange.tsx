@@ -96,7 +96,6 @@ export function DialogArrange({ open, onClose, onConfirm }: DialogArrangeProps) 
             <MenuItem value="-" disabled selected>
               Choose Product
             </MenuItem>
-            <MenuItem value="0">General</MenuItem>
             {data?.map((item) => (
               <MenuItem key={item?.id} value={item?.id?.toString()}>
                 {item?.name}

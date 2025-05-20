@@ -37,6 +37,7 @@ import { DialogArrange } from './DialogArrange';
 interface PopoverProps {
   handleEdit: (id: number) => void;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
+  isSuperAdmin: boolean;
 }
 
 const columnHelper = createColumnHelper<FaqType>();
@@ -56,6 +57,17 @@ const columns = (popoverProps: PopoverProps) => [
       </Stack>
     ),
   }),
+
+  ...(popoverProps.isSuperAdmin
+    ? [
+        columnHelper.accessor('products', {
+          header: 'Company Name',
+          cell: (info) => (
+            <Typography fontSize={14}>{info.getValue()?.[0]?.company?.name ?? '-'}</Typography>
+          ),
+        }),
+      ]
+    : []),
 
   columnHelper.accessor('is_active', {
     header: 'Status',
@@ -114,7 +126,7 @@ export default function MasterFaqPage() {
   const navigation = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
-
+  const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
@@ -201,7 +213,11 @@ export default function MasterFaqPage() {
               color="primary"
               startIcon={<Iconify icon="material-symbols-light:add" />}
               onClick={() => {
-                navigation(`/${vendor}/master-faq/create`);
+                if (isSuperAdmin) {
+                  navigation('/internal-company/master-faq/create');
+                } else {
+                  navigation(`/${vendor}/master-faq/create`);
+                }
               }}
             >
               Create FAQ
@@ -256,7 +272,6 @@ export default function MasterFaqPage() {
                     <MenuItem value="all" selected>
                       All Products
                     </MenuItem>
-                    <MenuItem value="0">General</MenuItem>
                     {data?.map((product) => (
                       <MenuItem key={product.id} value={product.id}>
                         {product.name}
@@ -280,7 +295,7 @@ export default function MasterFaqPage() {
               )}
             </Grid>
             <DataTable
-              columns={columns({ ...popoverFuncs(), setSelectedId })}
+              columns={columns({ ...popoverFuncs(), setSelectedId, isSuperAdmin })}
               enableSelection
               onSelectionChange={handleSelectionChange}
               {...getDataTableProps()}

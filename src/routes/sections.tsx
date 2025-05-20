@@ -203,6 +203,11 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: '/internal-company/product/create', element: <MasterCreateProductPage /> },
     { path: '/internal-company/product/:id/edit', element: <MasterCreateProductPage /> },
 
+    // FAQ
+    { path: '/internal-company/master-faq', element: <MasterFaqPage /> },
+    { path: '/internal-company/master-faq/create', element: <MasterFaqCreatePage /> },
+    { path: '/internal-company/master-faq/:id/edit', element: <MasterFaqCreatePage /> },
+
     // Category
     { path: '/:vendor/category', element: <MasterCategoryPage /> },
     { path: '/:vendor/category/create', element: <MasterCreateCategoryPage /> },
