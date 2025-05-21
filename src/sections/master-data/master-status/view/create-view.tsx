@@ -60,7 +60,7 @@ export function CreateStatusView() {
           company_id: !isSuperAdmin ? idCurrentCompany : data?.company?.id,
           is_active: formData.is_active,
           step: formData.step,
-          sort: 1, // TODO: Fix this hardcoded sort
+          // sort: 1, // TODO: Fix this hardcoded sort
         },
         {
           onSuccess: () => {
@@ -76,7 +76,7 @@ export function CreateStatusView() {
           company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
           step: superAdminData.step,
           is_active: superAdminData.is_active,
-          sort: 1, // TODO: Fix this hardcoded sort
+          // sort: 1, // TODO: Fix this hardcoded sort
         },
         {
           onSuccess: () => {

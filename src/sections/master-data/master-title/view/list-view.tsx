@@ -10,6 +10,7 @@ import {
   MenuItem,
   MenuList,
   Select,
+  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
@@ -27,10 +28,10 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import useDebounce from 'src/utils/use-debounce';
 import { useTitleCompanyList } from 'src/services/master-data/company/title/use-title-list';
-import { useDeleteTitle } from 'src/services/master-data/company/title/use-title-delete';
 import { Icon } from '@iconify/react';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { useBulkDeleteTitle } from 'src/services/master-data/company/title/use-title-bulk-delete';
+import { useInternalCompanies } from 'src/services/master-data/company';
 import type { TitleTypes } from '../type/types';
 
 interface PopoverProps {
@@ -119,7 +120,7 @@ export function ListTitleView() {
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
-  const { mutate: deleteTitleById } = useDeleteTitle();
+  const { data: internalCompanies } = useInternalCompanies();
   const [openBulkDelete, setOpenBulkDelete] = useState(false);
   const [form, setForm] = useState({
     search: '',
@@ -132,7 +133,9 @@ export function ListTitleView() {
   const { getDataTableProps, refetch } = useTitleCompanyList(
     {
       search: debounceSearch,
+      is_active: form.status,
       is_super_admin: isSuperAdmin,
+      company_id: form.company === 'all' ? '' : form.company,
     },
     String(idCurrentCompany)
   );
@@ -200,21 +203,21 @@ export function ListTitleView() {
           <Grid container spacing={2} mt={0} mb={3}>
             <Grid item xs={12} md={3}>
               <FormControl fullWidth>
-                <InputLabel id="select-title">Title</InputLabel>
+                <InputLabel id="select-product">Status</InputLabel>
                 <Select
                   value={form.status}
                   defaultValue="all"
                   fullWidth
                   placeholder="All"
-                  // onChange={(e: SelectChangeEvent<any>) => {
-                  //   setValue('productId', e.target.value);
-                  // }}
+                  onChange={(e: SelectChangeEvent<any>) => {
+                    setForm({ ...form, status: e.target.value });
+                  }}
                 >
                   <MenuItem value="all" selected>
                     All
                   </MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
+                  <MenuItem value="1">Active</MenuItem>
+                  <MenuItem value="0">Inactive</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -226,13 +229,16 @@ export function ListTitleView() {
                   defaultValue="all"
                   fullWidth
                   placeholder="All"
-                  // onChange={(e: SelectChangeEvent<any>) => {
-                  //   setValue('productId', e.target.value);
-                  // }}
+                  onChange={(e: SelectChangeEvent<any>) => {
+                    setForm({ ...form, company: e.target.value });
+                  }}
                 >
                   <MenuItem value="all" selected>
                     All
                   </MenuItem>
+                  {internalCompanies?.map((company) => (
+                    <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
