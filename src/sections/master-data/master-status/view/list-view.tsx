@@ -212,7 +212,7 @@ export function ListStatusView() {
       <Card>
         <CardContent>
           <Grid container spacing={2} mt={0} mb={3}>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={user?.user_info?.role_id === 1 ? 3 : 6}>
               <FormControl fullWidth>
                 <InputLabel id="select-product">Status</InputLabel>
                 <Select
@@ -232,27 +232,29 @@ export function ListStatusView() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel id="select-company">Company</InputLabel>
-                <Select
-                  value={form.company}
-                  defaultValue="all"
-                  fullWidth
-                  placeholder="All"
-                  onChange={(e: SelectChangeEvent<any>) => {
-                    setForm({ ...form, company: e.target.value });
-                  }}
-                >
-                  <MenuItem value="all" selected>
-                    All
-                  </MenuItem>
-                  {internalCompanies?.map((company) => (
-                    <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            {user?.user_info?.role_id === 1 && (
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel id="select-company">Company</InputLabel>
+                  <Select
+                    value={form.company}
+                    defaultValue="all"
+                    fullWidth
+                    placeholder="All"
+                    onChange={(e: SelectChangeEvent<any>) => {
+                      setForm({ ...form, company: e.target.value });
+                    }}
+                  >
+                    <MenuItem value="all" selected>
+                      All
+                    </MenuItem>
+                    {internalCompanies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
 
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
