@@ -364,6 +364,73 @@ export function CreateUserView({ type }: CreateUserProps) {
                 )}
               </Grid>
 
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.email)}
+                  sx={{ width: '100%' }}
+                  type="email"
+                  label="Email"
+                  {...register('email', {
+                    required: 'Email must be filled out',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address',
+                    },
+                  })}
+                  autoComplete="off"
+                />
+                {formState?.errors?.email && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.email?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+              {/* <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.phone)}
+                  sx={{ width: '100%' }}
+                  label="Phone No."
+                  {...register('phone', { required: 'Phone Number must be filled out' })}
+                  value={watch('phone')}
+                  onChange={(e) => onChangePhone(e, setValue, watch)}
+                  autoComplete="off"
+                />
+                {formState?.errors?.phone && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.phone?.message)}
+                  </FormHelperText>
+                )}
+              </Grid> */}
+
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.password)}
+                  fullWidth
+                  placeholder="at least 8 characters"
+                  label="Password"
+                  {...register('password', { required: 'Password must be filled out' })}
+                  // InputLabelProps={{ shrink: true }}
+                  type={showPassword ? 'text' : 'password'}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          <Iconify
+                            icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                          />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                {formState?.errors?.password && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.password?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+
               {type === 'client' ? (
                 <Grid item xs={12} md={12}>
                   <FormControl fullWidth>
@@ -797,72 +864,6 @@ export function CreateUserView({ type }: CreateUserProps) {
                   </Card>
                 </Grid>
               ) : null}
-
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.email)}
-                  sx={{ width: '100%' }}
-                  type="email"
-                  label="Email"
-                  {...register('email', {
-                    required: 'Email must be filled out',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                  autoComplete="off"
-                />
-                {formState?.errors?.email && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.email?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.phone)}
-                  sx={{ width: '100%' }}
-                  label="Phone No."
-                  {...register('phone', { required: 'Phone Number must be filled out' })}
-                  value={watch('phone')}
-                  onChange={(e) => onChangePhone(e, setValue, watch)}
-                  autoComplete="off"
-                />
-                {formState?.errors?.phone && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.phone?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <TextField
-                  error={Boolean(formState?.errors?.password)}
-                  fullWidth
-                  label="Password"
-                  {...register('password', { required: 'Password must be filled out' })}
-                  InputLabelProps={{ shrink: true }}
-                  type={showPassword ? 'text' : 'password'}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          <Iconify
-                            icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                          />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {formState?.errors?.password && (
-                  <FormHelperText sx={{ color: 'error.main' }}>
-                    {String(formState?.errors?.password?.message)}
-                  </FormHelperText>
-                )}
-              </Grid>
 
               <Grid item xs={12} md={12}>
                 <FormControl fullWidth>
