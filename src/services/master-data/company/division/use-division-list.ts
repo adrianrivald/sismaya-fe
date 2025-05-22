@@ -26,16 +26,24 @@ export function useDivisionByCompanyId(companyId: number) {
 
   export function fetchDivisionList(params: Partial<any>, company_id?: string) {
     const baseUrl = window.location.origin;
-    const endpointUrl = new URL('/departments?is_active=all', baseUrl);
+    const endpointUrl = new URL('/departments', baseUrl);
   
     if (company_id && params.is_super_admin === false) {
       endpointUrl.searchParams.append('company_id', company_id);
     }
   
+    if (params.company_id) {
+      endpointUrl.searchParams.append('company_id', params.company_id);
+    }
+  
     if (params.search) {
       endpointUrl.searchParams.append('search', params.search);
     }
-  
+    
+    if (params.is_active){
+      endpointUrl.searchParams.append('is_active', params.is_active || 'all');
+    }
+    
     dataTableParamsBuilder({
       searchParams: endpointUrl.searchParams,
       ...params,
@@ -45,7 +53,7 @@ export function useDivisionByCompanyId(companyId: number) {
   }
   
   export function useDivisionCompanyList(params: Partial<any>, company_id?: string) {
-    return usePaginationQuery(['division-list', params.search, company_id], (paginationState) =>
+    return usePaginationQuery(['division-list', params.search, params.company_id, params.is_active, company_id], (paginationState) =>
       fetchDivisionList({ ...params, ...paginationState }, company_id)
     );
   }

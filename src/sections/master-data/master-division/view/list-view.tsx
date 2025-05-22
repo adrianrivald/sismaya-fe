@@ -10,6 +10,7 @@ import {
   MenuItem,
   MenuList,
   Select,
+  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
@@ -23,7 +24,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { DataTable } from 'src/components/table/data-tables';
-import { useDivisionCompanyList, useDeleteDivision } from 'src/services/master-data/company';
+import {
+  useDivisionCompanyList,
+  useDeleteDivision,
+  useInternalCompanies,
+} from 'src/services/master-data/company';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import useDebounce from 'src/utils/use-debounce';
@@ -118,7 +123,7 @@ export function ListDivisionView() {
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
-  const { mutate: deleteDivisionById } = useDeleteDivision();
+  const { data: internalCompanies } = useInternalCompanies();
   const [openBulkDelete, setOpenBulkDelete] = useState(false);
   const [form, setForm] = useState({
     search: '',
@@ -131,7 +136,9 @@ export function ListDivisionView() {
   const { getDataTableProps, refetch } = useDivisionCompanyList(
     {
       search: debounceSearch,
+      is_active: form.status,
       is_super_admin: isSuperAdmin,
+      company_id: form.company === 'all' ? '' : form.company,
     },
     String(idCurrentCompany)
   );
@@ -199,44 +206,49 @@ export function ListDivisionView() {
       <Card>
         <CardContent>
           <Grid container spacing={2} mt={0} mb={3}>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={user?.user_info?.role_id === 1 ? 3 : 6}>
               <FormControl fullWidth>
-                <InputLabel id="select-division">Division</InputLabel>
+                <InputLabel id="select-product">Status</InputLabel>
                 <Select
                   value={form.status}
                   defaultValue="all"
                   fullWidth
                   placeholder="All"
-                  // onChange={(e: SelectChangeEvent<any>) => {
-                  //   setValue('productId', e.target.value);
-                  // }}
+                  onChange={(e: SelectChangeEvent<any>) => {
+                    setForm({ ...form, status: e.target.value });
+                  }}
                 >
                   <MenuItem value="all" selected>
                     All
                   </MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
+                  <MenuItem value="1">Active</MenuItem>
+                  <MenuItem value="0">Inactive</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel id="select-company">Company</InputLabel>
-                <Select
-                  value={form.company}
-                  defaultValue="all"
-                  fullWidth
-                  placeholder="All"
-                  // onChange={(e: SelectChangeEvent<any>) => {
-                  //   setValue('productId', e.target.value);
-                  // }}
-                >
-                  <MenuItem value="all" selected>
-                    All
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+            {user?.user_info?.role_id === 1 && (
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel id="select-company">Company</InputLabel>
+                  <Select
+                    value={form.company}
+                    defaultValue="all"
+                    fullWidth
+                    placeholder="All"
+                    onChange={(e: SelectChangeEvent<any>) => {
+                      setForm({ ...form, company: e.target.value });
+                    }}
+                  >
+                    <MenuItem value="all" selected>
+                      All
+                    </MenuItem>
+                    {internalCompanies?.map((company) => (
+                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
 
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>

@@ -42,11 +42,17 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
     endpointUrl.searchParams.append('company_id', company_id);
   }
 
+  if (params.company_id) {
+    endpointUrl.searchParams.append('company_id', params.company_id);
+  }
+
   if (params.search) {
     endpointUrl.searchParams.append('search', params.search);
   }
 
-  endpointUrl.searchParams.append('is_active', params.is_active || 'all');
+  if (params.is_active){
+    endpointUrl.searchParams.append('is_active', params.is_active || 'all');
+  }
 
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
@@ -57,7 +63,7 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
 }
 
 export function useProductCompanyList(params: Partial<any>, company_id?: string) {
-  return usePaginationQuery(['product-list', params.search, company_id], (paginationState) =>
+  return usePaginationQuery(['product-list', params.search, params.company_id, params.is_active, company_id], (paginationState) =>
     fetchProductList({ ...params, ...paginationState }, company_id)
   );
 }
