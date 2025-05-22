@@ -113,10 +113,10 @@ export const settingMenus = (
             heading: 'Client Company',
             path: '/client-company',
           },
-          {
-            heading: 'Internal User',
-            path: '/internal-user',
-          },
+          // {
+          //   heading: 'Internal User',
+          //   path: '/internal-user',
+          // }, Moved to RBAC
           {
             heading: 'Client User',
             path: '/client-user',

@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { CreateAccessControlUserView } from 'src/sections/access-control/user-list/view/create-view';
+import { CreateUserView } from 'src/sections/master-data/user/view';
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ export default function AccessControlUserListCreatePage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <CreateAccessControlUserView />
+      <CreateUserView type="internal" />
     </>
   );
 }
