@@ -38,8 +38,8 @@ export type UserClientDTO = z.infer<typeof userClientSchema>;
 export const userInternalUpdateSchema = z
   .object({
     email: z.string().min(1, 'Required'),
-    phone: z.string().min(1, 'Required'),
-    password: z.string().min(1, 'Required'),
+    // phone: z.string().min(1, 'Required'),
+    password: z.string().optional(),
     name: z.string().min(1, 'Required'),
     role_id: z.number().min(1, 'Required'),
     cover: z.any().optional(),
