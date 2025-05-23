@@ -178,7 +178,7 @@ function EditForm({
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('email', defaultValues?.email);
-    setValue('phone', defaultValues?.phone);
+    // setValue('phone', defaultValues?.phone);
     setValue('role_id', defaultValues?.role_id);
     setValue('company_id', defaultValues?.company_id);
     setValue('internal_id', defaultValues?.internal_id);
@@ -356,7 +356,7 @@ function EditForm({
           fullWidth
           label="Password"
           placeholder="at least 8 characters"
-          {...register('password', { required: 'Password must be filled out' })}
+          {...register('password')}
           // InputLabelProps={{ shrink: true }}
           type={showPassword ? 'text' : 'password'}
           InputProps={{
@@ -902,7 +902,7 @@ export function EditUserControlView({ type }: EditUserProps) {
     setOpenRemoveModal(false);
   };
 
-  const handleSubmit = (formData: UserClientUpdateDTO) => {
+  const handleSubmit = (formData: UserInternalUpdateDTO) => {
     const payload = {
       ...formData,
       id: Number(id),
