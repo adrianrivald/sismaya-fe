@@ -10,6 +10,7 @@ import {
   MenuItem,
   MenuList,
   Select,
+  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
@@ -28,7 +29,7 @@ import { createColumnHelper, CellContext } from '@tanstack/react-table';
 import { DataTable } from 'src/components/table/data-tables';
 import { useFaqList } from 'src/services/master-data/faq/use-faq-list';
 import useDebounce from 'src/utils/use-debounce';
-import { useProductCompany } from 'src/services/master-data/company';
+import { useInternalCompaniesAll, useProductCompany } from 'src/services/master-data/company';
 import { Icon } from '@iconify/react';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { useBulkDeleteFaq } from 'src/services/master-data/faq/use-faq-bulk-delete';
@@ -130,7 +131,7 @@ export default function MasterFaqPage() {
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
-  const { data } = useProductCompany(String(idCurrentCompany), 99999, '');
+
   const [dialogArrange, setDialogArrange] = useState({ isOpen: false });
   const [openBulkDelete, setOpenBulkDelete] = useState(false);
   const { mutate: mutateBulkDeleteFaq } = useBulkDeleteFaq();
@@ -138,18 +139,41 @@ export default function MasterFaqPage() {
     search: '',
     status: 'all',
     product: 'all',
+    company: 'all',
   });
+  const { data, refetch: refetchProductCompany } = useProductCompany(
+    String(
+      user?.user_info?.role_id !== 1
+        ? idCurrentCompany
+        : form.company === 'all'
+          ? null
+          : Number(form.company)
+    ),
+    99999,
+    ''
+  );
+  const { data: internalCompanies } = useInternalCompaniesAll();
   const [selectedFaq, setSelectedFaq] = useState<FaqType[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useFaqList(
     {
       search: debounceSearch,
       product_id: form.product === 'all' ? null : Number(form.product),
-      company_id: idCurrentCompany,
+      company_id:
+        user?.user_info?.role_id !== 1
+          ? idCurrentCompany
+          : form.company === 'all'
+            ? null
+            : Number(form.company),
     },
-    String(idCurrentCompany)
+    String(
+      user?.user_info?.role_id !== 1
+        ? idCurrentCompany
+        : form.company === 'all'
+          ? null
+          : Number(form.company)
+    )
   );
 
   const handleSelectionChange = (selected: FaqType[]) => {
@@ -235,7 +259,62 @@ export default function MasterFaqPage() {
         <Card>
           <CardContent>
             <Grid container rowSpacing={3} columnSpacing={2} mb={3}>
-              <Grid item xs={12} md={6}>
+              {user?.user_info?.role_id === 1 && (
+                <Grid item xs={12} md={3}>
+                  <FormControl fullWidth sx={{ mt: 3 }}>
+                    <InputLabel id="select-company">Company</InputLabel>
+                    <Select
+                      value={form.company}
+                      defaultValue="all"
+                      fullWidth
+                      placeholder="All"
+                      onChange={(e: SelectChangeEvent<any>) => {
+                        setForm({ ...form, company: e.target.value, product: 'all' });
+                        setTimeout(() => {
+                          refetchProductCompany();
+                        }, 1000);
+                      }}
+                    >
+                      <MenuItem value="all" selected>
+                        All
+                      </MenuItem>
+                      {internalCompanies?.map((company) => (
+                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth sx={{ mt: 3 }}>
+                  <InputLabel id="select-product">Product</InputLabel>
+                  <Select
+                    fullWidth
+                    labelId="select-product"
+                    id="select-product"
+                    value={form.product}
+                    label="Product"
+                    onChange={(e) => {
+                      setForm({ ...form, product: e.target.value });
+                      setTimeout(() => {
+                        refetch();
+                      }, 500);
+                    }}
+                    disabled={user?.user_info?.role_id === 1 && form.company === 'all'}
+                    variant="outlined"
+                  >
+                    <MenuItem value="all" selected>
+                      All Products
+                    </MenuItem>
+                    {data?.map((product) => (
+                      <MenuItem key={product.id} value={product.id}>
+                        {product.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={user?.user_info?.role_id === 1 ? 6 : 9}>
                 <FormControl fullWidth sx={{ mt: 3 }}>
                   <TextField
                     sx={{ width: '100%' }}
@@ -252,34 +331,7 @@ export default function MasterFaqPage() {
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth sx={{ mt: 3 }}>
-                  <InputLabel id="select-product">Product</InputLabel>
-                  <Select
-                    fullWidth
-                    labelId="select-product"
-                    id="select-product"
-                    value={form.product}
-                    label="Product"
-                    onChange={(e) => {
-                      setForm({ ...form, product: e.target.value });
-                      setTimeout(() => {
-                        refetch();
-                      }, 500);
-                    }}
-                    variant="outlined"
-                  >
-                    <MenuItem value="all" selected>
-                      All Products
-                    </MenuItem>
-                    {data?.map((product) => (
-                      <MenuItem key={product.id} value={product.id}>
-                        {product.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+
               {selectedFaq.length > 0 && (
                 <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
                   <Button
