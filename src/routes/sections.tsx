@@ -241,7 +241,7 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'internal-user/create', element: <UserInternalCreatePage /> },
     { path: 'internal-user/:id/edit', element: <UserInternalEditPage /> },
 
-    // Internal User
+    // Client User
     { path: 'client-user', element: <UserClientListPage /> },
     { path: 'client-user/create', element: <UserClientCreatePage /> },
     { path: 'client-user/:id/edit', element: <UserClientEditPage /> },
