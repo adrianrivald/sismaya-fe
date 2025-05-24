@@ -25,7 +25,7 @@ import { Form } from 'src/components/form/form';
 import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useInternalCompanies, useProductCompany } from 'src/services/master-data/company';
+import { useInternalCompaniesAll, useProductCompany } from 'src/services/master-data/company';
 import {
   FaqDTO,
   FaqDTOSuperAdmin,
@@ -48,7 +48,7 @@ export default function CreateMasterFaq() {
   const { data, refetch } = useProductCompany(String(idCompany), 99999, '');
   const { mutate: addFaq } = useAddMasterFaq();
   const { mutate: updateFaq } = useUpdateMasterFaq(Number(id));
-  const { data: internalCompanies } = useInternalCompanies();
+  const { data: internalCompanies } = useInternalCompaniesAll();
   const handleSubmit = (formData: FaqDTO) => {
     if (id) {
       updateFaq(
