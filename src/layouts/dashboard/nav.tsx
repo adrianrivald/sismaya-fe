@@ -217,6 +217,21 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     },
   ];
 
+  const clientCompaniesMasterDataSuperAdmin = [
+    {
+      path: `/client-company`,
+      heading: 'Companies',
+    },
+    {
+      path: `/client-company/title`,
+      heading: 'Titles',
+    },
+    {
+      path: `/client-company/division`,
+      heading: 'Divisions',
+    },
+  ];
+
   return (
     <Box sx={{ maxHeight: '100vh', overflow: 'auto', pb: 4 }}>
       <Logo />
@@ -232,6 +247,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           internalCompaniesReport,
           internalCompaniesMasterData,
           internalCompaniesMasterDataSuperAdmin,
+          clientCompaniesMasterDataSuperAdmin,
           internalCompaniesFaq,
           userType,
           userRole === 2
@@ -450,7 +466,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
                                         </Accordion>
                                       );
                                     }
-                                    if (userRole === 1 && item?.heading === 'Internal Company') {
+                                    if (
+                                      userRole === 1 &&
+                                      (item?.heading === 'Internal Company' ||
+                                        item?.heading === 'Client Company')
+                                    ) {
                                       return (
                                         <Accordion
                                           key={index}

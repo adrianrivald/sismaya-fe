@@ -13,12 +13,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Form } from 'src/components/form/form';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import {
   useAddDivision,
+  useClientCompanies,
   useInternalCompanies,
   useUpdateDivision,
 } from 'src/services/master-data/company';
@@ -33,13 +34,18 @@ import {
 import { useDivisionDetail } from 'src/services/master-data/company/division/use-division-detail';
 
 export function CreateDivisionView() {
+  const location = useLocation();
+  const isClientCompanyPage = location.pathname.includes('/client-company');
+  const isInternalCompanyPage = location.pathname.includes('/internal-company');
   const { mutate: addDivision } = useAddDivision();
   const { mutate: updateDivision } = useUpdateDivision();
   const navigate = useNavigate();
   const { vendor, id } = useParams();
   const { user } = useAuth();
-  const { data: internalCompanies } = useInternalCompanies();
 
+  const { data: internalCompanies } = useInternalCompanies(isInternalCompanyPage);
+  const { data: clientCompanies } = useClientCompanies(true, isClientCompanyPage);
+  const companiesData = isInternalCompanyPage ? internalCompanies : clientCompanies;
   const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
@@ -143,11 +149,11 @@ export function CreateDivisionView() {
                             }}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
                               <Autocomplete
-                                options={internalCompanies || []}
+                                options={companiesData || []}
                                 getOptionLabel={(option) => option?.name || ''}
                                 isOptionEqualToValue={(option, val) => option?.id === val?.id}
                                 value={
-                                  internalCompanies?.find((company) => company.id === value) || null
+                                  companiesData?.find((company) => company.id === value) || null
                                 }
                                 disabled={id !== undefined}
                                 onChange={async (_, selectedCompany) => {

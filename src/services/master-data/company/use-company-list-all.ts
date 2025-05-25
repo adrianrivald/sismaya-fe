@@ -28,25 +28,39 @@ export function useCompanies(type: string) {
   return data;
 }
 
-export function useClientCompanies(showAll?: boolean) {
-  const data = useQuery(['client-company-items-all'], () => fetchCompanies('client', showAll));
+  export function useClientCompanies(showAll?: boolean, isClient?: boolean) {
+    const data = useQuery(
+      ['client-company-items-all'],
+      () => fetchCompanies("client", showAll),
+      {
+        enabled: isClient || true
+      }
+    );
+  
+    return data;
+  }
+  export function useNonInternalCompanies(showAll?: boolean) {
+    const data = useQuery(
+      ['non-internal-company-items-all'],
+      () => fetchCompanies("non-internal", showAll)
+    );
+  
+    return data;
+  }
+  
+  export function useInternalCompanies(isInternal?: boolean) {
+    const data = useQuery(
+      ['internal-company-items-all'],
+      () => fetchInternalCompanies(),
+      {
+        enabled: isInternal || true
+      }
+    );
+  
+    return data;
+  }
 
-  return data;
-}
-export function useNonInternalCompanies(showAll?: boolean) {
-  const data = useQuery(['non-internal-company-items-all'], () =>
-    fetchCompanies('non-internal', showAll)
-  );
-
-  return data;
-}
-
-export function useInternalCompanies() {
-  const data = useQuery(['internal-company-items-all'], () => fetchInternalCompanies());
-
-  return data;
-}
-
+  
 export function useInternalCompaniesAll() {
   const data = useQuery(['internal-company-items-all'], () => fetchCompanies('internal', true));
   return data;
