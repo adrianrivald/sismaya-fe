@@ -261,8 +261,8 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'product-filter/:id/create', element: <CompanyRelationCreatePage /> },
 
     // FAQ
-    // { path: 'master-faq', element: <MasterFaqPage /> },
-    // { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
+    { path: 'master-faq', element: <MasterFaqPage /> },
+    { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
   ],
 };
 
