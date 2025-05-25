@@ -59,3 +59,9 @@ export function useCompanies(type: string) {
   
     return data;
   }
+
+  
+export function useInternalCompaniesAll() {
+  const data = useQuery(['internal-company-items-all'], () => fetchCompanies('internal', true));
+  return data;
+}
