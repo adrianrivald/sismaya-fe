@@ -8,9 +8,12 @@ import {
   FormControlLabel,
   FormHelperText,
   Grid,
+  InputLabel,
   Switch,
   TextField,
   Typography,
+  MenuItem,
+  Select,
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -55,7 +58,6 @@ export function CreateDivisionView() {
 
   const handleSubmit = (formData: DivisionDTO | DivisionSuperDTO) => {
     const superAdminData = formData as DivisionSuperDTO;
-    console.log(superAdminData, 'superAdminData');
     if (id) {
       updateDivision(
         {
@@ -63,6 +65,7 @@ export function CreateDivisionView() {
           name: formData.name,
           company_id: !isSuperAdmin ? idCurrentCompany : data?.company?.id,
           is_active: formData.is_active,
+          is_show_all: superAdminData.is_show_all === 'true',
         },
         {
           onSuccess: () => {
@@ -77,6 +80,7 @@ export function CreateDivisionView() {
           name: superAdminData.name,
           company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
           is_active: superAdminData.is_active,
+          is_show_all: superAdminData.is_show_all === 'true',
         },
         {
           onSuccess: () => {
@@ -91,6 +95,7 @@ export function CreateDivisionView() {
     name: data?.name || '',
     is_active: data?.is_active || false,
     company_id: data?.company?.id,
+    is_show_all: data?.is_show_all.toString() || '',
   };
 
   return (
@@ -132,6 +137,25 @@ export function CreateDivisionView() {
                         <TextField fullWidth label="Division Name" {...register('name')} />
                       </FormControl>
                     </Grid>
+                    {isClientCompanyPage && (
+                      <Grid item xs={12}>
+                        <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
+                          Show Type
+                        </Typography>
+
+                        <FormControl fullWidth>
+                          <InputLabel id="type">Show Type</InputLabel>
+                          <Select
+                            label="Type"
+                            {...register('is_show_all')}
+                            defaultValue={defaultValues?.is_show_all}
+                          >
+                            <MenuItem value="true">Show all division</MenuItem>
+                            <MenuItem value="false">Only show this division</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
 
                     {isSuperAdmin && (
                       <Grid item xs={12} md={12}>

@@ -7,4 +7,5 @@ export interface DivisionTypes {
     type: string;
   };
   is_active: boolean;
+  is_show_all: string;
 }
