@@ -20,7 +20,7 @@ import type { CellContext } from '@tanstack/react-table';
 import { createColumnHelper } from '@tanstack/react-table';
 import type { Dispatch, SetStateAction } from 'react';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { DataTable } from 'src/components/table/data-tables';
@@ -28,6 +28,7 @@ import {
   useDivisionCompanyList,
   useDeleteDivision,
   useInternalCompanies,
+  useClientCompanies,
 } from 'src/services/master-data/company';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
@@ -119,11 +120,17 @@ export function ListDivisionView() {
   const navigate = useNavigate();
   const { vendor } = useParams();
   const { user } = useAuth();
+  const location = useLocation();
+  const isClientCompanyPage = location.pathname.includes('/client-company');
+  const isInternalCompanyPage = location.pathname.includes('/internal-company');
   const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
+
   const { data: internalCompanies } = useInternalCompanies();
+  const { data: clientCompanies } = useClientCompanies(true, isClientCompanyPage);
+  const companiesData = isInternalCompanyPage ? internalCompanies : clientCompanies;
   const [openBulkDelete, setOpenBulkDelete] = useState(false);
   const [form, setForm] = useState({
     search: '',
@@ -242,7 +249,7 @@ export function ListDivisionView() {
                     <MenuItem value="all" selected>
                       All
                     </MenuItem>
-                    {internalCompanies?.map((company) => (
+                    {companiesData?.map((company) => (
                       <MenuItem value={company?.id}>{company?.name}</MenuItem>
                     ))}
                   </Select>
