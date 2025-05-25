@@ -28,10 +28,13 @@ async function fetchInternalCompanies() {
     return data;
   }
 
-  export function useClientCompanies(showAll?: boolean) {
+  export function useClientCompanies(showAll?: boolean, isClient?: boolean) {
     const data = useQuery(
       ['client-company-items-all'],
-      () => fetchCompanies("client", showAll)
+      () => fetchCompanies("client", showAll),
+      {
+        enabled: isClient || true
+      }
     );
   
     return data;
@@ -45,10 +48,13 @@ async function fetchInternalCompanies() {
     return data;
   }
   
-  export function useInternalCompanies() {
+  export function useInternalCompanies(isInternal?: boolean) {
     const data = useQuery(
       ['internal-company-items-all'],
-      () => fetchInternalCompanies()
+      () => fetchInternalCompanies(),
+      {
+        enabled: isInternal || true
+      }
     );
   
     return data;
