@@ -153,16 +153,20 @@ const ReportWorkPerformanceOverallPDF = ({
 
                     <td style={cellStyle} align="center">
                       <strong>
-                        {data?.reportData?.performance_per_year?.reduce(
-                          (a: any, b: any) => a.task_count + b.task_count
-                        )}
+                        {data?.reportData?.performance_per_year?.length > 1
+                          ? data?.reportData?.performance_per_year?.reduce(
+                              (a: any, b: any) => a.task_count + b.task_count
+                            )
+                          : data?.reportData?.performance_per_year[0]?.task_count}
                       </strong>
                     </td>
                     <td style={cellStyle} align="center">
                       <strong>
-                        {data?.reportData?.performance_per_year?.reduce(
-                          (a: any, b: any) => a.working_hours + b.working_hours
-                        )}
+                        {data?.reportData?.performance_per_year?.length > 1
+                          ? data?.reportData?.performance_per_year?.reduce(
+                              (a: any, b: any) => a.working_hours + b.working_hours
+                            )
+                          : data?.reportData?.performance_per_year[0]?.working_hours}
                       </strong>
                     </td>
                   </tr>
