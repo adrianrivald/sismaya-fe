@@ -110,11 +110,20 @@ export function ReportWorkPerformanceView() {
   const [reportType, setReportType] = useState('overall');
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
   const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
-  const { mutate: generateReportWorkPerformance, data: reportData } = useReportWorkPerformance();
+  const {
+    mutate: generateReportWorkPerformance,
+    data: reportData,
+    reset,
+    isIdle,
+  } = useReportWorkPerformance();
 
   const defaultValues = {
     user_id: [],
   };
+
+  useEffect(() => {
+    reset();
+  }, [reportData, reset]);
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
@@ -170,14 +179,17 @@ export function ReportWorkPerformanceView() {
   };
 
   const handleSubmit = (formData: ReportWorkPerformanceDTO) => {
-    console.log(formData, 'log: formData report request');
     // setIsLoading(true);
     const payload = {
       internalCompanyId: String(idCurrentCompany),
       period: timePeriod ?? '',
-      userId: formData.user_id,
       reportType,
     };
+    if (reportType === 'individual') {
+      Object.assign(payload, {
+        userId: formData.user_id,
+      });
+    }
     console.log(payload, 'payload');
     if (timePeriod === 'custom') {
       Object.assign(payload, {
@@ -306,6 +318,7 @@ export function ReportWorkPerformanceView() {
                               },
                             }}
                             onChange={(e: SelectChangeEvent<string>) => {
+                              reset();
                               setTimePeriod(e.target.value);
                             }}
                             id="time-period"
@@ -456,7 +469,7 @@ export function ReportWorkPerformanceView() {
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
                           Generate & Download Report
                         </Button>
-                        {reportType === 'individual' && (
+                        {reportType === 'individual' && !isIdle && (
                           <Suspense>
                             <ReportWorkPerformanceIndividualPDF
                               timePeriod={timePeriod}
@@ -470,7 +483,7 @@ export function ReportWorkPerformanceView() {
                             />
                           </Suspense>
                         )}
-                        {reportType === 'overall' && (
+                        {reportType === 'overall' && !isIdle && (
                           <Suspense>
                             <ReportWorkPerformanceOverallPDF
                               timePeriod={timePeriod}
