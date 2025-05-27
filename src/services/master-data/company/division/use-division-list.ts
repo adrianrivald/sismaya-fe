@@ -3,6 +3,7 @@ import { http } from "src/utils/http";
 import { dataTableParamsBuilder } from "src/utils/data-table-params-builder";
 import type { WithPagination } from "src/utils/types";
 import { usePaginationQuery } from "src/utils/hooks/use-pagination-query";
+import { useLocation } from "react-router-dom";
 import type { Department } from "../types";
 
 export async function fetchDivisionByCompanyId(companyId: number) {
@@ -24,12 +25,16 @@ export function useDivisionByCompanyId(companyId: number) {
 }
 
 
-  export function fetchDivisionList(params: Partial<any>, company_id?: string) {
+  export function fetchDivisionList(params: Partial<any>, company_id?: string, company_type?: string) {
     const baseUrl = window.location.origin;
     const endpointUrl = new URL('/departments', baseUrl);
   
     if (company_id && params.is_super_admin === false) {
       endpointUrl.searchParams.append('company_id', company_id);
+    }
+    
+    if (company_type && params.is_super_admin === true) {
+      endpointUrl.searchParams.append('company_type', company_type);
     }
   
     if (params.company_id) {
@@ -52,8 +57,9 @@ export function useDivisionByCompanyId(companyId: number) {
     return http<WithPagination<any>>(endpointUrl.toString().replace(baseUrl, ''));
   }
   
-  export function useDivisionCompanyList(params: Partial<any>, company_id?: string) {
-    return usePaginationQuery(['division-list', params.search, params.company_id, params.is_active, company_id], (paginationState) =>
-      fetchDivisionList({ ...params, ...paginationState }, company_id)
+  export function useDivisionCompanyList(params: Partial<any>, company_id?: string, company_type?: string) {
+    const location = useLocation();
+    return usePaginationQuery(['division-list',location, params.search, params.company_id, params.is_active, company_id], (paginationState) =>
+      fetchDivisionList({ ...params, ...paginationState }, company_id, company_type)
     );
   }

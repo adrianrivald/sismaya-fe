@@ -147,7 +147,8 @@ export function ListDivisionView() {
       is_super_admin: isSuperAdmin,
       company_id: form.company === 'all' ? '' : form.company,
     },
-    String(idCurrentCompany)
+    String(idCurrentCompany),
+    isInternalCompanyPage ? 'internal' : 'holding'
   );
   const [selectedDivisions, setSelectedDivisions] = useState<DivisionTypes[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
