@@ -193,9 +193,9 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'report/work-performance', element: <ReportWorkPerformancePage /> },
 
     // Internal Company
-    { path: 'internal-company', element: <InternalCompanyListPage /> },
-    { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
-    { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
+    { path: 'internal-company/companies', element: <InternalCompanyListPage /> },
+    { path: 'internal-company/companies/create', element: <InternalCompanyCreatePage /> },
+    { path: 'internal-company/companies/:id/edit', element: <InternalCompanyEditPage /> },
     // { path: 'internal-company/companies', element: <InternalCompanyListPage /> },
 
     // Product
@@ -231,10 +231,10 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: 'internal-company/faq', element: <>Content Here</> },
 
     // Client Company
-    { path: 'client-company', element: <ClientCompanyListPage /> },
-    { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
-    { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
-    { path: 'client-company/:id/:subId/edit', element: <ClientSubCompanyEditPage /> },
+    { path: 'client-company/companies', element: <ClientCompanyListPage /> },
+    { path: 'client-company/companies/create', element: <ClientCompanyCreatePage /> },
+    { path: 'client-company/companies/:id/edit', element: <ClientCompanyEditPage /> },
+    { path: 'client-company/companies/:id/:subId/edit', element: <ClientSubCompanyEditPage /> },
 
     // Internal User
     { path: 'internal-user', element: <UserInternalListPage /> },
@@ -328,14 +328,14 @@ const internalRoutes: NonIndexRouteObject = {
 
     // Master Data
     // Internal Company
-    { path: 'internal-company', element: <InternalCompanyListPage /> },
-    { path: 'internal-company/create', element: <InternalCompanyCreatePage /> },
-    { path: 'internal-company/:id/edit', element: <InternalCompanyEditPage /> },
+    { path: 'internal-company/companies', element: <InternalCompanyListPage /> },
+    { path: 'internal-company/companies/create', element: <InternalCompanyCreatePage /> },
+    { path: 'internal-company/companies/:id/edit', element: <InternalCompanyEditPage /> },
     // Client Company
-    { path: 'client-company', element: <ClientCompanyListPage /> },
-    { path: 'client-company/create', element: <ClientCompanyCreatePage /> },
-    { path: 'client-company/:id/edit', element: <ClientCompanyEditPage /> },
-    { path: 'client-company/:id/:subId/edit', element: <ClientSubCompanyEditPage /> },
+    { path: 'client-company/companies', element: <ClientCompanyListPage /> },
+    { path: 'client-company/companies/create', element: <ClientCompanyCreatePage /> },
+    { path: 'client-company/companies/:id/edit', element: <ClientCompanyEditPage /> },
+    { path: 'client-company/companies/:id/:subId/edit', element: <ClientSubCompanyEditPage /> },
 
     // Internal User
     { path: 'internal-user', element: <UserInternalListPage /> },

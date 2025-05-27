@@ -88,9 +88,6 @@ export function ProductFilterView() {
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
 
   const navigate = useNavigate();
-  const onClickAddNew = () => {
-    navigate('/client-company/create');
-  };
 
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {

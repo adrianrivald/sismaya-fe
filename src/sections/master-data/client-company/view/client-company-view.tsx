@@ -90,7 +90,7 @@ export function ClientCompanyView() {
 
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/client-company/create');
+    navigate('/client-company/companies/create');
   };
 
   const popoverFuncs = () => {

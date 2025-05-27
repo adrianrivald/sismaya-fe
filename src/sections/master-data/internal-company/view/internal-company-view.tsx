@@ -100,7 +100,7 @@ export function InternalCompanyView() {
   // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
-    navigate('/internal-company/create');
+    navigate('/internal-company/companies/create');
   };
 
   const popoverFuncs = () => {

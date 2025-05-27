@@ -54,9 +54,9 @@ export function useUpdateCompany() {
             transition: Bounce,
           });
           if (res?.data?.type === "holding") {
-            navigate(`/client-company/`)
+            navigate(`/client-company/companies`)
           } else if (res?.data?.type === "internal") {
-            navigate(`/internal-company/`)
+            navigate(`/internal-company/companies`)
           } else {
             const newPath = location.pathname.replace(/\/(\d+)\/\d+(\/edit)$/, "/$1$2");
 
