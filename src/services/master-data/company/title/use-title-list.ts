@@ -3,11 +3,16 @@ import { http } from "src/utils/http";
 import { dataTableParamsBuilder } from "src/utils/data-table-params-builder";
 import type { WithPagination } from "src/utils/types";
 import { usePaginationQuery } from "src/utils/hooks/use-pagination-query";
+import { useLocation } from "react-router-dom";
 
-  export function fetchTitleList(params: Partial<any>, company_id?: string) {
+  export function fetchTitleList(params: Partial<any>, company_id?: string, company_type?: string) {
     const baseUrl = window.location.origin;
     const endpointUrl = new URL('/titles', baseUrl);
   
+    if (company_type && params.is_super_admin === true) {
+      endpointUrl.searchParams.append('company_type', company_type);
+    }
+
     if (company_id && params.is_super_admin === false) {
       endpointUrl.searchParams.append('company_id', company_id);
     }
@@ -32,9 +37,10 @@ import { usePaginationQuery } from "src/utils/hooks/use-pagination-query";
     return http<WithPagination<any>>(endpointUrl.toString().replace(baseUrl, ''));
   }
   
-  export function useTitleCompanyList(params: Partial<any>, company_id?: string) {
-    return usePaginationQuery(['title-list', params.search, params.company_id, params.is_active, company_id], (paginationState) =>
-      fetchTitleList({ ...params, ...paginationState }, company_id)
+  export function useTitleCompanyList(params: Partial<any>, company_id?: string, company_type?: string) {
+    const location = useLocation();
+    return usePaginationQuery(['title-list',location, params.search, params.company_id, params.is_active, company_id, company_type], (paginationState) =>
+      fetchTitleList({ ...params, ...paginationState }, company_id, company_type)
     );
   }
   
