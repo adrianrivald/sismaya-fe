@@ -5,11 +5,13 @@ import { http } from "src/utils/http";
 interface WorkPerformanceParams {
   internalCompanyId: string;
   userId?: string[];
+  department_id?: string[];
   period: string;
   from?: string;
   to?: string;
   reportType: string;
-
+  include_individual?: string;
+  breakdown_by_request?: string;
 }
 
 
@@ -21,12 +23,26 @@ export function useReportWorkPerformance() {
         const {reportType, ...form} = formData
 
         const stringifiedUserIds = form.userId?.map(String)
+        const stringifiedDepartmentIds = form.department_id?.map(String)
         const params =  {
           internal_company_id: form.internalCompanyId,
           user_id: stringifiedUserIds?.join(','),
+          department_id: stringifiedDepartmentIds?.join(','),
           period: form.period
         }
-        
+
+        if (form.include_individual){
+            Object.assign(params, {
+            include_individual: "true"
+          })
+        }
+
+        if (form.breakdown_by_request){
+            Object.assign(params, {
+            breakdown_by_request: "true"
+          })
+        }
+
         if (formData.from) {
           Object.assign(params, {
             from: form.from,

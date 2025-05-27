@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   capitalize,
+  Checkbox,
   Chip,
   Divider,
   FormControl,
@@ -32,8 +33,10 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import { useReportWorkPerformance } from 'src/services/report/work-performance/use-report-work-performance';
 import { useInternalUsers } from 'src/services/master-data/user';
 import type { ReportWorkPerformanceDTO } from 'src/services/report/work-performance/schemas/work-performance-schema';
+import { useDivisionByCompanyId } from 'src/services/master-data/company';
 import ReportWorkPerformanceIndividualPDF from './individual-report-pdf';
 import ReportWorkPerformanceOverallPDF from './overall-report-pdf';
+import ReportWorkPerformanceDivisionPDF from './division-report-pdf';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -106,6 +109,7 @@ export function ReportWorkPerformanceView() {
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
   const { data: employeeList } = useInternalUsers(String(idCurrentCompany));
+  const { data: divisionList } = useDivisionByCompanyId(idCurrentCompany);
   const [timePeriod, setTimePeriod] = useState('month');
   const [reportType, setReportType] = useState('overall');
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
@@ -116,9 +120,12 @@ export function ReportWorkPerformanceView() {
     reset,
     isIdle,
   } = useReportWorkPerformance();
+  const [isIncludeIndividual, setIsIncludeIndividual] = useState(false);
+  const [isShowBreakdownByRequest, setShowBreakdownByRequest] = useState(false);
 
   const defaultValues = {
     user_id: [],
+    department_id: [],
   };
 
   useEffect(() => {
@@ -127,6 +134,13 @@ export function ReportWorkPerformanceView() {
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+  };
+
+  const onCheckIncludeIndividual = () => {
+    setIsIncludeIndividual((prev) => !prev);
+  };
+  const onCheckShowBreakdownByRequest = () => {
+    setShowBreakdownByRequest((prev) => !prev);
   };
 
   const hiddenRef = useRef<HTMLDivElement>(null);
@@ -190,7 +204,25 @@ export function ReportWorkPerformanceView() {
         userId: formData.user_id,
       });
     }
-    console.log(payload, 'payload');
+
+    if (reportType === 'division') {
+      Object.assign(payload, {
+        department_id: formData.department_id,
+      });
+    }
+
+    if (isIncludeIndividual) {
+      Object.assign(payload, {
+        include_individual: true,
+      });
+    }
+
+    if (isShowBreakdownByRequest) {
+      Object.assign(payload, {
+        breakdown_by_request: true,
+      });
+    }
+
     if (timePeriod === 'custom') {
       Object.assign(payload, {
         from: dateValue?.format('YYYY-MM-DD hh:mm'),
@@ -463,6 +495,108 @@ export function ReportWorkPerformanceView() {
                             )}
                           </>
                         )}
+
+                        {reportType === 'division' && (
+                          <>
+                            <Box>
+                              <FormControl fullWidth>
+                                <InputLabel id="department_id">Select Division</InputLabel>
+
+                                <Select
+                                  label="Select Division"
+                                  labelId="demo-simple-select-outlined-label-type"
+                                  error={Boolean(formState?.errors?.department_id)}
+                                  id="department_id"
+                                  {...register('department_id')}
+                                  multiple
+                                  value={watch('department_id')}
+                                  input={
+                                    <OutlinedInput
+                                      error={Boolean(formState?.errors?.department_id)}
+                                      id="select-multiple-chip"
+                                      label="Chip"
+                                    />
+                                  }
+                                  onMouseDown={(event) => {
+                                    event.stopPropagation();
+                                  }}
+                                  renderValue={() => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                      {watch('department_id')?.map((value: any) => (
+                                        <Chip
+                                          sx={{
+                                            bgcolor: '#D6F3F9',
+                                            color: 'info.dark',
+                                          }}
+                                          key={value}
+                                          label={
+                                            divisionList?.find((item) => item?.id === value)?.name
+                                          }
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                  MenuProps={MenuProps}
+                                  inputProps={{ 'aria-label': 'Without label' }}
+                                >
+                                  {divisionList &&
+                                    divisionList?.map((division) => (
+                                      <MenuItem
+                                        key={division?.id}
+                                        value={division?.id}
+                                        style={getStyles(
+                                          division?.id,
+                                          watch('department_id') ?? [],
+                                          theme
+                                        )}
+                                      >
+                                        {division?.name}
+                                      </MenuItem>
+                                    ))}
+                                </Select>
+                              </FormControl>
+                              {formState?.errors?.user_id && (
+                                <FormHelperText sx={{ color: 'error.main' }}>
+                                  {String(formState?.errors?.user_id?.message)}
+                                </FormHelperText>
+                              )}
+                            </Box>
+                            <Box mt={2} display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                id="include-individual"
+                                checked={isIncludeIndividual}
+                                onChange={onCheckIncludeIndividual}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
+                              />{' '}
+                              <Typography
+                                sx={{
+                                  cursor: 'pointer',
+                                }}
+                                component="label"
+                                htmlFor="include-individual"
+                              >
+                                Include individual breakdown
+                              </Typography>
+                            </Box>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                id="show-breakdown"
+                                checked={isShowBreakdownByRequest}
+                                onChange={onCheckShowBreakdownByRequest}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
+                              />{' '}
+                              <Typography
+                                sx={{
+                                  cursor: 'pointer',
+                                }}
+                                component="label"
+                                htmlFor="show-breakdown"
+                              >
+                                Show breakdown by request
+                              </Typography>
+                            </Box>
+                          </>
+                        )}
                       </Box>
 
                       <Box mt={24}>
@@ -472,6 +606,20 @@ export function ReportWorkPerformanceView() {
                         {reportType === 'individual' && !isIdle && (
                           <Suspense>
                             <ReportWorkPerformanceIndividualPDF
+                              timePeriod={timePeriod}
+                              vendor={vendor?.toUpperCase() ?? ''}
+                              data={{
+                                reportData: reportData?.data,
+                                image: reportData?.meta?.company_image,
+                              }}
+                              hiddenRef={hiddenRef}
+                              reportType={reportType}
+                            />
+                          </Suspense>
+                        )}
+                        {reportType === 'division' && !isIdle && (
+                          <Suspense>
+                            <ReportWorkPerformanceDivisionPDF
                               timePeriod={timePeriod}
                               vendor={vendor?.toUpperCase() ?? ''}
                               data={{

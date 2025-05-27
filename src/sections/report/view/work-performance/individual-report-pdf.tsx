@@ -28,7 +28,6 @@ const ReportWorkPerformanceIndividualPDF = ({
   timePeriod,
   reportType,
 }: ReportProps) => {
-  console.log(data, 'datadatadata');
   const renderPeriod = (period: string) => {
     const getFullMonthRange = (range: OpUnitType) => {
       const startOfMonth = dayjs().startOf(range);
