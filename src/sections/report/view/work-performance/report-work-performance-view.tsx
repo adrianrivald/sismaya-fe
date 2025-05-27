@@ -32,8 +32,10 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import { useReportWorkPerformance } from 'src/services/report/work-performance/use-report-work-performance';
 import { useInternalUsers } from 'src/services/master-data/user';
 import type { ReportWorkPerformanceDTO } from 'src/services/report/work-performance/schemas/work-performance-schema';
+import { useDivisionByCompanyId } from 'src/services/master-data/company';
 import ReportWorkPerformanceIndividualPDF from './individual-report-pdf';
 import ReportWorkPerformanceOverallPDF from './overall-report-pdf';
+import ReportWorkPerformanceDivisionPDF from './division-report-pdf';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -106,6 +108,7 @@ export function ReportWorkPerformanceView() {
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
       ?.id ?? 0;
   const { data: employeeList } = useInternalUsers(String(idCurrentCompany));
+  const { data: divisionList } = useDivisionByCompanyId(idCurrentCompany);
   const [timePeriod, setTimePeriod] = useState('month');
   const [reportType, setReportType] = useState('overall');
   const [dateValue, setDateValue] = useState<Dayjs | null>(null);
@@ -116,9 +119,10 @@ export function ReportWorkPerformanceView() {
     reset,
     isIdle,
   } = useReportWorkPerformance();
-
+  console.log(reportData?.data, 'log: reportData');
   const defaultValues = {
     user_id: [],
+    department_id: [],
   };
 
   useEffect(() => {
@@ -188,6 +192,12 @@ export function ReportWorkPerformanceView() {
     if (reportType === 'individual') {
       Object.assign(payload, {
         userId: formData.user_id,
+      });
+    }
+
+    if (reportType === 'division') {
+      Object.assign(payload, {
+        department_id: formData.department_id,
       });
     }
     console.log(payload, 'payload');
@@ -463,6 +473,72 @@ export function ReportWorkPerformanceView() {
                             )}
                           </>
                         )}
+
+                        {reportType === 'division' && (
+                          <>
+                            <FormControl fullWidth>
+                              <InputLabel id="department_id">Select Division</InputLabel>
+
+                              <Select
+                                label="Select Division"
+                                labelId="demo-simple-select-outlined-label-type"
+                                error={Boolean(formState?.errors?.department_id)}
+                                id="department_id"
+                                {...register('department_id')}
+                                multiple
+                                value={watch('department_id')}
+                                input={
+                                  <OutlinedInput
+                                    error={Boolean(formState?.errors?.department_id)}
+                                    id="select-multiple-chip"
+                                    label="Chip"
+                                  />
+                                }
+                                onMouseDown={(event) => {
+                                  event.stopPropagation();
+                                }}
+                                renderValue={() => (
+                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {watch('department_id')?.map((value: any) => (
+                                      <Chip
+                                        sx={{
+                                          bgcolor: '#D6F3F9',
+                                          color: 'info.dark',
+                                        }}
+                                        key={value}
+                                        label={
+                                          divisionList?.find((item) => item?.id === value)?.name
+                                        }
+                                      />
+                                    ))}
+                                  </Box>
+                                )}
+                                MenuProps={MenuProps}
+                                inputProps={{ 'aria-label': 'Without label' }}
+                              >
+                                {divisionList &&
+                                  divisionList?.map((division) => (
+                                    <MenuItem
+                                      key={division?.id}
+                                      value={division?.id}
+                                      style={getStyles(
+                                        division?.id,
+                                        watch('department_id') ?? [],
+                                        theme
+                                      )}
+                                    >
+                                      {division?.name}
+                                    </MenuItem>
+                                  ))}
+                              </Select>
+                            </FormControl>
+                            {formState?.errors?.user_id && (
+                              <FormHelperText sx={{ color: 'error.main' }}>
+                                {String(formState?.errors?.user_id?.message)}
+                              </FormHelperText>
+                            )}
+                          </>
+                        )}
                       </Box>
 
                       <Box mt={24}>
@@ -472,6 +548,20 @@ export function ReportWorkPerformanceView() {
                         {reportType === 'individual' && !isIdle && (
                           <Suspense>
                             <ReportWorkPerformanceIndividualPDF
+                              timePeriod={timePeriod}
+                              vendor={vendor?.toUpperCase() ?? ''}
+                              data={{
+                                reportData: reportData?.data,
+                                image: reportData?.meta?.company_image,
+                              }}
+                              hiddenRef={hiddenRef}
+                              reportType={reportType}
+                            />
+                          </Suspense>
+                        )}
+                        {reportType === 'division' && !isIdle && (
+                          <Suspense>
+                            <ReportWorkPerformanceDivisionPDF
                               timePeriod={timePeriod}
                               vendor={vendor?.toUpperCase() ?? ''}
                               data={{

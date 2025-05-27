@@ -21,7 +21,7 @@ interface ReportProps {
   reportType: string;
 }
 
-const ReportWorkPerformanceIndividualPDF = ({
+const ReportWorkPerformanceDivisionPDF = ({
   data,
   hiddenRef,
   vendor,
@@ -91,6 +91,8 @@ const ReportWorkPerformanceIndividualPDF = ({
     border: '1px solid #ccc',
   };
 
+  console.log(data?.reportData, 'data?.reportData');
+
   return (
     <div>
       <div
@@ -114,18 +116,11 @@ const ReportWorkPerformanceIndividualPDF = ({
 
         <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
           <Box width="100%">
-            {data?.reportData?.map((report: any, index: number) => (
+            {data?.reportData?.summary?.map((report: any, index: number) => (
               <Box mb={4}>
-                <Typography mb={1}>
-                  {index + 1}. {report?.employee}
-                </Typography>
+                <Typography mb={1}>1. {report?.department} TEAM&apos;S PERFORMANCE</Typography>
                 <table style={tableStyle}>
                   <thead>
-                    <tr>
-                      <th colSpan={4} style={headerStyle}>
-                        {report?.employee}&apos;s Monthly Performance
-                      </th>
-                    </tr>
                     <tr>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
@@ -134,7 +129,7 @@ const ReportWorkPerformanceIndividualPDF = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {report?.performance_report?.map((row: any, indexItem: number) => (
+                    {report?.performance_per_year?.map((row: any, indexItem: number) => (
                       <tr key={indexItem + 1}>
                         <td style={cellStyle}>{indexItem + 1}</td>
                         <td style={cellStyle} align="left">
@@ -147,13 +142,59 @@ const ReportWorkPerformanceIndividualPDF = ({
                   </tbody>
                 </table>
 
-                <table style={{ ...tableStyle, marginTop: 8 }}>
+                <Typography mb={1}>2. {report?.department} TEAM&apos;S PER MONTH</Typography>
+                <table style={tableStyle}>
                   <thead>
                     <tr>
-                      <th colSpan={4} style={headerStyle}>
-                        {report?.employee}&apos;s Work Distribution
-                      </th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
+                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
                     </tr>
+                  </thead>
+                  <tbody>
+                    {report?.performance_per_month?.map((row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row.period_name}
+                        </td>
+                        <td style={cellStyle}>{row.task_count}</td>
+                        <td style={cellStyle}>{row.working_hours}</td>
+                      </tr>
+                    ))}
+
+                    <tr>
+                      <td style={cellStyle} />
+                      <td style={cellStyle} align="center">
+                        <strong>Total</strong>
+                      </td>
+
+                      <td style={cellStyle} align="center">
+                        <strong>
+                          {report?.performance_per_month?.length > 1
+                            ? report?.performance_per_year?.reduce(
+                                (a: any, b: any) => a.task_count + b.task_count
+                              )
+                            : report?.performance_per_month[0]?.task_count}
+                        </strong>
+                      </td>
+                      <td style={cellStyle} align="center">
+                        <strong>
+                          {report?.performance_per_month?.length > 1
+                            ? (report?.performance_per_month?.reduce(
+                                (a: any, b: any) => a.working_hours + b.working_hours
+                              ) ?? 0)
+                            : (report?.performance_per_month[0]?.working_hours ?? 0)}
+                        </strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <Typography mb={1}>3. {report?.department} TEAM&apos;S PER PRODUCT</Typography>
+                <table style={tableStyle}>
+                  <thead>
                     <tr>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
                       <th style={{ ...subHeaderStyle, ...cellStyle }}>Product</th>
@@ -162,10 +203,12 @@ const ReportWorkPerformanceIndividualPDF = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {report?.distribution_report?.map((row: any, indexItem: number) => (
+                    {report?.performance_per_product?.map((row: any, indexItem: number) => (
                       <tr key={indexItem + 1}>
                         <td style={cellStyle}>{indexItem + 1}</td>
-                        <td style={cellStyle}>{row.product_name}</td>
+                        <td style={cellStyle} align="left">
+                          {row.product_name}
+                        </td>
                         <td style={cellStyle}>{row.task_count}</td>
                         <td style={cellStyle}>{row.working_hours}</td>
                       </tr>
@@ -181,4 +224,4 @@ const ReportWorkPerformanceIndividualPDF = ({
   );
 };
 
-export default ReportWorkPerformanceIndividualPDF;
+export default ReportWorkPerformanceDivisionPDF;
