@@ -605,7 +605,7 @@ export function EditClientCompanyView() {
   };
 
   const onClickEditCompany = (companyId: number) => {
-    navigate(`/client-company/${id}/${companyId}/edit`);
+    navigate(`/client-company/companies/${id}/${companyId}/edit`);
   };
 
   const onClickEdit = async (value: string, type: boolean, divisionId: number) => {

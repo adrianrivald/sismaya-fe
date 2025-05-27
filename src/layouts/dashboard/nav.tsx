@@ -188,7 +188,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
 
   const internalCompaniesMasterDataSuperAdmin = [
     {
-      path: `/internal-company`,
+      path: `/internal-company/companies`,
       heading: 'Companies',
     },
     {
@@ -219,7 +219,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
 
   const clientCompaniesMasterDataSuperAdmin = [
     {
-      path: `/client-company`,
+      path: `/client-company/companies`,
       heading: 'Companies',
     },
     {
