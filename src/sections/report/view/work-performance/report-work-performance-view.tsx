@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   capitalize,
+  Checkbox,
   Chip,
   Divider,
   FormControl,
@@ -119,7 +120,9 @@ export function ReportWorkPerformanceView() {
     reset,
     isIdle,
   } = useReportWorkPerformance();
-  console.log(reportData?.data, 'log: reportData');
+  const [isIncludeIndividual, setIsIncludeIndividual] = useState(false);
+  const [isShowBreakdownByRequest, setShowBreakdownByRequest] = useState(false);
+
   const defaultValues = {
     user_id: [],
     department_id: [],
@@ -131,6 +134,13 @@ export function ReportWorkPerformanceView() {
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setDateValue(newValue);
+  };
+
+  const onCheckIncludeIndividual = () => {
+    setIsIncludeIndividual((prev) => !prev);
+  };
+  const onCheckShowBreakdownByRequest = () => {
+    setShowBreakdownByRequest((prev) => !prev);
   };
 
   const hiddenRef = useRef<HTMLDivElement>(null);
@@ -200,7 +210,19 @@ export function ReportWorkPerformanceView() {
         department_id: formData.department_id,
       });
     }
-    console.log(payload, 'payload');
+
+    if (isIncludeIndividual) {
+      Object.assign(payload, {
+        include_individual: true,
+      });
+    }
+
+    if (isShowBreakdownByRequest) {
+      Object.assign(payload, {
+        breakdown_by_request: true,
+      });
+    }
+
     if (timePeriod === 'custom') {
       Object.assign(payload, {
         from: dateValue?.format('YYYY-MM-DD hh:mm'),
@@ -476,67 +498,103 @@ export function ReportWorkPerformanceView() {
 
                         {reportType === 'division' && (
                           <>
-                            <FormControl fullWidth>
-                              <InputLabel id="department_id">Select Division</InputLabel>
+                            <Box>
+                              <FormControl fullWidth>
+                                <InputLabel id="department_id">Select Division</InputLabel>
 
-                              <Select
-                                label="Select Division"
-                                labelId="demo-simple-select-outlined-label-type"
-                                error={Boolean(formState?.errors?.department_id)}
-                                id="department_id"
-                                {...register('department_id')}
-                                multiple
-                                value={watch('department_id')}
-                                input={
-                                  <OutlinedInput
-                                    error={Boolean(formState?.errors?.department_id)}
-                                    id="select-multiple-chip"
-                                    label="Chip"
-                                  />
-                                }
-                                onMouseDown={(event) => {
-                                  event.stopPropagation();
-                                }}
-                                renderValue={() => (
-                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                    {watch('department_id')?.map((value: any) => (
-                                      <Chip
-                                        sx={{
-                                          bgcolor: '#D6F3F9',
-                                          color: 'info.dark',
-                                        }}
-                                        key={value}
-                                        label={
-                                          divisionList?.find((item) => item?.id === value)?.name
-                                        }
-                                      />
+                                <Select
+                                  label="Select Division"
+                                  labelId="demo-simple-select-outlined-label-type"
+                                  error={Boolean(formState?.errors?.department_id)}
+                                  id="department_id"
+                                  {...register('department_id')}
+                                  multiple
+                                  value={watch('department_id')}
+                                  input={
+                                    <OutlinedInput
+                                      error={Boolean(formState?.errors?.department_id)}
+                                      id="select-multiple-chip"
+                                      label="Chip"
+                                    />
+                                  }
+                                  onMouseDown={(event) => {
+                                    event.stopPropagation();
+                                  }}
+                                  renderValue={() => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                      {watch('department_id')?.map((value: any) => (
+                                        <Chip
+                                          sx={{
+                                            bgcolor: '#D6F3F9',
+                                            color: 'info.dark',
+                                          }}
+                                          key={value}
+                                          label={
+                                            divisionList?.find((item) => item?.id === value)?.name
+                                          }
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                  MenuProps={MenuProps}
+                                  inputProps={{ 'aria-label': 'Without label' }}
+                                >
+                                  {divisionList &&
+                                    divisionList?.map((division) => (
+                                      <MenuItem
+                                        key={division?.id}
+                                        value={division?.id}
+                                        style={getStyles(
+                                          division?.id,
+                                          watch('department_id') ?? [],
+                                          theme
+                                        )}
+                                      >
+                                        {division?.name}
+                                      </MenuItem>
                                     ))}
-                                  </Box>
-                                )}
-                                MenuProps={MenuProps}
-                                inputProps={{ 'aria-label': 'Without label' }}
+                                </Select>
+                              </FormControl>
+                              {formState?.errors?.user_id && (
+                                <FormHelperText sx={{ color: 'error.main' }}>
+                                  {String(formState?.errors?.user_id?.message)}
+                                </FormHelperText>
+                              )}
+                            </Box>
+                            <Box mt={2} display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                id="include-individual"
+                                checked={isIncludeIndividual}
+                                onChange={onCheckIncludeIndividual}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
+                              />{' '}
+                              <Typography
+                                sx={{
+                                  cursor: 'pointer',
+                                }}
+                                component="label"
+                                htmlFor="include-individual"
                               >
-                                {divisionList &&
-                                  divisionList?.map((division) => (
-                                    <MenuItem
-                                      key={division?.id}
-                                      value={division?.id}
-                                      style={getStyles(
-                                        division?.id,
-                                        watch('department_id') ?? [],
-                                        theme
-                                      )}
-                                    >
-                                      {division?.name}
-                                    </MenuItem>
-                                  ))}
-                              </Select>
-                            </FormControl>
-                            {formState?.errors?.user_id && (
-                              <FormHelperText sx={{ color: 'error.main' }}>
-                                {String(formState?.errors?.user_id?.message)}
-                              </FormHelperText>
-                            )}
+                                Include individual breakdown
+                              </Typography>
+                            </Box>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                id="show-breakdown"
+                                checked={isShowBreakdownByRequest}
+                                onChange={onCheckShowBreakdownByRequest}
+                                onClick={(e) => e.stopPropagation()} // Stops accordion toggle
+                              />{' '}
+                              <Typography
+                                sx={{
+                                  cursor: 'pointer',
+                                }}
+                                component="label"
+                                htmlFor="show-breakdown"
+                              >
+                                Show breakdown by request
+                              </Typography>
+                            </Box>
                           </>
                         )}
                       </Box>

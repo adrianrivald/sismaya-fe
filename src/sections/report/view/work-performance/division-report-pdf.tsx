@@ -116,9 +116,17 @@ const ReportWorkPerformanceDivisionPDF = ({
 
         <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
           <Box width="100%">
+            {data?.reportData?.individual?.length > 0 && (
+              <Box pb={2} borderBottom={1} borderColor="grey.300">
+                <Typography>A. SUMMARY REPORT</Typography>
+              </Box>
+            )}
             {data?.reportData?.summary?.map((report: any, index: number) => (
-              <Box mb={4}>
-                <Typography mb={1}>1. {report?.department} TEAM&apos;S PERFORMANCE</Typography>
+              <Box mt={2} mb={4}>
+                <Box pb={1} borderBottom={1} borderColor="grey.300">
+                  <Typography fontWeight="bold">{report?.department}</Typography>
+                </Box>
+                <Typography my={1}>1. {report?.department} TEAM&apos;S PERFORMANCE</Typography>
                 <table style={tableStyle}>
                   <thead>
                     <tr>
@@ -215,6 +223,83 @@ const ReportWorkPerformanceDivisionPDF = ({
                     ))}
                   </tbody>
                 </table>
+              </Box>
+            ))}
+
+            {data?.reportData?.individual?.length > 0 && (
+              <Box pb={2} borderBottom={1} borderColor="grey.300">
+                <Typography>B. INDIVIDUAL BREAKDOWN</Typography>
+              </Box>
+            )}
+            {data?.reportData?.individual?.map((report: any, index: number) => (
+              <Box mt={2} mb={4}>
+                <Box pb={1} borderBottom={1} borderColor="grey.300">
+                  <Typography fontWeight="bold">{report?.department}</Typography>
+                </Box>
+                {report?.employees?.map((employee: any, employeeIndex: number) => (
+                  <>
+                    <Typography my={1}>
+                      {employeeIndex + 1}. {employee?.employee}
+                    </Typography>
+                    <table style={tableStyle}>
+                      <thead>
+                        <tr>
+                          <th colSpan={4} style={headerStyle}>
+                            {employee?.employee}&apos;s Monthly Performance
+                          </th>
+                        </tr>
+                        <tr>
+                          <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
+                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
+                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {employee?.performance_report?.map((row: any, indexItem: number) => (
+                          <tr key={indexItem + 1}>
+                            <td style={cellStyle}>{indexItem + 1}</td>
+                            <td style={cellStyle} align="left">
+                              {row.period_name}
+                            </td>
+                            <td style={cellStyle}>{row.task_count}</td>
+                            <td style={cellStyle}>{row.working_hours}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {employee?.distribution_report?.length > 0 ? (
+                      <table style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th colSpan={4} style={headerStyle}>
+                              {employee?.employee}&apos;s Monthly Performance
+                            </th>
+                          </tr>
+                          <tr>
+                            <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
+                            <th style={{ ...subHeaderStyle, ...cellStyle }}>Product</th>
+                            <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
+                            <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {employee?.distribution_report?.map((row: any, indexItem: number) => (
+                            <tr key={indexItem + 1}>
+                              <td style={cellStyle}>{indexItem + 1}</td>
+                              <td style={cellStyle} align="left">
+                                {row.product_name}
+                              </td>
+                              <td style={cellStyle}>{row.task_count}</td>
+                              <td style={cellStyle}>{row.working_hours}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : null}
+                  </>
+                ))}
               </Box>
             ))}
           </Box>

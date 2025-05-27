@@ -10,7 +10,8 @@ interface WorkPerformanceParams {
   from?: string;
   to?: string;
   reportType: string;
-
+  include_individual?: string;
+  breakdown_by_request?: string;
 }
 
 
@@ -29,7 +30,19 @@ export function useReportWorkPerformance() {
           department_id: stringifiedDepartmentIds?.join(','),
           period: form.period
         }
-        
+
+        if (form.include_individual){
+            Object.assign(params, {
+            include_individual: "true"
+          })
+        }
+
+        if (form.breakdown_by_request){
+            Object.assign(params, {
+            breakdown_by_request: "true"
+          })
+        }
+
         if (formData.from) {
           Object.assign(params, {
             from: form.from,
