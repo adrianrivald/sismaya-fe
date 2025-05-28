@@ -21,17 +21,16 @@ export function useAddCompany() {
         type,
       };
 
-      if (type === 'holding') {
-        if (cover) {
-          const imageData = new FormData();
-          imageData.append('file', cover as unknown as File);
-          const { url } = await uploadImage(imageData);
+      if (cover) {
+        const imageData = new FormData();
+        imageData.append('file', cover as unknown as File);
+        const { url } = await uploadImage(imageData);
 
-          Object.assign(payload, {
-            image: url,
-          });
-        }
+        Object.assign(payload, {
+          image: url,
+        });
       }
+
 
       if (parent_id) {
         Object.assign(payload, {

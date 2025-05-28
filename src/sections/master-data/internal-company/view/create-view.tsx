@@ -9,6 +9,7 @@ import { LoadingButton } from '@mui/lab';
 import React from 'react';
 import { CompanyDTO, companySchema } from 'src/services/master-data/company/schemas/company-schema';
 import { useAddCompany } from 'src/services/master-data/company';
+import { FieldDropzone } from 'src/components/form';
 
 export function CreateInternalCompanyView() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -72,6 +73,18 @@ export function CreateInternalCompanyView() {
                     {String(formState?.errors?.abbreviation?.message)}
                   </FormHelperText>
                 )}
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: 'cover',
+                    control,
+                  }}
+                  maxSize={5000000}
+                />
               </Grid>
               <Box
                 display="flex"
