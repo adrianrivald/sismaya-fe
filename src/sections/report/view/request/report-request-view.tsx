@@ -67,8 +67,16 @@ function getStyles(id: number, selectedInternalCompanies: readonly number[], the
 
 const docTypeOptions = [
   {
-    value: 'summary-detail',
+    value: 'all',
     label: 'Summary & Detail',
+  },
+  {
+    value: 'summary',
+    label: 'Summary',
+  },
+  {
+    value: 'detail',
+    label: 'Detail',
   },
 ];
 
@@ -115,7 +123,7 @@ export function ReportRequestView() {
   const { data: companyRelations } = useCompanyRelation({ internal_company_id: idCurrentCompany });
   const clientCompanies = companyRelations?.items;
   const [timePeriod, setTimePeriod] = useState('month');
-  const [docType, setDocType] = useState('summary-detail');
+  const [docType, setDocType] = useState('all');
   const [clientMode, setClientMode] = useState('all');
   const [divisionMode, setDivisionMode] = useState('all');
   const [requestStatusMode, setRequestStatusMode] = useState('all');
@@ -155,8 +163,6 @@ export function ReportRequestView() {
     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
     heightLeft -= pdfHeight;
 
-    const marginTop = 40; // Adjust as needed
-
     // Add remaining pages
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
@@ -180,12 +186,21 @@ export function ReportRequestView() {
   };
 
   const handleSubmit = (formData: any) => {
+    console.log(formData, 'formData');
     // setIsLoading(true);
     const payload = {
       internalCompanyId: String(idCurrentCompany),
-      departmentId: divisionIds.join(',') ?? '',
       period: timePeriod ?? '',
+      document_type: docType,
     };
+
+    if (divisionMode === 'custom') {
+      Object.assign(payload, {
+        departmentId: divisionIds.join(',') ?? '',
+      });
+    }
+
+    console.log(payload, 'payload');
     if (timePeriod === 'custom') {
       Object.assign(payload, {
         from: dateValue?.format('YYYY-MM-DD hh:mm'),
@@ -285,7 +300,7 @@ export function ReportRequestView() {
                   }}
                   //  schema={autoResponseSchema}
                 >
-                  {({ register, control, watch, formState, setValue }) => (
+                  {({ register, watch, formState, setValue }) => (
                     <>
                       <Box>
                         <FormControl sx={{ width: '100%' }}>
