@@ -212,7 +212,7 @@ export default function MasterFaqPage() {
   return (
     <>
       <Helmet>
-        <title> {`Master FAQ - ${CONFIG.appName}`}</title>
+        <title> {`FAQ - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -223,7 +223,7 @@ export default function MasterFaqPage() {
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-              Master FAQ
+              FAQ
             </Typography>
             <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
               <Typography>Master Data</Typography>
