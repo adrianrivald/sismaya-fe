@@ -24,7 +24,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useRole } from 'src/services/master-data/role';
 import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useInternalCompanies } from 'src/services/master-data/company';
+import { useInternalCompaniesAll } from 'src/services/master-data/company';
 import { RemoveAction } from '../../remove-action';
 
 interface PopoverProps {
@@ -153,7 +153,7 @@ export function AccessControlUserListView() {
     role_id: roleFilter,
     type: 'internal',
   });
-  const { data: internalCompanies } = useInternalCompanies();
+  const { data: internalCompanies } = useInternalCompaniesAll();
   const { data: roles } = useRole();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const { mutate: deleteUserById } = useDeleteUserById();
