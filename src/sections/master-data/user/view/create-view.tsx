@@ -608,26 +608,30 @@ export function CreateUserView({ type }: CreateUserProps) {
                                 mt={2}
                               >
                                 {existingCompanyProducts &&
-                                  existingCompanyProducts?.map((existingItem, existingIndex) => (
-                                    <Box
-                                      gridColumn={`${existingIndex % 2 === 0 ? '1 / 2' : '2 / 4'}`}
-                                    >
-                                      <Box display="flex" alignItems="center" gap={1}>
-                                        <Checkbox
-                                          id={`item-${existingItem?.id}`}
-                                          onChange={() => onChangeProductFilter(existingItem?.id)}
-                                          checked={selectedProductsTemp?.includes(existingItem?.id)}
-                                        />{' '}
-                                        <Typography
-                                          sx={{ cursor: 'pointer' }}
-                                          component="label"
-                                          htmlFor={`item-${existingItem?.id}`}
-                                        >
-                                          {existingItem?.name}
-                                        </Typography>
+                                  existingCompanyProducts
+                                    ?.filter((itm) => itm.name !== 'General')
+                                    ?.map((existingItem, existingIndex) => (
+                                      <Box
+                                        gridColumn={`${existingIndex % 2 === 0 ? '1 / 2' : '2 / 4'}`}
+                                      >
+                                        <Box display="flex" alignItems="center" gap={1}>
+                                          <Checkbox
+                                            id={`item-${existingItem?.id}`}
+                                            onChange={() => onChangeProductFilter(existingItem?.id)}
+                                            checked={selectedProductsTemp?.includes(
+                                              existingItem?.id
+                                            )}
+                                          />{' '}
+                                          <Typography
+                                            sx={{ cursor: 'pointer' }}
+                                            component="label"
+                                            htmlFor={`item-${existingItem?.id}`}
+                                          >
+                                            {existingItem?.name}
+                                          </Typography>
+                                        </Box>
                                       </Box>
-                                    </Box>
-                                  ))}
+                                    ))}
                               </Box>
                               <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
                                 <Button
@@ -831,24 +835,26 @@ export function CreateUserView({ type }: CreateUserProps) {
                     </Typography>
                     <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} mt={2}>
                       {companyProducts &&
-                        companyProducts?.map((item, index) => (
-                          <Box gridColumn={`${index % 2 === 0 ? '1 / 2' : '2 / 4'}`}>
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Checkbox
-                                id={`item-${item?.id}`}
-                                onChange={() => onChangeProductFilter(item?.id)}
-                                checked={selectedProductsTemp?.includes(item?.id)}
-                              />{' '}
-                              <Typography
-                                sx={{ cursor: 'pointer' }}
-                                component="label"
-                                htmlFor={`item-${item?.id}`}
-                              >
-                                {item?.name}
-                              </Typography>
+                        companyProducts
+                          .filter((item) => item.name !== 'General')
+                          ?.map((item, index) => (
+                            <Box gridColumn={`${index % 2 === 0 ? '1 / 2' : '2 / 4'}`}>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Checkbox
+                                  id={`item-${item?.id}`}
+                                  onChange={() => onChangeProductFilter(item?.id)}
+                                  checked={selectedProductsTemp?.includes(item?.id)}
+                                />{' '}
+                                <Typography
+                                  sx={{ cursor: 'pointer' }}
+                                  component="label"
+                                  htmlFor={`item-${item?.id}`}
+                                >
+                                  {item?.name}
+                                </Typography>
+                              </Box>
                             </Box>
-                          </Box>
-                        ))}
+                          ))}
                     </Box>
                     <Box display="flex" justifyContent="end" width="100%" sx={{ mt: 4 }}>
                       <Button
