@@ -29,7 +29,11 @@ import { createColumnHelper, CellContext } from '@tanstack/react-table';
 import { DataTable } from 'src/components/table/data-tables';
 import { useFaqList } from 'src/services/master-data/faq/use-faq-list';
 import useDebounce from 'src/utils/use-debounce';
-import { useInternalCompaniesAll, useProductCompany } from 'src/services/master-data/company';
+import {
+  useInternalCompaniesAll,
+  useProductCompany,
+  useProductCompanyWithGeneral,
+} from 'src/services/master-data/company';
 import { Icon } from '@iconify/react';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { useBulkDeleteFaq } from 'src/services/master-data/faq/use-faq-bulk-delete';
@@ -141,7 +145,7 @@ export default function MasterFaqPage() {
     product: 'all',
     company: 'all',
   });
-  const { data, refetch: refetchProductCompany } = useProductCompany(
+  const { data, refetch: refetchProductCompany } = useProductCompanyWithGeneral(
     String(
       user?.user_info?.role_id !== 1
         ? idCurrentCompany
