@@ -19,6 +19,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { Role } from 'src/services/master-data/role';
 import { useDeleteRoleById, useRoleList } from 'src/services/master-data/role';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useUserPermissions } from 'src/services/auth/use-user-permissions';
 import { RemoveAction } from '../../remove-action';
 
 interface PopoverProps {
@@ -26,6 +27,7 @@ interface PopoverProps {
   setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedUser: Dispatch<SetStateAction<string>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
+  userPermissionsList?: string[];
 }
 
 const columnHelper = createColumnHelper<Role>();
@@ -75,6 +77,10 @@ function ButtonActions(props: CellContext<Role, unknown>, popoverProps: PopoverP
     setSelectedUser(userName);
     setOpenRemoveModal(true);
   };
+
+  const canEdit = popoverProps?.userPermissionsList?.includes('user group:update');
+  const canDelete = popoverProps?.userPermissionsList?.includes('user group:delete');
+
   return (
     <MenuList
       disablePadding
@@ -92,7 +98,7 @@ function ButtonActions(props: CellContext<Role, unknown>, popoverProps: PopoverP
       }}
     >
       <Button
-        sx={{ fontWeight: 'normal' }}
+        sx={{ fontWeight: 'normal', display: !canEdit ? 'none' : 'block' }}
         variant="outlined"
         onClick={() => handleEdit(companyId)}
       >
@@ -102,7 +108,12 @@ function ButtonActions(props: CellContext<Role, unknown>, popoverProps: PopoverP
       <Button
         variant="outlined"
         onClick={onClickRemove}
-        sx={{ color: 'black', borderColor: 'grey.500', fontWeight: 'normal' }}
+        sx={{
+          color: 'black',
+          borderColor: 'grey.500',
+          fontWeight: 'normal',
+          display: !canDelete ? 'none' : 'block',
+        }}
       >
         Delete
       </Button>
@@ -112,12 +123,14 @@ function ButtonActions(props: CellContext<Role, unknown>, popoverProps: PopoverP
 
 export function AccessControlUserGroupView() {
   const location = useLocation();
+  const { data: userPermissionsList } = useUserPermissions();
   const pathname = location.pathname?.split('/')[2];
   const mode = pathname === 'user-list' ? 'user-list' : 'user-group';
   const { getDataTableProps } = useRoleList({});
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const { mutate: deleteRoleById } = useDeleteRoleById();
   const navigate = useNavigate();
+  const canCreate = userPermissionsList?.includes('user group:create');
 
   const onClickAddNew = () => {
     navigate('/access-control/user-group/create');
@@ -177,7 +190,12 @@ export function AccessControlUserGroupView() {
           </Box>
         </Box>
         <Box>
-          <Button onClick={onClickAddNew} variant="contained" color="primary">
+          <Button
+            sx={{ display: !canCreate ? 'none' : 'block' }}
+            onClick={onClickAddNew}
+            variant="contained"
+            color="primary"
+          >
             Create New User Group
           </Button>
         </Box>
@@ -224,6 +242,7 @@ export function AccessControlUserGroupView() {
                 setOpenRemoveModal,
                 setSelectedId,
                 setSelectedUser,
+                userPermissionsList,
               })}
               {...getDataTableProps()}
             />
