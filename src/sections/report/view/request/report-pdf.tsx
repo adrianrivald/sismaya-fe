@@ -10,6 +10,7 @@ interface ReportProps {
 }
 
 const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) => {
+  console.log(data?.reportData?.summary, 'data?.reportData?.summary');
   const renderPeriod = (period: string) => {
     const getFullMonthRange = (range: OpUnitType) => {
       const startOfMonth = dayjs().startOf(range);
@@ -95,8 +96,10 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
             <Box mb={4}>
               <Typography mb={1}>
                 {' '}
-                1. TOTAL REQUESTS FROM {data?.reportData?.report_per_year[0]?.period_name} TO{' '}
-                {data?.reportData?.report_per_year[1]?.period_name}
+                1. TOTAL REQUESTS FROM {
+                  data?.reportData?.summary?.report_per_year[0]?.period_name
+                }{' '}
+                TO {data?.reportData?.summary?.report_per_year[1]?.period_name}
               </Typography>
               <table style={tableStyle}>
                 <thead>
@@ -107,15 +110,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_year?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.period_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_year?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.period_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                   <tr>
                     <td style={cellStyle} />
                     <td style={cellStyle} align="center">
@@ -124,7 +129,7 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
 
                     <td style={cellStyle} align="center">
                       <strong>
-                        {data?.reportData?.report_per_year?.reduce(
+                        {data?.reportData?.summary?.report_per_year?.reduce(
                           (a: any, b: any) => a.request_count + b.request_count
                         )}
                       </strong>
@@ -144,15 +149,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_month?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.period_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_month?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.period_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </Box>
@@ -167,15 +174,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_category?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.category_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_category?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.category_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </Box>
@@ -190,15 +199,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_priority?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.priority_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_priority?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.priority_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </Box>
@@ -213,15 +224,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_status?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.progress_status_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_status?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.progress_status_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </Box>
@@ -237,15 +250,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_division?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.department_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_division?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.department_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </Box>
@@ -261,15 +276,17 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportData?.report_per_company?.map((row: any, indexItem: number) => (
-                    <tr key={indexItem + 1}>
-                      <td style={cellStyle}>{indexItem + 1}</td>
-                      <td style={cellStyle} align="left">
-                        {row?.company_name}
-                      </td>
-                      <td style={cellStyle}>{row?.request_count}</td>
-                    </tr>
-                  ))}
+                  {data?.reportData?.summary?.report_per_company?.map(
+                    (row: any, indexItem: number) => (
+                      <tr key={indexItem + 1}>
+                        <td style={cellStyle}>{indexItem + 1}</td>
+                        <td style={cellStyle} align="left">
+                          {row?.company_name}
+                        </td>
+                        <td style={cellStyle}>{row?.request_count}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </Box>

@@ -4,10 +4,11 @@ import { http } from "src/utils/http";
 
 interface ReportRequestParams {
   internalCompanyId: string;
-  departmentId: string;
+  departmentId?: string;
   period: string;
   from?: string;
   to?: string;
+  document_type?: string;
 }
 
 
@@ -19,7 +20,8 @@ export function useReportRequest() {
         const params =  {
           department_id: formData?.departmentId,
           internal_company_id: formData.internalCompanyId,
-          period: formData.period
+          period: formData.period,
+          document_type: formData.document_type
         }
         
         if (formData.from) {
