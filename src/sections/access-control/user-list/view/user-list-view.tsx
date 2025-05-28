@@ -25,6 +25,7 @@ import { useRole } from 'src/services/master-data/role';
 import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useInternalCompaniesAll } from 'src/services/master-data/company';
+import { useAuth } from 'src/sections/auth/providers/auth';
 import { RemoveAction } from '../../remove-action';
 
 interface PopoverProps {
@@ -143,6 +144,9 @@ function ButtonActions(props: CellContext<User, unknown>, popoverProps: PopoverP
 }
 
 export function AccessControlUserListView() {
+  const { user } = useAuth();
+  const userRole = user?.user_info?.role?.id;
+  const userCompanies = user?.internal_companies?.map((item) => item?.company?.id);
   const location = useLocation();
   const pathname = location.pathname?.split('/')[2];
   const mode = pathname === 'user-list' ? 'user-list' : 'user-group';
@@ -152,6 +156,7 @@ export function AccessControlUserListView() {
     internal_company: companyFilter,
     role_id: roleFilter,
     type: 'internal',
+    internalCompanies: userRole === 2 ? userCompanies?.toString() : null,
   });
   const { data: internalCompanies } = useInternalCompaniesAll();
   const { data: roles } = useRole();
@@ -272,9 +277,11 @@ export function AccessControlUserListView() {
                     onChange={handleChangeCompanyFilter}
                   >
                     <MenuItem value="">All</MenuItem>
-                    {internalCompanies?.map((company) => (
-                      <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                    ))}
+                    {internalCompanies
+                      ?.filter((item) =>
+                        userRole === 2 ? userCompanies?.includes(item?.id) : item
+                      )
+                      .map((company) => <MenuItem value={company?.id}>{company?.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Box>
