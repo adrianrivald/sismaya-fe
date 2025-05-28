@@ -180,7 +180,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
       },
       {
         path: `/${item?.company?.name.toLowerCase()}/master-faq`,
-        heading: 'Master FAQ',
+        heading: 'FAQ',
       },
     ],
     // path: `/${item?.company?.name.toLowerCase()}/report/request`,
@@ -213,7 +213,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     },
     {
       path: `/internal-company/master-faq`,
-      heading: 'Master FAQ',
+      heading: 'FAQ',
     },
   ];
 
