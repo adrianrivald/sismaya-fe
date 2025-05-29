@@ -122,8 +122,16 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     const path = location.pathname;
     if (path.startsWith('/internal-user')) return 'internal_user';
     if (path.startsWith('/client-user')) return 'client_user';
-    if (path.startsWith('/internal-company')) return 'internal_company';
-    if (path.startsWith('/client-company')) return 'client_company';
+    if (path.startsWith('/internal-company/companies')) return 'internal_company_companies';
+    if (path.startsWith('/internal-company/product')) return 'internal_company_product';
+    if (path.startsWith('/internal-company/category')) return 'internal_company_category';
+    if (path.startsWith('/internal-company/status')) return 'internal_company_status';
+    if (path.startsWith('/internal-company/title')) return 'internal_company_title';
+    if (path.startsWith('/internal-company/division')) return 'internal_company_division';
+    if (path.startsWith('/internal-company/master-faq')) return 'internal_company_master-faq';
+    if (path.startsWith('/client-company/companies')) return 'client_company_companies';
+    if (path.startsWith('/client-company/title')) return 'client_company_title';
+    if (path.startsWith('/client-company/division')) return 'client_company_division';
     if (path.startsWith('/product-filter')) return 'product_filter';
     return 'default';
   };
