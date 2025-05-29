@@ -29,7 +29,11 @@ import { createColumnHelper, CellContext } from '@tanstack/react-table';
 import { DataTable } from 'src/components/table/data-tables';
 import { useFaqList } from 'src/services/master-data/faq/use-faq-list';
 import useDebounce from 'src/utils/use-debounce';
-import { useInternalCompaniesAll, useProductCompany } from 'src/services/master-data/company';
+import {
+  useInternalCompaniesAll,
+  useProductCompany,
+  useProductCompanyWithGeneral,
+} from 'src/services/master-data/company';
 import { Icon } from '@iconify/react';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { useBulkDeleteFaq } from 'src/services/master-data/faq/use-faq-bulk-delete';
@@ -141,7 +145,7 @@ export default function MasterFaqPage() {
     product: 'all',
     company: 'all',
   });
-  const { data, refetch: refetchProductCompany } = useProductCompany(
+  const { data, refetch: refetchProductCompany } = useProductCompanyWithGeneral(
     String(
       user?.user_info?.role_id !== 1
         ? idCurrentCompany
@@ -212,7 +216,7 @@ export default function MasterFaqPage() {
   return (
     <>
       <Helmet>
-        <title> {`Master FAQ - ${CONFIG.appName}`}</title>
+        <title> {`FAQ - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -223,7 +227,7 @@ export default function MasterFaqPage() {
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-              Master FAQ
+              FAQ
             </Typography>
             <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
               <Typography>Master Data</Typography>

@@ -25,7 +25,10 @@ import { Form } from 'src/components/form/form';
 import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useInternalCompaniesAll, useProductCompany } from 'src/services/master-data/company';
+import {
+  useInternalCompaniesAll,
+  useProductCompanyWithGeneral,
+} from 'src/services/master-data/company';
 import {
   FaqDTO,
   FaqDTOSuperAdmin,
@@ -45,7 +48,7 @@ export default function CreateMasterFaq() {
       ?.id ?? 0;
   const [idCompany, setIdCompany] = useState<number>(idCurrentCompany || 0);
   const { data: dataFaq } = useFaqById(Number(id) || 0);
-  const { data, refetch } = useProductCompany(String(idCompany), 99999, '');
+  const { data, refetch } = useProductCompanyWithGeneral(String(idCompany), 99999, '');
   const { mutate: addFaq } = useAddMasterFaq();
   const { mutate: updateFaq } = useUpdateMasterFaq(Number(id));
   const { data: internalCompanies } = useInternalCompaniesAll();
@@ -93,7 +96,7 @@ export default function CreateMasterFaq() {
   return (
     <>
       <Helmet>
-        <title> {`Master FAQ Create - ${CONFIG.appName}`}</title>
+        <title> {`FAQ - ${CONFIG.appName}`}</title>
         <meta
           name="description"
           content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
@@ -104,7 +107,7 @@ export default function CreateMasterFaq() {
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-              Master FAQ
+              FAQ
             </Typography>
             <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
               <Typography>Master Data</Typography>
