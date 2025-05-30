@@ -243,17 +243,6 @@ export function ReportRequestView() {
               gap={2}
             >
               <Box
-                onClick={() => navigate(`/${vendor}/report/request`)}
-                display="flex"
-                alignItems="center"
-                gap={2}
-                sx={{ cursor: 'pointer' }}
-              >
-                <Iconify icon="solar:inbox-bold" />
-                <Typography>Requests</Typography>
-              </Box>
-
-              <Box
                 onClick={() => navigate(`/${vendor}/report/work-allocation`)}
                 display="flex"
                 alignItems="center"
@@ -273,6 +262,16 @@ export function ReportRequestView() {
               >
                 <Iconify icon="solar:users-group-rounded-bold" />
                 <Typography color="grey.600">Work Performance</Typography>
+              </Box>
+              <Box
+                onClick={() => navigate(`/${vendor}/report/request`)}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                sx={{ cursor: 'pointer' }}
+              >
+                <Iconify icon="solar:inbox-bold" />
+                <Typography>Requests</Typography>
               </Box>
             </Box>
             <Box

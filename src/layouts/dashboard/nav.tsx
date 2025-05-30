@@ -152,7 +152,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
 
   const internalCompaniesReport = user?.internal_companies?.map((item) => ({
     heading: item?.company?.name,
-    path: `/${item?.company?.name.toLowerCase()}/report/request`,
+    path: `/${item?.company?.name.toLowerCase()}/report/work-allocation`,
   }));
 
   const internalCompaniesMasterData = user?.internal_companies?.map((item) => ({
