@@ -301,6 +301,8 @@ export function ReportWorkAllocationView() {
                         </Button>
                         <ReportWorkAllocationPDF
                           timePeriod={timePeriod}
+                          startDate={dateValue}
+                          endDate={endDateValue}
                           vendor={vendor?.toUpperCase() ?? ''}
                           data={{
                             summary: reportData?.data?.summary,

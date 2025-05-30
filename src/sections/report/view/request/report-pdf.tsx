@@ -1,5 +1,5 @@
 import { Box, Typography, capitalize } from '@mui/material';
-import type { OpUnitType } from 'dayjs';
+import type { Dayjs, OpUnitType } from 'dayjs';
 import dayjs from 'dayjs';
 
 interface ReportProps {
@@ -7,10 +7,18 @@ interface ReportProps {
   hiddenRef: any;
   vendor: string;
   timePeriod: string;
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
 }
 
-const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) => {
-  console.log(data?.reportData?.summary, 'data?.reportData?.summary');
+const ReportRequestPDF = ({
+  data,
+  hiddenRef,
+  vendor,
+  timePeriod,
+  startDate,
+  endDate,
+}: ReportProps) => {
   const renderPeriod = (period: string) => {
     const getFullMonthRange = (range: OpUnitType) => {
       const startOfMonth = dayjs().startOf(range);
@@ -19,34 +27,37 @@ const ReportRequestPDF = ({ data, hiddenRef, vendor, timePeriod }: ReportProps) 
       return `${startOfMonth.format('D MMMM YYYY')} - ${endOfMonth.format('D MMMM YYYY')}`;
     };
     const getLastXDaysRange = (x: number) => {
-      const endDate = dayjs(); // today
-      const startDate = endDate.subtract(x, 'day'); // include today in the 30 days
+      const endDateValue = dayjs(); // today
+      const startDateValue = endDateValue.subtract(x, 'day'); // include today in the 30 days
 
-      return `${startDate.format('D MMMM YYYY')} - ${endDate.format('D MMMM YYYY')}`;
+      return `${startDateValue.format('D MMMM YYYY')} - ${endDateValue.format('D MMMM YYYY')}`;
     };
 
     const getLastXFullMonthsRange = (x: number) => {
-      const endDate = dayjs();
-      const startDate = dayjs().subtract(x, 'month');
+      const endDateValue = dayjs();
+      const startDateValue = dayjs().subtract(x, 'month');
 
-      return `${startDate.format('D MMMM YYYY')} - ${endDate.format('D MMMM YYYY')}`;
+      return `${startDateValue.format('D MMMM YYYY')} - ${endDateValue.format('D MMMM YYYY')}`;
     };
-    switch (period) {
-      case 'month':
-        return getFullMonthRange('month');
-      case 'year':
-        return getFullMonthRange('year');
-      case '30-days':
-        return getLastXDaysRange(30);
-      case '3-months':
-        return getLastXFullMonthsRange(3);
-      case '6-months':
-        return getLastXFullMonthsRange(6);
+    if (period !== 'custom') {
+      switch (period) {
+        case 'month':
+          return getFullMonthRange('month');
+        case 'year':
+          return getFullMonthRange('year');
+        case '30-days':
+          return getLastXDaysRange(30);
+        case '3-months':
+          return getLastXFullMonthsRange(3);
+        case '6-months':
+          return getLastXFullMonthsRange(6);
 
-      default:
-        return '';
-        break;
+        default:
+          return '';
+          break;
+      }
     }
+    return `${startDate?.format('D MMMM YYYY')} - ${endDate?.format('D MMMM YYYY')}`;
   };
 
   const tableStyle: React.CSSProperties | undefined = {
