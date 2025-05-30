@@ -649,6 +649,8 @@ export function ReportRequestView() {
                         </Button>
                         <ReportRequestPDF
                           timePeriod={timePeriod}
+                          startDate={dateValue}
+                          endDate={endDateValue}
                           vendor={vendor?.toUpperCase() ?? ''}
                           data={{
                             reportData: reportData?.data,

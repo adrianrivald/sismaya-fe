@@ -607,6 +607,8 @@ export function ReportWorkPerformanceView() {
                           <Suspense>
                             <ReportWorkPerformanceIndividualPDF
                               timePeriod={timePeriod}
+                              startDate={dateValue}
+                              endDate={endDateValue}
                               vendor={vendor?.toUpperCase() ?? ''}
                               data={{
                                 reportData: reportData?.data,
@@ -621,6 +623,8 @@ export function ReportWorkPerformanceView() {
                           <Suspense>
                             <ReportWorkPerformanceDivisionPDF
                               timePeriod={timePeriod}
+                              startDate={dateValue}
+                              endDate={endDateValue}
                               vendor={vendor?.toUpperCase() ?? ''}
                               data={{
                                 reportData: reportData?.data,
@@ -635,6 +639,8 @@ export function ReportWorkPerformanceView() {
                           <Suspense>
                             <ReportWorkPerformanceOverallPDF
                               timePeriod={timePeriod}
+                              startDate={dateValue}
+                              endDate={endDateValue}
                               vendor={vendor?.toUpperCase() ?? ''}
                               data={{
                                 reportData: reportData?.data,
