@@ -427,10 +427,10 @@ export default function TaskDetailPage() {
           <Stack spacing={1.5}>
             <Iconify icon="solid:ic-solar:bill-list-bold" />
 
-            <Stack spacing={0.5}>
+            {/* <Stack spacing={0.5}>
               <Typography variant="body2">Estimated Duration</Typography>
               <Typography variant="subtitle2">{task.estimateDay} days</Typography>
-            </Stack>
+            </Stack> */}
           </Stack>
         </Box>
 
