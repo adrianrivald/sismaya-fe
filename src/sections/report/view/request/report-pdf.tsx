@@ -141,7 +141,8 @@ const ReportRequestPDF = ({
                       <td style={cellStyle} align="center">
                         <strong>
                           {data?.reportData?.summary?.report_per_year?.reduce(
-                            (a: any, b: any) => a.request_count + b.request_count
+                            (sum: any, row: any) => sum + row.request_count,
+                            0
                           )}
                         </strong>
                       </td>
