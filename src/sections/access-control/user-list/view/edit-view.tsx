@@ -349,7 +349,7 @@ function EditForm({
           </FormHelperText>
         )}
       </Grid> */}
-
+      {/* 
       <Grid item xs={12} md={12}>
         <TextField
           error={Boolean(formState?.errors?.password)}
@@ -375,6 +375,72 @@ function EditForm({
             {String(formState?.errors?.password?.message)}
           </FormHelperText>
         )}
+      </Grid> */}
+
+      <Grid item xs={12} md={12}>
+        <ModalDialog
+          open={isOpenResetPassword}
+          setOpen={setIsOpenResetPassword}
+          minWidth={600}
+          title="Reset Password"
+          content={
+            (
+              <Box mt={2}>
+                <Box sx={{ mb: 3 }}>
+                  <Typography mb={1} fontWeight={500}>
+                    New Password
+                  </Typography>
+                  <TextField
+                    error={Boolean(formState?.errors?.password)}
+                    fullWidth
+                    {...register('password', {
+                      required: 'Password must be filled out',
+                    })}
+                    onChange={onChangeTempPassword}
+                    variant="outlined"
+                    InputLabelProps={{ shrink: false }}
+                    type={showPassword ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            <Iconify
+                              icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  {formState?.errors?.password && (
+                    <FormHelperText sx={{ color: 'error.main' }}>
+                      {String(formState?.errors?.password?.message)}
+                    </FormHelperText>
+                  )}
+                </Box>
+                <Box display="flex" justifyContent="flex-end">
+                  <Button onClick={onSavePassword} variant="contained" color="primary">
+                    Save
+                  </Button>
+                </Box>
+              </Box>
+            ) as any
+          }
+        >
+          {/* Button Open Modal */}
+          <Button
+            type="button"
+            sx={{
+              paddingY: 0.5,
+              border: 1,
+              borderColor: 'primary.main',
+              borderRadius: 1.5,
+            }}
+          >
+            Reset Password
+          </Button>
+        </ModalDialog>
       </Grid>
 
       {type === 'client' ? (

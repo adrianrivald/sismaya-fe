@@ -38,16 +38,20 @@ export const generalMenus = (
         ? internalCompaniesDashboard?.filter((item) => item?.heading !== undefined)
         : [],
   },
-  {
-    heading: 'Reports',
-    id: 'report',
-    // path: '/report/request',
-    icon: icon('ic-file'),
-    list:
-      userType === 'internal'
-        ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
-        : [],
-  },
+  ...(userType === 'internal'
+    ? [
+        {
+          heading: 'Reports',
+          id: 'report',
+          // path: '/report/request',
+          icon: icon('ic-file'),
+          list:
+            userType === 'internal'
+              ? internalCompaniesReport?.filter((item) => item?.heading !== undefined)
+              : [],
+        },
+      ]
+    : []),
   ...(userType === 'client'
     ? [
         {
