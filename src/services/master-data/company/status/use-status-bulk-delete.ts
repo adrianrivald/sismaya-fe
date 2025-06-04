@@ -5,7 +5,7 @@ import { http } from 'src/utils/http';
 export function useBulkDeleteStatus() {
   return useMutation(
     async (statusId: string) =>
-      http(`progress-status/bulk?status_id=${statusId}`, {
+      http(`progress-status/bulk?progress_status_id=${statusId}`, {
         method: 'DELETE',
       }),
     {
