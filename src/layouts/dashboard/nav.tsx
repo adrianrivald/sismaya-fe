@@ -250,7 +250,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           clientCompaniesMasterDataSuperAdmin,
           internalCompaniesFaq,
           userType,
-          userRole === 2
+          userRole
         )
           ?.filter((item) =>
             item?.list?.some((listItem) =>

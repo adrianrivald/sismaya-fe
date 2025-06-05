@@ -88,7 +88,7 @@ export const settingMenus = (
   internalCompaniesMasterData?: ChildMenus[],
   internalCompaniesMasterDataSuperAdmin?: ChildMenus[],
   clientCompaniesMasterDataSuperAdmin?: ChildMenus[],
-  isAdmin?: boolean
+  userRole?: number
 ) => [
   {
     heading: 'Auto-Reponse',
@@ -107,30 +107,31 @@ export const settingMenus = (
     heading: 'Master Data',
     id: 'master-data',
     icon: <Iconify icon="solar:database-bold" />,
-    list: isAdmin
-      ? internalCompaniesMasterData
-      : [
-          {
-            heading: 'Internal Company',
-            list: internalCompaniesMasterDataSuperAdmin,
-          },
-          {
-            heading: 'Client Company',
-            list: clientCompaniesMasterDataSuperAdmin,
-          },
-          // {
-          //   heading: 'Internal User',
-          //   path: '/internal-user',
-          // }, Moved to RBAC
-          {
-            heading: 'Client User',
-            path: '/client-user',
-          },
-          {
-            heading: 'Product Filter',
-            path: '/product-filter',
-          },
-        ],
+    list:
+      userRole === 2
+        ? internalCompaniesMasterData
+        : [
+            {
+              heading: 'Internal Company',
+              list: internalCompaniesMasterDataSuperAdmin,
+            },
+            {
+              heading: 'Client Company',
+              list: clientCompaniesMasterDataSuperAdmin,
+            },
+            // {
+            //   heading: 'Internal User',
+            //   path: '/internal-user',
+            // }, Moved to RBAC
+            {
+              heading: 'Client User',
+              path: '/client-user',
+            },
+            {
+              heading: 'Product Filter',
+              path: '/product-filter',
+            },
+          ],
   },
 ];
 
@@ -147,18 +148,22 @@ export const menuItems = (
   clientCompaniesMasterDataSuperAdmin?: ChildMenus[],
   internalCompaniesFaq?: ChildMenus[],
   userType?: string,
-  isAdmin?: boolean
+  userRole?: number
 ) => [
-  {
-    heading: 'GENERAL',
-    id: 'general',
-    list: generalMenus(
-      internalCompaniesDashboard,
-      internalCompaniesReport,
-      internalCompaniesFaq,
-      userType
-    ),
-  },
+  ...(userRole !== 1
+    ? [
+        {
+          heading: 'GENERAL',
+          id: 'general',
+          list: generalMenus(
+            internalCompaniesDashboard,
+            internalCompaniesReport,
+            internalCompaniesFaq,
+            userType
+          ),
+        },
+      ]
+    : []),
   {
     heading: 'MANAGEMENT',
     id: 'management',
@@ -173,7 +178,7 @@ export const menuItems = (
       internalCompaniesMasterData,
       internalCompaniesMasterDataSuperAdmin,
       clientCompaniesMasterDataSuperAdmin,
-      isAdmin
+      userRole
     ),
   },
 
