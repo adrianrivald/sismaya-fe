@@ -11,6 +11,8 @@ import {
   FormLabel,
   Autocomplete,
   FormHelperText,
+  FilledInput,
+  InputAdornment,
 } from '@mui/material';
 import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
@@ -104,6 +106,7 @@ function Form({ request, task }: FormProps) {
       dueDate: new Date().toISOString(),
       files: task?.attachments,
       requestData: request,
+      estimatedDuration: task?.estimatedDuration || '',
     });
     // }
 
@@ -206,6 +209,22 @@ function Form({ request, task }: FormProps) {
               endDate={request?.end_date}
               defaultValue={new Date()}
               {...formUtils.getDatePickerProps(form, 'dueDate')}
+            />
+
+            <TextField
+              label="Estimated Duration"
+              {...formUtils.getTextProps(form, 'estimatedDuration')}
+              type="number"
+              inputProps={{ onWheel: (event: any) => event.target.blur(), max: 999 }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Typography variant="caption" color="text.secondary">
+                      Days
+                    </Typography>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <TextField

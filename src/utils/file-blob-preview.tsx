@@ -2,7 +2,6 @@ interface Props {
   fileUrl: string;
 }
 const FileBlobPreview = ({ fileUrl }: Props) => {
-  console.log('data', fileUrl);
   return (
     <div>
       <iframe

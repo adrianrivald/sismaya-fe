@@ -237,8 +237,6 @@ function EditForm({
     }
   };
 
-  console.log(watch(), 'watch');
-
   const onSubmit = (formData: UserClientUpdateDTO) => {
     const payload = {
       ...formData,

@@ -24,6 +24,7 @@ export class RequestTask {
     public dueDate: string = new Date().toISOString(),
     public endDate: string = new Date().toISOString(),
     public requestData: any = {},
+    public estimatedDuration: string = '',
     public description: string = '',
     public status: keyof typeof RequestTask.statusMap = 'to-do',
     public assignees: Array<Assignee> = [],
@@ -44,6 +45,7 @@ export class RequestTask {
       {},
       json?.description,
       json.step,
+      json?.estimated_duration,
       json?.assignees?.map((assignee: any) => ({
         id: assignee?.id,
         userId: assignee?.assignee_info?.userId,
@@ -70,6 +72,7 @@ export class RequestTask {
       due_date: fDate(task.dueDate, 'YYYY-MM-DD'),
       description: task.description,
       assignees: task.assignees,
+      estimated_duration: task.estimatedDuration,
       attachments,
     };
   }
@@ -108,6 +111,7 @@ export class RequestTask {
     title: z.string().min(1, 'Required'),
     dueDate: z.string().min(1, 'Required'),
     description: z.string().min(1, 'Required'),
+    estimatedDuration: z.string().min(1, 'Required'),
     status: z.enum(['to-do', 'in-progress', 'completed'], {
       required_error: 'Required',
       invalid_type_error: 'Invalid status',
@@ -167,6 +171,7 @@ export function useCreateOrUpdateTask(
     mutationKey: ['task'],
     mutationFn: async (task) => {
       let formData;
+
       if (isEdit) {
         formData = await RequestTask.toJson({ ...task, requestId });
       } else {
@@ -179,6 +184,7 @@ export function useCreateOrUpdateTask(
           due_date: fDate(task.dueDate, 'YYYY-MM-DD'),
           description: task.description,
           assignees: task.assignees,
+          estimated_duration: task.estimatedDuration,
           attachments: task.files.map((item: any) => ({
             file_path: item.path,
             file_name: item.name,

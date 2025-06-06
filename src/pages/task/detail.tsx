@@ -376,7 +376,7 @@ export default function TaskDetailPage() {
           display="flex"
           flexDirection="row"
           justifyContent="space-between"
-          p={2}
+          p={2.5}
           border="1px solid rgba(145, 158, 171, 0.16)"
           borderRadius={2}
           aria-label="request info"
@@ -427,10 +427,10 @@ export default function TaskDetailPage() {
           <Stack spacing={1.5}>
             <Iconify icon="solid:ic-solar:bill-list-bold" />
 
-            {/* <Stack spacing={0.5}>
+            <Stack spacing={0.5}>
               <Typography variant="body2">Estimated Duration</Typography>
-              <Typography variant="subtitle2">{task.estimateDay} days</Typography>
-            </Stack> */}
+              <Typography variant="subtitle2">{task.estimatedDuration} days</Typography>
+            </Stack>
           </Stack>
         </Box>
 
