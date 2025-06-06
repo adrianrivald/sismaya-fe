@@ -34,6 +34,7 @@ export interface Task {
   progress: number;
   dueDate: string;
   estimateDay: number;
+  estimatedDuration: string;
   status: keyof typeof taskStatusMap;
   assignees: Array<Assignee>;
   attachments: Array<{
@@ -77,7 +78,8 @@ export class TaskManagement {
       dueDate: json.due_date,
       status: json.step || 'to-do',
       progress: json.progress || 0,
-      estimateDay: dayjs(json.request?.due_date).diff(dayjs(), 'day'),
+      estimateDay: dayjs(json.due_date).diff(dayjs(), 'day'),
+      estimatedDuration: json?.estimated_duration || '',
       assignees: json.assignees.map(
         (assignee: any) =>
           ({
@@ -139,6 +141,7 @@ export class TaskManagement {
     request_id: z.number().optional(),
     title: z.string().min(1, 'Required'),
     dueDate: z.string().min(1, 'Required'),
+
     description: z.string().min(1, 'Required'),
     status: z.enum(['to-do', 'in-progress', 'completed'], {
       required_error: 'Required',
