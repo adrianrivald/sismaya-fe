@@ -9,6 +9,7 @@ import {
   MenuItem,
   Button,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
 import * as Dialog from 'src/components/disclosure/modal';
 import * as Drawer from 'src/components/disclosure/drawer';
@@ -146,6 +147,23 @@ function TaskForm({ requestId, task = defaultFormValues, requestNumber }: TaskFo
               endDate={task?.endDate}
               {...formUtils.getDatePickerProps(form, 'dueDate')}
             />
+
+            <TextField
+              label="Estimated Duration"
+              {...formUtils.getTextProps(form, 'estimatedDuration')}
+              type="number"
+              inputProps={{ onWheel: (event: any) => event.target.blur(), max: 999 }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Typography variant="caption" color="text.secondary">
+                      Days
+                    </Typography>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
             <TextField
               label="Status"
               defaultValue={form.watch('status')}
