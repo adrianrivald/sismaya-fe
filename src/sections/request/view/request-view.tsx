@@ -69,8 +69,8 @@ const columns = (popoverProps: PopoverProps) => [
           {step === 'pending' || step === 'rejected'
             ? step === 'pending'
               ? 'Requested'
-              : capitalize(step)
-            : capitalize(progressStatus)}
+              : capitalize(step || '')
+            : capitalize(progressStatus || '')}
         </Typography>
       );
     },
