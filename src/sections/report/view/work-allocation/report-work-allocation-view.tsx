@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable consistent-return */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable new-cap */
 import { useEffect, useRef, useState } from 'react';
@@ -16,7 +18,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import type { Dayjs } from 'dayjs';
+import type { Dayjs, OpUnitType } from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -27,6 +29,7 @@ import { Form } from 'src/components/form/form';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import type { ReportWorkAllocationDTO } from 'src/services/report/work-allocation/schemas/work-allocation-schema';
 import { useReportWorkAllocation } from 'src/services/report/work-allocation/use-report-work-allocation';
+import dayjs from 'dayjs';
 import ReportWorkAllocationPDF from './report-pdf';
 
 const timePeriodOptions = [
@@ -73,42 +76,133 @@ export function ReportWorkAllocationView() {
 
   const hiddenRef = useRef<HTMLDivElement>(null);
 
+  // Helper: Convert image URL to base64
+  const loadImageAsBase64 = (url: string): Promise<string | null> =>
+    new Promise((resolve) => {
+      if (!url) return resolve(null);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+
+  const renderPeriod = (period: string) => {
+    const getFullMonthRange = (range: OpUnitType) => {
+      const startOfMonth = dayjs().startOf(range);
+      const endOfMonth = dayjs().endOf(range);
+
+      return `${startOfMonth.format('D MMMM YYYY')} - ${endOfMonth.format('D MMMM YYYY')}`;
+    };
+    const getLastXDaysRange = (x: number) => {
+      const endDateValueRange = dayjs(); // today
+      const startDateValue = endDateValueRange.subtract(x, 'day'); // include today in the 30 days
+
+      return `${startDateValue.format('D MMMM YYYY')} - ${endDateValueRange.format('D MMMM YYYY')}`;
+    };
+
+    const getLastXFullMonthsRange = (x: number) => {
+      const endDateValueRange = dayjs();
+      const startDateValue = dayjs().subtract(x, 'month');
+
+      return `${startDateValue.format('D MMMM YYYY')} - ${endDateValueRange.format('D MMMM YYYY')}`;
+    };
+    if (period !== 'custom') {
+      switch (period) {
+        case 'month':
+          return getFullMonthRange('month');
+        case 'year':
+          return getFullMonthRange('year');
+        case '30-days':
+          return getLastXDaysRange(30);
+        case '3-months':
+          return getLastXFullMonthsRange(3);
+        case '6-months':
+          return getLastXFullMonthsRange(6);
+
+        default:
+          return '';
+          break;
+      }
+    }
+    return `${dateValue?.format('D MMMM YYYY')} - ${endDateValue?.format('D MMMM YYYY')}`;
+  };
   const generatePdf = async () => {
     const element = hiddenRef.current;
     if (!element) return;
 
     const canvas = await html2canvas(element, {
       useCORS: true,
-      scale: 2, // optional: higher resolution
+      scale: 2,
     });
 
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4'); // pt = points
+    const pdf = new jsPDF('p', 'pt', 'a4');
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
+    const headerHeight = 60;
+    const footerHeight = 30;
 
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
-
     const imgHeight = (pdfWidth * canvasHeight) / canvasWidth;
 
     let heightLeft = imgHeight;
     let position = 0;
+    let pageNumber = 1;
+    const totalPages = Math.ceil(imgHeight / (pdfHeight - headerHeight - footerHeight));
+
+    const logoImg = await loadImageAsBase64(reportData?.meta?.company_image);
+
+    const addHeaderFooter = () => {
+      // Header
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0);
+      pdf.text(`PT ${vendor} Work Allocation Report`, 20, 30);
+
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(100);
+      pdf.text(renderPeriod(timePeriod), 20, 45);
+
+      // Logo (right side)
+      if (logoImg) {
+        const imgWidth = 60;
+        const logoHeight = 60;
+        pdf.addImage(logoImg, 'PNG', pdfWidth - imgWidth - 40, 20, imgWidth, logoHeight);
+      }
+
+      // Footer
+      pdf.setFontSize(10);
+      pdf.setTextColor(150);
+      pdf.text(`Page ${pageNumber} of ${totalPages}`, pdfWidth - 100, pdfHeight - 15);
+    };
 
     // First page
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-    heightLeft -= pdfHeight;
+    pdf.addImage(imgData, 'PNG', 0, headerHeight, pdfWidth, imgHeight);
+    addHeaderFooter();
+    heightLeft -= pdfHeight - headerHeight - footerHeight;
 
-    // Add remaining pages
+    // Additional pages
     while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
+      pageNumber++;
       pdf.addPage();
+      position = heightLeft - imgHeight + headerHeight;
       pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      addHeaderFooter();
+      heightLeft -= pdfHeight - headerHeight - footerHeight;
     }
 
-    // Either open in new tab or save
     const blob = pdf.output('blob');
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, '_blank');
@@ -142,6 +236,7 @@ export function ReportWorkAllocationView() {
     if (reportData) {
       generatePdf();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportData]);
 
   return (

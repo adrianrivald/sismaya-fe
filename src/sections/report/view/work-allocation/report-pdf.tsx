@@ -105,7 +105,7 @@ const ReportWorkAllocationPDF = ({
         style={{ position: 'absolute', left: '-99300px', padding: '20px', width: '900px' }}
       >
         {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px' }}> */}
-        <Box display="flex" justifyContent="space-between">
+        {/* <Box display="flex" justifyContent="space-between">
           <Box>
             <Typography fontSize={20} fontWeight="bold">
               PT {vendor} Work Allocation Report
@@ -117,7 +117,7 @@ const ReportWorkAllocationPDF = ({
           <Box>
             <img src={data?.image} alt="logo" height={100} crossOrigin="anonymous" />
           </Box>
-        </Box>
+        </Box> */}
         <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
           <Box width="50%" border={1} borderColor="grey.300" borderRadius={2} p={4}>
             <PieChart data={pieData} />
