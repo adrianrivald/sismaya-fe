@@ -1,22 +1,10 @@
-import {
-  Box,
-  TableContainer,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  capitalize,
-} from '@mui/material';
+import { capitalize } from '@mui/material';
+import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { Dayjs, OpUnitType } from 'dayjs';
 import dayjs from 'dayjs';
 
 interface ReportProps {
   data: any;
-  hiddenRef: any;
-  vendor: string;
   timePeriod: string;
   reportType: string;
   startDate: Dayjs | null;
@@ -25,8 +13,6 @@ interface ReportProps {
 
 const ReportWorkPerformanceDivisionPDF = ({
   data,
-  hiddenRef,
-  vendor,
   timePeriod,
   reportType,
   startDate,
@@ -73,251 +59,332 @@ const ReportWorkPerformanceDivisionPDF = ({
     return `${startDate?.format('D MMMM YYYY')} - ${endDate?.format('D MMMM YYYY')}`;
   };
 
-  const tableStyle: React.CSSProperties | undefined = {
-    borderCollapse: 'collapse',
-    fontFamily: 'Arial, sans-serif',
-    width: '100%',
-    textAlign: 'center',
-    margin: '20px auto',
-  };
-
-  const headerStyle = {
-    backgroundColor: '#DFE3E8',
-    fontWeight: 'bold',
-    padding: '10px',
-    border: '1px solid #ccc',
-  };
-
-  const subHeaderStyle = {
-    backgroundColor: '#DFE3E8',
-    padding: '8px',
-  };
-
-  const cellStyle = {
-    padding: '8px',
-    border: '1px solid #ccc',
-  };
-
-  console.log(data?.reportData, 'data?.reportData');
-
+  // Helper styles
+  const styles = StyleSheet.create({
+    page: {
+      paddingTop: 40, // leave space for header
+      paddingBottom: 40, // leave space for footer
+      paddingHorizontal: 20,
+      fontSize: 12,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      paddingBottom: 10,
+    },
+    headerLeft: {
+      flex: 1,
+    },
+    title: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      color: '#000',
+    },
+    subtitle: {
+      fontSize: 10,
+      color: '#666',
+      marginTop: 4,
+    },
+    logo: {
+      width: 50,
+      height: 80,
+    },
+    footer: {
+      position: 'absolute',
+      bottom: 20,
+      left: 20,
+      right: 20,
+      textAlign: 'center',
+      fontSize: 10,
+      color: 'gray',
+      borderTop: '1pt solid #aaa',
+      paddingTop: 5,
+    },
+    section: {
+      marginBottom: 16,
+    },
+    table: {
+      display: 'flex',
+      width: 'auto',
+      marginTop: 8,
+    },
+    tableRow: {
+      flexDirection: 'row',
+    },
+    tableColHeader: {
+      fontWeight: 'bold',
+      backgroundColor: '#DFE3E8',
+      padding: 8,
+    },
+    tableCol: {
+      padding: 8,
+    },
+    cell: {
+      width: '25%',
+      border: '1px solid #ccc',
+      padding: 8,
+    },
+  });
   return (
-    <div>
-      <div
-        ref={hiddenRef}
-        style={{ position: 'absolute', left: '-99300px', padding: '20px', width: '900px' }}
-      >
-        {/* <div ref={hiddenRef} style={{ padding: '20px', width: '900px', maxHeight: '100vh' }}> */}
-        <Box display="flex" justifyContent="space-between">
-          <Box>
-            <Typography fontSize={20} fontWeight="bold">
+    <Document>
+      <Page size="A4" style={styles.page} wrap>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.title}>
               Employee Performance Report: {capitalize(reportType)} Performance
-            </Typography>
-            <Typography mt={1} color="grey.600">
-              {renderPeriod(timePeriod)}
-            </Typography>
-          </Box>
-          <Box>
-            <img src={data?.image} alt="logo" height={100} crossOrigin="anonymous" />
-          </Box>
-        </Box>
+            </Text>
+            <Text style={styles.subtitle}>{renderPeriod(timePeriod)}</Text>
+          </View>
 
-        <Box mt={4} display="flex" width="100%" justifyContent="space-between" gap={4}>
-          <Box width="100%">
-            {data?.reportData?.individual?.length > 0 && (
-              <Box pb={2} borderBottom={1} borderColor="grey.300">
-                <Typography>A. SUMMARY REPORT</Typography>
-              </Box>
-            )}
+          {data?.image && <Image src={data.image} style={styles.logo} />}
+        </View>
+        <View wrap>
+          <View style={styles.section}>
+            <View style={{ width: '100%' }}>
+              <Text style={{ width: '100%' }}>
+                {data?.reportData?.individual?.length > 0 && (
+                  <View style={{ paddingBottom: 2, borderBottom: 1, borderBottomColor: 'grey' }}>
+                    <Text>A. SUMMARY REPORT</Text>
+                  </View>
+                )}
+              </Text>
+            </View>
             {data?.reportData?.summary?.map((report: any, index: number) => (
-              <Box mt={2} mb={4}>
-                <Box pb={1} borderBottom={1} borderColor="grey.300">
-                  <Typography fontWeight="bold">{report?.department}</Typography>
-                </Box>
-                <Typography my={1}>1. {report?.department} TEAM&apos;S PERFORMANCE</Typography>
-                <table style={tableStyle}>
-                  <thead>
-                    <tr>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {report?.performance_per_year?.map((row: any, indexItem: number) => (
-                      <tr key={indexItem + 1}>
-                        <td style={cellStyle}>{indexItem + 1}</td>
-                        <td style={cellStyle} align="left">
-                          {row.period_name}
-                        </td>
-                        <td style={cellStyle}>{row.task_count}</td>
-                        <td style={cellStyle}>{row.working_hours}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <>
+                <View
+                  style={{
+                    width: '100%',
+                    marginVertical: '12px',
+                    paddingVertical: '12px',
+                    borderTop: 1,
+                    borderTopColor: '#DFE3E8',
+                    borderBottom: 1,
+                    borderBottomColor: '#DFE3E8',
+                  }}
+                >
+                  <Text style={{ width: '100%' }}>
+                    <View style={{ paddingBottom: 2, borderBottom: 1, borderBottomColor: 'grey' }}>
+                      <Text>{report?.department}</Text>
+                    </View>
+                  </Text>
+                </View>
+                <View>
+                  <Text style={{ marginVertical: 1 }}>
+                    1. {report?.department} TEAM&apos;S PERFORMANCE
+                  </Text>
+                </View>
+                <View style={styles.table}>
+                  <View style={styles.tableRow}>
+                    <Text style={[styles.cell, styles.tableColHeader]}>No.</Text>
+                    <Text style={[styles.cell, styles.tableColHeader]}>Period</Text>
+                    <Text style={[styles.cell, styles.tableColHeader]}>Total Tasks</Text>
+                    <Text style={[styles.cell, styles.tableColHeader]}>Total Working Hours</Text>
+                  </View>
+                  {report?.performance_per_year?.map((row: any, i: number) => (
+                    <View style={styles.tableRow} key={i}>
+                      <Text style={styles.cell}>{i + 1}</Text>
+                      <Text style={styles.cell}>{row.period_name}</Text>
+                      <Text style={styles.cell}>{row.task_count}</Text>
+                      <Text style={styles.cell}>{row.working_hours}</Text>
+                    </View>
+                  ))}
 
-                <Typography mb={1}>2. {report?.department} TEAM&apos;S PER MONTH</Typography>
-                <table style={tableStyle}>
-                  <thead>
-                    <tr>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                      <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {report?.performance_per_month?.map((row: any, indexItem: number) => (
-                      <tr key={indexItem + 1}>
-                        <td style={cellStyle}>{indexItem + 1}</td>
-                        <td style={cellStyle} align="left">
-                          {row.period_name}
-                        </td>
-                        <td style={cellStyle}>{row.task_count}</td>
-                        <td style={cellStyle}>{row.working_hours}</td>
-                      </tr>
-                    ))}
+                  <View style={styles.tableRow}>
+                    <Text style={styles.cell} />
+                    <Text style={{ ...styles.cell, fontWeight: 'bold' }}>Total</Text>
+                    <Text style={{ ...styles.cell, fontWeight: 'bold' }}>
+                      {report?.performance_per_year?.length > 1
+                        ? report?.performance_per_year?.reduce(
+                            (sum: number, item: any) => sum + item.task_count,
+                            0
+                          )
+                        : report?.performance_per_year[0]?.task_count}
+                    </Text>
+                    <Text style={{ ...styles.cell, fontWeight: 'bold' }}>
+                      {report?.performance_per_year?.length > 1
+                        ? report?.performance_per_month?.reduce(
+                            (sum: number, item: any) => sum + item.working_hours,
+                            0
+                          )
+                        : report?.performance_per_year[0]?.working_hours}
+                    </Text>
+                  </View>
+                </View>
 
-                    <tr>
-                      <td style={cellStyle} />
-                      <td style={cellStyle} align="center">
-                        <strong>Total</strong>
-                      </td>
+                <View style={{ marginTop: '18px' }}>
+                  <Text style={{ marginVertical: 1 }}>
+                    2. {report?.department} TEAM&apos;S PER MONTH
+                  </Text>
+                </View>
 
-                      <td style={cellStyle} align="center">
-                        <strong>
-                          {report?.performance_per_month?.length > 1
-                            ? report.performance_per_month.reduce(
-                                (sum: number, item: any) => sum + item.task_count,
-                                0
-                              )
-                            : (report?.performance_per_month[0]?.task_count ?? 0)}
-                        </strong>
-                      </td>
-                      <td style={cellStyle} align="center">
-                        <strong>
-                          {report?.performance_per_month?.length > 1
-                            ? report.performance_per_month.reduce(
-                                (sum: number, item: any) => sum + item.working_hours,
-                                0
-                              )
-                            : (report?.performance_per_month[0]?.working_hours ?? 0)}
-                        </strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <View style={styles.table}>
+                  <View style={styles.tableRow}>
+                    <Text style={[styles.cell, styles.tableColHeader]}>No.</Text>
+                    <Text style={[styles.cell, styles.tableColHeader]}>Period</Text>
+                    <Text style={[styles.cell, styles.tableColHeader]}>Total Tasks</Text>
+                    <Text style={[styles.cell, styles.tableColHeader]}>Total Working Hours</Text>
+                  </View>
+                  {report?.performance_per_month?.map((row: any, i: number) => (
+                    <View style={styles.tableRow} key={i}>
+                      <Text style={styles.cell}>{i + 1}</Text>
+                      <Text style={styles.cell}>{row.period_name}</Text>
+                      <Text style={styles.cell}>{row.task_count}</Text>
+                      <Text style={styles.cell}>{row.working_hours}</Text>
+                    </View>
+                  ))}
+                </View>
                 {report?.performance_per_product?.length > 0 && (
                   <>
-                    <Typography mb={1}>3. {report?.department} TEAM&apos;S PER PRODUCT</Typography>
-                    <table style={tableStyle}>
-                      <thead>
-                        <tr>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Product</th>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {report?.performance_per_product?.map((row: any, indexItem: number) => (
-                          <tr key={indexItem + 1}>
-                            <td style={cellStyle}>{indexItem + 1}</td>
-                            <td style={cellStyle} align="left">
-                              {row.product_name}
-                            </td>
-                            <td style={cellStyle}>{row.task_count}</td>
-                            <td style={cellStyle}>{row.working_hours}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <View style={{ marginTop: '18px' }}>
+                      <Text style={{ marginVertical: 1 }}>
+                        3. {report?.department} TEAM&apos;S PER PRODUCT
+                      </Text>
+                    </View>
+
+                    <View style={styles.table}>
+                      <View style={styles.tableRow}>
+                        <Text style={[styles.cell, styles.tableColHeader]}>No.</Text>
+                        <Text style={[styles.cell, styles.tableColHeader]}>Product</Text>
+                        <Text style={[styles.cell, styles.tableColHeader]}>Total Tasks</Text>
+                        <Text style={[styles.cell, styles.tableColHeader]}>
+                          Total Working Hours
+                        </Text>
+                      </View>
+                      {report?.performance_per_month?.map((row: any, i: number) => (
+                        <View style={styles.tableRow} key={i}>
+                          <Text style={styles.cell}>{i + 1}</Text>
+                          <Text style={styles.cell}>{row.product_name}</Text>
+                          <Text style={styles.cell}>{row.task_count}</Text>
+                          <Text style={styles.cell}>{row.working_hours}</Text>
+                        </View>
+                      ))}
+                    </View>
                   </>
                 )}
-              </Box>
+              </>
             ))}
 
+            {/* Individual Breakdown */}
             {data?.reportData?.individual?.length > 0 && (
-              <Box pb={2} borderBottom={1} borderColor="grey.300">
-                <Typography>B. INDIVIDUAL BREAKDOWN</Typography>
-              </Box>
+              <View
+                style={{
+                  paddingBottom: 2,
+                  marginTop: '18px',
+                }}
+              >
+                <Text>B. INDIVIDUAL BREAKDOWN</Text>
+              </View>
             )}
             {data?.reportData?.individual?.map((report: any, index: number) => (
-              <Box mt={2} mb={4}>
-                <Box pb={1} borderBottom={1} borderColor="grey.300">
-                  <Typography fontWeight="bold">{report?.department}</Typography>
-                </Box>
+              <>
+                <View
+                  style={{
+                    width: '100%',
+                    marginVertical: '12px',
+                    paddingVertical: '12px',
+                    borderTop: 1,
+                    borderTopColor: '#DFE3E8',
+                    borderBottom: 1,
+                    borderBottomColor: '#DFE3E8',
+                  }}
+                >
+                  <Text style={{ width: '100%' }}>
+                    <View style={{ paddingBottom: 2, borderBottom: 1, borderBottomColor: 'grey' }}>
+                      <Text>{report?.department}</Text>
+                    </View>
+                  </Text>
+                </View>
                 {report?.employees?.map((employee: any, employeeIndex: number) => (
                   <>
-                    <Typography my={1}>
-                      {employeeIndex + 1}. {employee?.employee}
-                    </Typography>
-                    <table style={tableStyle}>
-                      <thead>
-                        <tr>
-                          <th colSpan={4} style={headerStyle}>
-                            {employee?.employee}&apos;s Monthly Performance
-                          </th>
-                        </tr>
-                        <tr>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                          <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {employee?.performance_report?.map((row: any, indexItem: number) => (
-                          <tr key={indexItem + 1}>
-                            <td style={cellStyle}>{indexItem + 1}</td>
-                            <td style={cellStyle} align="left">
-                              {row.period_name}
-                            </td>
-                            <td style={cellStyle}>{row.task_count}</td>
-                            <td style={cellStyle}>{row.working_hours}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <View style={{ marginTop: '12px' }}>
+                      <Text style={{ marginVertical: 1 }}>
+                        {employeeIndex + 1}. {employee?.employee}
+                      </Text>
+                    </View>
+
+                    <View style={styles.table}>
+                      <View style={styles.tableRow}>
+                        <Text
+                          style={[
+                            {
+                              width: '100%',
+                              border: '1px solid #ccc',
+                              padding: 8,
+                              textAlign: 'center',
+                            },
+                            styles.tableColHeader,
+                          ]}
+                        >
+                          {' '}
+                          {employee?.employee}&apos;s Monthly Performance
+                        </Text>
+                      </View>
+                      <View style={styles.tableRow}>
+                        <Text style={[styles.cell, styles.tableColHeader]}>No.</Text>
+                        <Text style={[styles.cell, styles.tableColHeader]}>Period</Text>
+                        <Text style={[styles.cell, styles.tableColHeader]}>Total Tasks</Text>
+                        <Text style={[styles.cell, styles.tableColHeader]}>
+                          Total Working Hours
+                        </Text>
+                      </View>
+                      {employee?.performance_report?.map((row: any, i: number) => (
+                        <View style={styles.tableRow} key={i}>
+                          <Text style={styles.cell}>{i + 1}</Text>
+                          <Text style={styles.cell}>{row.period_name}</Text>
+                          <Text style={styles.cell}>{row.task_count}</Text>
+                          <Text style={styles.cell}>{row.working_hours}</Text>
+                        </View>
+                      ))}
+                    </View>
 
                     {employee?.distribution_report?.length > 0 ? (
-                      <table style={tableStyle}>
-                        <thead>
-                          <tr>
-                            <th colSpan={4} style={headerStyle}>
-                              {employee?.employee}&apos;s Monthly Performance
-                            </th>
-                          </tr>
-                          <tr>
-                            <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                            <th style={{ ...subHeaderStyle, ...cellStyle }}>Product</th>
-                            <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                            <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {employee?.distribution_report?.map((row: any, indexItem: number) => (
-                            <tr key={indexItem + 1}>
-                              <td style={cellStyle}>{indexItem + 1}</td>
-                              <td style={cellStyle} align="left">
-                                {row.product_name}
-                              </td>
-                              <td style={cellStyle}>{row.task_count}</td>
-                              <td style={cellStyle}>{row.working_hours}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <View style={styles.table}>
+                        <View style={styles.tableRow}>
+                          <Text style={[styles.cell, styles.tableColHeader]}>No.</Text>
+                          <Text style={[styles.cell, styles.tableColHeader]}>Period</Text>
+                          <Text style={[styles.cell, styles.tableColHeader]}>Total Tasks</Text>
+                          <Text style={[styles.cell, styles.tableColHeader]}>
+                            Total Working Hours
+                          </Text>
+                        </View>
+                        {employee?.distribution_report?.map((row: any, i: number) => (
+                          <View style={styles.tableRow} key={i}>
+                            <Text style={styles.cell}>{i + 1}</Text>
+                            <Text style={styles.cell}>{row.period_name}</Text>
+                            <Text style={styles.cell}>{row.task_count}</Text>
+                            <Text style={styles.cell}>{row.working_hours}</Text>
+                          </View>
+                        ))}
+                      </View>
                     ) : null}
                   </>
                 ))}
-              </Box>
+              </>
             ))}
-          </Box>
-        </Box>
-      </div>
-    </div>
+          </View>
+        </View>
+
+        {/* Footer with page number */}
+        <View
+          style={styles.footer}
+          render={({ pageNumber, totalPages }: any) => (
+            <View
+              style={{
+                flexDirection: 'row',
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              <Text>{`Printed on ${dayjs().format('DD/MM/YYYY HH:mm:ss')} WIB`}</Text>
+              <Text>{`Page ${pageNumber} of ${totalPages}`}</Text>
+            </View>
+          )}
+          fixed // ensures it stays in the same place on every page
+        />
+      </Page>
+    </Document>
   );
 };
 

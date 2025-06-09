@@ -34,6 +34,7 @@ import { useReportWorkPerformance } from 'src/services/report/work-performance/u
 import { useInternalUsers } from 'src/services/master-data/user';
 import type { ReportWorkPerformanceDTO } from 'src/services/report/work-performance/schemas/work-performance-schema';
 import { useDivisionByCompanyId } from 'src/services/master-data/company';
+import { pdf, PDFDownloadLink } from '@react-pdf/renderer';
 import ReportWorkPerformanceIndividualPDF from './individual-report-pdf';
 import ReportWorkPerformanceOverallPDF from './overall-report-pdf';
 import ReportWorkPerformanceDivisionPDF from './division-report-pdf';
@@ -145,47 +146,59 @@ export function ReportWorkPerformanceView() {
 
   const hiddenRef = useRef<HTMLDivElement>(null);
 
-  const generatePdf = async () => {
-    const element = hiddenRef.current;
-    if (!element) return;
+  const generatePDFFile = async () => {
+    if (reportType === 'individual') {
+      const blob = await pdf(
+        <ReportWorkPerformanceIndividualPDF
+          timePeriod={timePeriod}
+          startDate={dateValue}
+          endDate={endDateValue}
+          data={{
+            reportData: reportData?.data,
+            image: reportData?.meta?.company_image,
+          }}
+          reportType={reportType}
+        />
+      ).toBlob();
 
-    const canvas = await html2canvas(element, {
-      useCORS: true,
-      scale: 2, // optional: higher resolution
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4'); // pt = points
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-
-    const imgHeight = (pdfWidth * canvasHeight) / canvasWidth;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // First page
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    const marginTop = 40; // Adjust as needed
-
-    // Add remaining pages
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
     }
 
-    // Either open in new tab or save
-    const blob = pdf.output('blob');
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, '_blank');
+    if (reportType === 'overall') {
+      const blob = await pdf(
+        <ReportWorkPerformanceOverallPDF
+          timePeriod={timePeriod}
+          startDate={dateValue}
+          endDate={endDateValue}
+          data={{
+            reportData: reportData?.data,
+            image: reportData?.meta?.company_image,
+          }}
+          reportType={reportType}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+    if (reportType === 'division' && !isIdle) {
+      const blob = await pdf(
+        <ReportWorkPerformanceDivisionPDF
+          timePeriod={timePeriod}
+          startDate={dateValue}
+          endDate={endDateValue}
+          data={{
+            reportData: reportData?.data,
+            image: reportData?.meta?.company_image,
+          }}
+          reportType={reportType}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
   };
 
   const handleChangeEndDate = (newValue: Dayjs | null) => {
@@ -238,8 +251,9 @@ export function ReportWorkPerformanceView() {
 
   useEffect(() => {
     if (reportData) {
-      generatePdf();
+      generatePDFFile();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportData]);
 
   return (
@@ -603,54 +617,6 @@ export function ReportWorkPerformanceView() {
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
                           Generate & Download Report
                         </Button>
-                        {reportType === 'individual' && !isIdle && (
-                          <Suspense>
-                            <ReportWorkPerformanceIndividualPDF
-                              timePeriod={timePeriod}
-                              startDate={dateValue}
-                              endDate={endDateValue}
-                              vendor={vendor?.toUpperCase() ?? ''}
-                              data={{
-                                reportData: reportData?.data,
-                                image: reportData?.meta?.company_image,
-                              }}
-                              hiddenRef={hiddenRef}
-                              reportType={reportType}
-                            />
-                          </Suspense>
-                        )}
-                        {reportType === 'division' && !isIdle && (
-                          <Suspense>
-                            <ReportWorkPerformanceDivisionPDF
-                              timePeriod={timePeriod}
-                              startDate={dateValue}
-                              endDate={endDateValue}
-                              vendor={vendor?.toUpperCase() ?? ''}
-                              data={{
-                                reportData: reportData?.data,
-                                image: reportData?.meta?.company_image,
-                              }}
-                              hiddenRef={hiddenRef}
-                              reportType={reportType}
-                            />
-                          </Suspense>
-                        )}
-                        {reportType === 'overall' && !isIdle && (
-                          <Suspense>
-                            <ReportWorkPerformanceOverallPDF
-                              timePeriod={timePeriod}
-                              startDate={dateValue}
-                              endDate={endDateValue}
-                              vendor={vendor?.toUpperCase() ?? ''}
-                              data={{
-                                reportData: reportData?.data,
-                                image: reportData?.meta?.company_image,
-                              }}
-                              hiddenRef={hiddenRef}
-                              reportType={reportType}
-                            />
-                          </Suspense>
-                        )}
                       </Box>
                     </>
                   )}

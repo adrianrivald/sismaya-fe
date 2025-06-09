@@ -22,7 +22,6 @@ import {
   useTheme,
 } from '@mui/material';
 import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -31,18 +30,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
 import { Form } from 'src/components/form/form';
-import {
-  useCompanyRelation,
-  useDivisionByCompanyId,
-  useInternalCompanies,
-  useNonInternalCompanies,
-} from 'src/services/master-data/company';
+import { useCompanyRelation } from 'src/services/master-data/company';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import { useDepartmentName } from 'src/services/report/request/use-department-name';
 import { useDepartmentId } from 'src/services/report/request/use-department-id';
 import { useReportRequest } from 'src/services/report/request/use-report-request';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+
+import { pdf } from '@react-pdf/renderer';
 import ReportRequestPDF from './report-pdf';
 
 const ITEM_HEIGHT = 48;
@@ -136,45 +130,21 @@ export function ReportRequestView() {
 
   const hiddenRef = useRef<HTMLDivElement>(null);
 
-  const generatePdf = async () => {
-    const element = hiddenRef.current;
-    if (!element) return;
+  const generatePDFFile = async () => {
+    const blob = await pdf(
+      <ReportRequestPDF
+        timePeriod={timePeriod}
+        startDate={dateValue}
+        endDate={endDateValue}
+        data={{
+          reportData: reportData?.data,
+          image: reportData?.meta?.company_image,
+        }}
+      />
+    ).toBlob();
 
-    const canvas = await html2canvas(element, {
-      useCORS: true,
-      scale: 2, // optional: higher resolution
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4'); // pt = points
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-
-    const imgHeight = (pdfWidth * canvasHeight) / canvasWidth;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // First page
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    // Add remaining pages
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
-    }
-
-    // Either open in new tab or save
-    const blob = pdf.output('blob');
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, '_blank');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   const handleChangeDate = (newValue: Dayjs | null) => {
@@ -216,8 +186,9 @@ export function ReportRequestView() {
 
   useEffect(() => {
     if (reportData) {
-      generatePdf();
+      generatePDFFile();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportData]);
 
   return (
@@ -647,17 +618,6 @@ export function ReportRequestView() {
                         <Button sx={{ width: '100%' }} type="submit" variant="contained">
                           Generate & Download Report
                         </Button>
-                        <ReportRequestPDF
-                          timePeriod={timePeriod}
-                          startDate={dateValue}
-                          endDate={endDateValue}
-                          vendor={vendor?.toUpperCase() ?? ''}
-                          data={{
-                            reportData: reportData?.data,
-                            image: reportData?.meta?.company_image,
-                          }}
-                          hiddenRef={hiddenRef}
-                        />
                       </Box>
                     </>
                   )}
