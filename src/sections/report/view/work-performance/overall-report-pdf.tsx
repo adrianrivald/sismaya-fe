@@ -257,86 +257,22 @@ const ReportWorkPerformanceOverallPDF = ({
           </View>
         </View>
 
-        {/* <Box my={4}>
-          <Typography mb={1}>2. EMPLOYEE PERFORMANCE OF THE MONTH</Typography>
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Period</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data?.reportData?.performance_per_month?.map((row: any, indexItem: number) => (
-                <tr key={indexItem + 1}>
-                  <td style={cellStyle}>{indexItem + 1}</td>
-                  <td style={cellStyle} align="left">
-                    {row?.period_name}
-                  </td>
-                  <td style={cellStyle}>{row?.task_count}</td>
-                  <td style={cellStyle}>{row?.working_hours}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Box>
-
-        <Box my={4}>
-          <Typography mb={1}>3. EMPLOYEE PERFORMANCE PER PRODUCT</Typography>
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Product</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data?.reportData?.performance_per_product?.map((row: any, indexItem: number) => (
-                <tr key={indexItem + 1}>
-                  <td style={cellStyle}>{indexItem + 1}</td>
-                  <td style={cellStyle} align="left">
-                    {row?.product_name}
-                  </td>
-                  <td style={cellStyle}>{row?.task_count}</td>
-                  <td style={cellStyle}>{row?.working_hours}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Box>
-        <Box mt={4}>
-          <Typography mb={1}>4. EMPLOYEE PERFORMANCE PER DIVISION</Typography>
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>No.</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Division</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Tasks</th>
-                <th style={{ ...subHeaderStyle, ...cellStyle }}>Total Working Hours</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data?.reportData?.performance_per_division?.map((row: any, indexItem: number) => (
-                <tr key={indexItem + 1}>
-                  <td style={cellStyle}>{indexItem + 1}</td>
-                  <td style={cellStyle} align="left">
-                    {row?.department_name ?? '-'}
-                  </td>
-                  <td style={cellStyle}>{row?.task_count}</td>
-                  <td style={cellStyle}>{row?.working_hours}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Box> */}
         {/* Footer with page number */}
-        <Text
+        <View
           style={styles.footer}
-          render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+          render={({ pageNumber, totalPages }: any) => (
+            <View
+              style={{
+                flexDirection: 'row',
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              <Text>{`Printed on ${dayjs().format('DD/MM/YYYY HH:mm:ss')} WIB`}</Text>
+              <Text>{`Page ${pageNumber} of ${totalPages}`}</Text>
+            </View>
+          )}
           fixed // ensures it stays in the same place on every page
         />
       </Page>

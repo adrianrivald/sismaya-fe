@@ -185,6 +185,7 @@ export function ReportWorkAllocationView() {
       // Footer
       pdf.setFontSize(10);
       pdf.setTextColor(150);
+      pdf.text(`Printed on ${dayjs().format('DD/MM/YYYY HH:mm:ss')} WIB`, 15, pdfHeight - 15);
       pdf.text(`Page ${pageNumber} of ${totalPages}`, pdfWidth - 100, pdfHeight - 15);
     };
 

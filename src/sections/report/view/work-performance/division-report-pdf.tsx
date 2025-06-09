@@ -366,9 +366,21 @@ const ReportWorkPerformanceDivisionPDF = ({
         </View>
 
         {/* Footer with page number */}
-        <Text
+        <View
           style={styles.footer}
-          render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+          render={({ pageNumber, totalPages }: any) => (
+            <View
+              style={{
+                flexDirection: 'row',
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              <Text>{`Printed on ${dayjs().format('DD/MM/YYYY HH:mm:ss')} WIB`}</Text>
+              <Text>{`Page ${pageNumber} of ${totalPages}`}</Text>
+            </View>
+          )}
           fixed // ensures it stays in the same place on every page
         />
       </Page>
