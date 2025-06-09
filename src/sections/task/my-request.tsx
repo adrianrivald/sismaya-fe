@@ -264,7 +264,9 @@ export default function MyRequestTask() {
               <Box display="flex" alignItems="center" gap={2}>
                 <SvgColor color="#FFC107" src="/assets/icons/ic-alert.svg" />
                 <Typography color="warning.600">
-                  You haven’t filled out the evaluation report for this request.
+                  {requestDetail?.rating === null
+                    ? 'You haven’t filled out the evaluation report for this request.'
+                    : 'You have filled out the evaluation report for this request.'}
                 </Typography>
               </Box>
               <Button
@@ -276,7 +278,9 @@ export default function MyRequestTask() {
                   borderColor: 'warning.600',
                 }}
               >
-                Fill Out the Evaluation Report
+                {requestDetail?.rating === null
+                  ? 'Fill Out the Evaluation Report'
+                  : 'Check out the evaluation form'}
               </Button>
             </Box>
           )}
