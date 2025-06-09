@@ -62,16 +62,21 @@ const ReportWorkPerformanceOverallPDF = ({
   // Helper styles
   const styles = StyleSheet.create({
     page: {
-      paddingTop: 40, // leave space for header
+      paddingTop: 100, // leave space for header
       paddingBottom: 40, // leave space for footer
       paddingHorizontal: 20,
       fontSize: 12,
     },
     header: {
+      position: 'absolute',
+      top: 20,
+      left: 20,
+      right: 20,
+
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      paddingBottom: 10,
+      paddingBottom: 30,
     },
     headerLeft: {
       flex: 1,
@@ -130,16 +135,22 @@ const ReportWorkPerformanceOverallPDF = ({
   return (
     <Document>
       <Page size="A4" style={styles.page} wrap>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.title}>
-              Employee Performance Report: {capitalize(reportType)} Performance
-            </Text>
-            <Text style={styles.subtitle}>{renderPeriod(timePeriod)}</Text>
-          </View>
+        <View
+          style={styles.header}
+          render={() => (
+            <>
+              <View style={styles.headerLeft}>
+                <Text style={styles.title}>
+                  Employee Performance Report: {capitalize(reportType)} Performance
+                </Text>
+                <Text style={styles.subtitle}>{renderPeriod(timePeriod)}</Text>
+              </View>
 
-          {data?.image && <Image src={data.image} style={styles.logo} />}
-        </View>
+              {data?.image && <Image src={data.image} style={styles.logo} />}
+            </>
+          )}
+          fixed // <-- add this
+        />
         <View wrap>
           <View style={styles.section}>
             <View style={{ width: '100%' }}>
