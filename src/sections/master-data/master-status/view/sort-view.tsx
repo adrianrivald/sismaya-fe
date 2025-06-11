@@ -7,10 +7,11 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { StrictModeDroppable } from 'src/pages/master-data/master-faq/StrictModeDroppable';
 import { getSession } from 'src/sections/auth/session/session';
 import { useInternalCompaniesAll, useUpdateStatus } from 'src/services/master-data/company';
+import { useReSortStatus } from 'src/services/master-data/company/status/use-status-resort';
 import type { Status } from 'src/services/master-data/company/types';
 
 export function SortStatusView() {
-  const { mutate: updateStatus } = useUpdateStatus();
+  const { mutate: reSortStatus } = useReSortStatus();
   const { data: internalCompanies } = useInternalCompaniesAll();
   const [isCompanyFetched, setIsCompanyFetched] = useState(false);
   const [statusList, setStatusList] = useState<Status[]>([]);
@@ -32,14 +33,13 @@ export function SortStatusView() {
 
     setStatusList(reordered);
 
+    const newSort = reordered?.map((item) => item?.id).toString();
+
     if (sourceSort !== destinationSort) {
-      updateStatus(
+      reSortStatus(
         {
           company_id: selectedCompanyId ?? 0,
-          sort: destinationSort,
-          id: result.draggableId,
-          name: targettedStatus?.name ?? '',
-          step: targettedStatus?.step ?? '',
+          progress_status_id: newSort,
         },
         {
           onSuccess: () => {
