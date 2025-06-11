@@ -12,13 +12,14 @@ import type { Status } from 'src/services/master-data/company/types';
 export function SortStatusView() {
   const { mutate: updateStatus } = useUpdateStatus();
   const { data: internalCompanies } = useInternalCompaniesAll();
-
+  const [isCompanyFetched, setIsCompanyFetched] = useState(false);
   const [statusList, setStatusList] = useState<Status[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
   const handleDragEnd = (result: any) => {
     const { destination, source } = result;
     const destinationSort = destination.index + 1;
+    const sourceSort = source.index + 1;
     const targettedStatus = statusList?.find((item) => item?.id === Number(result.draggableId));
 
     if (!destination) return;
@@ -31,13 +32,22 @@ export function SortStatusView() {
 
     setStatusList(reordered);
 
-    updateStatus({
-      company_id: selectedCompanyId ?? 0,
-      sort: destinationSort,
-      id: result.draggableId,
-      name: targettedStatus?.name ?? '',
-      step: targettedStatus?.step ?? '',
-    });
+    if (sourceSort !== destinationSort) {
+      updateStatus(
+        {
+          company_id: selectedCompanyId ?? 0,
+          sort: destinationSort,
+          id: result.draggableId,
+          name: targettedStatus?.name ?? '',
+          step: targettedStatus?.step ?? '',
+        },
+        {
+          onSuccess: () => {
+            fetchStatus(selectedCompanyId ?? 0);
+          },
+        }
+      );
+    }
   };
 
   const fetchStatus = async (companyId: number) => {
@@ -46,11 +56,16 @@ export function SortStatusView() {
         Authorization: `Bearer ${getSession()}`,
       },
     }).then((res) =>
-      res.json().then((value) => {
-        console.log(value, 'value');
-        const newArr = value?.data?.progress_statuses?.sort((a: any, b: any) => a.sort - b.sort);
-        setStatusList(newArr);
-      })
+      res
+        .json()
+        .then((value) => {
+          const newArr = value?.data?.progress_statuses?.sort((a: any, b: any) => a.sort - b.sort);
+          setStatusList(newArr);
+          setIsCompanyFetched(true);
+        })
+        .catch(() => {
+          setIsCompanyFetched(true);
+        })
     );
     return data;
   };
@@ -107,66 +122,78 @@ export function SortStatusView() {
               borderRadius: 4,
             }}
           >
-            {!statusList?.length ? (
+            {!statusList?.length && !isCompanyFetched ? (
               <Box display="flex" justifyContent="center" my={4}>
                 <Typography>Select company first to sort progress statuses</Typography>
               </Box>
             ) : (
               <>
-                <Box
-                  sx={{
-                    backgroundColor: '#CAFDF5',
-                    borderRadius: '8px',
-                    p: 2,
-                  }}
-                  display="flex"
-                  alignItems="center"
-                  gap={2}
-                >
-                  <SvgColor src="/assets/icons/ic-info-bold.svg" color="#00B8D9" />
-                  <Box>
-                    <Typography color="#003768">Drag ☰ icon to move status order.</Typography>
+                {isCompanyFetched && !statusList?.length ? (
+                  <Box display="flex" justifyContent="center" my={4}>
+                    <Typography>Progress Statuses in this company is empty</Typography>
                   </Box>
-                </Box>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        backgroundColor: '#CAFDF5',
+                        borderRadius: '8px',
+                        p: 2,
+                      }}
+                      display="flex"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      <SvgColor src="/assets/icons/ic-info-bold.svg" color="#00B8D9" />
+                      <Box>
+                        <Typography color="#003768">Drag ☰ icon to move status order.</Typography>
+                      </Box>
+                    </Box>
 
-                <Box sx={{ width: '100%' }} mt={4}>
-                  <Box bgcolor="#F4F6F8" display="flex" p={2} gap={4} alignItems="center">
-                    <SvgColor src="/assets/icons/ic-bar.svg" color="grey.500" />
-                    <Typography>Status Name</Typography>
-                  </Box>
-                  <DragDropContext onDragEnd={handleDragEnd}>
-                    <StrictModeDroppable droppableId="list">
-                      {(provided) => (
-                        <Box component="div" {...provided.droppableProps} ref={provided.innerRef}>
-                          {statusList?.map((status, index) => (
-                            <Draggable
-                              key={status.id}
-                              draggableId={status.id.toString()}
-                              index={index}
+                    <Box sx={{ width: '100%' }} mt={4}>
+                      <Box bgcolor="#F4F6F8" display="flex" p={2} gap={4} alignItems="center">
+                        <SvgColor src="/assets/icons/ic-bar.svg" color="grey.500" />
+                        <Typography>Status Name</Typography>
+                      </Box>
+                      <DragDropContext onDragEnd={handleDragEnd}>
+                        <StrictModeDroppable droppableId="list">
+                          {(provided) => (
+                            <Box
+                              component="div"
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
                             >
-                              {(providedItem, snapshot) => (
-                                <Box
-                                  component="div"
-                                  ref={providedItem.innerRef}
-                                  {...providedItem.draggableProps}
-                                  {...providedItem.dragHandleProps}
-                                  display="flex"
-                                  p={2}
-                                  gap={4}
-                                  alignItems="center"
+                              {statusList?.map((status, index) => (
+                                <Draggable
+                                  key={status.id}
+                                  draggableId={status.id.toString()}
+                                  index={index}
                                 >
-                                  <SvgColor src="/assets/icons/ic-bar.svg" color="grey.500" />
-                                  <Typography>{status.name}</Typography>
-                                </Box>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </Box>
-                      )}
-                    </StrictModeDroppable>
-                  </DragDropContext>
-                </Box>
+                                  {(providedItem, snapshot) => (
+                                    <Box
+                                      component="div"
+                                      ref={providedItem.innerRef}
+                                      {...providedItem.draggableProps}
+                                      {...providedItem.dragHandleProps}
+                                      display="flex"
+                                      p={2}
+                                      gap={4}
+                                      alignItems="center"
+                                    >
+                                      <SvgColor src="/assets/icons/ic-bar.svg" color="grey.500" />
+                                      <Typography>{status.name}</Typography>
+                                    </Box>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </Box>
+                          )}
+                        </StrictModeDroppable>
+                      </DragDropContext>
+                    </Box>
+                  </>
+                )}
               </>
             )}
           </Card>
