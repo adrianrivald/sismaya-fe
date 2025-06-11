@@ -155,6 +155,9 @@ export const MasterStatusPage = lazy(() => import('src/pages/master-data/master-
 export const MasterCreateStatusPage = lazy(
   () => import('src/pages/master-data/master-status/create')
 );
+export const MasterEditStatusOrderPage = lazy(
+  () => import('src/pages/master-data/master-status/sort')
+);
 
 // Master division
 export const MasterDivisionPage = lazy(() => import('src/pages/master-data/master-division/list'));
@@ -217,6 +220,7 @@ const superAdminRoutes: NonIndexRouteObject = {
     { path: '/:vendor/status', element: <MasterStatusPage /> },
     { path: '/:vendor/status/create', element: <MasterCreateStatusPage /> },
     { path: '/:vendor/status/:id/edit', element: <MasterCreateStatusPage /> },
+    { path: '/:vendor/status/sort', element: <MasterEditStatusOrderPage /> },
 
     // Division
     { path: '/:vendor/division', element: <MasterDivisionPage /> },
@@ -379,6 +383,7 @@ const internalRoutes: NonIndexRouteObject = {
     { path: '/:vendor/status', element: <MasterStatusPage /> },
     { path: '/:vendor/status/create', element: <MasterCreateStatusPage /> },
     { path: '/:vendor/status/:id/edit', element: <MasterCreateStatusPage /> },
+    { path: '/:vendor/status/sort', element: <MasterEditStatusOrderPage /> },
 
     // Division
     { path: '/:vendor/division', element: <MasterDivisionPage /> },

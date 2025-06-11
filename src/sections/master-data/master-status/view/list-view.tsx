@@ -207,6 +207,15 @@ export function ListStatusView() {
           >
             New Request Status
           </Button>
+          <Button
+            variant="outlined"
+            startIcon={<SvgColor src="/assets/icons/ic-bar.svg" />}
+            onClick={() => {
+              navigate(`/${vendor}/status/sort`);
+            }}
+          >
+            Edit Status Order
+          </Button>
         </Stack>
       </Box>
       <Card>
