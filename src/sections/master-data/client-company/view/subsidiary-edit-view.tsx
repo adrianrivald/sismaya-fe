@@ -518,7 +518,7 @@ export function EditClientSubCompanyView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-        Client Company
+        Client Sub-Company
       </Typography>
       <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
         <Typography>Master Data</Typography>
