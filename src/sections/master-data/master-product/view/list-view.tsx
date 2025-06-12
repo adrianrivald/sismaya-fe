@@ -22,17 +22,23 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { DataTable } from 'src/components/table/data-tables';
-import { useInternalCompanies, useProductCompanyList } from 'src/services/master-data/company';
+import {
+  useDeleteProduct,
+  useInternalCompanies,
+  useProductCompanyList,
+} from 'src/services/master-data/company';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
 import useDebounce from 'src/utils/use-debounce';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { Icon } from '@iconify/react';
 import { useBulkDeleteProduct } from 'src/services/master-data/company/product/use-product-bulk-delete';
-import { ProductTypes } from '../type/types';
+import { DialogDelete } from 'src/components/dialog/dialog-delete';
+import type { ProductTypes } from '../type/types';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
+  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
   isSuperAdmin: boolean;
 }
@@ -83,8 +89,11 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, setSelectedId } = popoverProps;
-
+  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
   return (
     <MenuList
       disablePadding
@@ -104,6 +113,11 @@ function ButtonActions(props: CellContext<ProductTypes, unknown>, popoverProps: 
       <MenuItem onClick={() => handleEdit(companyId)}>
         <Iconify icon="solar:pen-bold" />
         Edit
+      </MenuItem>
+
+      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
+        <Iconify icon="solar:trash-bin-trash-bold" />
+        Delete
       </MenuItem>
     </MenuList>
   );
@@ -136,7 +150,11 @@ export function ListProductView() {
     },
     String(idCurrentCompany)
   );
+  const { mutate: deleteProduct } = useDeleteProduct();
+
   const [selectedProducts, setSelectedProducts] = useState<ProductTypes[]>([]);
+  const [openRemoveModal, setOpenRemoveModal] = useState(false);
+
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const handleSelectionChange = (selected: ProductTypes[]) => {
@@ -148,7 +166,11 @@ export function ListProductView() {
       navigate(`${id}/edit`);
     };
 
-    return { handleEdit };
+    const handleDelete = () => {
+      deleteProduct(Number(selectedId));
+      setOpenRemoveModal(false);
+    };
+    return { handleEdit, handleDelete };
   };
 
   const onBulkDelete = () => {
@@ -171,8 +193,6 @@ export function ListProductView() {
       },
     });
   };
-
-  console.log('dataa', form.status);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -281,18 +301,23 @@ export function ListProductView() {
             )}
           </Grid>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setSelectedId, isSuperAdmin })}
+            columns={columns({
+              ...popoverFuncs(),
+              setOpenRemoveModal,
+              setSelectedId,
+              isSuperAdmin,
+            })}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
           />
         </CardContent>
       </Card>
-      {/* <RemoveAction
+      <DialogDelete
         onRemove={popoverFuncs().handleDelete}
         openRemoveModal={openRemoveModal}
         setOpenRemoveModal={setOpenRemoveModal}
-      /> */}
+      />
       <DialogBulkDelete
         open={openBulkDelete}
         onClose={() => setOpenBulkDelete(false)}
