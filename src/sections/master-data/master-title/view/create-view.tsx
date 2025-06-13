@@ -165,7 +165,7 @@ export function CreateTitleView() {
                               }
                               return (
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                  {[...(internalCompanies || [])]
+                                  {[...(companiesData || [])]
                                     ?.filter((company) => selected?.includes(company.id))
                                     .map((company) => (
                                       <Chip
@@ -181,7 +181,7 @@ export function CreateTitleView() {
                               );
                             }}
                           >
-                            {internalCompanies?.map((company) => (
+                            {companiesData?.map((company) => (
                               <MenuItem key={company.id} value={company.id}>
                                 {company.name}
                               </MenuItem>
@@ -206,11 +206,11 @@ export function CreateTitleView() {
                             }}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
                               <Autocomplete
-                                options={internalCompanies || []}
+                                options={companiesData || []}
                                 getOptionLabel={(option) => option?.name || ''}
                                 isOptionEqualToValue={(option, val) => option?.id === val?.id}
                                 value={
-                                  internalCompanies?.find((company) => company.id === value) || null
+                                  companiesData?.find((company) => company.id === value) || null
                                 }
                                 disabled={id !== undefined}
                                 onChange={async (_, selectedCompany) => {
