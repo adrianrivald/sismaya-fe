@@ -5,7 +5,7 @@ import { http } from "src/utils/http";
 
 export type StoreCategory = {
   name:string;
-  company_id?: number;
+  company_id?: number[];
   is_active?:boolean;
 };
 

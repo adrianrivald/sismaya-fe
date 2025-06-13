@@ -14,6 +14,8 @@ import {
   Typography,
   MenuItem,
   Select,
+  Chip,
+  SelectChangeEvent,
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -78,7 +80,9 @@ export function CreateDivisionView() {
       addDivision(
         {
           name: superAdminData.name,
-          company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
+          company_id: isSuperAdmin
+            ? superAdminData?.company_id.filter((item: number) => item !== undefined)
+            : [idCurrentCompany],
           is_active: superAdminData.is_active,
           is_show_all: superAdminData.is_show_all === 'true',
         },
@@ -94,7 +98,7 @@ export function CreateDivisionView() {
   const defaultValues: DivisionDTO | DivisionSuperDTO = {
     name: data?.name || '',
     is_active: data?.is_active || false,
-    company_id: data?.company?.id,
+    company_id: [data?.company?.id],
     is_show_all: data?.is_show_all.toString() || '',
   };
 
@@ -121,10 +125,11 @@ export function CreateDivisionView() {
           options={{
             defaultValues: {
               ...defaultValues,
+              ...(id ? { company_id: defaultValues?.company_id[0] } : []),
             },
           }}
         >
-          {({ register, setValue, control, formState }) => (
+          {({ register, setValue, control, formState, watch }) => (
             <Box>
               <Card>
                 <CardContent>
@@ -157,7 +162,58 @@ export function CreateDivisionView() {
                       </Grid>
                     )}
 
-                    {isSuperAdmin && (
+                    {isSuperAdmin && !id && (
+                      <Grid item xs={12} md={12}>
+                        <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
+                          Company Name
+                        </Typography>
+                        <FormControl fullWidth>
+                          <Select
+                            multiple
+                            value={watch('company_id') || []}
+                            defaultValue={[]}
+                            fullWidth
+                            displayEmpty
+                            placeholder="Company"
+                            onChange={(e: SelectChangeEvent<number[]>) => {
+                              setValue('company_id', e.target.value);
+                            }}
+                            renderValue={(selected) => {
+                              if (selected.length === 0) {
+                                return (
+                                  <Typography fontSize={14} color="GrayText">
+                                    Company
+                                  </Typography>
+                                );
+                              }
+                              return (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {[...(internalCompanies || [])]
+                                    ?.filter((company) => selected?.includes(company.id))
+                                    .map((company) => (
+                                      <Chip
+                                        sx={{
+                                          bgcolor: '#D6F3F9',
+                                          color: 'info.dark',
+                                        }}
+                                        key={company.id}
+                                        label={company.name}
+                                      />
+                                    ))}
+                                </Box>
+                              );
+                            }}
+                          >
+                            {internalCompanies?.map((company) => (
+                              <MenuItem key={company.id} value={company.id}>
+                                {company.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+                    {isSuperAdmin && id && (
                       <Grid item xs={12} md={12}>
                         <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
                           Company Name
@@ -173,11 +229,11 @@ export function CreateDivisionView() {
                             }}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
                               <Autocomplete
-                                options={companiesData || []}
+                                options={internalCompanies || []}
                                 getOptionLabel={(option) => option?.name || ''}
                                 isOptionEqualToValue={(option, val) => option?.id === val?.id}
                                 value={
-                                  companiesData?.find((company) => company.id === value) || null
+                                  internalCompanies?.find((company) => company.id === value) || null
                                 }
                                 disabled={id !== undefined}
                                 onChange={async (_, selectedCompany) => {

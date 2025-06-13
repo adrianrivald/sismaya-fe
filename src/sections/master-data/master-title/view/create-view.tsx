@@ -4,10 +4,14 @@ import {
   Box,
   Card,
   CardContent,
+  Chip,
   FormControl,
   FormControlLabel,
   FormHelperText,
   Grid,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   Switch,
   TextField,
   Typography,
@@ -17,7 +21,11 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Form } from 'src/components/form/form';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/sections/auth/providers/auth';
-import { useClientCompanies, useInternalCompanies } from 'src/services/master-data/company';
+import {
+  useClientCompanies,
+  useInternalCompanies,
+  useInternalCompaniesAll,
+} from 'src/services/master-data/company';
 import type {
   TitleDTO,
   TitleSuperDTO,
@@ -39,7 +47,7 @@ export function CreateTitleView() {
   const navigate = useNavigate();
   const { vendor, id } = useParams();
   const { user } = useAuth();
-  const { data: internalCompanies } = useInternalCompanies(isInternalCompanyPage);
+  const { data: internalCompanies } = useInternalCompaniesAll();
   const { data: clientCompanies } = useClientCompanies(true, isClientCompanyPage);
   const companiesData = isInternalCompanyPage ? internalCompanies : clientCompanies;
   const isSuperAdmin = user?.user_info?.role_id === 1;
@@ -71,7 +79,9 @@ export function CreateTitleView() {
       addTitle(
         {
           name: superAdminData.name,
-          company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
+          company_id: isSuperAdmin
+            ? superAdminData?.company_id.filter((item: number) => item !== undefined)
+            : [idCurrentCompany],
           is_active: superAdminData.is_active,
         },
         {
@@ -86,7 +96,7 @@ export function CreateTitleView() {
   const defaultValues: TitleDTO | TitleSuperDTO = {
     name: data?.name || '',
     is_active: data?.is_active || false,
-    company_id: data?.company?.id,
+    company_id: [data?.company?.id],
   };
 
   return (
@@ -112,10 +122,11 @@ export function CreateTitleView() {
           options={{
             defaultValues: {
               ...defaultValues,
+              ...(id ? { company_id: defaultValues?.company_id[0] } : []),
             },
           }}
         >
-          {({ register, setValue, control, formState }) => (
+          {({ register, setValue, control, formState, watch }) => (
             <Box>
               <Card>
                 <CardContent>
@@ -128,8 +139,58 @@ export function CreateTitleView() {
                         <TextField fullWidth label="Title Name" {...register('name')} />
                       </FormControl>
                     </Grid>
-
-                    {isSuperAdmin && (
+                    {isSuperAdmin && !id && (
+                      <Grid item xs={12} md={12}>
+                        <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
+                          Company Name
+                        </Typography>
+                        <FormControl fullWidth>
+                          <Select
+                            multiple
+                            value={watch('company_id') || []}
+                            defaultValue={[]}
+                            fullWidth
+                            displayEmpty
+                            placeholder="Company"
+                            onChange={(e: SelectChangeEvent<number[]>) => {
+                              setValue('company_id', e.target.value);
+                            }}
+                            renderValue={(selected) => {
+                              if (selected.length === 0) {
+                                return (
+                                  <Typography fontSize={14} color="GrayText">
+                                    Company
+                                  </Typography>
+                                );
+                              }
+                              return (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {[...(internalCompanies || [])]
+                                    ?.filter((company) => selected?.includes(company.id))
+                                    .map((company) => (
+                                      <Chip
+                                        sx={{
+                                          bgcolor: '#D6F3F9',
+                                          color: 'info.dark',
+                                        }}
+                                        key={company.id}
+                                        label={company.name}
+                                      />
+                                    ))}
+                                </Box>
+                              );
+                            }}
+                          >
+                            {internalCompanies?.map((company) => (
+                              <MenuItem key={company.id} value={company.id}>
+                                {company.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+                    {isSuperAdmin && id && (
                       <Grid item xs={12} md={12}>
                         <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
                           Company Name
@@ -145,11 +206,11 @@ export function CreateTitleView() {
                             }}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
                               <Autocomplete
-                                options={companiesData || []}
+                                options={internalCompanies || []}
                                 getOptionLabel={(option) => option?.name || ''}
                                 isOptionEqualToValue={(option, val) => option?.id === val?.id}
                                 value={
-                                  companiesData?.find((company) => company.id === value) || null
+                                  internalCompanies?.find((company) => company.id === value) || null
                                 }
                                 disabled={id !== undefined}
                                 onChange={async (_, selectedCompany) => {

@@ -61,58 +61,9 @@ interface EditFormProps {
   control: Control<CompanyDTO>;
   setValue: UseFormSetValue<CompanyDTO>;
   defaultValues: InternalCompanyValues;
-  data: Company | undefined;
-  onChangeStatus: (e: SelectChangeEvent<string>, itemId: number, type: string) => void;
-  onClickEditStatus: (value: string, step: string, statusId: number) => void;
-  statuses: Status[];
-  onClickDeleteStatus: (statusId: number) => void;
-  status: Partial<Status>;
-  onChangeStatusNew: (e: SelectChangeEvent<string>, type: string) => void;
-  onAddStatus: () => void;
-  onChangeCategory: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
-  onClickEditCategory: (value: string, categoryId: number) => void;
-  categories: Categories[];
-  onClickDeleteCategory: (categoryId: number) => void;
-  category: string;
-  onChangeCategoryNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAddCategory: () => void;
-  onClickEditProduct: (value: string, productId: number) => void;
-  onChangeProduct: (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => void;
-  products: Products[];
-  onClickDeleteProduct: (productId: number) => void;
-  product: string;
-  onChangeProductNew: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAddProduct: () => void;
-  onClickRemove: (mode: string, id: number) => void;
 }
 
-function EditForm({
-  formState,
-  register,
-  control,
-  setValue,
-  defaultValues,
-  data,
-  onChangeStatus,
-  onClickEditStatus,
-  statuses,
-  status,
-  onChangeStatusNew,
-  onAddStatus,
-  onChangeCategory,
-  onClickEditCategory,
-  categories,
-  category,
-  onChangeCategoryNew,
-  onAddCategory,
-  onClickEditProduct,
-  onChangeProduct,
-  products,
-  product,
-  onChangeProductNew,
-  onAddProduct,
-  onClickRemove,
-}: EditFormProps) {
+function EditForm({ formState, register, control, setValue, defaultValues }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
     setValue('abbreviation', defaultValues?.abbreviation);
@@ -228,23 +179,6 @@ export function EditInternalCompanyView() {
     product: data?.products ?? [],
     image: data?.image,
   };
-  // Status
-  const onAddStatus = () => {
-    addStatus({
-      name: status?.name,
-      company_id: data?.id,
-      step: status?.step,
-      sort: statuses.length + 1,
-    });
-    setStatus({
-      name: '',
-      step: '',
-    });
-  };
-
-  useEffect(() => {
-    console.log(status, 'status now');
-  }, [status]);
 
   const onChangeStatus = (e: SelectChangeEvent<string>, itemId: number, type: string) => {
     if (type === 'status') {
@@ -294,15 +228,6 @@ export function EditInternalCompanyView() {
     });
   };
 
-  // Category
-  const onAddCategory = () => {
-    addCategory({
-      name: category,
-      company_id: data?.id,
-    });
-    setCategory('');
-  };
-
   const onChangeCategory = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
     setCategories((prevCategories) => {
       const updatedCategories = [...prevCategories];
@@ -331,13 +256,13 @@ export function EditInternalCompanyView() {
   };
 
   // Product
-  const onAddProduct = () => {
-    addProduct({
-      name: product,
-      company_id: data?.id,
-    });
-    setProduct('');
-  };
+  // const onAddProduct = () => {
+  //   addProduct({
+  //     name: product,
+  //     company_id: data?.id,
+  //   });
+  //   setProduct('');
+  // };
 
   const onChangeProduct = (e: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
     setProducts((prevProducts) => {
@@ -439,29 +364,6 @@ export function EditInternalCompanyView() {
               control={control}
               setValue={setValue}
               defaultValues={defaultValues}
-              data={data}
-              onChangeStatus={onChangeStatus}
-              onClickEditStatus={onClickEditStatus}
-              statuses={statuses}
-              onClickDeleteStatus={onClickDeleteStatus}
-              status={status}
-              onChangeStatusNew={onChangeStatusNew}
-              onAddStatus={onAddStatus}
-              onChangeCategory={onChangeCategory}
-              onClickEditCategory={onClickEditCategory}
-              categories={categories}
-              onClickDeleteCategory={onClickDeleteCategory}
-              category={category}
-              onChangeCategoryNew={onChangeCategoryNew}
-              onAddCategory={onAddCategory}
-              onClickEditProduct={onClickEditProduct}
-              onChangeProduct={onChangeProduct}
-              products={products}
-              onClickDeleteProduct={onClickDeleteProduct}
-              product={product}
-              onChangeProductNew={onChangeProductNew}
-              onAddProduct={onAddProduct}
-              onClickRemove={onClickRemove}
             />
           )}
         </Form>

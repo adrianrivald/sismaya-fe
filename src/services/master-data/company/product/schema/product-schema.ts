@@ -8,7 +8,7 @@ export const productSchema = z.object({
 
 export const productSuperAdminSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  company_id: z.number().min(1, 'Company is required'),
+  company_id: z.any(),
   is_active: z.boolean().optional(),
 });
 
