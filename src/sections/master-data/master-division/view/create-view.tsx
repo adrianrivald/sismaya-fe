@@ -26,6 +26,7 @@ import {
   useAddDivision,
   useClientCompanies,
   useInternalCompanies,
+  useInternalCompaniesAll,
   useUpdateDivision,
 } from 'src/services/master-data/company';
 import type {
@@ -48,7 +49,7 @@ export function CreateDivisionView() {
   const { vendor, id } = useParams();
   const { user } = useAuth();
 
-  const { data: internalCompanies } = useInternalCompanies(isInternalCompanyPage);
+  const { data: internalCompanies } = useInternalCompaniesAll();
   const { data: clientCompanies } = useClientCompanies(true, isClientCompanyPage);
   const companiesData = isInternalCompanyPage ? internalCompanies : clientCompanies;
   const isSuperAdmin = user?.user_info?.role_id === 1;
@@ -188,7 +189,7 @@ export function CreateDivisionView() {
                               }
                               return (
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                  {[...(internalCompanies || [])]
+                                  {[...(companiesData || [])]
                                     ?.filter((company) => selected?.includes(company.id))
                                     .map((company) => (
                                       <Chip
@@ -204,7 +205,7 @@ export function CreateDivisionView() {
                               );
                             }}
                           >
-                            {internalCompanies?.map((company) => (
+                            {companiesData?.map((company) => (
                               <MenuItem key={company.id} value={company.id}>
                                 {company.name}
                               </MenuItem>
@@ -229,11 +230,11 @@ export function CreateDivisionView() {
                             }}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
                               <Autocomplete
-                                options={internalCompanies || []}
+                                options={companiesData || []}
                                 getOptionLabel={(option) => option?.name || ''}
                                 isOptionEqualToValue={(option, val) => option?.id === val?.id}
                                 value={
-                                  internalCompanies?.find((company) => company.id === value) || null
+                                  companiesData?.find((company) => company.id === value) || null
                                 }
                                 disabled={id !== undefined}
                                 onChange={async (_, selectedCompany) => {
