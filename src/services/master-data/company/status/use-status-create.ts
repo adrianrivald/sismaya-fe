@@ -5,7 +5,7 @@ import { http } from "src/utils/http";
 
 export type StoreStatus = {
   name?:string;
-  company_id?: number
+  company_id?: number[];
   step?: string;
   sort?: number;
   is_active?:boolean;

@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   CardContent,
+  Chip,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -11,6 +12,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Switch,
   TextField,
   Typography,
@@ -23,6 +25,7 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import {
   useAddStatus,
   useInternalCompanies,
+  useInternalCompaniesAll,
   useUpdateStatus,
 } from 'src/services/master-data/company';
 import type {
@@ -41,7 +44,7 @@ export function CreateStatusView() {
   const navigate = useNavigate();
   const { vendor, id } = useParams();
   const { user } = useAuth();
-  const { data: internalCompanies } = useInternalCompanies();
+  const { data: internalCompanies } = useInternalCompaniesAll();
   const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
@@ -73,7 +76,10 @@ export function CreateStatusView() {
       addStatus(
         {
           name: superAdminData.name,
-          company_id: isSuperAdmin ? superAdminData?.company_id : idCurrentCompany,
+
+          company_id: isSuperAdmin
+            ? superAdminData?.company_id.filter((item: number) => item !== undefined)
+            : [idCurrentCompany],
           step: superAdminData.step,
           is_active: superAdminData.is_active,
           // sort: 1, // TODO: Fix this hardcoded sort
@@ -92,7 +98,7 @@ export function CreateStatusView() {
     is_active: data?.is_active || false,
     step: data?.step || '',
     sort: data?.sort || 0,
-    company_id: data?.company?.id,
+    company_id: [data?.company?.id],
   };
 
   return (
@@ -118,6 +124,7 @@ export function CreateStatusView() {
           options={{
             defaultValues: {
               ...defaultValues,
+              ...(id ? { company_id: defaultValues?.company_id[0] } : []),
             },
           }}
         >
@@ -148,7 +155,58 @@ export function CreateStatusView() {
                       </FormControl>
                     </Grid>
 
-                    {isSuperAdmin && (
+                    {isSuperAdmin && !id && (
+                      <Grid item xs={12} md={12}>
+                        <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
+                          Company Name
+                        </Typography>
+                        <FormControl fullWidth>
+                          <Select
+                            multiple
+                            value={watch('company_id') || []}
+                            defaultValue={[]}
+                            fullWidth
+                            displayEmpty
+                            placeholder="Company"
+                            onChange={(e: SelectChangeEvent<number[]>) => {
+                              setValue('company_id', e.target.value);
+                            }}
+                            renderValue={(selected) => {
+                              if (selected.length === 0) {
+                                return (
+                                  <Typography fontSize={14} color="GrayText">
+                                    Company
+                                  </Typography>
+                                );
+                              }
+                              return (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {[...(internalCompanies || [])]
+                                    ?.filter((company) => selected?.includes(company.id))
+                                    .map((company) => (
+                                      <Chip
+                                        sx={{
+                                          bgcolor: '#D6F3F9',
+                                          color: 'info.dark',
+                                        }}
+                                        key={company.id}
+                                        label={company.name}
+                                      />
+                                    ))}
+                                </Box>
+                              );
+                            }}
+                          >
+                            {internalCompanies?.map((company) => (
+                              <MenuItem key={company.id} value={company.id}>
+                                {company.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+                    {isSuperAdmin && id && (
                       <Grid item xs={12} md={12}>
                         <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
                           Company Name
