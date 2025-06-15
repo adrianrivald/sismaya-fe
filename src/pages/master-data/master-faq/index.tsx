@@ -37,10 +37,13 @@ import {
 import { Icon } from '@iconify/react';
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { useBulkDeleteFaq } from 'src/services/master-data/faq/use-faq-bulk-delete';
+import { DialogDelete } from 'src/components/dialog/dialog-delete';
+import { useFaqDelete } from 'src/services/master-data/faq/use-faq-delete';
 import { DialogArrange } from './DialogArrange';
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
+  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
   isSuperAdmin: boolean;
 }
@@ -101,7 +104,12 @@ const columns = (popoverProps: PopoverProps) => [
 function ButtonActions(props: CellContext<FaqType, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit } = popoverProps;
+  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
+
+  const onClickRemove = (itemId?: number) => {
+    if (itemId) setSelectedId(itemId);
+    setOpenRemoveModal(true);
+  };
 
   return (
     <MenuList
@@ -123,6 +131,11 @@ function ButtonActions(props: CellContext<FaqType, unknown>, popoverProps: Popov
         <Iconify icon="solar:pen-bold" />
         Edit
       </MenuItem>
+
+      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
+        <Iconify icon="solar:trash-bin-trash-bold" />
+        Delete
+      </MenuItem>
     </MenuList>
   );
 }
@@ -138,7 +151,9 @@ export default function MasterFaqPage() {
 
   const [dialogArrange, setDialogArrange] = useState({ isOpen: false });
   const [openBulkDelete, setOpenBulkDelete] = useState(false);
+  const [openRemoveModal, setOpenRemoveModal] = useState(false);
   const { mutate: mutateBulkDeleteFaq } = useBulkDeleteFaq();
+  const { mutate: mutateDeleteFaq } = useFaqDelete();
   const [form, setForm] = useState({
     search: '',
     status: 'all',
@@ -189,7 +204,12 @@ export default function MasterFaqPage() {
       navigation(`${id}/edit`);
     };
 
-    return { handleEdit };
+    const handleDelete = () => {
+      mutateDeleteFaq(Number(selectedId));
+      setOpenRemoveModal(false);
+    };
+
+    return { handleEdit, handleDelete };
   };
 
   const onBulkDelete = () => {
@@ -351,7 +371,12 @@ export default function MasterFaqPage() {
               )}
             </Grid>
             <DataTable
-              columns={columns({ ...popoverFuncs(), setSelectedId, isSuperAdmin })}
+              columns={columns({
+                ...popoverFuncs(),
+                setOpenRemoveModal,
+                setSelectedId,
+                isSuperAdmin,
+              })}
               enableSelection
               onSelectionChange={handleSelectionChange}
               {...getDataTableProps()}
@@ -398,6 +423,13 @@ export default function MasterFaqPage() {
           open={dialogArrange.isOpen}
           onClose={() => setDialogArrange({ isOpen: false })}
         />
+
+        <DialogDelete
+          onRemove={popoverFuncs().handleDelete}
+          openRemoveModal={openRemoveModal}
+          setOpenRemoveModal={setOpenRemoveModal}
+        />
+
         <DialogBulkDelete
           open={openBulkDelete}
           onClose={() => setOpenBulkDelete(false)}
