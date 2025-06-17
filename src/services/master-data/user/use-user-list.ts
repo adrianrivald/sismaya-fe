@@ -10,6 +10,10 @@ function fetchUserList(params: Partial<any>) {
   if (params.type) {
     endpointUrl.searchParams.append('type', params.type);
   }
+  
+  if (params.name) {
+    endpointUrl.searchParams.append('name_sort', params.name);
+  }
 
   if (params.internal_company){
     endpointUrl.searchParams.append('internal_company', params.internal_company);
@@ -34,7 +38,7 @@ function fetchUserList(params: Partial<any>) {
 }
 
 export function useUserList(params: Partial<any>) {
-  return usePaginationQuery(['user', params.type, params.keyword, params.internal_company, params.role_id, params.internalCompanies], (paginationState) =>
+  return usePaginationQuery(['user', params.type, params.keyword, params.internal_company, params.role_id, params.name, params.internalCompanies], (paginationState) =>
     fetchUserList({ ...params, ...paginationState })
   );
 }

@@ -31,6 +31,7 @@ const columnHelper = createColumnHelper<{ id: number; internal_company: Companie
 
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('internal_company.name', {
+    id: 'name_sort',
     header: 'Name',
   }),
 
@@ -102,12 +103,12 @@ function ButtonActions(
 
 export function ProductFilterLinkedView() {
   const { id } = useParams();
-  const { getDataTableProps } = useCompanyRelation({ client_company_id: id });
   const { mutate: deleteCompanyRelationById } = useDeleteCompanyRelation();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
+  const [sortOrder, setSortOrder] = React.useState('');
+  const { getDataTableProps } = useCompanyRelation({ client_company_id: id, name: sortOrder });
 
-  // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('create');
@@ -127,6 +128,16 @@ export function ProductFilterLinkedView() {
   };
 
   const { data: companyById } = useCompanyById(Number(id));
+
+  const onSort = (cellId: string) => {
+    if (cellId === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -155,6 +166,9 @@ export function ProductFilterLinkedView() {
         <Grid xs={12}>
           <DataTable
             columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            order={sortOrder}
+            orderBy="name_sort"
+            onSort={onSort}
             {...getDataTableProps()}
           />
         </Grid>

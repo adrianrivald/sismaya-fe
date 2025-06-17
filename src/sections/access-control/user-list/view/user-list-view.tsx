@@ -39,6 +39,7 @@ const columnHelper = createColumnHelper<User>();
 
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('user_info.name', {
+    id: 'name_sort',
     header: 'Name',
   }),
 
@@ -152,11 +153,14 @@ export function AccessControlUserListView() {
   const mode = pathname === 'user-list' ? 'user-list' : 'user-group';
   const [roleFilter, setRoleFilter] = React.useState<number | null>(null);
   const [companyFilter, setCompanyFilter] = React.useState<number | null>(null);
+  const [sortOrder, setSortOrder] = React.useState('');
+
   const { getDataTableProps } = useUserList({
     internal_company: companyFilter,
     role_id: roleFilter,
     type: 'internal',
     internalCompanies: userRole === 2 ? userCompanies?.toString() : null,
+    name: sortOrder,
   });
   const { data: internalCompanies } = useInternalCompaniesAll();
   const { data: roles } = useRole();
@@ -190,6 +194,17 @@ export function AccessControlUserListView() {
 
     return { handleEdit, handleDelete };
   };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -316,6 +331,9 @@ export function AccessControlUserListView() {
                 setSelectedId,
                 setSelectedUser,
               })}
+              order={sortOrder}
+              orderBy="name_sort"
+              onSort={onSort}
               {...getDataTableProps()}
             />
           </Card>

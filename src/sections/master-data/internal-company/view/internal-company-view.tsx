@@ -26,6 +26,7 @@ const columnHelper = createColumnHelper<Companies>();
 
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
+    id: 'name_sort',
     header: 'Name',
   }),
 
@@ -81,23 +82,18 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
   );
 }
 
-// const columns = [
-//   { id: 'name', label: 'Name' },
-//   { id: 'desc', label: 'Description' },
-//   { id: 'picture', label: 'Picture' },
-//   { id: 'status', label: 'Status' },
-//   { id: 'category', label: 'Category' },
-//   { id: 'product', label: 'Product' },
-//   { id: '', label: 'Action' },
-// ];
-
 export function InternalCompanyView() {
-  const { getDataTableProps } = useCompanyList({}, 'internal');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
+  const [sortOrder, setSortOrder] = React.useState('');
+  const { getDataTableProps } = useCompanyList(
+    {
+      name: sortOrder,
+    },
+    'internal'
+  );
 
-  // console.log(getDataTableProps(), 'get data table props');
   const navigate = useNavigate();
   const onClickAddNew = () => {
     navigate('/internal-company/companies/create');
@@ -114,6 +110,16 @@ export function InternalCompanyView() {
     };
 
     return { handleEdit, handleDelete };
+  };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
   };
 
   return (
@@ -140,6 +146,9 @@ export function InternalCompanyView() {
         <Grid xs={12}>
           <DataTable
             columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            order={sortOrder}
+            orderBy="name_sort"
+            onSort={onSort}
             {...getDataTableProps()}
           />
         </Grid>

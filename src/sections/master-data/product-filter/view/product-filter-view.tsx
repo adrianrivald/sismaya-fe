@@ -25,6 +25,7 @@ const columnHelper = createColumnHelper<Companies>();
 
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
+    id: 'name_sort',
     header: 'Name',
   }),
 
@@ -82,11 +83,17 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
 }
 
 export function ProductFilterView() {
-  const { getDataTableProps } = useCompanyList({}, 'holding');
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
+  const [sortOrder, setSortOrder] = React.useState('');
 
+  const { getDataTableProps } = useCompanyList(
+    {
+      name: sortOrder,
+    },
+    'holding'
+  );
   const navigate = useNavigate();
 
   const popoverFuncs = () => {
@@ -100,6 +107,16 @@ export function ProductFilterView() {
     };
 
     return { handleEdit, handleDelete };
+  };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
   };
 
   return (
@@ -126,6 +143,9 @@ export function ProductFilterView() {
         <Grid xs={12}>
           <DataTable
             columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            order={sortOrder}
+            orderBy="name_sort"
+            onSort={onSort}
             {...getDataTableProps()}
           />
         </Grid>
