@@ -46,6 +46,7 @@ interface PopoverProps {
 const columnHelper = createColumnHelper<ProductTypes>();
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
+    id: 'name_sort',
     header: 'Product Name',
     cell: (info) => (
       <Typography fontSize={14} width="30vw">
@@ -139,7 +140,7 @@ export function ListProductView() {
     company: 'all',
   });
   const { mutate: mutateBulkDeleteProduct } = useBulkDeleteProduct();
-
+  const [sortOrder, setSortOrder] = useState('');
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useProductCompanyList(
     {
@@ -147,6 +148,7 @@ export function ListProductView() {
       is_active: form.status,
       is_super_admin: isSuperAdmin,
       company_id: form.company === 'all' ? '' : form.company,
+      name: sortOrder,
     },
     String(idCurrentCompany)
   );
@@ -192,6 +194,16 @@ export function ListProductView() {
         }, 500);
       },
     });
+  };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
   };
 
   return (
@@ -307,6 +319,9 @@ export function ListProductView() {
               setSelectedId,
               isSuperAdmin,
             })}
+            order={sortOrder}
+            orderBy="name_sort"
+            onSort={onSort}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}

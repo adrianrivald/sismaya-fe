@@ -17,6 +17,10 @@ import { useLocation } from "react-router-dom";
       endpointUrl.searchParams.append('company_id', company_id);
     }
   
+    if (params.name) {
+      endpointUrl.searchParams.append('name_sort', params.name);
+    }
+
     if (params.company_id) {
       endpointUrl.searchParams.append('company_id', params.company_id);
     }
@@ -39,7 +43,7 @@ import { useLocation } from "react-router-dom";
   
   export function useTitleCompanyList(params: Partial<any>, company_id?: string, company_type?: string) {
     const location = useLocation();
-    return usePaginationQuery(['title-list',location, params.search, params.company_id, params.is_active, company_id, company_type], (paginationState) =>
+    return usePaginationQuery(['title-list',location, params.search, params.company_id, params.is_active, params.name, company_id, company_type], (paginationState) =>
       fetchTitleList({ ...params, ...paginationState }, company_id, company_type)
     );
   }

@@ -40,6 +40,10 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
     endpointUrl.searchParams.append('company_id', company_id);
   }
 
+  if (params.name) {
+    endpointUrl.searchParams.append('name_sort', params.name);
+  }
+
   if (params.company_id) {
     endpointUrl.searchParams.append('company_id', params.company_id);
   }
@@ -62,7 +66,7 @@ export function fetchProductList(params: Partial<any>, company_id?: string) {
 
 export function useProductCompanyList(params: Partial<any>, company_id?: string) {
   return usePaginationQuery(
-    ['product-list', params.search, params.company_id, params.is_active, company_id],
+    ['product-list', params.search, params.company_id, params.is_active, params.name, company_id],
     (paginationState) => fetchProductList({ ...params, ...paginationState }, company_id)
   );
 }

@@ -23,6 +23,10 @@ export function useStatusByCompanyId(companyId: number) {
       if (company_id && params.is_super_admin === false) {
         endpointUrl.searchParams.append('company_id', company_id);
       }
+
+  if (params.name) {
+    endpointUrl.searchParams.append('name_sort', params.name);
+  }
     
       if (params.company_id) {
         endpointUrl.searchParams.append('company_id', params.company_id);
@@ -45,7 +49,7 @@ export function useStatusByCompanyId(companyId: number) {
     }
     
     export function useStatusCompanyList(params: Partial<any>, company_id?: string) {
-      return usePaginationQuery(['status-list', params.search, params.company_id, params.is_active, company_id], (paginationState) =>
+      return usePaginationQuery(['status-list', params.search, params.company_id, params.is_active, params.name, company_id], (paginationState) =>
         fetchStatusList({ ...params, ...paginationState }, company_id)
       );
     }

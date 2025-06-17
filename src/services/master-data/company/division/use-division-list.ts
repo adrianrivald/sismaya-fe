@@ -36,6 +36,10 @@ export function useDivisionByCompanyId(companyId: number) {
     if (company_type && params.is_super_admin === true) {
       endpointUrl.searchParams.append('company_type', company_type);
     }
+    
+    if (params.name) {
+      endpointUrl.searchParams.append('name_sort', params.name);
+    }
   
     if (params.company_id) {
       endpointUrl.searchParams.append('company_id', params.company_id);
@@ -59,7 +63,7 @@ export function useDivisionByCompanyId(companyId: number) {
   
   export function useDivisionCompanyList(params: Partial<any>, company_id?: string, company_type?: string) {
     const location = useLocation();
-    return usePaginationQuery(['division-list',location, params.search, params.company_id, params.is_active, company_id], (paginationState) =>
+    return usePaginationQuery(['division-list',location, params.search, params.company_id, params.is_active, params.name, company_id], (paginationState) =>
       fetchDivisionList({ ...params, ...paginationState }, company_id, company_type)
     );
   }

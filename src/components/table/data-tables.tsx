@@ -32,6 +32,17 @@ import React, { useEffect } from 'react';
 import { SvgColor } from '../svg-color';
 import { Iconify } from '../iconify';
 
+export const visuallyHidden = {
+  border: 0,
+  margin: -1,
+  padding: 0,
+  width: '1px',
+  height: '1px',
+  overflow: 'hidden',
+  position: 'absolute',
+  whiteSpace: 'nowrap',
+  clip: 'rect(0 0 0 0)',
+} as const;
 interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'columns'> {
   // pageCount: number;
   pagination: PaginationState;
@@ -45,6 +56,9 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   //   pageLinks: MetaLink[];
   enableCollapse?: boolean;
   renderCollapse?: (row: TData) => React.ReactNode;
+  orderBy?: string;
+  order?: any;
+  onSort?: (id: string) => void;
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
@@ -61,6 +75,9 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     onSelectionChange,
     enableCollapse = false,
     renderCollapse,
+    orderBy,
+    order = '',
+    onSort,
   } = props;
 
   const [selectedRows, setSelectedRows] = React.useState<TData[]>([]);
@@ -177,6 +194,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
       [rowId]: !prev[rowId],
     }));
   };
+  console.log(table.getHeaderGroups(), 'table.getHeaderGroups()');
 
   //   const notFound = !dataFiltered.length && !!filterName;
   return (
@@ -198,38 +216,26 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
                   )}
                   {enableCollapse && <TableCell style={{ width: 50 }} />}
                   {headerGroup.headers.map((header) => (
-                    // <Th
-                    //   data-testid="th"
-                    //   key={header.id}
-                    //   borderBottomColor="table.stroke"
-                    // >
-                    //   {header.isPlaceholder
-                    //     ? null
-                    //     : flexRender(
-                    //         header.column.columnDef.header,
-                    //         header.getContext()
-                    //       )}
-                    // </Th>
                     <TableCell
                       key={header.id}
                       align={header.id.includes('[center]') ? 'center' : 'left'}
-                      // sortDirection={orderBy === headCell.id ? order : false}
+                      sortDirection={order}
                       // sx={{ width: headCell.width, minWidth: headCell.minWidth }}
                     >
                       <TableSortLabel
-                        hideSortIcon
-                        // active={orderBy === headCell.id}
-                        // direction={orderBy === headCell.id ? order : 'asc'}
-                        // onClick={() => onSort(headCell.id)}
+                        hideSortIcon={header.id !== 'name_sort'}
+                        active={orderBy === header.id}
+                        direction={order}
+                        onClick={() => onSort?.(header.id)}
                       >
                         {header.isPlaceholder
                           ? null
                           : flexRender(header.column.columnDef.header, header.getContext())}
-                        {/* {orderBy === headCell.id ? (
-                      <Box sx={{ ...visuallyHidden }}>
-                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                      </Box>
-                    ) : null} */}
+                        {orderBy === header.id ? (
+                          <Box sx={{ ...visuallyHidden }}>
+                            {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                          </Box>
+                        ) : null}
                       </TableSortLabel>
                     </TableCell>
                   ))}

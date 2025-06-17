@@ -49,6 +49,7 @@ interface PopoverProps {
 const columnHelper = createColumnHelper<StatusTypes>();
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
+    id: 'name_sort',
     header: 'Status Name',
     cell: (info) => (
       <Typography fontSize={14} width="30vw">
@@ -150,7 +151,7 @@ export function ListStatusView() {
   });
   const { mutate: mutateBulkDeleteStatus } = useBulkDeleteStatus();
   const { mutate: deleteStatus } = useDeleteStatus();
-
+  const [sortOrder, setSortOrder] = useState('');
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useStatusCompanyList(
     {
@@ -158,6 +159,7 @@ export function ListStatusView() {
       is_active: form.status,
       is_super_admin: isSuperAdmin,
       company_id: form.company === 'all' ? '' : form.company,
+      name: sortOrder,
     },
     String(idCurrentCompany)
   );
@@ -199,6 +201,16 @@ export function ListStatusView() {
         }, 500);
       },
     });
+  };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
   };
 
   return (
@@ -324,6 +336,9 @@ export function ListStatusView() {
               setSelectedId,
               isSuperAdmin,
             })}
+            order={sortOrder}
+            orderBy="name"
+            onSort={onSort}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
