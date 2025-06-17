@@ -24,6 +24,9 @@ export function useCategoryByCompanyId(companyId: number) {
       endpointUrl.searchParams.append('company_id', company_id);
     }
   
+  if (params.name) {
+    endpointUrl.searchParams.append('name_sort', params.name);
+  } 
     if (params.company_id) {
       endpointUrl.searchParams.append('company_id', params.company_id);
     }
@@ -44,7 +47,7 @@ export function useCategoryByCompanyId(companyId: number) {
   }
   
   export function useCategoryCompanyList(params: Partial<any>, company_id?: string) {
-    return usePaginationQuery(['category-list', params.search, params.company_id, params.is_active, company_id], (paginationState) =>
+    return usePaginationQuery(['category-list', params.search, params.company_id, params.is_active,params.name,  company_id], (paginationState) =>
       fetchCategoryList({ ...params, ...paginationState }, company_id)
     );
   }

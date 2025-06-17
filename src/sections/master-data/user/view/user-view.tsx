@@ -24,6 +24,7 @@ const columnHelper = createColumnHelper<User>();
 
 const columns = (popoverProps: PopoverProps, isInternalUserList: boolean) => [
   columnHelper.accessor('user_info.name', {
+    id: 'name_sort',
     header: 'Name',
   }),
 
@@ -121,10 +122,12 @@ interface UserViewProps {
 }
 
 export function UserView({ type }: UserViewProps) {
-  const { getDataTableProps } = useUserList({ type });
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const { mutate: deleteUserById } = useDeleteUserById();
+  const [sortOrder, setSortOrder] = React.useState('');
+  const { getDataTableProps } = useUserList({ type, name: sortOrder });
+
   const navigate = useNavigate();
 
   const onClickAddNew = () => {
@@ -142,6 +145,16 @@ export function UserView({ type }: UserViewProps) {
     };
 
     return { handleEdit, handleDelete };
+  };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
   };
 
   return (
@@ -171,6 +184,9 @@ export function UserView({ type }: UserViewProps) {
               { ...popoverFuncs(), setOpenRemoveModal, setSelectedId },
               type === 'internal'
             )}
+            order={sortOrder}
+            orderBy="name_sort"
+            onSort={onSort}
             {...getDataTableProps()}
           />
         </Grid>

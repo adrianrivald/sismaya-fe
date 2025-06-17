@@ -15,6 +15,10 @@ export function fetchCompanyList(params: Partial<any>, type: string) {
     endpointUrl.searchParams.append('type', type);
   }
 
+  if (params.name) {
+    endpointUrl.searchParams.append('name_sort', params.name);
+  }
+  
   dataTableParamsBuilder({
     searchParams: endpointUrl.searchParams,
     filterValues: [params.order],
@@ -29,7 +33,7 @@ export function fetchCompanyList(params: Partial<any>, type: string) {
 
 export function useCompanyList(params: Partial<any>, type: string) {
   return usePaginationQuery(
-    ['company', params.keyword, params.active, params.order, params.platform, type],
+    ['company', params.keyword, params.active, params.order, params.platform, params.name, type],
     (paginationState) => fetchCompanyList({ ...params, ...paginationState }, type)
   );
 }

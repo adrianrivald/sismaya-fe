@@ -13,6 +13,10 @@ export function fetchCompanyRelation(params: Partial<any>) {
   if (params.search) {
     endpointUrl.searchParams.append('search', params.search);
   }
+  
+  if (params.name) {
+    endpointUrl.searchParams.append('name_sort', params.name);
+  }
 
   if (params.internal_company_id) {
     endpointUrl.searchParams.append('internal_company_id', params.internal_company_id);
@@ -33,7 +37,7 @@ export function fetchCompanyRelation(params: Partial<any>) {
 
 export function useCompanyRelation(params: Partial<any>) {
   return usePaginationQuery(
-    ['company-relation', params.search, params.internal_company_id, params.client_company_id],
+    ['company-relation', params.search, params.internal_company_id, params.client_company_id, params.name],
     (paginationState) => fetchCompanyRelation({ ...params, ...paginationState })
   );
 }

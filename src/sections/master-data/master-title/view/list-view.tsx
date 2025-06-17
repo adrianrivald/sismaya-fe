@@ -46,6 +46,7 @@ interface PopoverProps {
 const columnHelper = createColumnHelper<TitleTypes>();
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
+    id: 'name_sort',
     header: 'Title Name',
     cell: (info) => (
       <Typography fontSize={14} width="30vw">
@@ -144,7 +145,7 @@ export function ListTitleView() {
     company: 'all',
   });
   const { mutate: mutateBulkDeleteTitle } = useBulkDeleteTitle();
-
+  const [sortOrder, setSortOrder] = useState('');
   const debounceSearch = useDebounce(form.search, 1000);
   const { getDataTableProps, refetch } = useTitleCompanyList(
     {
@@ -152,6 +153,7 @@ export function ListTitleView() {
       is_active: form.status,
       is_super_admin: isSuperAdmin,
       company_id: form.company === 'all' ? '' : form.company,
+      name: sortOrder,
     },
     String(idCurrentCompany),
     isInternalCompanyPage ? 'internal' : 'holding'
@@ -197,6 +199,17 @@ export function ListTitleView() {
       },
     });
   };
+
+  const onSort = (id: string) => {
+    if (id === 'name_sort') {
+      if (sortOrder === '' || sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -311,6 +324,9 @@ export function ListTitleView() {
               setSelectedId,
               isSuperAdmin,
             })}
+            order={sortOrder}
+            orderBy="name"
+            onSort={onSort}
             enableSelection
             onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
