@@ -27,6 +27,7 @@ import {
   useClientCompanies,
   useInternalCompanies,
   useInternalCompaniesAll,
+  useNonInternalCompanies,
   useUpdateDivision,
 } from 'src/services/master-data/company';
 import type {
@@ -50,7 +51,7 @@ export function CreateDivisionView() {
   const { user } = useAuth();
 
   const { data: internalCompanies } = useInternalCompaniesAll();
-  const { data: clientCompanies } = useClientCompanies(true, isClientCompanyPage);
+  const { data: clientCompanies } = useNonInternalCompanies(true);
   const companiesData = isInternalCompanyPage ? internalCompanies : clientCompanies;
   const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
