@@ -38,7 +38,7 @@ async function fetchProductFilter(params: any) {
 
 
 export type StoreProduct = {
-  product_id:number;
+  product_id:number[];
   company_id?: number
 };
 

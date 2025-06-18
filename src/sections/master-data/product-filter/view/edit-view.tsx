@@ -1,9 +1,9 @@
 import Typography from '@mui/material/Typography';
-import { Box, Grid, Card, Checkbox } from '@mui/material';
+import { Box, Grid, Card, Checkbox, Button } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { roleSchema, type RoleDTO } from 'src/services/master-data/role/schemas/role-schema';
 import { useParams } from 'react-router-dom';
 import {
@@ -16,33 +16,68 @@ import { useCompanyById } from 'src/services/master-data/company';
 
 export function EditProductFilterView() {
   const { id, vendorId } = useParams();
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [unSelectedProducts, setUnSelectedProducts] = useState<number[]>([]);
   const { data: products } = useProductByCompanyId(Number(vendorId));
   const { data: productFilter } = useProductFilter({
     company_id: id,
     internal_company_id: vendorId,
   });
+  const defaultIds = productFilter?.map((item: any) => item?.product?.id);
+
   const { mutate: addProductFilter } = useAddProductFilter();
   const { mutate: deleteProductFilter } = useDeleteProductFilterById();
-  const onChangeProductFilter = (productFilterId?: string) => {
+  const onChangeProductFilter = (productFilterId?: number) => {
     if (productFilterId) {
-      if (
-        !productFilter?.map((item: any) => item?.product?.id?.toString()).includes(productFilterId)
-      ) {
-        addProductFilter({
-          product_id: Number(productFilterId),
-          company_id: Number(id),
-        });
+      const isHasId = selectedProducts?.includes(productFilterId);
+      if (isHasId) {
+        const newArr = selectedProducts?.filter((item) => item !== productFilterId);
+        setSelectedProducts(newArr);
+        setUnSelectedProducts((prev) => [...prev, productFilterId]);
       } else {
-        const productUseId = productFilter?.find(
-          (item: any) => item?.product?.id === Number(productFilterId)
-        ).id;
-        deleteProductFilter(Number(productUseId));
+        const newArr = selectedProducts?.filter((item) => item === productFilterId);
+        setUnSelectedProducts(newArr);
+        setSelectedProducts((prev) => [...prev, productFilterId]);
       }
     }
+    // if (productFilterId) {
+    //   if (
+    //     !productFilter?.map((item: any) => item?.product?.id?.toString()).includes(productFilterId)
+    //   ) {
+    //     addProductFilter({
+    //       product_id: Number(productFilterId),
+    //       company_id: Number(id),
+    //     });
+    //   } else {
+    //     const productUseId = productFilter?.find(
+    //       (item: any) => item?.product?.id === Number(productFilterId)
+    //     ).id;
+    //     deleteProductFilter(Number(productUseId));
+    //   }
+    // }
   };
+
+  console.log(selectedProducts, 'log: selectedProducts');
+  console.log(unSelectedProducts, 'log: unSelectedProducts');
+
+  useEffect(() => {
+    if (productFilter) {
+      setSelectedProducts(defaultIds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productFilter]);
+
+  console.log(productFilter, 'selected');
 
   const { data: companyById } = useCompanyById(Number(id));
   const { data: internalCompanyById } = useCompanyById(Number(vendorId));
+
+  const handleSubmit = () => {
+    addProductFilter({
+      product_id: selectedProducts,
+      company_id: Number(id),
+    });
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -75,16 +110,27 @@ export function EditProductFilterView() {
             <Box display="flex" alignItems="center" gap={1}>
               <Checkbox
                 id={`item-${item?.id}`}
-                onChange={() => onChangeProductFilter(item?.id.toString())}
-                checked={productFilter
-                  ?.map((productItem: any) => productItem?.product?.id.toString())
-                  ?.includes(item?.id.toString())}
+                onChange={() => onChangeProductFilter(item?.id)}
+                checked={selectedProducts?.includes(item?.id)}
               />{' '}
               <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor={`item-${item?.id}`}>
                 {item?.name}
               </Typography>
             </Box>
           ))}
+
+          <Box
+            display="flex"
+            justifyContent="end"
+            width="100%"
+            sx={{
+              mt: 8,
+            }}
+          >
+            <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+              Submit
+            </Button>
+          </Box>
         </Card>
       </Grid>
     </DashboardContent>
