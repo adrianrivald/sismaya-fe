@@ -36,29 +36,29 @@ export class RequestTask {
   ) {}
 
   static fromJson(json: any) {
-    return new RequestTask(
-      json.request?.id,
-      json.id,
-      json.name,
-      json.due_date,
-      json.request?.end_date,
-      {},
-      json?.description,
-      json.step,
-      json?.estimated_duration,
-      json?.assignees?.map((assignee: any) => ({
-        id: assignee?.id,
-        userId: assignee?.assignee_info?.userId,
-        name: assignee?.assignee_info?.name,
-        email: assignee?.assignee_info?.email,
-        avatar: assignee?.assignee_info?.profile_picture,
-      })) ?? [],
-      json?.attachments?.map((attachment: any) => ({
-        id: attachment.id,
-        name: attachment.file_name,
-        url: [attachment.file_path, attachment.file_name].join('/'),
-      })) ?? []
-    );
+   return new RequestTask(
+  json.request?.id,                 
+  json.id,                          
+  json.name,                        
+  json.due_date,                    
+  json.request?.end_date,          
+  {},                               
+  json?.estimated_duration ?? '',  
+  json?.description ?? '',         
+  json?.step ?? 'to-do',           
+  json?.assignees?.map((assignee: any) => ({
+    id: assignee?.id,
+    userId: assignee?.assignee_info?.userId,
+    name: assignee?.assignee_info?.name,
+    email: assignee?.assignee_info?.email,
+    avatar: assignee?.assignee_info?.profile_picture,
+  })) ?? [],
+  json?.attachments?.map((attachment: any) => ({
+    id: attachment.id,
+    name: attachment.file_name,
+    url: [attachment.file_path, attachment.file_name].join('/'),
+  })) ?? []
+);
   }
 
   static async toJson(task: any) {
