@@ -629,7 +629,9 @@ export function CreateRequestView() {
                       <Autocomplete
                         disabled={!watch('company_id')}
                         multiple
-                        options={divisionList || []}
+                        options={
+                          divisionList?.filter((item) => item.id !== watch('department_id')) || []
+                        }
                         getOptionLabel={(option) => option.name}
                         value={(divisionList || [])?.filter((division) =>
                           (watch('related_department') || [])?.includes(division.id)
