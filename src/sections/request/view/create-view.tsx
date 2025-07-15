@@ -16,6 +16,7 @@ import {
   Stack,
   TextField,
   IconButton,
+  Chip,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -30,6 +31,8 @@ import { useAddRequest, useCitoById } from 'src/services/request';
 import {
   useCategoryByCompanyId,
   useCompanyById,
+  useDivisionByCompanyId,
+  useDivisionCompanyList,
   useInternalCompanies,
   useProductByCompanyId,
 } from 'src/services/master-data/company';
@@ -80,6 +83,8 @@ export function CreateRequestView() {
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
   const { data: clientUsers } = useClientUsers(String(idCurrentCompany));
+  const { data: divisions } = useDivisionByCompanyId(Number(selectedCompanyId));
+  const divisionList = divisions;
   const { mutate: addRequest } = useAddRequest();
 
   const [selectedCompany, setSelectedCompany] = React.useState('');
@@ -290,6 +295,7 @@ export function CreateRequestView() {
 
   let payload = {};
   const handleSubmit = (formData: RequestDTO) => {
+    console.log(formData, 'formdata');
     if (user?.user_info?.user_type === 'client') {
       payload = {
         ...formData,
@@ -594,7 +600,7 @@ export function CreateRequestView() {
                 <Stack direction="row" gap={3} alignItems="center">
                   <Box
                     sx={{
-                      width: { xs: '100%', md: '48%' },
+                      width: { xs: '100%', md: '50%' },
                     }}
                   >
                     <TextField
@@ -613,6 +619,54 @@ export function CreateRequestView() {
                         {String(formState?.errors?.name?.message)}
                       </FormHelperText>
                     )}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: { xs: '100%', md: '50%' },
+                    }}
+                  >
+                    <FormControl fullWidth>
+                      <Autocomplete
+                        disabled={!watch('company_id')}
+                        multiple
+                        options={divisionList || []}
+                        getOptionLabel={(option) => option.name}
+                        value={(divisionList || [])?.filter((division) =>
+                          (watch('related_department') || [])?.includes(division.id)
+                        )}
+                        onChange={(event, newValue) => {
+                          setValue(
+                            'related_department',
+                            newValue.map((division) => division.id)
+                          );
+                        }}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => (
+                            <Chip
+                              label={option.name}
+                              {...getTagProps({ index })}
+                              key={option.id}
+                              sx={{
+                                bgcolor: '#D6F3F9',
+                                color: 'info.dark',
+                              }}
+                            />
+                          ))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            placeholder="Related Divisions"
+                            label="Related Divisions"
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                          />
+                        )}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                      />
+                    </FormControl>
                   </Box>
                 </Stack>
               </Grid>
@@ -634,7 +688,7 @@ export function CreateRequestView() {
                         })}
                         label="Product"
                       >
-                        {products?.map((product) => (
+                        {(products ?? [])?.map((product) => (
                           <MenuItem value={product?.id}>{product?.name}</MenuItem>
                         ))}
                       </Select>
