@@ -143,58 +143,55 @@ export function CreateTitleView() {
                     {isSuperAdmin && !id && (
                       <Grid item xs={12} md={12}>
                         <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
-                          Company Name
-                        </Typography>
+                          Select Company
+                        </Typography>{' '}
                         <FormControl fullWidth>
-                          <Select
+                          <Autocomplete
                             multiple
-                            value={watch('company_id') || []}
-                            defaultValue={[]}
-                            fullWidth
-                            displayEmpty
-                            placeholder="Company"
-                            onChange={(e: SelectChangeEvent<number[]>) => {
-                              setValue('company_id', e.target.value);
-                            }}
-                            renderValue={(selected) => {
-                              if (selected.length === 0) {
-                                return (
-                                  <Typography fontSize={14} color="GrayText">
-                                    Company
-                                  </Typography>
-                                );
-                              }
-                              return (
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                  {[...(companiesData || [])]
-                                    ?.filter((company) => selected?.includes(company.id))
-                                    .map((company) => (
-                                      <Chip
-                                        sx={{
-                                          bgcolor: '#D6F3F9',
-                                          color: 'info.dark',
-                                        }}
-                                        key={company.id}
-                                        label={company.name}
-                                      />
-                                    ))}
-                                </Box>
+                            options={internalCompanies || []}
+                            getOptionLabel={(option) => option.name}
+                            value={(internalCompanies || []).filter((company) =>
+                              (watch('company_id') || []).includes(company.id)
+                            )}
+                            onChange={(event, newValue) => {
+                              setValue(
+                                'company_id',
+                                newValue.map((company) => company.id)
                               );
                             }}
-                          >
-                            {companiesData?.map((company) => (
-                              <MenuItem key={company.id} value={company.id}>
-                                {company.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
+                            renderTags={(value, getTagProps) =>
+                              value.map((option, index) => (
+                                <Chip
+                                  label={option.name}
+                                  {...getTagProps({ index })}
+                                  key={option.id}
+                                  sx={{
+                                    bgcolor: '#D6F3F9',
+                                    color: 'info.dark',
+                                  }}
+                                />
+                              ))
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                variant="outlined"
+                                placeholder="Company"
+                                label="Company"
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                              />
+                            )}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                          />
                         </FormControl>
                       </Grid>
                     )}
                     {isSuperAdmin && id && (
                       <Grid item xs={12} md={12}>
                         <Typography fontSize={14} fontWeight="bold" sx={{ mb: 1 }}>
-                          Company Name
+                          Select Company
                         </Typography>
                         <FormControl fullWidth>
                           {/* <InputLabel id="select-company">Company</InputLabel> */}
