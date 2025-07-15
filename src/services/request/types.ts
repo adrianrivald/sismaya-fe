@@ -131,6 +131,17 @@ export interface RequestDetail {
     task_count: number;
     rating: number;
     rating_desc: string
+    related_department: RelatedDepartment[]
+}
+
+interface RelatedDepartment {
+    department_id: number;
+    department: Department;
+    id: number;
+    is_main: boolean;
+    request: Request;
+    request_id: number;
+
 }
 
 

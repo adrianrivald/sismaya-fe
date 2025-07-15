@@ -14,6 +14,8 @@ import {
   Stack,
   TextField,
   IconButton,
+  Autocomplete,
+  Chip,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -39,7 +41,11 @@ import {
   useRequestById,
   useUpdateRequest,
 } from 'src/services/request';
-import { useCategoryByCompanyId, useProductByCompanyId } from 'src/services/master-data/company';
+import {
+  useCategoryByCompanyId,
+  useDivisionByCompanyId,
+  useProductByCompanyId,
+} from 'src/services/master-data/company';
 import { SvgColor } from 'src/components/svg-color';
 import { Bounce, toast } from 'react-toastify';
 import { getFileExtension } from 'src/utils/get-file-format';
@@ -104,6 +110,8 @@ export function EditRequestView() {
   const [files, setFiles] = React.useState<FileList | any>([]);
   const [searchTerm, setSearchTerm] = useSearchDebounce();
 
+  const { data: divisions } = useDivisionByCompanyId(Number(idCurrentCompany));
+  const divisionList = divisions;
   const [attachmentModal, setAttachmentModal] = React.useState({
     isOpen: false,
     url: '',
@@ -133,6 +141,9 @@ export function EditRequestView() {
     description: requestDetail?.description,
     product_id: requestDetail?.product?.id,
     is_cito: requestDetail?.is_cito,
+    related_department: requestDetail?.related_department?.map(
+      (department) => department.department_id
+    ),
   };
   const { mutate: addRequestAssignee } = useAddRequestAssignee();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
@@ -349,6 +360,7 @@ export function EditRequestView() {
 
   const handleSubmit = (formData: RequestDTO) => {
     // setIsLoading(true);
+    console.log(formData, 'formdata');
     const payload = {
       ...formData,
       id: Number(id),
@@ -497,7 +509,7 @@ export function EditRequestView() {
             },
           }}
         >
-          {({ register, formState, watch }) => (
+          {({ register, formState, watch, setValue }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
                 <Stack
@@ -563,7 +575,7 @@ export function EditRequestView() {
                 <Stack direction="row" gap={3} alignItems="center">
                   <Box
                     sx={{
-                      width: { xs: '100%', md: '48%' },
+                      width: { xs: '100%', md: '50%' },
                     }}
                   >
                     <TextField
@@ -583,6 +595,56 @@ export function EditRequestView() {
                         {String(formState?.errors?.name?.message)}
                       </FormHelperText>
                     )}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: { xs: '100%', md: '50%' },
+                    }}
+                  >
+                    <FormControl fullWidth>
+                      <Autocomplete
+                        disabled={!watch('company_id')}
+                        multiple
+                        options={
+                          divisionList?.filter((item) => item.id !== watch('department_id')) || []
+                        }
+                        getOptionLabel={(option) => option.name}
+                        value={(divisionList || [])?.filter((division) =>
+                          (watch('related_department') || [])?.includes(division.id)
+                        )}
+                        onChange={(event, newValue) => {
+                          setValue(
+                            'related_department',
+                            newValue.map((division) => division.id)
+                          );
+                        }}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => (
+                            <Chip
+                              label={option.name}
+                              {...getTagProps({ index })}
+                              key={option.id}
+                              sx={{
+                                bgcolor: '#D6F3F9',
+                                color: 'info.dark',
+                              }}
+                            />
+                          ))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            placeholder="Related Divisions"
+                            label="Related Divisions"
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                          />
+                        )}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                      />
+                    </FormControl>
                   </Box>
                 </Stack>
               </Grid>
