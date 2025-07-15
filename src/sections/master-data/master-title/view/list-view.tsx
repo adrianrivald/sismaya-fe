@@ -115,10 +115,10 @@ function ButtonActions(props: CellContext<TitleTypes, unknown>, popoverProps: Po
         <Iconify icon="solar:pen-bold" />
         Edit
       </MenuItem>
-      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
+      {/* <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
-      </MenuItem>
+      </MenuItem> */}
     </MenuList>
   );
 }
@@ -303,19 +303,20 @@ export function ListTitleView() {
               </FormControl>
             </Grid>
 
-            {selectedTitles.length > 0 && (
-              <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
-                <Button
-                  onClick={() => {
+            <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+              <Button
+                onClick={() => {
+                  if (selectedTitles.length > 0) {
                     setOpenBulkDelete(true);
-                  }}
-                  startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
-                  color="error"
-                >
-                  Delete ({selectedTitles.length})
-                </Button>
-              </Grid>
-            )}
+                  }
+                }}
+                startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                color="error"
+                disabled={selectedTitles.length === 0}
+              >
+                Delete {selectedTitles.length > 0 ? `(${selectedTitles.length})` : null}
+              </Button>
+            </Grid>
           </Grid>
           <DataTable
             columns={columns({

@@ -126,10 +126,10 @@ function ButtonActions(props: CellContext<StatusTypes, unknown>, popoverProps: P
         Edit
       </MenuItem>
 
-      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
+      {/* <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
-      </MenuItem>
+      </MenuItem> */}
     </MenuList>
   );
 }
@@ -315,19 +315,20 @@ export function ListStatusView() {
               </FormControl>
             </Grid>
 
-            {selectedStatuses.length > 0 && (
-              <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
-                <Button
-                  onClick={() => {
+            <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+              <Button
+                onClick={() => {
+                  if (selectedStatuses.length > 0) {
                     setOpenBulkDelete(true);
-                  }}
-                  startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
-                  color="error"
-                >
-                  Delete ({selectedStatuses.length})
-                </Button>
-              </Grid>
-            )}
+                  }
+                }}
+                startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                color="error"
+                disabled={selectedStatuses.length === 0}
+              >
+                Delete {selectedStatuses.length > 0 ? `(${selectedStatuses.length})` : null}
+              </Button>
+            </Grid>
           </Grid>
           <DataTable
             columns={columns({
