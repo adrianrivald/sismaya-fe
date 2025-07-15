@@ -118,10 +118,10 @@ function ButtonActions(props: CellContext<CategoryTypes, unknown>, popoverProps:
         Edit
       </MenuItem>
 
-      <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
+      {/* <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
         <Iconify icon="solar:trash-bin-trash-bold" />
         Delete
-      </MenuItem>
+      </MenuItem> */}
     </MenuList>
   );
 }
@@ -301,19 +301,20 @@ export function ListCategoryView() {
               </FormControl>
             </Grid>
 
-            {selectedCategories.length > 0 && (
-              <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
-                <Button
-                  onClick={() => {
+            <Grid item xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+              <Button
+                onClick={() => {
+                  if (selectedCategories.length > 0) {
                     setOpenBulkDelete(true);
-                  }}
-                  startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
-                  color="error"
-                >
-                  Delete ({selectedCategories.length})
-                </Button>
-              </Grid>
-            )}
+                  }
+                }}
+                startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                color="error"
+                disabled={selectedCategories.length === 0}
+              >
+                Delete {selectedCategories.length > 0 ? `(${selectedCategories.length})` : null}
+              </Button>
+            </Grid>
           </Grid>
           <DataTable
             columns={columns({
