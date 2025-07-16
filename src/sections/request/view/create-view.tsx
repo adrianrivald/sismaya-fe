@@ -83,7 +83,9 @@ export function CreateRequestView() {
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
   const { data: clientUsers } = useClientUsers(String(idCurrentCompany));
-  const { data: divisions } = useDivisionByCompanyId(Number(selectedCompanyId));
+  const { data: divisions } = useDivisionByCompanyId(
+    userType === 'internal' ? Number(selectedCompanyId) : user?.user_info?.company?.id
+  );
   const divisionList = divisions;
   const { mutate: addRequest } = useAddRequest();
 
@@ -627,7 +629,7 @@ export function CreateRequestView() {
                   >
                     <FormControl fullWidth>
                       <Autocomplete
-                        disabled={!watch('company_id')}
+                        disabled={!watch('company_id') && userType === 'internal'}
                         multiple
                         options={
                           divisionList?.filter((item) => item.id !== watch('department_id')) || []
