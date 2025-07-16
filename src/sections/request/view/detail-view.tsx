@@ -192,6 +192,9 @@ export function RequestDetailView() {
 
   const names = selectedPic?.slice(0, 5).map((item) => item.name);
 
+  const relatedDepartments =
+    requestDetail?.related_department?.filter((item) => item?.is_main !== true) ?? [];
+
   return (
     <Box p={3} bgcolor="blue.50" sx={{ borderRadius: 2, marginTop: 2 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -289,10 +292,9 @@ export function RequestDetailView() {
                 Related Division
               </TableCell>
               <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
-                {requestDetail?.related_department
-                  ?.filter((item) => item?.is_main !== true)
-                  .map((item) => item?.department.name)
-                  .join(', ')}
+                {relatedDepartments?.length > 0
+                  ? relatedDepartments?.map((item) => item?.department.name).join(', ')
+                  : '-'}
               </TableCell>
             </TableRow>
             <TableRow>
