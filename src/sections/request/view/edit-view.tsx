@@ -61,6 +61,10 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { Iconify } from 'src/components/iconify';
 import { AttachmentModal } from 'src/pages/task/attachment-modal';
 import { useUserPermissions } from 'src/services/auth/use-user-permissions';
+import {
+  useAddRelatedDepartment,
+  useDeleteRelatedDepartment,
+} from 'src/services/request/use-related-department';
 import { AddAssigneeModal } from '../add-assignee';
 
 interface VideoFile {
@@ -147,7 +151,8 @@ export function EditRequestView() {
   };
   const { mutate: addRequestAssignee } = useAddRequestAssignee();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();
-
+  const { mutate: addRelatedDepartment } = useAddRelatedDepartment();
+  const { mutate: deleteRelatedDepartment } = useDeleteRelatedDepartment();
   const [selectedPic, setSelectedPic] = React.useState<
     { id: number; picture: string; assignee_id?: number; name: string }[] | undefined
   >(
@@ -613,10 +618,31 @@ export function EditRequestView() {
                           (watch('related_department') || [])?.includes(division.id)
                         )}
                         onChange={(event, newValue) => {
-                          setValue(
-                            'related_department',
-                            newValue.map((division) => division.id)
+                          const previousIds = watch('related_department') || [];
+                          const newIds = newValue.map((division) => division.id);
+
+                          const added = newIds.filter((newId) => !previousIds.includes(newId));
+                          const removed = previousIds.filter(
+                            (prevId: number) => !newIds.includes(prevId)
                           );
+                          const removedRelatedId = requestDetail?.related_department?.find((item) =>
+                            removed.includes(item.department_id)
+                          )?.id;
+
+                          if (added.length > 0) {
+                            console.log('Added:', added);
+                            addRelatedDepartment({
+                              department_id: Number(added),
+                              request_id: requestDetail?.id ?? 0,
+                            });
+                          }
+
+                          if (removed.length > 0) {
+                            console.log('Removed:', removed);
+                            deleteRelatedDepartment(removedRelatedId ?? 0);
+                          }
+
+                          setValue('related_department', newIds);
                         }}
                         renderTags={(value, getTagProps) =>
                           value.map((option, index) => (
