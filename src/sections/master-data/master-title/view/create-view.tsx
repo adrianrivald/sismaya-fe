@@ -51,6 +51,7 @@ export function CreateTitleView() {
   const { data: internalCompanies } = useInternalCompaniesAll();
   const { data: clientCompanies } = useNonInternalCompanies(true);
   const companiesData = isInternalCompanyPage ? internalCompanies : clientCompanies;
+  console.log(companiesData, 'companiesData');
   const isSuperAdmin = user?.user_info?.role_id === 1;
   const idCurrentCompany =
     user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
@@ -148,9 +149,9 @@ export function CreateTitleView() {
                         <FormControl fullWidth>
                           <Autocomplete
                             multiple
-                            options={internalCompanies || []}
+                            options={companiesData || []}
                             getOptionLabel={(option) => option.name}
-                            value={(internalCompanies || []).filter((company) =>
+                            value={(companiesData || []).filter((company) =>
                               (watch('company_id') || []).includes(company.id)
                             )}
                             onChange={(event, newValue) => {

@@ -172,9 +172,9 @@ export function CreateDivisionView() {
                         <FormControl fullWidth>
                           <Autocomplete
                             multiple
-                            options={internalCompanies || []}
+                            options={companiesData || []}
                             getOptionLabel={(option) => option.name}
-                            value={(internalCompanies || []).filter((company) =>
+                            value={(companiesData || []).filter((company) =>
                               (watch('company_id') || []).includes(company.id)
                             )}
                             onChange={(event, newValue) => {
