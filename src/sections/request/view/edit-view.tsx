@@ -110,7 +110,7 @@ export function EditRequestView() {
   const [files, setFiles] = React.useState<FileList | any>([]);
   const [searchTerm, setSearchTerm] = useSearchDebounce();
 
-  const { data: divisions } = useDivisionByCompanyId(Number(idCurrentCompany));
+  const { data: divisions } = useDivisionByCompanyId(Number(requestDetail?.company?.id));
   const divisionList = divisions;
   const [attachmentModal, setAttachmentModal] = React.useState({
     isOpen: false,
@@ -141,9 +141,9 @@ export function EditRequestView() {
     description: requestDetail?.description,
     product_id: requestDetail?.product?.id,
     is_cito: requestDetail?.is_cito,
-    related_department: requestDetail?.related_department?.map(
-      (department) => department.department_id
-    ),
+    related_department: requestDetail?.related_department
+      ?.filter((item) => item.is_main !== true)
+      .map((department) => department.department_id),
   };
   const { mutate: addRequestAssignee } = useAddRequestAssignee();
   const { mutate: deleteRequestAssignee } = useDeleteRequestAssigneeById();

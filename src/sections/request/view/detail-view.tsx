@@ -286,6 +286,17 @@ export function RequestDetailView() {
             </TableRow>
             <TableRow>
               <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
+                Related Division
+              </TableCell>
+              <TableCell size="small" sx={{ color: 'blue.700', fontWeight: 500 }}>
+                {requestDetail?.related_department
+                  ?.filter((item) => item?.is_main !== true)
+                  .map((item) => item?.department.name)
+                  .join(', ')}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell size="small" width={200} sx={{ color: 'grey.600' }}>
                 Category
               </TableCell>
               <TableCell size="small">{requestDetail?.category?.name}</TableCell>
