@@ -9,15 +9,29 @@ export function useProductByCompanyId(
   companyId: number,
   isClientCompany?: boolean,
   onSuccess?: () => void,
-  internalCompanyId?: number
+  internalCompanyId?: number,
+  showAll?: boolean
 ) {
   return useQuery(
-    ['product-items', companyId],
+    ['product-items', companyId, showAll],
     async () => {
+      const params = new URLSearchParams();
+
+      if (isClientCompany) {
+        params.append('client_company_id', String(companyId));
+        if (internalCompanyId) {
+          params.append('company_id', String(internalCompanyId));
+        }
+      } else {
+        params.append('company_id', String(companyId));
+      }
+
+      if (showAll) {
+        params.append('page_size', '10000');
+      }
+
       const { data: response } = await http<{ data: Products[] }>(
-        isClientCompany
-          ? `products?client_company_id=${companyId}${internalCompanyId ? `&company_id=${internalCompanyId}` : ''}`
-          : `products?company_id=${companyId}${internalCompanyId ? `&company_id=${internalCompanyId}` : ''}`
+        `products?${params.toString()}`
       );
 
       return response;
@@ -27,10 +41,11 @@ export function useProductByCompanyId(
         console.log('onsuc');
         onSuccess?.();
       },
-      enabled: companyId !== null || companyId !== 0,
+      enabled: companyId !== null && companyId !== 0,
     }
   );
 }
+
 
 export function fetchProductList(params: Partial<any>, company_id?: string) {
   const baseUrl = window.location.origin;

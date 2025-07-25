@@ -18,7 +18,13 @@ export function EditProductFilterView() {
   const { id, vendorId } = useParams();
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [unSelectedProducts, setUnSelectedProducts] = useState<number[]>([]);
-  const { data: products } = useProductByCompanyId(Number(vendorId));
+  const { data: products } = useProductByCompanyId(
+    Number(vendorId),
+    undefined,
+    undefined,
+    undefined,
+    true
+  );
   const { data: productFilter } = useProductFilter({
     company_id: id,
     internal_company_id: vendorId,
