@@ -59,9 +59,9 @@ export function useAddCompany() {
           transition: Bounce,
         });
         if (res?.data?.type === 'holding') {
-          navigate(`/client-company/companies/${res?.data?.id}/edit`);
+          navigate(`/client-company/companies/`);
         } else if (res?.data?.type === 'internal') {
-          navigate(`/internal-company/companies/${res?.data?.id}/edit`);
+          navigate(`/internal-company/companies/`);
         } else {
           const currentPath = location.pathname;
           const slicedPath = currentPath?.split('/edit')[0];
