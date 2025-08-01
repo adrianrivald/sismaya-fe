@@ -6,7 +6,7 @@ import { http } from 'src/utils/http';
 import { CompanyDTO } from './schemas/company-schema';
 import { Company } from './types';
 
-export type StoreCompany = CompanyDTO & { type: string; cover?: any; parent_id?: string };
+export type StoreCompany = CompanyDTO & { type: string; cover?: any; parent_id?: string; subCompaniesCover?: any; clientSubCompanies?: any[] };
 
 export function useAddCompany() {
   const queryClient = useQueryClient();
@@ -14,12 +14,26 @@ export function useAddCompany() {
   const location = useLocation();
   return useMutation(
     async (formData: StoreCompany) => {
-      const { name, abbreviation, type, cover, parent_id } = formData;
+      const { name, abbreviation, type, cover, parent_id, subCompaniesCover, clientSubCompanies } = formData;
       const payload = {
         name,
         abbreviation,
         type,
+        clientSubCompanies
       };
+
+      if (subCompaniesCover?.length > 0) {
+        clientSubCompanies?.forEach(async(company, index) => {
+          
+        const imageData = new FormData();
+        imageData.append('file', cover as unknown as File);
+        const { url } = await uploadImage(imageData);
+
+        Object.assign(company, {
+          image: url
+        })
+        })
+      }
 
       if (cover) {
         const imageData = new FormData();

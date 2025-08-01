@@ -1,15 +1,16 @@
 import Typography from '@mui/material/Typography';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   MenuList,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
   menuItemClasses,
@@ -30,16 +31,19 @@ import {
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
 import { Bounce, toast } from 'react-toastify';
+import { Icon } from '@iconify/react';
 
 export function CreateClientCompanyView() {
   const { mutate: addCompany } = useAddCompany();
   const { mutate: addCompanyRelation } = useAddCompanyRelation();
   const handleSubmit = (formData: CompanyDTO) => {
+    console.log(formData, 'log: formDatanya');
     // setIsLoading(true);
     addCompany(
       {
         ...formData,
         type: 'holding',
+        clientSubCompanies: subCompanies,
       },
       {
         onSuccess(data) {
@@ -59,6 +63,57 @@ export function CreateClientCompanyView() {
 
   const { data: internalCompanies } = useInternalCompanies();
   const [internalCompanyId, setInternalCompanyId] = React.useState<number>(0);
+
+  const [subCompanies, setSubCompanies] = React.useState([
+    {
+      name: '',
+      abbreviation: '',
+      image: '',
+      internalCompany: null,
+    },
+  ]);
+
+  const onAddSubCompany = () => {
+    setSubCompanies((prev) => [
+      ...prev,
+      {
+        name: '',
+        abbreviation: '',
+        image: '',
+        internalCompany: null,
+      },
+    ]);
+  };
+
+  const onDeleteSubCompany = (index: number) => {
+    const newArr = subCompanies?.filter((_, companyIndex) => companyIndex !== index);
+    if (subCompanies.length > 1) {
+      setSubCompanies(newArr);
+    }
+  };
+
+  const handleChangeSubCompany = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent,
+    index: number
+  ) => {
+    console.log(e.target.name, 'log: name');
+    console.log(e.target.value, 'log: value');
+    console.log(index, 'log: index');
+    const newArr = subCompanies?.map((company, companyIndex) => {
+      if (companyIndex === index) {
+        console.log('here?');
+        return {
+          ...company,
+          [e.target.name]: e.target.value,
+        };
+      }
+      return company;
+    });
+    console.log(newArr, 'newArr');
+    setSubCompanies(newArr);
+  };
+
+  console.log(subCompanies, 'subCompanies');
 
   return (
     <DashboardContent maxWidth="xl">
@@ -113,7 +168,7 @@ export function CreateClientCompanyView() {
                 )}
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={12}>
                 <FieldDropzone
                   label="Upload Picture"
                   helperText="Picture maximum 5mb size"
@@ -269,6 +324,141 @@ export function CreateClientCompanyView() {
                     {String(formState?.errors?.internal_id?.message)}
                   </FormHelperText>
                 )}
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="h4" color="primary" mb={2}>
+                    Client Sub Company
+                  </Typography>
+
+                  <Button onClick={onAddSubCompany} variant="contained" color="primary">
+                    <IconButton
+                      aria-label="Create Client Sub Company"
+                      size="small"
+                      sx={{ color: 'white' }}
+                    >
+                      <Iconify icon="mdi:plus" />
+                    </IconButton>
+                    <Typography>Tambah Client Sub Company</Typography>
+                  </Button>
+                </Stack>
+                {subCompanies?.map((company, index) => (
+                  <Box
+                    sx={{
+                      bgcolor: '#F5F9FA',
+                      p: 4,
+                      mt: 4,
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <Grid container spacing={3} xs={12}>
+                      <Grid item xs={12} md={12}>
+                        <TextField
+                          error={Boolean(formState?.errors?.name)}
+                          sx={{
+                            width: '100%',
+                          }}
+                          label="Client Name"
+                          autoComplete="off"
+                          name="name"
+                          onChange={(e) => handleChangeSubCompany(e, index)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={12}>
+                        <TextField
+                          error={Boolean(formState?.errors?.abbreviation)}
+                          multiline
+                          sx={{
+                            width: '100%',
+                          }}
+                          label="Client Description"
+                          rows={4}
+                          name="abbreviation"
+                          onChange={(e) => handleChangeSubCompany(e, index)}
+                        />
+                        {formState?.errors?.abbreviation && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.abbreviation?.message)}
+                          </FormHelperText>
+                        )}
+                      </Grid>
+
+                      <Grid item xs={12} md={12}>
+                        <FieldDropzone
+                          label="Upload Picture"
+                          helperText="Picture maximum 5mb size"
+                          controller={{
+                            name: `subCompaniesCover[${index}]`,
+                            control,
+                            // rules: {
+                            //   required: {
+                            //     value: true,
+                            //     message: 'Picture must be uploaded',
+                            //   },
+                            // },
+                          }}
+                          error={formState.errors?.cover}
+                          maxSize={5000000}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={12}>
+                        <Typography variant="h4" color="primary" mb={2}>
+                          Internal Company
+                        </Typography>
+
+                        {/* <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel> */}
+                        <Box display="flex" flexDirection="column" gap={2}>
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={3}
+                            alignItems="center"
+                          >
+                            <Box width="100%">
+                              <FormControl fullWidth>
+                                <InputLabel id="userCompany">Internal Company</InputLabel>
+                                <Select
+                                  label="Internal Company"
+                                  value={String(subCompanies[index].internalCompany)}
+                                  name="internalCompany"
+                                  onChange={(e: SelectChangeEvent) =>
+                                    handleChangeSubCompany(e, index)
+                                  }
+                                >
+                                  {internalCompanies?.map((internalCompany) => (
+                                    <MenuItem value={internalCompany?.id}>
+                                      {internalCompany?.name}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          </Stack>
+                        </Box>
+                        {formState?.errors?.internal_id && (
+                          <FormHelperText sx={{ color: 'error.main' }}>
+                            {String(formState?.errors?.internal_id?.message)}
+                          </FormHelperText>
+                        )}
+                      </Grid>
+
+                      <Grid item xs={12} md={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+                        <Button
+                          onClick={() => onDeleteSubCompany(index)}
+                          startIcon={
+                            <Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />
+                          }
+                          color="error"
+                          disabled={subCompanies?.length < 2}
+                        >
+                          Hapus
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                ))}
               </Grid>
 
               <Box

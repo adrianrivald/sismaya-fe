@@ -166,10 +166,30 @@ function Dropzone<TFormFields extends Record<string, unknown> = Record<string, u
             src={image}
           />
         ) : (
-          <Box textAlign="center" p={2}>
-            <Typography>{label ?? 'Upload picture'}</Typography>
-            <Typography color="gray.600">or drop your image into this box</Typography>
-          </Box>
+          <Stack direction="row" gap={2} alignItems="center">
+            <Box
+              component="img"
+              alt="Upload"
+              src="/assets/illustrations/illustration-upload.png"
+              sx={{ width: 200, my: 2 }}
+            />
+            <Box textAlign="left" p={2}>
+              <Typography fontWeight="bold" fontSize={20}>
+                Select Files
+              </Typography>
+              <Typography color="gray.600">
+                Drop files here or click{' '}
+                <Typography
+                  component="span"
+                  color="primary.main"
+                  sx={{ textDecoration: 'underline' }}
+                >
+                  browse
+                </Typography>{' '}
+                thorough your machine
+              </Typography>
+            </Box>
+          </Stack>
         )}
 
         <input
