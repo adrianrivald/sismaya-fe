@@ -1,7 +1,22 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import { Box, Button, MenuItem, menuItemClasses, MenuList } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  ListItemText,
+  MenuItem,
+  menuItemClasses,
+  MenuList,
+  OutlinedInput,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useNavigate } from 'react-router-dom';
@@ -9,19 +24,19 @@ import { DataTable } from 'src/components/table/data-tables';
 import type { CellContext } from '@tanstack/react-table';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
-import { useCompanyList } from 'src/services/master-data/company/use-company-list';
 import { useDeleteCompanyById } from 'src/services/master-data/company';
-import { Companies } from '../../client-company/view/types';
+import { useProductUse } from 'src/services/master-data/product-filter/use-product-use';
+import type { SelectChangeEvent } from '@mui/material/Select/SelectInput';
+import type { ProductFilter } from '../type/types';
 
 // ----------------------------------------------------------------------
 
 interface PopoverProps {
   handleEdit: (id: number) => void;
-  setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
 }
 
-const columnHelper = createColumnHelper<Companies>();
+const columnHelper = createColumnHelper<ProductFilter>();
 
 const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('name', {
@@ -30,7 +45,7 @@ const columns = (popoverProps: PopoverProps) => [
   }),
 
   columnHelper.accessor('abbreviation', {
-    header: 'Abbreviation',
+    header: 'Description',
   }),
 
   columnHelper.accessor('type', {
@@ -38,21 +53,16 @@ const columns = (popoverProps: PopoverProps) => [
   }),
 
   columnHelper.display({
+    header: 'Action',
     id: 'actions',
     cell: (info) => ButtonActions(info, popoverProps),
   }),
 ];
 
-function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: PopoverProps) {
+function ButtonActions(props: CellContext<ProductFilter, unknown>, popoverProps: PopoverProps) {
   const { row } = props;
   const companyId = row.original.id;
-  const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
-
-  const onClickRemove = (itemId?: number) => {
-    if (itemId) setSelectedId(itemId);
-    setOpenRemoveModal(true);
-  };
-  // const { mutateAsync: deleteBanner } = useDeleteBanner();
+  const { handleEdit, setSelectedId } = popoverProps;
   return (
     <MenuList
       disablePadding
@@ -71,29 +81,19 @@ function ButtonActions(props: CellContext<Companies, unknown>, popoverProps: Pop
     >
       <MenuItem onClick={() => handleEdit(companyId)}>
         <Iconify icon="solar:pen-bold" />
-        Edit
+        Detail
       </MenuItem>
-
-      {/* <MenuItem onClick={() => onClickRemove(companyId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
-      </MenuItem> */}
     </MenuList>
   );
 }
 
 export function ProductFilterView() {
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
-  const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [sortOrder, setSortOrder] = React.useState('');
 
-  const { getDataTableProps } = useCompanyList(
-    {
-      name: sortOrder,
-    },
-    'holding'
-  );
+  const { data, getDataTableProps: getDataTablePropsProduct } = useProductUse({});
+  const dataTable = data as any;
   const navigate = useNavigate();
 
   const popoverFuncs = () => {
@@ -103,7 +103,6 @@ export function ProductFilterView() {
 
     const handleDelete = () => {
       deleteCompanyById(Number(selectedId));
-      setOpenRemoveModal(false);
     };
 
     return { handleEdit, handleDelete };
@@ -119,12 +118,22 @@ export function ProductFilterView() {
     }
   };
 
+  const [selectedCompanies, setSelectedCompanies] = React.useState(['SIM', 'SAS']);
+  const companyOptions = ['SIM', 'SAS', 'KMI', 'FPA'];
+
+  const handleChange = (event: SelectChangeEvent<string[]>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedCompanies(typeof value === 'string' ? value.split(',') : value);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            Product Filter
+            List Client Product Mapping
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Master Data</Typography>
@@ -132,21 +141,70 @@ export function ProductFilterView() {
             <Typography color="grey.500">Product Filter</Typography>
           </Box>
         </Box>
-        {/* <Box>
-          <Button onClick={onClickAddNew} variant="contained" color="primary">
-            Create New Product Filter
-          </Button>
-        </Box> */}
+      </Box>
+
+      <Box display="flex" justifyContent="end" mb={2}>
+        <FormControl sx={{ m: 1, minWidth: 200 }}>
+          <Select
+            labelId="company-selector-label"
+            multiple
+            displayEmpty
+            value={selectedCompanies}
+            onChange={handleChange}
+            input={<OutlinedInput />}
+            renderValue={() => 'Display Company'}
+            sx={{
+              borderRadius: '12px',
+              '& fieldset': {
+                borderColor: 'grey.500', // Optional: match your Figma design
+              },
+            }}
+          >
+            {companyOptions.map((name) => (
+              <MenuItem key={name} value={name}>
+                <Checkbox checked={selectedCompanies.indexOf(name) > -1} />
+                <ListItemText primary={name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
 
       <Grid container spacing={3}>
         <Grid xs={12}>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            columns={columns({ ...popoverFuncs(), setSelectedId })}
             order={sortOrder}
             orderBy="name_sort"
             onSort={onSort}
-            {...getDataTableProps()}
+            enableCollapse
+            isCollapseWithBg
+            renderCollapse={(row) => (
+              <Box margin={1}>
+                <Table size="small" aria-label="subcompanies">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ bgcolor: '#EBFAFC' }}>Name</TableCell>
+                      <TableCell sx={{ bgcolor: '#EBFAFC' }}>Description</TableCell>
+                      <TableCell sx={{ bgcolor: '#EBFAFC' }}>Type</TableCell>
+                      {/* dynamic column here */}
+                      <TableCell sx={{ bgcolor: '#EBFAFC' }}>Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {row.subsidiaries?.map((sub, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{sub.name}</TableCell>
+                        <TableCell>{sub.abbreviation}</TableCell>
+                        <TableCell>{sub.type}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
+            {...getDataTablePropsProduct()}
+            data={dataTable.items.result}
           />
         </Grid>
       </Grid>

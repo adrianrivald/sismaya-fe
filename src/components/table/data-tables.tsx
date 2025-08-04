@@ -59,6 +59,7 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   orderBy?: string;
   order?: any;
   onSort?: (id: string) => void;
+  isCollapseWithBg?: boolean;
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
@@ -74,6 +75,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     enableSelection = false,
     onSelectionChange,
     enableCollapse = false,
+    isCollapseWithBg = false,
     renderCollapse,
     orderBy,
     order = '',
@@ -249,6 +251,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
                     hover
                     data-testid="trBody"
                     selected={selectedRows.indexOf(row.original) !== -1}
+                    sx={{ bgcolor: openRows[row.id] ? '#EBFAFC' : '' }}
                   >
                     {enableSelection && (
                       <TableCell padding="checkbox">
@@ -280,7 +283,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
                     ))}
                   </TableRow>
                   {enableCollapse && renderCollapse && (
-                    <TableRow>
+                    <TableRow sx={{ bgcolor: isCollapseWithBg ? '#EBFAFC' : '' }}>
                       <TableCell
                         style={{ paddingBottom: 0, paddingTop: 0 }}
                         colSpan={columns.length + (enableSelection ? 2 : 1)}
