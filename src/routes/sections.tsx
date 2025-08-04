@@ -12,6 +12,8 @@ import { useAuth } from 'src/sections/auth/providers/auth';
 import PageListTimer from 'src/sections/task/page-list-timer';
 import MyRequestTask from 'src/sections/task/my-request';
 
+import EvaluationFormPage from 'src/pages/happiness-rating/evaluation-form';
+
 // ----------------------------------------------------------------------
 export const HomePage = lazy(() => import('src/pages/home'));
 
@@ -294,6 +296,7 @@ const internalRoutes: NonIndexRouteObject = {
         { path: 'task', element: <RequestTaskPage /> },
       ],
     },
+    { path: '/:vendor/request/:id/evaluation-form', element: <EvaluationFormPage /> },
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
     { path: '/:vendor/dashboard', element: <DashboardInternalCompanyPage /> },
@@ -419,6 +422,7 @@ const clientRoutes: NonIndexRouteObject = {
     { path: '/:vendor/request/create', element: <RequestCreatePage /> },
     { path: '/:vendor/request/:id/edit', element: <RequestEditPage /> },
     { path: '/:vendor/request/:id/review', element: <RequestReviewPage /> },
+    { path: '/:vendor/request/:id/evaluation-form', element: <EvaluationFormPage /> },
   ],
 };
 

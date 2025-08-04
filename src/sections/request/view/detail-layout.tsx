@@ -15,6 +15,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { priorityColorMap, stepColorMap } from 'src/constants/status';
 import { store } from 'src/services/request/task';
 import { useSelector } from '@xstate/store/react';
+import { Icon } from '@iconify/react';
 import { useMessage } from 'src/services/messaging/use-messaging';
 import type { Messaging } from 'src/services/messaging/types';
 import { SvgColor } from 'src/components/svg-color';
@@ -215,6 +216,30 @@ export default function RequestDetailLayout() {
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography variant="h5">Request</Typography>
             <Typography variant="h5">{(vendor ?? '').toUpperCase()} Request Management</Typography>
+          </Box>
+          <Box sx={{ mb: 2, p: 2, backgroundColor: '#FFF7CD', borderRadius: 2 }}>
+            <Grid container>
+              <Grid item xs={12} md={12} lg={8} mt={0.5}>
+                <Stack sx={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
+                  <Icon icon="solar:danger-triangle-bold" width="20" height="20" />
+                  <Typography color="#7A4F01" fontSize={14}>
+                    You haven’t filled out the evaluation report for this request.
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={12} lg={4}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    navigate(`/${vendor}/request/${id}/evaluation-form`);
+                  }}
+                >
+                  <Typography fontSize={12} sx={{ color: '#7A4F01' }}>
+                    Fill Out the Evaluation Report
+                  </Typography>
+                </Button>
+              </Grid>
+            </Grid>
           </Box>
 
           {requestDetail?.step === 'done' && userType === 'client' && (
