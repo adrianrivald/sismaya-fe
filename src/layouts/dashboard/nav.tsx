@@ -215,6 +215,7 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
       path: `/internal-company/master-faq`,
       heading: 'FAQ',
     },
+    { path: '/internal-company/settings-cito', heading: 'Settings Cito' },
   ];
 
   const clientCompaniesMasterDataSuperAdmin = [
