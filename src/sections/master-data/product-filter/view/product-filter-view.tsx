@@ -5,12 +5,16 @@ import {
   Box,
   Checkbox,
   FormControl,
+  List,
+  ListItem,
   ListItemText,
   MenuItem,
   menuItemClasses,
   MenuList,
   OutlinedInput,
   Select,
+  Stack,
+  styled,
   Table,
   TableBody,
   TableCell,
@@ -34,7 +38,15 @@ import type { ProductFilter } from '../type/types';
 interface PopoverProps {
   handleEdit: (id: number) => void;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
+  mappedCompanies: any[];
 }
+
+const BulletListItem = styled(ListItem)(({ theme }) => ({
+  display: 'list-item',
+  listStyleType: 'disc',
+  listStylePosition: 'outside',
+  paddingLeft: 0,
+}));
 
 const columnHelper = createColumnHelper<ProductFilter>();
 
@@ -51,6 +63,37 @@ const columns = (popoverProps: PopoverProps) => [
   columnHelper.accessor('type', {
     header: 'Type',
   }),
+
+  ...(popoverProps.mappedCompanies?.map((company: any) =>
+    columnHelper.accessor('product_used', {
+      header: company.name,
+      id: `product_used_${company.name}`,
+      cell: () => (
+        <List>
+          <BulletListItem>
+            <Typography>
+              Holding:{' '}
+              <Typography
+                sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+              >
+                {company?.parent_count}
+              </Typography>
+            </Typography>{' '}
+          </BulletListItem>
+          <BulletListItem>
+            <Typography>
+              Sub Company:{' '}
+              <Typography
+                sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+              >
+                {company?.child_count}
+              </Typography>
+            </Typography>{' '}
+          </BulletListItem>
+        </List>
+      ),
+    })
+  ) ?? []),
 
   columnHelper.display({
     header: 'Action',
@@ -118,8 +161,7 @@ export function ProductFilterView() {
     }
   };
 
-  const [selectedCompanies, setSelectedCompanies] = React.useState(['SIM', 'SAS']);
-  const companyOptions = ['SIM', 'SAS', 'KMI', 'FPA'];
+  const [selectedCompanies, setSelectedCompanies] = React.useState(['']);
 
   const handleChange = (event: SelectChangeEvent<string[]>) => {
     const {
@@ -127,6 +169,11 @@ export function ProductFilterView() {
     } = event;
     setSelectedCompanies(typeof value === 'string' ? value.split(',') : value);
   };
+
+  const mappedCompanies = dataTable.items.result?.map((item: any) => item.product_used)[0];
+  const mappedSubCompanies = dataTable.items.result[0]?.subsidiaries?.map(
+    (item: any) => item?.product_used
+  )[0];
 
   return (
     <DashboardContent maxWidth="xl">
@@ -160,10 +207,10 @@ export function ProductFilterView() {
               },
             }}
           >
-            {companyOptions.map((name) => (
-              <MenuItem key={name} value={name}>
-                <Checkbox checked={selectedCompanies.indexOf(name) > -1} />
-                <ListItemText primary={name} />
+            {mappedCompanies?.map((item: any, index: number) => (
+              <MenuItem key={index} value={item.name}>
+                <Checkbox checked={selectedCompanies.indexOf(item.name) > -1} />
+                <ListItemText primary={item.name} />
               </MenuItem>
             ))}
           </Select>
@@ -173,7 +220,7 @@ export function ProductFilterView() {
       <Grid container spacing={3}>
         <Grid xs={12}>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setSelectedId })}
+            columns={columns({ ...popoverFuncs(), setSelectedId, mappedCompanies })}
             order={sortOrder}
             orderBy="name_sort"
             onSort={onSort}
@@ -187,8 +234,9 @@ export function ProductFilterView() {
                       <TableCell sx={{ bgcolor: '#EBFAFC' }}>Name</TableCell>
                       <TableCell sx={{ bgcolor: '#EBFAFC' }}>Description</TableCell>
                       <TableCell sx={{ bgcolor: '#EBFAFC' }}>Type</TableCell>
-                      {/* dynamic column here */}
-                      <TableCell sx={{ bgcolor: '#EBFAFC' }}>Action</TableCell>
+                      {mappedSubCompanies?.map((company: any) => (
+                        <TableCell sx={{ bgcolor: '#EBFAFC' }}>{company?.company_name}</TableCell>
+                      ))}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -196,7 +244,21 @@ export function ProductFilterView() {
                       <TableRow key={index}>
                         <TableCell>{sub.name}</TableCell>
                         <TableCell>{sub.abbreviation}</TableCell>
+
                         <TableCell>{sub.type}</TableCell>
+                        {mappedSubCompanies?.map((company: any) => (
+                          <TableCell>
+                            <Typography
+                              sx={{
+                                cursor: 'pointer',
+                                textDecoration: 'underline',
+                                color: 'primary.main',
+                              }}
+                            >
+                              {company?.request_count}
+                            </Typography>
+                          </TableCell>
+                        ))}
                       </TableRow>
                     ))}
                   </TableBody>

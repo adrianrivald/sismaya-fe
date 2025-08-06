@@ -196,9 +196,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
       [rowId]: !prev[rowId],
     }));
   };
-  console.log(table.getHeaderGroups(), 'table.getHeaderGroups()');
 
-  //   const notFound = !dataFiltered.length && !!filterName;
   return (
     <Card>
       <Scrollbar>
