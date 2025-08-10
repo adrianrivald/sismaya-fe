@@ -1,10 +1,19 @@
 import Typography from '@mui/material/Typography';
-import { Box, Grid, Card, Checkbox, Button } from '@mui/material';
+import type { AccordionSummaryProps } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Card,
+  Checkbox,
+  Button,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  styled,
+} from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Form } from 'src/components/form/form';
-import React, { useEffect, useState } from 'react';
-import { roleSchema, type RoleDTO } from 'src/services/master-data/role/schemas/role-schema';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   useAddProductFilter,
@@ -13,6 +22,24 @@ import {
 } from 'src/services/master-data/product-filter';
 import { useProductByCompanyId } from 'src/services/master-data/company/product/use-product-list';
 import { useCompanyById } from 'src/services/master-data/company';
+import { useProductUseById } from 'src/services/master-data/product-filter/use-product-use-detail';
+import { SvgColor } from 'src/components/svg-color';
+
+const AccordionHeader = styled((props: AccordionSummaryProps) => (
+  <AccordionSummary
+    expandIcon={<SvgColor width={15} src="/assets/icons/ic-chevron-down.svg" />}
+    {...props}
+  />
+))(() => ({
+  fontWeight: '600',
+  '& .MuiAccordionSummary-content.Mui-expanded': {
+    backgroundColor: 'unset',
+    color: 'black',
+  },
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    backgroundColor: 'unset',
+  },
+}));
 
 export function EditProductFilterView() {
   const { id, vendorId } = useParams();
@@ -29,6 +56,12 @@ export function EditProductFilterView() {
     company_id: id,
     internal_company_id: vendorId,
   });
+
+  const { data: productUse } = useProductUseById({
+    clientCompanyId: Number(id),
+    internalCompanyId: Number(vendorId),
+  });
+
   const defaultIds = productFilter?.map((item: any) => item?.product?.id);
 
   const { mutate: addProductFilter } = useAddProductFilter();
@@ -101,28 +134,130 @@ export function EditProductFilterView() {
       </Box>
 
       <Grid container spacing={3} sx={{ width: 'auto', mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Card
-          sx={{
-            width: '100%',
-            mt: 2,
-            p: 4,
-            boxShadow: '2',
-            position: 'relative',
-            backgroundColor: 'blue.50',
-            borderRadius: 4,
-          }}
-        >
-          {products?.map((item) => (
+        <Box mt={4} width="100%">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography fontSize={18} variant="h6">
+              List Product Holding: {companyById?.name}
+            </Typography>
             <Box display="flex" alignItems="center" gap={1}>
               <Checkbox
-                id={`item-${item?.id}`}
-                onChange={() => onChangeProductFilter(item?.id)}
-                checked={selectedProducts?.includes(item?.id)}
+                id="check-all-holding"
+                // onChange={() => onChangeProductFilter(item?.id)}
+                // checked={selectedProducts?.includes(item?.id)}
               />{' '}
-              <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor={`item-${item?.id}`}>
-                {item?.name}
+              <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor="check-all-holding">
+                Check All Product in Holding Company
               </Typography>
             </Box>
+          </Box>
+          <Card
+            sx={{
+              width: '100%',
+              mt: 2,
+              p: 4,
+              boxShadow: '2',
+              position: 'relative',
+              backgroundColor: 'blue.50',
+              borderRadius: 4,
+            }}
+          >
+            {products?.map((item) => (
+              <Box display="flex" alignItems="center" gap={1} py={1}>
+                <Checkbox
+                  id={`item-${item?.id}`}
+                  onChange={() => onChangeProductFilter(item?.id)}
+                  checked={selectedProducts?.includes(item?.id)}
+                />{' '}
+                <Typography
+                  sx={{ cursor: 'pointer' }}
+                  component="label"
+                  htmlFor={`item-${item?.id}`}
+                >
+                  {item?.name}
+                </Typography>
+              </Box>
+            ))}
+          </Card>
+        </Box>
+        <Box mt={4} width="100%">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography fontSize={18} variant="h6">
+              List Product Every Sub Company
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                id="check-all-sub"
+                // onChange={() => onChangeProductFilter(item?.id)}
+                // checked={selectedProducts?.includes(item?.id)}
+              />{' '}
+              <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor="check-all-sub">
+                Check All Product in All Sub Company
+              </Typography>
+            </Box>
+          </Box>
+
+          {productUse?.result?.map((product: any) => (
+            <Card
+              sx={{
+                width: '100%',
+                mt: 2,
+                p: 4,
+                boxShadow: '2',
+                position: 'relative',
+                backgroundColor: 'blue.50',
+                borderRadius: 4,
+              }}
+            >
+              <Accordion
+                sx={{
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <AccordionHeader
+                  expandIcon={<SvgColor width={15} src="/assets/icons/ic-chevron-down.svg" />}
+                  aria-controls="general"
+                  id="general-header"
+                  sx={{
+                    padding: 0,
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Checkbox
+                      // checked={generalChilds
+                      //   ?.map((item) => item?.id)
+                      //   ?.every((item) => selectedPermissions?.includes(item))}
+                      // onChange={onCheckAllGeneral}
+                      onClick={(e) => e.stopPropagation()} // Stops accordion toggle
+                    />{' '}
+                    {product?.name}
+                  </Box>
+                </AccordionHeader>
+                {product?.products?.map((child: any) => (
+                  <AccordionDetails sx={{ py: 1, px: 0 }}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      sx={{ backgroundColor: 'blue.50', borderRadius: '8px' }}
+                    >
+                      <Checkbox
+                        id={`item-${child?.id}`}
+                        // defaultChecked={defaultValues?.permissions?.includes(child?.id)}
+                        // onChange={() => onChangePermission(child?.id)}
+                        // checked={selectedPermissions?.includes(child?.id)}
+                      />{' '}
+                      <Typography
+                        sx={{ cursor: 'pointer' }}
+                        component="label"
+                        htmlFor={`item-${child?.id}`}
+                      >
+                        {child?.name}
+                      </Typography>
+                    </Box>
+                  </AccordionDetails>
+                ))}
+              </Accordion>
+            </Card>
           ))}
 
           <Box
@@ -134,10 +269,10 @@ export function EditProductFilterView() {
             }}
           >
             <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
-              Submit
+              Save Changes
             </Button>
           </Box>
-        </Card>
+        </Box>
       </Grid>
     </DashboardContent>
   );
