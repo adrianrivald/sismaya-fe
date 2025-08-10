@@ -31,6 +31,7 @@ import {
 import React, { useEffect } from 'react';
 import { SvgColor } from '../svg-color';
 import { Iconify } from '../iconify';
+import { TableNoData } from './table-no-data';
 
 export const visuallyHidden = {
   border: 0,
@@ -60,6 +61,7 @@ interface DataTablesProps<TData> extends Pick<TableOptions<TData>, 'data' | 'col
   order?: any;
   onSort?: (id: string) => void;
   isCollapseWithBg?: boolean;
+  minWidth?: number;
 }
 
 export function DataTable<TData>(props: DataTablesProps<TData>) {
@@ -80,6 +82,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     orderBy,
     order = '',
     onSort,
+    minWidth = 800,
   } = props;
 
   const [selectedRows, setSelectedRows] = React.useState<TData[]>([]);
@@ -196,14 +199,13 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
       [rowId]: !prev[rowId],
     }));
   };
-  console.log(table.getHeaderGroups(), 'table.getHeaderGroups()');
 
   //   const notFound = !dataFiltered.length && !!filterName;
   return (
     <Card>
       <Scrollbar>
-        <TableContainer sx={{ overflow: 'unset' }}>
-          <TableMui sx={{ minWidth: 800 }}>
+        <TableContainer sx={{ overflow: 'auto' }}>
+          <TableMui sx={{ minWidth }}>
             <TableHead>
               {table.getHeaderGroups().map((headerGroup, index) => (
                 <TableRow key={index}>
@@ -302,7 +304,7 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
                 emptyRows={emptyRows(table.page, table.rowsPerPage, data.length)}
               /> */}
 
-              {/* {notFound && <TableNoData searchQuery={filterName} />} */}
+              {data.length === 0 && <TableNoData searchQuery="" />}
             </TableBody>
           </TableMui>
         </TableContainer>

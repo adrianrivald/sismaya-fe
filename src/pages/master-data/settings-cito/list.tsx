@@ -10,6 +10,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -17,10 +18,202 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { SvgColor } from 'src/components/svg-color';
 import { CONFIG } from 'src/config-global';
+import { useSettingCitoList } from 'src/services/settings-cito/use-list-cito';
+import useDebounce from 'src/utils/use-debounce';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { DataTable } from 'src/components/table/data-tables';
+import { Icon } from '@iconify/react';
+import { PaginationState, createColumnHelper } from '@tanstack/react-table';
+import { SettingCitoType, SubsidiariesType } from 'src/services/settings-cito/schemas/type';
 import DialogAddCitoQuota from './components/add-cito-quota';
 import DialogAddAdditionalCito from './components/add-additional-cito';
 import DialogAddInitialCito from './components/add-initial-cito';
+
+const columnHelper = createColumnHelper<SettingCitoType>();
+const columnHelperSubsidiaries = createColumnHelper<SubsidiariesType>();
+
+interface PopoverProps {
+  // handleEdit: (id: number) => void;
+  // setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
+  // setSelectedId: Dispatch<SetStateAction<number | null>>;
+  // isSuperAdmin: boolean;
+}
+
+const columns = (popoverProps: PopoverProps) => [
+  columnHelper.accessor('name', {
+    header: 'Companies Name',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue()}
+      </Typography>
+    ),
+  }),
+
+  columnHelper.accessor('abbreviation', {
+    header: 'Description',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue()}
+      </Typography>
+    ),
+  }),
+
+  columnHelper.accessor('cito_type', {
+    header: 'Type',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() === 'all-sub-company'
+          ? 'Sub Company'
+          : info.getValue() === 'holding'
+            ? 'Holding'
+            : '-'}
+      </Typography>
+    ),
+  }),
+
+  columnHelper.accessor('initial_quota', {
+    header: 'Initial Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+
+  columnHelper.accessor('additional_quota', {
+    header: 'Additional Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+  columnHelper.accessor('total_quota', {
+    header: 'Total Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+  columnHelper.accessor('quota_used', {
+    header: 'Quota Used',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+  columnHelper.accessor('remaining_quota', {
+    header: 'Remaining Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+
+  columnHelper.display({
+    header: 'Actions',
+    id: 'actions',
+
+    cell: (info) => (
+      <Stack direction="row" gap={2}>
+        <Button>
+          <Stack direction="row" gap={1}>
+            <Icon icon="material-symbols:edit-outline" width="20" height="20" color="black" />
+            <Typography fontSize={14} color="black">
+              Add Quota
+            </Typography>
+          </Stack>
+        </Button>
+        <Button>
+          <Stack direction="row" gap={1}>
+            <Icon icon="material-symbols:history-rounded" width="20" height="20" color="black" />
+            <Typography fontSize={14} color="black">
+              History
+            </Typography>
+          </Stack>
+        </Button>
+      </Stack>
+    ),
+  }),
+];
+
+const columnsSubsidiaries = () => [
+  columnHelperSubsidiaries.accessor('name', {
+    header: 'Companies Name',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue()}
+      </Typography>
+    ),
+  }),
+
+  columnHelperSubsidiaries.accessor('abbreviation', {
+    header: 'Description',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue()}
+      </Typography>
+    ),
+  }),
+
+  columnHelperSubsidiaries.accessor('cito_type', {
+    header: 'Type',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() === 'all-sub-company'
+          ? 'Sub Company'
+          : info.getValue() === 'holding'
+            ? 'Holding'
+            : '-'}
+      </Typography>
+    ),
+  }),
+
+  columnHelperSubsidiaries.accessor('initial_quota', {
+    header: 'Initial Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+
+  columnHelperSubsidiaries.accessor('additional_quota', {
+    header: 'Additional Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+  columnHelperSubsidiaries.accessor('total_quota', {
+    header: 'Total Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+  columnHelperSubsidiaries.accessor('quota_used', {
+    header: 'Quota Used',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+  columnHelperSubsidiaries.accessor('remaining_quota', {
+    header: 'Remaining Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
+];
 
 export default function SettingCitoList() {
   const [form, setForm] = useState({
@@ -36,6 +229,12 @@ export default function SettingCitoList() {
   });
   const [openInitialQuota, setOpenInitialQuota] = useState({ isOpen: false, id: '', index: 0 });
   const [openCitoQuota, setOpenCitoQuota] = useState({ isOpen: false, id: '', index: 0 });
+  const debounceSearch = useDebounce(form.search, 1000);
+  const { getDataTableProps, refetch } = useSettingCitoList({
+    search: debounceSearch,
+
+    cito_type: form.cito_type === 'all' ? null : form.cito_type,
+  });
 
   return (
     <div>
@@ -119,13 +318,40 @@ export default function SettingCitoList() {
             </Grid>
           </CardContent>
 
-          <Button
+          {/* <Button
             onClick={() => {
               setOpenCitoQuota({ isOpen: true, id: '', index: 0 });
             }}
           >
             Add cito quota
-          </Button>
+          </Button> */}
+
+          <DataTable
+            minWidth={1500}
+            columns={columns({
+              // ...popoverFuncs(),
+              // setOpenRemoveModal,
+              // setSelectedId,
+              // isSuperAdmin,
+            })}
+            // enableSelection
+            // onSelectionChange={handleSelectionChange}
+            {...getDataTableProps()}
+            enableCollapse
+            renderCollapse={(row) => (
+              <DataTable
+                minWidth={1500}
+                columns={columnsSubsidiaries()}
+                // enableSelection
+                // onSelectionChange={handleSelectionChange}
+                withPagination={false}
+                total={1}
+                onPaginationChange={() => null}
+                data={(row?.subsidiaries as SubsidiariesType[]) || ([] as SubsidiariesType[])}
+                pagination={{ pageIndex: 0, pageSize: 9999 }}
+              />
+            )}
+          />
         </Card>
       </DashboardContent>
 
