@@ -28,12 +28,15 @@ import { SettingCitoType, SubsidiariesType } from 'src/services/settings-cito/sc
 import DialogAddCitoQuota from './components/add-cito-quota';
 import DialogAddAdditionalCito from './components/add-additional-cito';
 import DialogAddInitialCito from './components/add-initial-cito';
+import DialogCitoHistory from './components/cito-history';
+import DialogDocumentPoHistory from './components/more-history-po';
 
 const columnHelper = createColumnHelper<SettingCitoType>();
 const columnHelperSubsidiaries = createColumnHelper<SubsidiariesType>();
 
 interface PopoverProps {
-  // handleEdit: (id: number) => void;
+  handleAddOpen: (id: number, index?: number) => void;
+  handleHistory: (id: number, index?: number) => void;
   // setOpenRemoveModal: Dispatch<SetStateAction<boolean>>;
   // setSelectedId: Dispatch<SetStateAction<number | null>>;
   // isSuperAdmin: boolean;
@@ -58,7 +61,7 @@ const columns = (popoverProps: PopoverProps) => [
     ),
   }),
 
-  columnHelper.accessor('cito_type', {
+  columnHelper.accessor('type', {
     header: 'Type',
     cell: (info) => (
       <Typography fontSize={14} mb={1}>
@@ -113,13 +116,30 @@ const columns = (popoverProps: PopoverProps) => [
     ),
   }),
 
+  columnHelper.accessor('cito_type', {
+    header: 'Cito Type',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() === 'all-sub-company'
+          ? 'Sub Company'
+          : info.getValue() === 'holding'
+            ? 'Holding'
+            : '-'}
+      </Typography>
+    ),
+  }),
+
   columnHelper.display({
     header: 'Actions',
     id: 'actions',
 
     cell: (info) => (
       <Stack direction="row" gap={2}>
-        <Button>
+        <Button
+          onClick={() => {
+            popoverProps.handleAddOpen(info?.row.original?.id);
+          }}
+        >
           <Stack direction="row" gap={1}>
             <Icon icon="material-symbols:edit-outline" width="20" height="20" color="black" />
             <Typography fontSize={14} color="black">
@@ -127,7 +147,11 @@ const columns = (popoverProps: PopoverProps) => [
             </Typography>
           </Stack>
         </Button>
-        <Button>
+        <Button
+          onClick={() => {
+            popoverProps.handleHistory(info?.row.original?.id);
+          }}
+        >
           <Stack direction="row" gap={1}>
             <Icon icon="material-symbols:history-rounded" width="20" height="20" color="black" />
             <Typography fontSize={14} color="black">
@@ -159,7 +183,7 @@ const columnsSubsidiaries = () => [
     ),
   }),
 
-  columnHelperSubsidiaries.accessor('cito_type', {
+  columnHelperSubsidiaries.accessor('type', {
     header: 'Type',
     cell: (info) => (
       <Typography fontSize={14} mb={1}>
@@ -205,6 +229,19 @@ const columnsSubsidiaries = () => [
       </Typography>
     ),
   }),
+
+  columnHelperSubsidiaries.accessor('cito_type', {
+    header: 'Cito Type',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() === 'all-sub-company'
+          ? 'Sub Company'
+          : info.getValue() === 'holding'
+            ? 'Holding'
+            : '-'}
+      </Typography>
+    ),
+  }),
   columnHelperSubsidiaries.accessor('remaining_quota', {
     header: 'Remaining Quota',
     cell: (info) => (
@@ -227,6 +264,7 @@ export default function SettingCitoList() {
     id: '',
     index: 0,
   });
+  const [openCitoHistory, setOpenCitoHistory] = useState({ isOpen: false, id: '', index: 0 });
   const [openInitialQuota, setOpenInitialQuota] = useState({ isOpen: false, id: '', index: 0 });
   const [openCitoQuota, setOpenCitoQuota] = useState({ isOpen: false, id: '', index: 0 });
   const debounceSearch = useDebounce(form.search, 1000);
@@ -235,6 +273,18 @@ export default function SettingCitoList() {
 
     cito_type: form.cito_type === 'all' ? null : form.cito_type,
   });
+
+  const popoverFuncs = () => {
+    const handleAddOpen = (id: number, index?: number) => {
+      setOpenCitoQuota({ id: String(id), index: index || 0, isOpen: true });
+    };
+
+    const handleHistory = (id: number, index?: number) => {
+      setOpenCitoHistory({ id: String(id), index: index || 0, isOpen: true });
+    };
+
+    return { handleAddOpen, handleHistory };
+  };
 
   return (
     <div>
@@ -329,10 +379,7 @@ export default function SettingCitoList() {
           <DataTable
             minWidth={1500}
             columns={columns({
-              // ...popoverFuncs(),
-              // setOpenRemoveModal,
-              // setSelectedId,
-              // isSuperAdmin,
+              ...popoverFuncs(),
             })}
             // enableSelection
             // onSelectionChange={handleSelectionChange}
@@ -342,8 +389,6 @@ export default function SettingCitoList() {
               <DataTable
                 minWidth={1500}
                 columns={columnsSubsidiaries()}
-                // enableSelection
-                // onSelectionChange={handleSelectionChange}
                 withPagination={false}
                 total={1}
                 onPaginationChange={() => null}
@@ -384,6 +429,22 @@ export default function SettingCitoList() {
         onClose={() => {
           setOpenInitialQuota({ isOpen: false, id: '', index: 0 });
         }}
+      />
+
+      {/* <DialogCitoHistory
+        open={openCitoHistory.isOpen}
+        onClose={() => {
+          setOpenCitoHistory({ isOpen: false, id: '', index: 0 });
+        }}
+        id={openCitoHistory.id}
+      /> */}
+
+      <DialogDocumentPoHistory
+        open={openCitoHistory.isOpen}
+        onClose={() => {
+          setOpenCitoHistory({ isOpen: false, id: '', index: 0 });
+        }}
+        id={openCitoHistory.id}
       />
     </div>
   );

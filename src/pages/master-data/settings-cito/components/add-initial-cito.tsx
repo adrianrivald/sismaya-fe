@@ -71,7 +71,9 @@ export default function DialogAddInitialCito({ open, onClose }: DialogAddInitial
           </FormControl>
 
           <Stack direction="row" gap={2} sx={{ mt: 3 }} justifyContent="flex-end">
-            <Button variant="outlined">Cancel</Button>
+            <Button variant="outlined" onClick={onClose}>
+              Cancel
+            </Button>
             <Button variant="contained" disabled>
               Save
             </Button>

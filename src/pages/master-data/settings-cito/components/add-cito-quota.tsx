@@ -1,4 +1,17 @@
-import { Box, Button, Dialog, Grid, Stack, Typography } from '@mui/material';
+import { Icon } from '@iconify/react';
+import {
+  Box,
+  Button,
+  Dialog,
+  Grid,
+  Stack,
+  Table,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 
 interface DialogAddCitoQuotaProps {
   open: boolean;
@@ -27,18 +40,48 @@ export default function DialogAddCitoQuota({
           Add Cito Quota
         </Typography>
 
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
-          <Typography>Initial Quota</Typography>
-          <Button variant="contained" onClick={() => onClick && onClick('initial', id)}>
-            Add Initial Quota
-          </Button>
-        </Stack>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
+        <Box>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
+            <Typography>Initial Quota</Typography>
+            <Button variant="contained" onClick={() => onClick && onClick('initial', id)}>
+              Add Initial Quota
+            </Button>
+          </Stack>
+          <Stack direction="row" gap={1} sx={{ my: 1.5 }}>
+            <Box sx={{ minWidth: 24, minHeight: 24 }}>
+              <Icon icon="solar:info-circle-bold" color="red" height={20} width={20} />
+            </Box>
+
+            <Typography fontSize={14} color="#919EAB">
+              The initial quota becomes the reference for the monthly quota.
+            </Typography>
+          </Stack>
+          <TableContainer>
+            <Table sx={{ borderRadius: 4 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    <Typography fontSize={14} color="#637381">
+                      Company Name
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography fontSize={14} color="#637381">
+                      Cito Quota
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        {/* <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
           <Typography>Additional Quota</Typography>
           <Button variant="contained" onClick={() => onClick && onClick('additional', id)}>
             Add Additional Quota
           </Button>
-        </Stack>
+        </Stack> */}
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button

@@ -24,3 +24,14 @@ export type SubsidiariesType = {
   total_quota: number;
   type: string;
 };
+
+export type InitialCitoType = {
+  data: [
+    {
+      cito_type: string;
+    },
+    {
+      initial: { company_name: string; id: number; quota: number; type: string }[];
+    },
+  ];
+};
