@@ -31,6 +31,9 @@ import { Iconify } from 'src/components/iconify';
 import { useDeleteCompanyById } from 'src/services/master-data/company';
 import { useProductUse } from 'src/services/master-data/product-filter/use-product-use';
 import type { SelectChangeEvent } from '@mui/material/Select/SelectInput';
+import DialogViewCompany from 'src/components/dialog/dialog-view-company';
+import { getSession } from 'src/sections/auth/session/session';
+import { API_URL } from 'src/constants';
 import type { ProductFilter } from '../type/types';
 
 // ----------------------------------------------------------------------
@@ -39,6 +42,11 @@ interface PopoverProps {
   handleEdit: (id: number) => void;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
   mappedCompanies: any[];
+  fetchCompanyPopupList: (
+    companyId: number,
+    internalCompanyId: number,
+    isSubCompany?: boolean
+  ) => void;
 }
 
 const BulletListItem = styled(ListItem)(({ theme }) => ({
@@ -65,15 +73,16 @@ const columns = (popoverProps: PopoverProps) => [
   }),
 
   ...(popoverProps.mappedCompanies?.map((company: any) =>
-    columnHelper.accessor('product_used', {
+    columnHelper.accessor((row) => row, {
       header: company.name,
       id: `product_used_${company.name}`,
-      cell: () => (
+      cell: (info) => (
         <List>
           <BulletListItem>
             <Typography>
               Holding:{' '}
               <Typography
+                onClick={() => popoverProps.fetchCompanyPopupList(info.getValue().id, company.id)}
                 sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
               >
                 {company?.parent_count}
@@ -84,6 +93,9 @@ const columns = (popoverProps: PopoverProps) => [
             <Typography>
               Sub Company:{' '}
               <Typography
+                onClick={() =>
+                  popoverProps.fetchCompanyPopupList(info.getValue().id, company.id, true)
+                }
                 sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
               >
                 {company?.child_count}
@@ -132,12 +144,51 @@ function ButtonActions(props: CellContext<ProductFilter, unknown>, popoverProps:
 
 export function ProductFilterView() {
   const { mutate: deleteCompanyById } = useDeleteCompanyById();
+  const [openViewCompanyModal, setOpenViewCompanyModal] = React.useState(false);
+  const [openedCompanyList, setOpenedCompanyList] = React.useState([]);
+
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [sortOrder, setSortOrder] = React.useState('');
 
   const { data, getDataTableProps: getDataTablePropsProduct } = useProductUse({});
   const dataTable = data as any;
   const navigate = useNavigate();
+
+  const fetchCompanyPopupList = async (
+    companyId: number,
+    internalCompanyId: number,
+    isSubCompany?: boolean
+  ) => {
+    setOpenedCompanyList([]);
+
+    try {
+      const companyData = await fetch(
+        `${API_URL}/product-use?company_id=${companyId}&internal_company_id=${internalCompanyId}&is_active=all${isSubCompany ? '&mode=subsidiaries' : ''}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getSession()}`,
+          },
+        }
+      ).then((res) =>
+        res.json().then((value) => {
+          console.log(value, 'valuenya');
+          const transformed =
+            value?.data !== null
+              ? value?.data.map((item: any) => ({
+                  name: item.company.name,
+                }))
+              : [];
+          setOpenedCompanyList(transformed ?? []);
+        })
+      );
+      setOpenViewCompanyModal(true);
+      return companyData;
+    } catch (error) {
+      setOpenedCompanyList([]);
+      setOpenViewCompanyModal(true);
+      return error;
+    }
+  };
 
   const popoverFuncs = () => {
     const handleEdit = (id: number) => {
@@ -220,7 +271,12 @@ export function ProductFilterView() {
       <Grid container spacing={3}>
         <Grid xs={12}>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setSelectedId, mappedCompanies })}
+            columns={columns({
+              ...popoverFuncs(),
+              setSelectedId,
+              mappedCompanies,
+              fetchCompanyPopupList,
+            })}
             order={sortOrder}
             orderBy="name_sort"
             onSort={onSort}
@@ -270,6 +326,11 @@ export function ProductFilterView() {
           />
         </Grid>
       </Grid>
+      <DialogViewCompany
+        list={openedCompanyList}
+        open={openViewCompanyModal}
+        setOpen={setOpenViewCompanyModal}
+      />
     </DashboardContent>
   );
 }
