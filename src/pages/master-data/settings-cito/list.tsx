@@ -265,6 +265,7 @@ export default function SettingCitoList() {
     id: '',
     index: 0,
   });
+
   const [openCitoHistory, setOpenCitoHistory] = useState({ isOpen: false, id: '', index: 0 });
   const [openInitialQuota, setOpenInitialQuota] = useState({ isOpen: false, id: '', index: 0 });
   const [openCitoQuota, setOpenCitoQuota] = useState({ isOpen: false, id: '', index: 0 });
