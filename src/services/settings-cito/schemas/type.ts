@@ -26,12 +26,11 @@ export type SubsidiariesType = {
 };
 
 export type InitialCitoType = {
-  data: [
-    {
-      cito_type: string;
-    },
-    {
-      initial: { company_name: string; id: number; quota: number; type: string }[];
-    },
-  ];
+  cito_type: string;
+  initial: {
+    company_name: string;
+    id: number;
+    quota: number;
+    type: string;
+  }[];
 };

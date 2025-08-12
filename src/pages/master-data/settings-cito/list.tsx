@@ -25,9 +25,10 @@ import { DataTable } from 'src/components/table/data-tables';
 import { Icon } from '@iconify/react';
 import { PaginationState, createColumnHelper } from '@tanstack/react-table';
 import { SettingCitoType, SubsidiariesType } from 'src/services/settings-cito/schemas/type';
+import DialogAddInitialCito from './components/add-initial-cito';
 import DialogAddCitoQuota from './components/add-cito-quota';
 import DialogAddAdditionalCito from './components/add-additional-cito';
-import DialogAddInitialCito from './components/add-initial-cito';
+
 import DialogCitoHistory from './components/cito-history';
 import DialogDocumentPoHistory from './components/more-history-po';
 
@@ -276,6 +277,7 @@ export default function SettingCitoList() {
 
   const popoverFuncs = () => {
     const handleAddOpen = (id: number, index?: number) => {
+      // setOpenInitialQuota({ id: String(id), index: index || 0, isOpen: true });
       setOpenCitoQuota({ id: String(id), index: index || 0, isOpen: true });
     };
 
@@ -429,6 +431,7 @@ export default function SettingCitoList() {
         onClose={() => {
           setOpenInitialQuota({ isOpen: false, id: '', index: 0 });
         }}
+        id={openInitialQuota.id}
       />
 
       {/* <DialogCitoHistory

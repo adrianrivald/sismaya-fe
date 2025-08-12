@@ -12,6 +12,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { useInitialQuota } from 'src/services/settings-cito/use-initial-cito';
 
 interface DialogAddCitoQuotaProps {
   open: boolean;
@@ -25,6 +26,8 @@ export default function DialogAddCitoQuota({
   onClick,
   id,
 }: DialogAddCitoQuotaProps) {
+  const { data } = useInitialQuota('', id, open === true);
+
   return (
     <Dialog
       open={open}
@@ -47,7 +50,7 @@ export default function DialogAddCitoQuota({
               Add Initial Quota
             </Button>
           </Stack>
-          <Stack direction="row" gap={1} sx={{ my: 1.5 }}>
+          {/* <Stack direction="row" gap={1} sx={{ my: 1.5 }}>
             <Box sx={{ minWidth: 24, minHeight: 24 }}>
               <Icon icon="solar:info-circle-bold" color="red" height={20} width={20} />
             </Box>
@@ -73,15 +76,19 @@ export default function DialogAddCitoQuota({
                 </TableRow>
               </TableHead>
             </Table>
-          </TableContainer>
+          </TableContainer> */}
         </Box>
 
-        {/* <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
           <Typography>Additional Quota</Typography>
-          <Button variant="contained" onClick={() => onClick && onClick('additional', id)}>
+          <Button
+            variant="contained"
+            onClick={() => onClick && onClick('additional', id)}
+            disabled={data?.cito_type === ''}
+          >
             Add Additional Quota
           </Button>
-        </Stack> */}
+        </Stack>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button

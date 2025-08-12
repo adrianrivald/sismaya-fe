@@ -10,20 +10,46 @@ import {
   Select,
   SelectChangeEvent,
   Button,
+  Table,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableBody,
+  TextField,
 } from '@mui/material';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useInitialQuota, useInitialQuotaPost } from 'src/services/settings-cito/use-initial-cito';
 
 interface DialogAddInitialCitoProps {
   open: boolean;
   onClose: () => void;
+  id: string;
 }
 
-export default function DialogAddInitialCito({ open, onClose }: DialogAddInitialCitoProps) {
-  const methods = useForm({
+export default function DialogAddInitialCito({ open, onClose, id }: DialogAddInitialCitoProps) {
+  const methods = useForm<{ cito_type: string; quota: { company_id: number; quota: number }[] }>({
     defaultValues: {
-      cito_type: 'holding_company',
+      cito_type: 'all_sub_company',
+      quota: [],
     },
   });
+
+  const { data } = useInitialQuota('', id, open === true);
+  const mutation = useInitialQuotaPost();
+
+  useEffect(() => {
+    if (data) {
+      methods.reset({
+        cito_type: data?.cito_type || 'all_sub_company',
+        quota: data?.initial.map((item) => ({ company_id: item.id, quota: item.quota || 0 })),
+      });
+    }
+  }, [data, methods]);
+
+  console.log('dataa', data);
+
   return (
     <Dialog
       open={open}
@@ -54,27 +80,120 @@ export default function DialogAddInitialCito({ open, onClose }: DialogAddInitial
             Cito Type
           </Typography>
           <FormControl fullWidth sx={{ mt: 1.5 }}>
-            <InputLabel id="select-company">Cito Type</InputLabel>
+            {/* <InputLabel id="select-company">Cito Type</InputLabel> */}
             <Select
               value={methods.watch('cito_type') || ''}
-              defaultValue="holding_company"
               fullWidth
               onChange={(e: SelectChangeEvent<any>) => {
                 methods.setValue('cito_type', e.target.value);
               }}
             >
-              <MenuItem value="holding_company" selected>
-                Holding Company
-              </MenuItem>
-              <MenuItem value="sub_company">All Sub Company</MenuItem>
+              {/* Holding only yg di kirim hanya type nya holding */}
+              {/* Kalo cito type nya null berarti harus add initial quota */}
+              <MenuItem value="holding-only">Only Holding</MenuItem>
+
+              <MenuItem value="all-sub-company">All Sub Company</MenuItem>
             </Select>
+
+            <TableContainer sx={{ mt: 2 }}>
+              <Table sx={{ borderRadius: 4 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell width="73%">
+                      <Typography fontSize={14} color="#637381">
+                        Company Name
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontSize={14} color="#637381">
+                        Cito Quota
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {data?.initial
+                    .filter((item) => item.type !== 'subsidiary')
+                    .map((itm, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>
+                          <Typography fontSize={14}>{itm.company_name}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            fullWidth
+                            // value={methods.watch(`quota.${idx}.quota`) || 0}
+                            placeholder="Input"
+                            type="number"
+                            {...methods.register(`quota.${idx}.quota`)}
+                            inputProps={{ onWheel: (event: any) => event.target.blur(), max: 999 }}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const newValue = e.target.value;
+                              const dataValue = { company_id: itm.id, quota: Number(newValue) };
+                              methods.setValue(`quota.${idx}`, dataValue);
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  {methods.watch('cito_type') === 'all-sub-company' && (
+                    <>
+                      {data?.initial.map(
+                        (itm, idx) =>
+                          itm.type === 'subsidiary' && (
+                            <TableRow key={idx}>
+                              <TableCell>
+                                <Typography sx={{ ml: 1.5 }} fontSize={14}>
+                                  {itm.company_name}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <TextField
+                                  fullWidth
+                                  placeholder="Input"
+                                  type="number"
+                                  {...methods.register(`quota.${idx}.quota`)}
+                                  inputProps={{
+                                    onWheel: (event: any) => event.target.blur(),
+                                    max: 999,
+                                  }}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    const newValue = e.target.value;
+                                    const dataValue = {
+                                      company_id: itm.id,
+                                      quota: Number(newValue),
+                                    };
+                                    methods.setValue(`quota.${idx}`, dataValue);
+                                  }}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                      )}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </FormControl>
 
           <Stack direction="row" gap={2} sx={{ mt: 3 }} justifyContent="flex-end">
             <Button variant="outlined" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="contained" disabled>
+            <Button
+              variant="contained"
+              onClick={() => {
+                // TBD
+                // mutation.mutate({
+                //   cito_type: methods.watch('cito_type'),
+                //   quotas: methods.watch('quota'),
+                // });
+
+                onClose();
+              }}
+            >
               Save
             </Button>
           </Stack>
