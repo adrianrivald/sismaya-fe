@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import {
@@ -149,8 +149,11 @@ export function ProductFilterView() {
 
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [sortOrder, setSortOrder] = React.useState('');
+  const [selectedCompanies, setSelectedCompanies] = React.useState<number[]>([]);
 
-  const { data, getDataTableProps: getDataTablePropsProduct } = useProductUse({});
+  const { data, getDataTableProps: getDataTablePropsProduct } = useProductUse({
+    internalCompanyId: selectedCompanies,
+  });
   const dataTable = data as any;
   const navigate = useNavigate();
 
@@ -212,19 +215,22 @@ export function ProductFilterView() {
     }
   };
 
-  const [selectedCompanies, setSelectedCompanies] = React.useState(['']);
-
-  const handleChange = (event: SelectChangeEvent<string[]>) => {
+  const handleChange = (event: SelectChangeEvent<number[]>) => {
     const {
       target: { value },
     } = event;
-    setSelectedCompanies(typeof value === 'string' ? value.split(',') : value);
+    setSelectedCompanies(value as number[]);
   };
 
-  const mappedCompanies = dataTable.items.result?.map((item: any) => item.product_used)[0];
   const mappedSubCompanies = dataTable.items.result[0]?.subsidiaries?.map(
     (item: any) => item?.product_used
   )[0];
+
+  const [mappedCompanies, setMappedCompanies] = useState([]);
+  useEffect(() => {
+    setMappedCompanies(dataTable.items.result?.map((item: any) => item.product_used)[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -259,8 +265,8 @@ export function ProductFilterView() {
             }}
           >
             {mappedCompanies?.map((item: any, index: number) => (
-              <MenuItem key={index} value={item.name}>
-                <Checkbox checked={selectedCompanies.indexOf(item.name) > -1} />
+              <MenuItem key={index} value={item.id}>
+                <Checkbox checked={selectedCompanies.indexOf(item.id) > -1} />
                 <ListItemText primary={item.name} />
               </MenuItem>
             ))}
