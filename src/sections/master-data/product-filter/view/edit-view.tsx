@@ -44,7 +44,7 @@ const AccordionHeader = styled((props: AccordionSummaryProps) => (
 export function EditProductFilterView() {
   const { id, vendorId } = useParams();
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-  const [unSelectedProducts, setUnSelectedProducts] = useState<number[]>([]);
+
   const { data: products } = useProductByCompanyId(
     Number(vendorId),
     undefined,
@@ -64,40 +64,50 @@ export function EditProductFilterView() {
 
   const defaultIds = productFilter?.map((item: any) => item?.product?.id);
 
+  const [selectedHoldingProducts, setSelectedHoldingProducts] = useState<number[]>([]);
+  const [selectedSubCompaniesProducts, setSelectedSubCompaniesProducts] =
+    useState<Record<string, number[]>>();
+
   const { mutate: addProductFilter } = useAddProductFilter();
   const { mutate: deleteProductFilter } = useDeleteProductFilterById();
-  const onChangeProductFilter = (productFilterId?: number) => {
-    if (productFilterId) {
-      const isHasId = selectedProducts?.includes(productFilterId);
-      if (isHasId) {
-        const newArr = selectedProducts?.filter((item) => item !== productFilterId);
-        setSelectedProducts(newArr);
-        setUnSelectedProducts((prev) => [...prev, productFilterId]);
-      } else {
-        const newArr = selectedProducts?.filter((item) => item === productFilterId);
-        setUnSelectedProducts(newArr);
-        setSelectedProducts((prev) => [...prev, productFilterId]);
-      }
+
+  const onCheckAllHolding = () => {
+    const allProducts = productUse?.result[0].products;
+    const newArr = allProducts?.map((item: any) => item.id);
+    const hasCheckAll = allProducts
+      ?.map((item: any) => item?.id)
+      ?.every((item: any) => selectedHoldingProducts?.includes(item));
+    if (hasCheckAll) {
+      setSelectedHoldingProducts([]);
+    } else {
+      setSelectedHoldingProducts(newArr);
     }
-    // if (productFilterId) {
-    //   if (
-    //     !productFilter?.map((item: any) => item?.product?.id?.toString()).includes(productFilterId)
-    //   ) {
-    //     addProductFilter({
-    //       product_id: Number(productFilterId),
-    //       company_id: Number(id),
-    //     });
-    //   } else {
-    //     const productUseId = productFilter?.find(
-    //       (item: any) => item?.product?.id === Number(productFilterId)
-    //     ).id;
-    //     deleteProductFilter(Number(productUseId));
-    //   }
-    // }
   };
 
-  console.log(selectedProducts, 'log: selectedProducts');
-  console.log(unSelectedProducts, 'log: unSelectedProducts');
+  const onChangeProductHolding = (childId: number) => {
+    const hasValue = selectedHoldingProducts?.some((item) => item === childId);
+    if (hasValue) {
+      const newArr = selectedHoldingProducts?.filter((item) => item !== childId);
+      setSelectedHoldingProducts(newArr);
+    } else {
+      const newArr = [...selectedHoldingProducts, childId];
+      setSelectedHoldingProducts(newArr);
+    }
+  };
+
+  const onChangeSubCompanyProduct = (parentIndex: number, childIdValue: number) => {
+    setSelectedSubCompaniesProducts((prev = {}) => {
+      const currentArr = prev[parentIndex] ?? [];
+      const hasValue = currentArr.includes(childIdValue);
+
+      return {
+        ...prev,
+        [parentIndex]: hasValue
+          ? currentArr.filter((idFiltered: number) => idFiltered !== childIdValue) // remove
+          : [...currentArr, childIdValue], // add
+      };
+    });
+  };
 
   useEffect(() => {
     if (productFilter) {
@@ -106,17 +116,47 @@ export function EditProductFilterView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productFilter]);
 
-  console.log(productFilter, 'selected');
-
   const { data: companyById } = useCompanyById(Number(id));
   const { data: internalCompanyById } = useCompanyById(Number(vendorId));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     addProductFilter({
-      product_id: selectedProducts,
+      product_id: selectedHoldingProducts,
       company_id: Number(id),
     });
+    // Convert object into an array of promises
+    const promises = Object.entries(selectedSubCompaniesProducts ?? {}).map(
+      ([companyId, productIds]) =>
+        addProductFilter({
+          product_id: productIds,
+          company_id: Number(companyId),
+        })
+    );
+
+    // Wait for all API calls to finish
+    await Promise.all(promises);
   };
+
+  useEffect(() => {
+    const activeProductsHolding = productUse?.result[0].products
+      ?.filter((item: any) => item?.is_active === 1)
+      .map((item: any) => item?.id);
+    setSelectedHoldingProducts(activeProductsHolding);
+
+    const activeProductsSub = productUse?.result?.slice(1);
+    if (activeProductsSub) {
+      const mappedData = activeProductsSub.reduce(
+        (acc: any, company: any) => {
+          acc[company.id] = company.products
+            .filter((product: any) => product.is_active === 1)
+            .map((product: any) => product.id);
+          return acc;
+        },
+        {} as Record<number, number[]>
+      );
+      setSelectedSubCompaniesProducts(mappedData);
+    }
+  }, [productUse]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -142,42 +182,72 @@ export function EditProductFilterView() {
             <Box display="flex" alignItems="center" gap={1}>
               <Checkbox
                 id="check-all-holding"
-                // onChange={() => onChangeProductFilter(item?.id)}
-                // checked={selectedProducts?.includes(item?.id)}
+                checked={productUse?.result[0].products
+                  ?.map((item: any) => item?.id)
+                  ?.every((item: any) => selectedHoldingProducts?.includes(item))}
+                onChange={onCheckAllHolding}
               />{' '}
               <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor="check-all-holding">
                 Check All Product in Holding Company
               </Typography>
             </Box>
           </Box>
-          <Card
-            sx={{
-              width: '100%',
-              mt: 2,
-              p: 4,
-              boxShadow: '2',
-              position: 'relative',
-              backgroundColor: 'blue.50',
-              borderRadius: 4,
-            }}
-          >
-            {products?.map((item) => (
-              <Box display="flex" alignItems="center" gap={1} py={1}>
-                <Checkbox
-                  id={`item-${item?.id}`}
-                  onChange={() => onChangeProductFilter(item?.id)}
-                  checked={selectedProducts?.includes(item?.id)}
-                />{' '}
-                <Typography
-                  sx={{ cursor: 'pointer' }}
-                  component="label"
-                  htmlFor={`item-${item?.id}`}
+          {productUse?.result?.slice(0, 1).map((product: any) => (
+            <Card
+              sx={{
+                width: '100%',
+                mt: 2,
+                p: 4,
+                boxShadow: '2',
+                position: 'relative',
+                backgroundColor: 'blue.50',
+                borderRadius: 4,
+              }}
+            >
+              <Accordion
+                sx={{
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <AccordionHeader
+                  expandIcon={<SvgColor width={15} src="/assets/icons/ic-chevron-down.svg" />}
+                  aria-controls="general"
+                  id="general-header"
+                  sx={{
+                    padding: 0,
+                  }}
                 >
-                  {item?.name}
-                </Typography>
-              </Box>
-            ))}
-          </Card>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Checkbox /> {product?.name}
+                  </Box>
+                </AccordionHeader>
+                {product?.products?.map((child: any) => (
+                  <AccordionDetails sx={{ py: 1, px: 0 }}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      sx={{ backgroundColor: 'blue.50', borderRadius: '8px' }}
+                    >
+                      <Checkbox
+                        id={`item-${child?.id}`}
+                        checked={selectedHoldingProducts?.includes(child?.id)}
+                        value={selectedHoldingProducts?.filter((item) => item === child?.id)}
+                        onChange={() => onChangeProductHolding(child?.id)}
+                      />{' '}
+                      <Typography
+                        sx={{ cursor: 'pointer' }}
+                        component="label"
+                        htmlFor={`item-${child?.id}`}
+                      >
+                        {child?.name}
+                      </Typography>
+                    </Box>
+                  </AccordionDetails>
+                ))}
+              </Accordion>
+            </Card>
+          ))}
         </Box>
         <Box mt={4} width="100%">
           <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -196,7 +266,7 @@ export function EditProductFilterView() {
             </Box>
           </Box>
 
-          {productUse?.result?.map((product: any) => (
+          {productUse?.result?.slice(1).map((product: any, index: number) => (
             <Card
               sx={{
                 width: '100%',
@@ -223,17 +293,15 @@ export function EditProductFilterView() {
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Checkbox
-                      // checked={generalChilds
-                      //   ?.map((item) => item?.id)
-                      //   ?.every((item) => selectedPermissions?.includes(item))}
-                      // onChange={onCheckAllGeneral}
-                      onClick={(e) => e.stopPropagation()} // Stops accordion toggle
+                    // checked={selectedHoldingProducts?.includes(child?.id)}
+                    // value={selectedHoldingProducts?.filter((item) => item === child?.id)}
+                    // onChange={() => onChangeSubCompanyProduct(index, child?.id)}
                     />{' '}
                     {product?.name}
                   </Box>
                 </AccordionHeader>
-                {product?.products?.map((child: any) => (
-                  <AccordionDetails sx={{ py: 1, px: 0 }}>
+                {product?.products?.map((child: any, indexChild: number) => (
+                  <AccordionDetails key={child?.id} sx={{ py: 1, px: 0 }}>
                     <Box
                       display="flex"
                       alignItems="center"
@@ -241,15 +309,16 @@ export function EditProductFilterView() {
                       sx={{ backgroundColor: 'blue.50', borderRadius: '8px' }}
                     >
                       <Checkbox
-                        id={`item-${child?.id}`}
-                        // defaultChecked={defaultValues?.permissions?.includes(child?.id)}
-                        // onChange={() => onChangePermission(child?.id)}
-                        // checked={selectedPermissions?.includes(child?.id)}
-                      />{' '}
+                        id={`item-sub-${child?.id}`}
+                        onChange={() => onChangeSubCompanyProduct(product?.id, child?.id)}
+                        checked={Boolean(
+                          (selectedSubCompaniesProducts?.[product?.id] ?? []).includes(child?.id)
+                        )}
+                      />
                       <Typography
                         sx={{ cursor: 'pointer' }}
                         component="label"
-                        htmlFor={`item-${child?.id}`}
+                        htmlFor={`item-sub-${child?.id}`}
                       >
                         {child?.name}
                       </Typography>
