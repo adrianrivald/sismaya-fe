@@ -122,9 +122,9 @@ const columns = (popoverProps: PopoverProps) => [
     cell: (info) => (
       <Typography fontSize={14} mb={1}>
         {info.getValue() === 'all-sub-company'
-          ? 'Sub Company'
-          : info.getValue() === 'holding'
-            ? 'Holding'
+          ? 'All Sub Company'
+          : info.getValue() === 'holding-only'
+            ? 'Only Holding'
             : '-'}
       </Typography>
     ),
@@ -230,24 +230,24 @@ const columnsSubsidiaries = () => [
       </Typography>
     ),
   }),
+  columnHelperSubsidiaries.accessor('remaining_quota', {
+    header: 'Remaining Quota',
+    cell: (info) => (
+      <Typography fontSize={14} mb={1}>
+        {info.getValue() || '-'}
+      </Typography>
+    ),
+  }),
 
   columnHelperSubsidiaries.accessor('cito_type', {
     header: 'Cito Type',
     cell: (info) => (
       <Typography fontSize={14} mb={1}>
         {info.getValue() === 'all-sub-company'
-          ? 'Sub Company'
-          : info.getValue() === 'holding'
-            ? 'Holding'
+          ? 'All Sub Company'
+          : info.getValue() === 'holding-only'
+            ? 'Only Holding'
             : '-'}
-      </Typography>
-    ),
-  }),
-  columnHelperSubsidiaries.accessor('remaining_quota', {
-    header: 'Remaining Quota',
-    cell: (info) => (
-      <Typography fontSize={14} mb={1}>
-        {info.getValue() || '-'}
       </Typography>
     ),
   }),
@@ -317,24 +317,6 @@ export default function SettingCitoList() {
             <Grid container rowSpacing={3} columnSpacing={2} mb={3}>
               <Grid item xs={12} md={3}>
                 <FormControl fullWidth sx={{ mt: 3 }}>
-                  <InputLabel id="select-company">Company Type</InputLabel>
-                  <Select
-                    value={form.company_type}
-                    defaultValue="all"
-                    fullWidth
-                    placeholder="All"
-                    onChange={(e: SelectChangeEvent<any>) => {
-                      setForm({ ...form, company_type: e.target.value });
-                    }}
-                  >
-                    <MenuItem value="all" selected>
-                      All
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <FormControl fullWidth sx={{ mt: 3 }}>
                   <InputLabel id="select-company">Cito Type</InputLabel>
                   <Select
                     value={form.cito_type}
@@ -351,7 +333,7 @@ export default function SettingCitoList() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={9}>
                 <FormControl fullWidth sx={{ mt: 3 }}>
                   <TextField
                     sx={{ width: '100%' }}
