@@ -26,9 +26,8 @@ export function useAddCompany() {
         clientSubCompanies?.forEach(async(company, index) => {
           
         const imageData = new FormData();
-        imageData.append('file', cover as unknown as File);
+        imageData.append('file', subCompaniesCover[index] as unknown as File);
         const { url } = await uploadImage(imageData);
-
         Object.assign(company, {
           image: url
         })
@@ -51,7 +50,6 @@ export function useAddCompany() {
           parent_id,
         });
       }
-
       return http(`companies`, {
         data: payload,
       });
