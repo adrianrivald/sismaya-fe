@@ -3,10 +3,13 @@ import { Dialog, Box, Typography, Stack, Button, TextField } from '@mui/material
 import { useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
+import { AdditionalCitoListType } from 'src/services/settings-cito/schemas/type';
 
 interface DialogAddAdditionalCitoProps {
   open: boolean;
   onClose: () => void;
+  data: AdditionalCitoListType;
+  cito_type: string;
 }
 
 function bytesToMB(bytes: number): string {
@@ -17,9 +20,21 @@ function bytesToMB(bytes: number): string {
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export default function DialogAddAdditionalCito({ open, onClose }: DialogAddAdditionalCitoProps) {
+export default function DialogAddAdditionalCito({
+  open,
+  onClose,
+  data,
+  cito_type,
+}: DialogAddAdditionalCitoProps) {
+  console.log('dataaa', data, cito_type);
   const methods = useForm<{
-    files: { file_size: number; file_name: string; file_number: string; files: File }[];
+    files: {
+      file_size: number;
+      file_name: string;
+      file_number: string;
+      files: File;
+      file_url: string;
+    }[];
     cito_type: string;
     quota: { company_id: number; quota: number; name: string; type: string }[];
   }>({
@@ -83,6 +98,7 @@ export default function DialogAddAdditionalCito({ open, onClose }: DialogAddAddi
           file_name: file.name,
           file_number: `PO_${String(sequenceNumber).padStart(3, '0')}`,
           files: file,
+          file_url: '',
         });
       });
     }

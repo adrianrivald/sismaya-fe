@@ -34,3 +34,14 @@ export type InitialCitoType = {
     type: string;
   }[];
 };
+
+export type AdditionalCitoListType = {
+  details: {
+    company_name: string;
+    id: number;
+    quota: number;
+  }[];
+  documents: string[];
+  id: number;
+  po_number: string;
+};

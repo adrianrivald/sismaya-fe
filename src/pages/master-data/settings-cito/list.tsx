@@ -24,7 +24,11 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { DataTable } from 'src/components/table/data-tables';
 import { Icon } from '@iconify/react';
 import { PaginationState, createColumnHelper } from '@tanstack/react-table';
-import { SettingCitoType, SubsidiariesType } from 'src/services/settings-cito/schemas/type';
+import {
+  AdditionalCitoListType,
+  SettingCitoType,
+  SubsidiariesType,
+} from 'src/services/settings-cito/schemas/type';
 import DialogAddInitialCito from './components/add-initial-cito';
 import DialogAddCitoQuota from './components/add-cito-quota';
 import DialogAddAdditionalCito from './components/add-additional-cito';
@@ -264,9 +268,15 @@ export default function SettingCitoList() {
     isOpen: false,
     id: '',
     index: 0,
+    data: {} as AdditionalCitoListType,
+    cito_type: '',
   });
 
-  const [openCitoHistory, setOpenCitoHistory] = useState({ isOpen: false, id: '', index: 0 });
+  const [openCitoHistory, setOpenCitoHistory] = useState({
+    isOpen: false,
+    id: '',
+    index: 0,
+  });
   const [openInitialQuota, setOpenInitialQuota] = useState({ isOpen: false, id: '', index: 0 });
   const [openCitoQuota, setOpenCitoQuota] = useState({ isOpen: false, id: '', index: 0 });
   const debounceSearch = useDebounce(form.search, 1000);
@@ -283,7 +293,7 @@ export default function SettingCitoList() {
     };
 
     const handleHistory = (id: number, index?: number) => {
-      setOpenCitoHistory({ id: String(id), index: index || 0, isOpen: true });
+      // setOpenCitoHistory({ id: String(id), index: index || 0, isOpen: true });
     };
 
     return { handleAddOpen, handleHistory };
@@ -394,19 +404,35 @@ export default function SettingCitoList() {
         onClick={(type: string, id: string) => {
           setOpenCitoQuota({ isOpen: false, id: '', index: 0 });
           setTimeout(() => {
-            if (type === 'additional') {
-              setOpenAdditionalQuota({ isOpen: true, id, index: 0 });
-            } else {
-              setOpenInitialQuota({ isOpen: true, id, index: 0 });
-            }
+            setOpenInitialQuota({ isOpen: true, id, index: 0 });
+          }, 500);
+        }}
+        onClickAdditional={(additional, cito_type) => {
+          setOpenCitoQuota({ isOpen: false, id: '', index: 0 });
+          setTimeout(() => {
+            setOpenAdditionalQuota({
+              isOpen: true,
+              id: '',
+              index: 0,
+              data: additional as AdditionalCitoListType,
+              cito_type,
+            });
           }, 500);
         }}
       />
 
       <DialogAddAdditionalCito
         open={openAdditionalQuota.isOpen}
+        data={openAdditionalQuota.data}
+        cito_type={openAdditionalQuota.cito_type}
         onClose={() => {
-          setOpenAdditionalQuota({ isOpen: false, id: '', index: 0 });
+          setOpenAdditionalQuota({
+            isOpen: false,
+            id: '',
+            index: 0,
+            data: {} as AdditionalCitoListType,
+            cito_type: '',
+          });
         }}
       />
       <DialogAddInitialCito
@@ -428,7 +454,11 @@ export default function SettingCitoList() {
       <DialogDocumentPoHistory
         open={openCitoHistory.isOpen}
         onClose={() => {
-          setOpenCitoHistory({ isOpen: false, id: '', index: 0 });
+          setOpenCitoHistory({
+            isOpen: false,
+            id: '',
+            index: 0,
+          });
         }}
         id={openCitoHistory.id}
       />
