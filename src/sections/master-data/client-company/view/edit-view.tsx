@@ -15,7 +15,10 @@ import {
   Select,
   OutlinedInput,
   Chip,
+  Autocomplete,
+  IconButton,
 } from '@mui/material';
+import { Icon } from '@iconify/react';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
@@ -110,7 +113,12 @@ interface EditFormProps {
   department: Partial<Department>;
   departments: Department[];
   subCompany: Partial<Company>;
-  subCompanies: Company[];
+  subCompanies: {
+    name: string;
+    abbreviation: string;
+    image: string;
+    internalCompany: any;
+  }[];
   onAddDepartment: () => void;
   onAddSubCompany: () => void;
   onClickRemove: (id: number, type: string) => void;
@@ -119,6 +127,8 @@ interface EditFormProps {
   onChangeVendors: any;
   onAddVendors: any;
   onRemoveVendors: any;
+  handleChangeSubCompany: (e: React.ChangeEvent<any>, index: number) => void;
+  onDeleteSubCompany: (index: number) => void;
 }
 
 function EditForm({
@@ -146,6 +156,8 @@ function EditForm({
   onAddVendors,
   onChangeVendors,
   onRemoveVendors,
+  handleChangeSubCompany,
+  onDeleteSubCompany,
 }: EditFormProps) {
   useEffect(() => {
     setValue('name', defaultValues?.name);
@@ -315,7 +327,7 @@ function EditForm({
         )}
       </Grid>
 
-      <Grid item xs={12} md={12}>
+      {/* <Grid item xs={12} md={12}>
         <Typography variant="h4" color="primary" mb={4}>
           Sub-Company
         </Typography>
@@ -418,6 +430,164 @@ function EditForm({
             </Button>
           </Stack>
         </Box>
+      </Grid> */}
+
+      <Grid item xs={12} md={12}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h4" color="primary" mb={2}>
+            Client Sub Company
+          </Typography>
+
+          <Button onClick={onAddSubCompany} variant="contained" color="primary">
+            <IconButton aria-label="Create Client Sub Company" size="small" sx={{ color: 'white' }}>
+              <Iconify icon="mdi:plus" />
+            </IconButton>
+            <Typography>Tambah Client Sub Company</Typography>
+          </Button>
+        </Stack>
+        {subCompanies?.map((company, index) => (
+          <Box
+            sx={{
+              bgcolor: '#F5F9FA',
+              p: 4,
+              mt: 4,
+              borderRadius: '8px',
+            }}
+          >
+            <Grid container spacing={3} xs={12}>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.name)}
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Client Name"
+                  autoComplete="off"
+                  name="name"
+                  onChange={(e) => handleChangeSubCompany(e, index)}
+                />
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  error={Boolean(formState?.errors?.abbreviation)}
+                  multiline
+                  sx={{
+                    width: '100%',
+                  }}
+                  label="Client Description"
+                  rows={4}
+                  name="abbreviation"
+                  onChange={(e) => handleChangeSubCompany(e, index)}
+                />
+                {formState?.errors?.abbreviation && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.abbreviation?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <FieldDropzone
+                  label="Upload Picture"
+                  helperText="Picture maximum 5mb size"
+                  controller={{
+                    name: `subCompaniesCover[${index}]`,
+                    control,
+                    // rules: {
+                    //   required: {
+                    //     value: true,
+                    //     message: 'Picture must be uploaded',
+                    //   },
+                    // },
+                  }}
+                  error={formState.errors?.cover}
+                  maxSize={5000000}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Typography variant="h4" color="primary" mb={2}>
+                  Internal Company
+                </Typography>
+
+                {/* <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel> */}
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    spacing={3}
+                    alignItems="center"
+                  >
+                    <Box width="100%">
+                      <Autocomplete
+                        multiple
+                        options={internalCompanies || []}
+                        getOptionLabel={(option) => option.name || ''}
+                        value={(internalCompanies || []).filter((internalCompany) =>
+                          (subCompanies[index].internalCompany || []).includes(
+                            internalCompany.id as never
+                          )
+                        )}
+                        onChange={(event, newValue) => {
+                          handleChangeSubCompany(
+                            {
+                              target: {
+                                name: 'internalCompany',
+                                value: newValue.map((companyValue) => companyValue.id),
+                              },
+                            } as any,
+                            index
+                          );
+                        }}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, idx) => (
+                            <Chip
+                              label={option.name}
+                              {...getTagProps({ index: idx })}
+                              key={option.id}
+                              sx={{
+                                bgcolor: '#D6F3F9',
+                                color: 'info.dark',
+                              }}
+                            />
+                          ))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            placeholder="Internal Company"
+                            label="Internal Company"
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                          />
+                        )}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                      />
+                    </Box>
+                  </Stack>
+                </Box>
+                {formState?.errors?.internal_id && (
+                  <FormHelperText sx={{ color: 'error.main' }}>
+                    {String(formState?.errors?.internal_id?.message)}
+                  </FormHelperText>
+                )}
+              </Grid>
+
+              <Grid item xs={12} md={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+                <Button
+                  onClick={() => onDeleteSubCompany(index)}
+                  startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+                  color="error"
+                  disabled={subCompanies?.length < 2}
+                >
+                  Hapus
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        ))}
       </Grid>
 
       <Box
@@ -459,7 +629,14 @@ export function EditClientCompanyView() {
     is_show_all: false,
   });
 
-  const [subCompanies, setSubCompanies] = React.useState([]);
+  const [subCompanies, setSubCompanies] = React.useState([
+    {
+      name: '',
+      abbreviation: '',
+      image: '',
+      internalCompany: null,
+    },
+  ]);
   const [subCompany, setSubCompany] = React.useState({
     name: '',
     abbreviation: '',
@@ -521,6 +698,26 @@ export function EditClientCompanyView() {
     }
     setDeleteType('');
     setOpenRemoveModal(false);
+  };
+
+  const onDeleteSubCompany = (index: number) => {
+    const newArr = subCompanies?.filter((_, companyIndex) => companyIndex !== index);
+    if (subCompanies.length > 1) {
+      setSubCompanies(newArr);
+    }
+  };
+
+  const handleChangeSubCompany = (e: React.ChangeEvent<any>, index: number) => {
+    const newArr = subCompanies?.map((company, companyIndex) => {
+      if (companyIndex === index) {
+        return {
+          ...company,
+          [e.target.name]: e.target.value,
+        };
+      }
+      return company;
+    });
+    setSubCompanies(newArr);
   };
 
   const handleSubmit = (formData: CompanyDTO) => {
@@ -686,6 +883,8 @@ export function EditClientCompanyView() {
               onChangeVendors={onChangeVendors}
               onAddVendors={onAddVendors}
               onRemoveVendors={onRemoveVendors}
+              handleChangeSubCompany={handleChangeSubCompany}
+              onDeleteSubCompany={onDeleteSubCompany}
             />
           )}
         </Form>
