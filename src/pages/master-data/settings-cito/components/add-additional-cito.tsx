@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react';
 import { Dialog, Box, Typography, Stack, Button, TextField } from '@mui/material';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
 import { AdditionalCitoListType } from 'src/services/settings-cito/schemas/type';
@@ -26,7 +26,6 @@ export default function DialogAddAdditionalCito({
   data,
   cito_type,
 }: DialogAddAdditionalCitoProps) {
-  console.log('dataaa', data, cito_type);
   const methods = useForm<{
     files: {
       file_size: number;
@@ -105,6 +104,22 @@ export default function DialogAddAdditionalCito({
 
     event.target.value = '';
   };
+
+  useEffect(() => {
+    if (open) {
+      methods.reset({
+        cito_type,
+        quota: data.details.map((item) => ({
+          company_id: item.id,
+          name: item.company_name,
+          quota: item.quota || 0,
+        })),
+        files: [],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, cito_type, data]);
+
   return (
     <Dialog
       open={open}

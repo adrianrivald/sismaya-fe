@@ -148,94 +148,9 @@ export default function DialogAddCitoQuota({
             Add Additional Quota
           </Button>
         </Stack>
-        <Box>
-          {data?.cito_type === 'holding-only' && dataAdditional && (
-            <TableContainer sx={{ mt: 2 }}>
-              <Table sx={{ borderRadius: 4 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <Typography fontSize={14} color="#637381">
-                        Company Name
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography fontSize={14} color="#637381">
-                        CITO Quota
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography fontSize={14} color="#637381">
-                        PO Number
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography fontSize={14} color="#637381">
-                        Action
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {dataAdditional.map((item, _) =>
-                    item.details.map(
-                      (itm, idx) =>
-                        idx === 0 && (
-                          <TableRow key={idx}>
-                            <TableCell>
-                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                {itm.company_name}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                {itm.quota || 0}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                -
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              {idx === 0 && (
-                                <Stack direction="row" gap={1}>
-                                  <Button
-                                    sx={{ minWidth: 2, p: 0, pl: 1 }}
-                                    startIcon={
-                                      <Icon
-                                        icon="material-symbols:edit-outline"
-                                        width="20"
-                                        height="20"
-                                        color="black"
-                                      />
-                                    }
-                                  />
-                                  <Button
-                                    sx={{ minWidth: 2, p: 0, pl: 1 }}
-                                    startIcon={
-                                      <Icon
-                                        icon="mdi:attachment-vertical"
-                                        width="20"
-                                        height="20"
-                                        color="black"
-                                      />
-                                    }
-                                  />
-                                </Stack>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )
-                    )
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-          {data?.cito_type === 'all-sub-company' && dataAdditional && (
-            <Box>
+        {dataAdditional && dataAdditional?.length > 0 && (
+          <Box>
+            {data?.cito_type === 'holding-only' && dataAdditional && (
               <TableContainer sx={{ mt: 2 }}>
                 <Table sx={{ borderRadius: 4 }}>
                   <TableHead>
@@ -264,61 +179,194 @@ export default function DialogAddCitoQuota({
                   </TableHead>
 
                   <TableBody>
-                    {dataAdditional.map((item, _) =>
-                      item.details.map((itm, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell>
-                            <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                              {itm.company_name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                              {itm.quota || 0}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                              -
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            {idx === 0 && (
-                              <Stack direction="row" gap={1}>
-                                <Button
-                                  sx={{ minWidth: 2, p: 0, pl: 1 }}
-                                  startIcon={
-                                    <Icon
-                                      icon="material-symbols:edit-outline"
-                                      width="20"
-                                      height="20"
-                                      color="black"
+                    {dataAdditional.map((item) =>
+                      item.details.map(
+                        (itm, idx) =>
+                          idx === 0 && (
+                            <TableRow key={idx}>
+                              <TableCell>
+                                <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
+                                  {itm.company_name}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
+                                  {itm.quota || 0}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
+                                  -
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                {idx === 0 && (
+                                  <Stack direction="row" gap={1}>
+                                    <Button
+                                      onClick={() => {
+                                        if (data.cito_type === 'holding-only') {
+                                          onClickAdditional?.(
+                                            {
+                                              details: item.details.slice(0, 1),
+                                              documents: item.documents,
+                                              po_number: item.po_number,
+                                              id: item.id,
+                                            },
+                                            data.cito_type
+                                          );
+                                        } else if (data.cito_type === 'all-sub-company') {
+                                          onClickAdditional?.(
+                                            {
+                                              details: item.details,
+                                              documents: item.documents,
+                                              po_number: item.po_number,
+                                              id: item.id,
+                                            },
+                                            data.cito_type
+                                          );
+                                        }
+                                      }}
+                                      sx={{ minWidth: 2, p: 0, pl: 1 }}
+                                      startIcon={
+                                        <Icon
+                                          icon="material-symbols:edit-outline"
+                                          width="20"
+                                          height="20"
+                                          color="black"
+                                        />
+                                      }
                                     />
-                                  }
-                                />
-                                <Button
-                                  sx={{ minWidth: 2, p: 0, pl: 1 }}
-                                  startIcon={
-                                    <Icon
-                                      icon="mdi:attachment-vertical"
-                                      width="20"
-                                      height="20"
-                                      color="black"
+                                    <Button
+                                      sx={{ minWidth: 2, p: 0, pl: 1 }}
+                                      startIcon={
+                                        <Icon
+                                          icon="mdi:attachment-vertical"
+                                          width="20"
+                                          height="20"
+                                          color="black"
+                                        />
+                                      }
                                     />
-                                  }
-                                />
-                              </Stack>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
+                                  </Stack>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          )
+                      )
                     )}
                   </TableBody>
                 </Table>
               </TableContainer>
-            </Box>
-          )}
-        </Box>
+            )}
+            {data?.cito_type === 'all-sub-company' && dataAdditional && (
+              <Box>
+                <TableContainer sx={{ mt: 2 }}>
+                  <Table sx={{ borderRadius: 4 }}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Typography fontSize={14} color="#637381">
+                            Company Name
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography fontSize={14} color="#637381">
+                            CITO Quota
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography fontSize={14} color="#637381">
+                            PO Number
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography fontSize={14} color="#637381">
+                            Action
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                      {dataAdditional.map((item, _) =>
+                        item.details.map((itm, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell>
+                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
+                                {itm.company_name}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
+                                {itm.quota || 0}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
+                                -
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              {idx === 0 && (
+                                <Stack direction="row" gap={1}>
+                                  <Button
+                                    sx={{ minWidth: 2, p: 0, pl: 1 }}
+                                    onClick={() => {
+                                      if (data.cito_type === 'holding-only') {
+                                        onClickAdditional?.(
+                                          {
+                                            details: item.details.slice(0, 1),
+                                            documents: item.documents,
+                                            po_number: item.po_number,
+                                            id: item.id,
+                                          },
+                                          data.cito_type
+                                        );
+                                      } else if (data.cito_type === 'all-sub-company') {
+                                        onClickAdditional?.(
+                                          {
+                                            details: item.details,
+                                            documents: item.documents,
+                                            po_number: item.po_number,
+                                            id: item.id,
+                                          },
+                                          data.cito_type
+                                        );
+                                      }
+                                    }}
+                                    startIcon={
+                                      <Icon
+                                        icon="material-symbols:edit-outline"
+                                        width="20"
+                                        height="20"
+                                        color="black"
+                                      />
+                                    }
+                                  />
+                                  <Button
+                                    sx={{ minWidth: 2, p: 0, pl: 1 }}
+                                    startIcon={
+                                      <Icon
+                                        icon="mdi:attachment-vertical"
+                                        width="20"
+                                        height="20"
+                                        color="black"
+                                      />
+                                    }
+                                  />
+                                </Stack>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            )}
+          </Box>
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
