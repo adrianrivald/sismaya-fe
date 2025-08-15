@@ -67,7 +67,7 @@ export function useAdditionalQuotaDraft(
   );
 }
 
-export function useUpdateAdditionalQuota(additional_id: number) {
+export function useUpdateAdditionalQuota(additional_id: number, onSuccessSubmit?: () => void) {
   return useMutation(
     (formData: {
       details: { id: number; quota: number }[];
@@ -81,6 +81,8 @@ export function useUpdateAdditionalQuota(additional_id: number) {
       }),
     {
       onSuccess: () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        onSuccessSubmit && onSuccessSubmit();
         toast.success('Data updated successfully', {
           position: 'top-right',
           autoClose: 5000,

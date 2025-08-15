@@ -1,9 +1,28 @@
 import { Icon } from '@iconify/react';
-import { Dialog, Box, Typography, Stack, Button, TextField } from '@mui/material';
+import {
+  Dialog,
+  Box,
+  Typography,
+  Stack,
+  Button,
+  TextField,
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 import { useEffect, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { Bounce, toast } from 'react-toastify';
 import { AdditionalCitoListType } from 'src/services/settings-cito/schemas/type';
+import { useUpdateAdditionalQuota } from 'src/services/settings-cito/use-additional-cito';
+import { uploadFilesBulk } from 'src/services/utils/upload-image';
 
 interface DialogAddAdditionalCitoProps {
   open: boolean;
@@ -26,6 +45,7 @@ export default function DialogAddAdditionalCito({
   data,
   cito_type,
 }: DialogAddAdditionalCitoProps) {
+  console.log('dataa', data);
   const methods = useForm<{
     files: {
       file_size: number;
@@ -43,10 +63,16 @@ export default function DialogAddAdditionalCito({
       quota: [],
     },
   });
+
   const { control } = methods;
   const { append, remove } = useFieldArray({
     control,
     name: 'files',
+  });
+
+  const mutation = useUpdateAdditionalQuota(data?.id, () => {
+    onClose();
+    methods.reset();
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,16 +116,28 @@ export default function DialogAddAdditionalCito({
     if (validFiles.length > 0) {
       const existingLength = methods.watch('files').length;
 
-      validFiles.forEach((file, index) => {
-        const sequenceNumber = existingLength + index + 1; // Start from next index
-        append({
-          file_size: file.size,
-          file_name: file.name,
-          file_number: `PO_${String(sequenceNumber).padStart(3, '0')}`,
-          files: file,
-          file_url: '',
-        });
-      });
+      for (const [index, file] of validFiles.entries()) {
+        const sequenceNumber = existingLength + index + 1;
+
+        const filesData = new FormData();
+        filesData.append('files', file); // upload only current file
+
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          uploadFilesBulk(filesData).then((dataUpload) => {
+            append({
+              file_size: file.size,
+              file_name: file.name,
+              file_number: `PO_${String(sequenceNumber).padStart(3, '0')}`,
+              files: file,
+              file_url: dataUpload?.data?.[0]?.url,
+            });
+          });
+        } catch (error) {
+          console.error('Upload failed for:', file.name, error);
+          // Optional: show error toast or skip append
+        }
+      }
     }
 
     event.target.value = '';
@@ -109,16 +147,35 @@ export default function DialogAddAdditionalCito({
     if (open) {
       methods.reset({
         cito_type,
-        quota: data.details.map((item) => ({
+        quota: data?.details?.map((item) => ({
           company_id: item.id,
           name: item.company_name,
           quota: item.quota || 0,
         })),
-        files: [],
+        files:
+          data?.documents?.map((item: any, index: number) => ({
+            file_size: 0,
+            file_name: item.document.split('/').pop(),
+            file_number: index === 0 ? data.po_number : '',
+            files: undefined,
+            file_url: item.document,
+          })) || [],
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, cito_type, data]);
+
+  const onSubmit = async () => {
+    const formData = methods.watch();
+
+    const dataMutation = {
+      details: formData.quota.map((item) => ({ id: item.company_id, quota: item.quota })),
+      po_number: formData.files.map((item) => item.file_number).join(','),
+      documents: formData?.files?.map((item) => item.file_url),
+    };
+
+    mutation.mutate(dataMutation);
+  };
 
   return (
     <Dialog
@@ -149,22 +206,25 @@ export default function DialogAddAdditionalCito({
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.xls,.xlsx,image/*"
+            accept=".pdf,.doc,.docx,.xls,.xlsx"
             style={{ display: 'none' }}
             multiple
           />
         </Stack>
         <Box>
-          <Stack direction="row" gap={1} sx={{ my: 1.5 }}>
-            <Box sx={{ minWidth: 24, minHeight: 24 }}>
-              <Icon icon="solar:info-circle-bold" color="red" height={20} width={20} />
-            </Box>
+          {methods.watch('files').length > 0 && (
+            <Stack direction="row" gap={1} sx={{ my: 1.5 }}>
+              <Box sx={{ minWidth: 24, minHeight: 24 }}>
+                <Icon icon="solar:info-circle-bold" color="red" height={20} width={20} />
+              </Box>
 
-            <Typography fontSize={14} color="#919EAB">
-              Please upload the Purchase Order (PO) document before proceeding with additional
-              quota.
-            </Typography>
-          </Stack>
+              <Typography fontSize={14} color="#919EAB">
+                Please upload the Purchase Order (PO) document before proceeding with additional
+                quota.
+              </Typography>
+            </Stack>
+          )}
+
           {methods.watch('files').map((item, index) => (
             <Box border={0.2} borderRadius={1} mt={1} key={index}>
               <Stack p={1.5} flexDirection="row" justifyContent="space-between">
@@ -210,6 +270,116 @@ export default function DialogAddAdditionalCito({
               />
             </Box>
           )}
+
+          <Typography fontWeight="bold" sx={{ mt: 2 }}>
+            CITO Type
+          </Typography>
+          <FormControl fullWidth sx={{ mt: 1.5 }}>
+            {/* <InputLabel id="select-company">Cito Type</InputLabel> */}
+            <Select
+              value={methods.watch('cito_type') || ''}
+              fullWidth
+              onChange={(e: SelectChangeEvent<any>) => {
+                methods.setValue('cito_type', e.target.value);
+              }}
+              disabled
+            >
+              <MenuItem value="holding-only">Only Holding</MenuItem>
+              {methods.watch('cito_type') === 'all-sub-company' && (
+                <MenuItem value="all-sub-company">All Sub Company</MenuItem>
+              )}
+            </Select>
+
+            <TableContainer sx={{ mt: 2 }}>
+              <Table sx={{ borderRadius: 4 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell width="73%">
+                      <Typography fontSize={14} color="#637381">
+                        Company Name
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontSize={14} color="#637381">
+                        CITO Quota
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {methods.watch('quota').map((itm, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>
+                        <Typography fontSize={14}>{itm.name}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                          fullWidth
+                          // value={methods.watch(`quota.${idx}.quota`) || 0}
+                          placeholder="Input"
+                          type="number"
+                          {...methods.register(`quota.${idx}.quota`)}
+                          inputProps={{
+                            onWheel: (event: any) => event.target.blur(),
+                            max: 999,
+                          }}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const newValue = e.target.value;
+                            const dataValue = {
+                              company_id: itm.company_id,
+                              quota: Number(newValue),
+                              name: itm.name,
+                              type: itm.type,
+                            };
+                            methods.setValue(`quota.${idx}`, dataValue);
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {methods.watch('cito_type') === 'all-sub-company' && (
+                    <>
+                      {methods.watch('quota').map(
+                        (itm, idx) =>
+                          itm.type === 'subsidiary' && (
+                            <TableRow key={idx}>
+                              <TableCell>
+                                <Typography sx={{ ml: 1.5 }} fontSize={14}>
+                                  {itm.name}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <TextField
+                                  fullWidth
+                                  placeholder="Input"
+                                  type="number"
+                                  {...methods.register(`quota.${idx}.quota`)}
+                                  inputProps={{
+                                    onWheel: (event: any) => event.target.blur(),
+                                    max: 999,
+                                  }}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    const newValue = e.target.value;
+                                    const dataValue = {
+                                      company_id: itm.company_id,
+                                      quota: Number(newValue),
+                                      name: itm.name,
+                                      type: itm.type,
+                                    };
+                                    methods.setValue(`quota.${idx}`, dataValue);
+                                  }}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                      )}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </FormControl>
         </Box>
 
         <Stack direction="row" gap={2} sx={{ mt: 3 }} justifyContent="flex-end">
@@ -221,7 +391,11 @@ export default function DialogAddAdditionalCito({
           >
             Cancel
           </Button>
-          <Button variant="contained" onClick={() => {}}>
+          <Button
+            variant="contained"
+            onClick={onSubmit}
+            disabled={methods.watch('files').length < 1}
+          >
             Save
           </Button>
         </Stack>

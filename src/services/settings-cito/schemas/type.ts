@@ -41,7 +41,15 @@ export type AdditionalCitoListType = {
     id: number;
     quota: number;
   }[];
-  documents: string[];
+  documents:
+    | string[]
+    | {
+        cito_additional_quota_id: number;
+        document: string;
+        id: string;
+        created_at: string;
+        updated_at: string;
+      }[];
   id: number;
   po_number: string;
 };

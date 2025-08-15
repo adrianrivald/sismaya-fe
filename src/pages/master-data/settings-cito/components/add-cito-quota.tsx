@@ -38,7 +38,18 @@ export default function DialogAddCitoQuota({
   const { data: dataAdditional } = useAdditionalQuota('', id, open === true);
   const mutation = useAdditionalQuotaDraft(
     Number(id),
-    (additional) => onClickAdditional && onClickAdditional(additional, data?.cito_type || '')
+    (additional) =>
+      onClickAdditional &&
+      onClickAdditional(
+        {
+          details: additional.details,
+          documents: additional.documents,
+          po_number: additional.po_number,
+          // @ts-ignore
+          id: additional?.additional_id,
+        },
+        data?.cito_type || ''
+      )
   );
 
   return (
@@ -196,7 +207,7 @@ export default function DialogAddCitoQuota({
                               </TableCell>
                               <TableCell>
                                 <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                  -
+                                  {item.po_number || '-'}
                                 </Typography>
                               </TableCell>
                               <TableCell>
@@ -303,7 +314,7 @@ export default function DialogAddCitoQuota({
                             </TableCell>
                             <TableCell>
                               <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                -
+                                {item.po_number || '-'}
                               </Typography>
                             </TableCell>
                             <TableCell>

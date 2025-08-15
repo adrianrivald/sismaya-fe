@@ -96,8 +96,6 @@ export default function DialogAddInitialCito({ open, onClose, id }: DialogAddIni
                   methods.setValue('cito_type', e.target.value);
                 }}
               >
-                {/* Holding only yg di kirim hanya type nya holding */}
-                {/* Kalo cito type nya null berarti harus add initial quota */}
                 <MenuItem value="holding-only">Only Holding</MenuItem>
                 {data?.initial.some((item) => item.type === 'subsidiary') && (
                   <MenuItem value="all-sub-company">All Sub Company</MenuItem>
