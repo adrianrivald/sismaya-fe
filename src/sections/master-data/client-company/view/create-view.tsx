@@ -28,6 +28,7 @@ import { FieldDropzone } from 'src/components/form';
 import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import {
   useAddCompany,
+  useAddCompanyBulk,
   useAddCompanyRelation,
   useInternalCompanies,
 } from 'src/services/master-data/company';
@@ -36,7 +37,7 @@ import { Bounce, toast } from 'react-toastify';
 import { Icon } from '@iconify/react';
 
 export function CreateClientCompanyView() {
-  const { mutate: addCompany } = useAddCompany();
+  const { mutate: addCompany } = useAddCompanyBulk();
   const { mutate: addCompanyRelation } = useAddCompanyRelation();
   const handleSubmit = (formData: CompanyDTO) => {
     console.log(formData, 'log: formDatanya');
@@ -71,7 +72,7 @@ export function CreateClientCompanyView() {
       name: '',
       abbreviation: '',
       image: '',
-      internalCompany: null,
+      internal_id: null,
     },
   ]);
 
@@ -82,7 +83,7 @@ export function CreateClientCompanyView() {
         name: '',
         abbreviation: '',
         image: '',
-        internalCompany: null,
+        internal_id: null,
       },
     ]);
   };
@@ -416,7 +417,7 @@ export function CreateClientCompanyView() {
                                 options={internalCompanies || []}
                                 getOptionLabel={(option) => option.name || ''}
                                 value={(internalCompanies || []).filter((internalCompany) =>
-                                  (subCompanies[index].internalCompany || []).includes(
+                                  (subCompanies[index].internal_id || []).includes(
                                     internalCompany.id as never
                                   )
                                 )}
@@ -424,7 +425,7 @@ export function CreateClientCompanyView() {
                                   handleChangeSubCompany(
                                     {
                                       target: {
-                                        name: 'internalCompany',
+                                        name: 'internal_id',
                                         value: newValue.map((companyValue) => companyValue.id),
                                       },
                                     } as any,
