@@ -171,6 +171,9 @@ export const MasterCreateTitlePage = lazy(
   () => import('src/pages/master-data/master-title/create')
 );
 
+// Settings Cito
+export const SettingCitoList = lazy(() => import('src/pages/master-data/settings-cito/list'));
+
 // ----------------------------------------------------------------------
 
 const renderFallback = (
@@ -267,6 +270,9 @@ const superAdminRoutes: NonIndexRouteObject = {
     // FAQ
     { path: 'master-faq', element: <MasterFaqPage /> },
     { path: 'master-faq/create', element: <MasterFaqCreatePage /> },
+
+    // Settings Cito
+    { path: '/internal-company/settings-cito', element: <SettingCitoList /> },
   ],
 };
 
