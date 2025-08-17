@@ -283,6 +283,7 @@ export default function SettingCitoList() {
     }[],
     index: 0,
   });
+  const [historyListCito, setHistoryListCito] = useState({ isOpen: false, id: '' });
   const [openInitialQuota, setOpenInitialQuota] = useState({ isOpen: false, id: '', index: 0 });
   const [openCitoQuota, setOpenCitoQuota] = useState({ isOpen: false, id: '', index: 0 });
   const debounceSearch = useDebounce(form.search, 1000);
@@ -299,7 +300,7 @@ export default function SettingCitoList() {
     };
 
     const handleHistory = (id: number, index?: number) => {
-      // setOpenCitoHistory({ id: String(id), index: index || 0, isOpen: true });
+      setHistoryListCito({ id: String(id), isOpen: true });
     };
 
     return { handleAddOpen, handleHistory };
@@ -456,13 +457,20 @@ export default function SettingCitoList() {
         id={openInitialQuota.id}
       />
 
-      {/* <DialogCitoHistory
-        open={openCitoHistory.isOpen}
+      <DialogCitoHistory
+        open={historyListCito.isOpen}
         onClose={() => {
-          setOpenCitoHistory({ isOpen: false, id: '', index: 0 });
+          setHistoryListCito({ isOpen: false, id: '' });
         }}
-        id={openCitoHistory.id}
-      /> */}
+        id={historyListCito.id}
+        onClickAttachment={(data: any) => {
+          setHistoryListCito({ isOpen: false, id: '' });
+
+          setTimeout(() => {
+            setOpenCitoHistory({ isOpen: true, index: 0, data });
+          }, 500);
+        }}
+      />
 
       <DialogDocumentPoHistory
         open={openCitoHistory.isOpen}

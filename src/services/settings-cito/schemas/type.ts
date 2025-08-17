@@ -53,3 +53,22 @@ export type AdditionalCitoListType = {
   id: number;
   po_number: string;
 };
+
+export type CitoHistoryType = {
+  company_name: string[];
+  date: string;
+  time: string;
+  documents: {
+    cito_additional_quota_id: number;
+    document: string;
+    id: number;
+    created_at: string;
+    updated_at: string;
+  }[];
+  id: number;
+  po_number: string[];
+  quota_after: string[];
+  quota_before: string[];
+  quota_type: string;
+  user: string;
+};

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { http } from 'src/utils/http';
 import { Bounce, toast } from 'react-toastify';
-import { InitialCitoType } from './schemas/type';
+import { CitoHistoryType, InitialCitoType } from './schemas/type';
 
 async function fetchInitialQuota(params: any, company_id: string) {
   const baseUrl = window.location.origin;
@@ -65,4 +65,30 @@ export function useInitialQuotaPost() {
       },
     }
   );
+}
+
+async function fetchHistoryCito(params: any, company_id: string, search?: string) {
+  const baseUrl = window.location.origin;
+  const endpointUrl = new URL(`/cito-history-quota/${company_id}?search=${search || ''}`, baseUrl);
+
+  const { data } = await http<{
+    data: CitoHistoryType[];
+  }>(endpointUrl.toString().replace(baseUrl, ''));
+
+  return data;
+}
+
+export function useHistoryCito(
+  params: any,
+  company_id: string,
+  enabled: boolean = true,
+  search: string = 'dde'
+) {
+  const data = useQuery(
+    ['citos-history', params, company_id, search],
+    () => fetchHistoryCito(params, company_id, search),
+    { enabled }
+  );
+
+  return data;
 }
