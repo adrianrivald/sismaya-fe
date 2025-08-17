@@ -45,7 +45,6 @@ export default function DialogAddAdditionalCito({
   data,
   cito_type,
 }: DialogAddAdditionalCitoProps) {
-  console.log('dataa', data);
   const methods = useForm<{
     files: {
       file_size: number;

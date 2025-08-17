@@ -14,11 +14,13 @@ import {
   Typography,
 } from '@mui/material';
 import { AdditionalCitoListType } from 'src/services/settings-cito/schemas/type';
+
 import {
   useAdditionalQuota,
   useAdditionalQuotaDraft,
 } from 'src/services/settings-cito/use-additional-cito';
 import { useInitialQuota } from 'src/services/settings-cito/use-initial-cito';
+import { RowAdditionalCito } from './row-additional-cito';
 
 interface DialogAddCitoQuotaProps {
   open: boolean;
@@ -26,6 +28,7 @@ interface DialogAddCitoQuotaProps {
   onClick?: (type: string, id: string) => void;
   onClickAdditional?: (additional: AdditionalCitoListType, cito_type: string) => void;
   id: string;
+  onClickAttachment: (data: any) => void;
 }
 export default function DialogAddCitoQuota({
   open,
@@ -33,6 +36,7 @@ export default function DialogAddCitoQuota({
   onClick,
   id,
   onClickAdditional,
+  onClickAttachment,
 }: DialogAddCitoQuotaProps) {
   const { data } = useInitialQuota('', id, open === true);
   const { data: dataAdditional } = useAdditionalQuota('', id, open === true);
@@ -249,6 +253,9 @@ export default function DialogAddCitoQuota({
                                     />
                                     <Button
                                       sx={{ minWidth: 2, p: 0, pl: 1 }}
+                                      onClick={() => {
+                                        onClickAttachment(item.documents);
+                                      }}
                                       startIcon={
                                         <Icon
                                           icon="mdi:attachment-vertical"
@@ -299,78 +306,12 @@ export default function DialogAddCitoQuota({
                     </TableHead>
 
                     <TableBody>
-                      {dataAdditional.map((item, _) =>
-                        item.details.map((itm, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>
-                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                {itm.company_name}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                {itm.quota || 0}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography sx={{ ml: idx === 0 ? 0 : 1.5 }} fontSize={14}>
-                                {item.po_number || '-'}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              {idx === 0 && (
-                                <Stack direction="row" gap={1}>
-                                  <Button
-                                    sx={{ minWidth: 2, p: 0, pl: 1 }}
-                                    onClick={() => {
-                                      if (data.cito_type === 'holding-only') {
-                                        onClickAdditional?.(
-                                          {
-                                            details: item.details.slice(0, 1),
-                                            documents: item.documents,
-                                            po_number: item.po_number,
-                                            id: item.id,
-                                          },
-                                          data.cito_type
-                                        );
-                                      } else if (data.cito_type === 'all-sub-company') {
-                                        onClickAdditional?.(
-                                          {
-                                            details: item.details,
-                                            documents: item.documents,
-                                            po_number: item.po_number,
-                                            id: item.id,
-                                          },
-                                          data.cito_type
-                                        );
-                                      }
-                                    }}
-                                    startIcon={
-                                      <Icon
-                                        icon="material-symbols:edit-outline"
-                                        width="20"
-                                        height="20"
-                                        color="black"
-                                      />
-                                    }
-                                  />
-                                  <Button
-                                    sx={{ minWidth: 2, p: 0, pl: 1 }}
-                                    startIcon={
-                                      <Icon
-                                        icon="mdi:attachment-vertical"
-                                        width="20"
-                                        height="20"
-                                        color="black"
-                                      />
-                                    }
-                                  />
-                                </Stack>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                      <RowAdditionalCito
+                        data={dataAdditional}
+                        cito_type={data?.cito_type}
+                        onClickAdditional={onClickAdditional}
+                        onClickAttachment={onClickAttachment}
+                      />
                     </TableBody>
                   </Table>
                 </TableContainer>

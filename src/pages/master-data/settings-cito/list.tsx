@@ -274,7 +274,13 @@ export default function SettingCitoList() {
 
   const [openCitoHistory, setOpenCitoHistory] = useState({
     isOpen: false,
-    id: '',
+    data: [] as {
+      cito_additional_quota_id: number;
+      document: string;
+      id: number;
+      created_at: string;
+      updated_at: string;
+    }[],
     index: 0,
   });
   const [openInitialQuota, setOpenInitialQuota] = useState({ isOpen: false, id: '', index: 0 });
@@ -419,6 +425,13 @@ export default function SettingCitoList() {
             });
           }, 500);
         }}
+        onClickAttachment={(data: any) => {
+          setOpenCitoQuota({ ...openCitoQuota, isOpen: false });
+
+          setTimeout(() => {
+            setOpenCitoHistory({ isOpen: true, index: 0, data });
+          }, 500);
+        }}
       />
 
       <DialogAddAdditionalCito
@@ -456,11 +469,11 @@ export default function SettingCitoList() {
         onClose={() => {
           setOpenCitoHistory({
             isOpen: false,
-            id: '',
+            data: [],
             index: 0,
           });
         }}
-        id={openCitoHistory.id}
+        data={openCitoHistory.data}
       />
     </div>
   );
