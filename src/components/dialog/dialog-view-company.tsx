@@ -14,20 +14,13 @@ import {
   Box,
 } from '@mui/material';
 
-const hospitals = [
-  'Primaya Hospital Tangerang',
-  'Primaya Hospital Depok',
-  'Primaya Hospital Bangka',
-  'Primaya Hospital Bekasi',
-  'Primaya Hospital Evasari',
-];
-
 interface DialogViewCompanyProps {
+  list?: any[];
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function DialogViewCompany({ open, setOpen }: DialogViewCompanyProps) {
+export default function DialogViewCompany({ list = [], open, setOpen }: DialogViewCompanyProps) {
   const handleClose = () => {
     setOpen(false);
   };
@@ -47,10 +40,10 @@ export default function DialogViewCompany({ open, setOpen }: DialogViewCompanyPr
             </TableRow>
           </TableHead>
           <TableBody>
-            {hospitals.map((name, index) => (
+            {list?.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{name}</TableCell>
+                <TableCell>{item.name}</TableCell>
               </TableRow>
             ))}
           </TableBody>

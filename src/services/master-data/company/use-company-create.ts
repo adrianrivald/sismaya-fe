@@ -26,9 +26,8 @@ export function useAddCompany() {
         clientSubCompanies?.forEach(async(company, index) => {
           
         const imageData = new FormData();
-        imageData.append('file', cover as unknown as File);
+        imageData.append('file', subCompaniesCover[index] as unknown as File);
         const { url } = await uploadImage(imageData);
-
         Object.assign(company, {
           image: url
         })
@@ -51,7 +50,98 @@ export function useAddCompany() {
           parent_id,
         });
       }
+      return http(`companies`, {
+        data: payload,
+      });
+    },
+    {
+      // onSuccess: (res: {data: StoreCompany}) => {
+      onSuccess: (res: any) => {
+        queryClient.invalidateQueries(['company']);
 
+        toast.success('Data added successfully', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        });
+        if (res?.data?.type === 'holding') {
+          navigate(`/client-company/companies/`);
+        } else if (res?.data?.type === 'internal') {
+          navigate(`/internal-company/companies/`);
+        } else {
+          const currentPath = location.pathname;
+          const slicedPath = currentPath?.split('/edit')[0];
+          navigate(`${slicedPath}/${res?.data?.id}/edit`);
+        }
+      },
+      onError: (error) => {
+        const reason = error instanceof Error ? error.message : 'Something went wrong';
+
+        toast.error(reason, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        });
+      },
+    }
+  );
+}
+
+
+export function useAddCompanyBulk() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+  return useMutation(
+    async (formData: StoreCompany) => {
+      const { name, abbreviation, type, cover, parent_id, subCompaniesCover, clientSubCompanies } = formData;
+      const payload = {
+        name,
+        abbreviation,
+        type,
+        sub_companies: clientSubCompanies
+      };
+
+      if (subCompaniesCover?.length > 0) {
+        clientSubCompanies?.forEach(async(company, index) => {
+          
+        const imageData = new FormData();
+        imageData.append('file', subCompaniesCover[index] as unknown as File);
+        const { url } = await uploadImage(imageData);
+        Object.assign(company, {
+          image: url
+        })
+        })
+      }
+
+      if (cover) {
+        const imageData = new FormData();
+        imageData.append('file', cover as unknown as File);
+        const { url } = await uploadImage(imageData);
+
+        Object.assign(payload, {
+          image: url,
+        });
+      }
+
+
+      if (parent_id) {
+        Object.assign(payload, {
+          parent_id,
+        });
+      }
       return http(`companies`, {
         data: payload,
       });

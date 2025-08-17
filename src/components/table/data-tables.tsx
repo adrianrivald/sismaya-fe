@@ -200,7 +200,6 @@ export function DataTable<TData>(props: DataTablesProps<TData>) {
     }));
   };
 
-  //   const notFound = !dataFiltered.length && !!filterName;
   return (
     <Card>
       <Scrollbar>

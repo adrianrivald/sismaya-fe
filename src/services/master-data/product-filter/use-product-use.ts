@@ -11,8 +11,8 @@ export function fetchProductUse(params: Partial<any>) {
   const baseUrl = window.location.origin;
   const endpointUrl = new URL('/product-use/fetch', baseUrl);
 
-  if (params.name) {
-    endpointUrl.searchParams.append('name_sort', params.name);
+  if (params.internalCompanyId) {
+    endpointUrl.searchParams.append('internal_company_id', params.internalCompanyId);
   }
   
   dataTableParamsBuilder({
@@ -29,7 +29,7 @@ export function fetchProductUse(params: Partial<any>) {
 
 export function useProductUse(params: Partial<any>) {
   return usePaginationQuery(
-    ['product-use', params.keyword, params.active, params.order, params.platform, params.name],
+    ['product-use', params.keyword, params.internalCompanyId],
     (paginationState) => fetchProductUse({ ...params, ...paginationState })
   );
 }

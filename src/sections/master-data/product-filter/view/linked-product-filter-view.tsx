@@ -16,8 +16,11 @@ import { DataTable } from 'src/components/table/data-tables';
 import type { CellContext } from '@tanstack/react-table';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
+import { DialogDelete } from 'src/components/dialog/dialog-delete';
+import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
+import { useBulkDeleteCompany } from 'src/services/master-data/company/use-company-bulk-delete';
+import { Icon } from '@iconify/react';
 import { Companies } from '../../internal-company/view/types';
-import { RemoveAction } from '../../internal-company/view/remove-action';
 
 // ----------------------------------------------------------------------
 
@@ -55,13 +58,8 @@ function ButtonActions(
 ) {
   const { row } = props;
   const companyId = row.original.internal_company.id;
-  const relationId = row.original.id;
   const { handleEdit, setSelectedId, setOpenRemoveModal } = popoverProps;
 
-  const onClickRemove = (itemId?: number) => {
-    if (itemId) setSelectedId(itemId);
-    setOpenRemoveModal(true);
-  };
   return (
     <MenuList
       disablePadding
@@ -81,11 +79,6 @@ function ButtonActions(
       <MenuItem onClick={() => handleEdit(companyId)}>
         <Iconify icon="solar:pen-bold" />
         Edit
-      </MenuItem>
-
-      <MenuItem onClick={() => onClickRemove(relationId)} sx={{ color: 'error.main' }}>
-        <Iconify icon="solar:trash-bin-trash-bold" />
-        Delete
       </MenuItem>
     </MenuList>
   );
@@ -107,12 +100,16 @@ export function ProductFilterLinkedView() {
   const [openRemoveModal, setOpenRemoveModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [sortOrder, setSortOrder] = React.useState('');
-  const { getDataTableProps } = useCompanyRelation({ client_company_id: id, name: sortOrder });
+  const [openBulkDelete, setOpenBulkDelete] = React.useState(false);
+  const [selectedCompanies, setSelectedCompanies] = React.useState<Companies[]>([]);
+
+  const { getDataTableProps, refetch } = useCompanyRelation({
+    client_company_id: id,
+    name: sortOrder,
+  });
+  const { mutate: mutateBulkDeleteCompany } = useBulkDeleteCompany();
 
   const navigate = useNavigate();
-  const onClickAddNew = () => {
-    navigate('create');
-  };
 
   const popoverFuncs = () => {
     const handleEdit = (itemId: number) => {
@@ -139,6 +136,31 @@ export function ProductFilterLinkedView() {
     }
   };
 
+  const onBulkDelete = () => {
+    const titleData = selectedCompanies.map((item) => item.id).join(',');
+    mutateBulkDeleteCompany(titleData, {
+      onSuccess: () => {
+        setOpenBulkDelete(false);
+        refetch();
+
+        setTimeout(() => {
+          setSelectedCompanies([]);
+        }, 500);
+      },
+      onError: () => {
+        setOpenBulkDelete(false);
+        refetch();
+        setTimeout(() => {
+          setSelectedCompanies([]);
+        }, 500);
+      },
+    });
+  };
+
+  const handleSelectionChange = (selected: any) => {
+    setSelectedCompanies(selected);
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -163,21 +185,45 @@ export function ProductFilterLinkedView() {
       </Box>
 
       <Grid container spacing={3}>
+        <Grid xs={12} display="flex" sx={{ justifyContent: 'flex-end' }}>
+          <Button
+            onClick={() => {
+              if (selectedCompanies.length > 0) {
+                setOpenBulkDelete(true);
+              }
+            }}
+            startIcon={<Icon icon="solar:trash-bin-trash-bold" width="20" height="20" />}
+            color="error"
+            disabled={selectedCompanies.length === 0}
+          >
+            Delete {selectedCompanies.length > 0 ? `(${selectedCompanies.length})` : null}
+          </Button>
+        </Grid>
         <Grid xs={12}>
           <DataTable
             columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
             order={sortOrder}
             orderBy="name_sort"
             onSort={onSort}
+            enableSelection
+            onSelectionChange={handleSelectionChange}
             {...getDataTableProps()}
           />
         </Grid>
       </Grid>
 
-      <RemoveAction
+      <DialogDelete
         onRemove={popoverFuncs().handleDelete}
         openRemoveModal={openRemoveModal}
         setOpenRemoveModal={setOpenRemoveModal}
+      />
+      <DialogBulkDelete
+        open={openBulkDelete}
+        onClose={() => setOpenBulkDelete(false)}
+        title={`Delete ${selectedCompanies.length} Titles?`}
+        onClick={() => {
+          onBulkDelete();
+        }}
       />
     </DashboardContent>
   );

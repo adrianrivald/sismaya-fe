@@ -1,8 +1,10 @@
 import Typography from '@mui/material/Typography';
 import type { SelectChangeEvent } from '@mui/material';
 import {
+  Autocomplete,
   Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -26,6 +28,7 @@ import { FieldDropzone } from 'src/components/form';
 import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import {
   useAddCompany,
+  useAddCompanyBulk,
   useAddCompanyRelation,
   useInternalCompanies,
 } from 'src/services/master-data/company';
@@ -34,7 +37,7 @@ import { Bounce, toast } from 'react-toastify';
 import { Icon } from '@iconify/react';
 
 export function CreateClientCompanyView() {
-  const { mutate: addCompany } = useAddCompany();
+  const { mutate: addCompany } = useAddCompanyBulk();
   const { mutate: addCompanyRelation } = useAddCompanyRelation();
   const handleSubmit = (formData: CompanyDTO) => {
     console.log(formData, 'log: formDatanya');
@@ -69,7 +72,7 @@ export function CreateClientCompanyView() {
       name: '',
       abbreviation: '',
       image: '',
-      internalCompany: null,
+      internal_id: null,
     },
   ]);
 
@@ -80,7 +83,7 @@ export function CreateClientCompanyView() {
         name: '',
         abbreviation: '',
         image: '',
-        internalCompany: null,
+        internal_id: null,
       },
     ]);
   };
@@ -92,16 +95,9 @@ export function CreateClientCompanyView() {
     }
   };
 
-  const handleChangeSubCompany = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent,
-    index: number
-  ) => {
-    console.log(e.target.name, 'log: name');
-    console.log(e.target.value, 'log: value');
-    console.log(index, 'log: index');
+  const handleChangeSubCompany = (e: React.ChangeEvent<any>, index: number) => {
     const newArr = subCompanies?.map((company, companyIndex) => {
       if (companyIndex === index) {
-        console.log('here?');
         return {
           ...company,
           [e.target.name]: e.target.value,
@@ -109,7 +105,6 @@ export function CreateClientCompanyView() {
       }
       return company;
     });
-    console.log(newArr, 'newArr');
     setSubCompanies(newArr);
   };
 
@@ -417,23 +412,52 @@ export function CreateClientCompanyView() {
                             alignItems="center"
                           >
                             <Box width="100%">
-                              <FormControl fullWidth>
-                                <InputLabel id="userCompany">Internal Company</InputLabel>
-                                <Select
-                                  label="Internal Company"
-                                  value={String(subCompanies[index].internalCompany)}
-                                  name="internalCompany"
-                                  onChange={(e: SelectChangeEvent) =>
-                                    handleChangeSubCompany(e, index)
-                                  }
-                                >
-                                  {internalCompanies?.map((internalCompany) => (
-                                    <MenuItem value={internalCompany?.id}>
-                                      {internalCompany?.name}
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
+                              <Autocomplete
+                                multiple
+                                options={internalCompanies || []}
+                                getOptionLabel={(option) => option.name || ''}
+                                value={(internalCompanies || []).filter((internalCompany) =>
+                                  (subCompanies[index].internal_id || []).includes(
+                                    internalCompany.id as never
+                                  )
+                                )}
+                                onChange={(event, newValue) => {
+                                  handleChangeSubCompany(
+                                    {
+                                      target: {
+                                        name: 'internal_id',
+                                        value: newValue.map((companyValue) => companyValue.id),
+                                      },
+                                    } as any,
+                                    index
+                                  );
+                                }}
+                                renderTags={(value, getTagProps) =>
+                                  value.map((option, idx) => (
+                                    <Chip
+                                      label={option.name}
+                                      {...getTagProps({ index: idx })}
+                                      key={option.id}
+                                      sx={{
+                                        bgcolor: '#D6F3F9',
+                                        color: 'info.dark',
+                                      }}
+                                    />
+                                  ))
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    variant="outlined"
+                                    placeholder="Internal Company"
+                                    label="Internal Company"
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                  />
+                                )}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                              />
                             </Box>
                           </Stack>
                         </Box>
