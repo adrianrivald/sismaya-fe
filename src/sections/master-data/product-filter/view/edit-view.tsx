@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import Typography from '@mui/material/Typography';
 import type { AccordionSummaryProps } from '@mui/material';
 import {
@@ -43,15 +44,7 @@ const AccordionHeader = styled((props: AccordionSummaryProps) => (
 
 export function EditProductFilterView() {
   const { id, vendorId } = useParams();
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
 
-  const { data: products } = useProductByCompanyId(
-    Number(vendorId),
-    undefined,
-    undefined,
-    undefined,
-    true
-  );
   const { data: productFilter } = useProductFilter({
     company_id: id,
     internal_company_id: vendorId,
@@ -109,13 +102,6 @@ export function EditProductFilterView() {
     });
   };
 
-  useEffect(() => {
-    if (productFilter) {
-      setSelectedProducts(defaultIds);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productFilter]);
-
   const { data: companyById } = useCompanyById(Number(id));
   const { data: internalCompanyById } = useCompanyById(Number(vendorId));
 
@@ -157,6 +143,43 @@ export function EditProductFilterView() {
       setSelectedSubCompaniesProducts(mappedData);
     }
   }, [productUse]);
+
+  const onCheckAllSubCompany = (companyId: number) => {
+    setSelectedSubCompaniesProducts((prev = {}) => {
+      const allProducts = productUse?.result?.find((c: any) => c.id === companyId)?.products ?? [];
+
+      const allIds = allProducts.map((p: any) => p.id);
+
+      const isAllChecked = allIds.every((id: number) => (prev[companyId] ?? []).includes(id));
+
+      return {
+        ...prev,
+        [companyId]: isAllChecked ? [] : allIds,
+      };
+    });
+  };
+
+  const onCheckAllSubCompanies = () => {
+    const subCompanies = productUse?.result?.slice(1) ?? [];
+
+    const isAllChecked = subCompanies.every((company: any) =>
+      company.products
+        .map((p: any) => p.id)
+        .every((id: any) => (selectedSubCompaniesProducts?.[company.id] ?? []).includes(id))
+    );
+
+    if (isAllChecked) {
+      // clear all
+      setSelectedSubCompaniesProducts({});
+    } else {
+      // select all
+      const newSelection: Record<number, number[]> = {};
+      subCompanies.forEach((company: any) => {
+        newSelection[company.id] = company.products.map((p: any) => p.id);
+      });
+      setSelectedSubCompaniesProducts(newSelection);
+    }
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -218,7 +241,15 @@ export function EditProductFilterView() {
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Checkbox /> {product?.name}
+                    <Checkbox
+                      checked={productUse?.result[0].products
+                        ?.map((item: any) => item?.id)
+                        ?.every((item: any) => selectedHoldingProducts?.includes(item))}
+                      onChange={onCheckAllHolding}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) => e.stopPropagation()}
+                    />{' '}
+                    {product?.name}
                   </Box>
                 </AccordionHeader>
                 {product?.products?.map((child: any) => (
@@ -257,9 +288,29 @@ export function EditProductFilterView() {
             <Box display="flex" alignItems="center" gap={1}>
               <Checkbox
                 id="check-all-sub"
-                // onChange={() => onChangeProductFilter(item?.id)}
-                // checked={selectedProducts?.includes(item?.id)}
-              />{' '}
+                checked={productUse?.result
+                  ?.slice(1)
+                  ?.every((company: any) =>
+                    company.products
+                      .map((p: any) => p.id)
+                      .every((id: any) =>
+                        (selectedSubCompaniesProducts?.[company.id] ?? []).includes(id)
+                      )
+                  )}
+                indeterminate={
+                  Object.values(selectedSubCompaniesProducts ?? {}).some((arr) => arr.length > 0) &&
+                  !productUse?.result
+                    ?.slice(1)
+                    ?.every((company: any) =>
+                      company.products
+                        .map((p: any) => p.id)
+                        .every((id: any) =>
+                          (selectedSubCompaniesProducts?.[company.id] ?? []).includes(id)
+                        )
+                    )
+                }
+                onChange={onCheckAllSubCompanies}
+              />
               <Typography sx={{ cursor: 'pointer' }} component="label" htmlFor="check-all-sub">
                 Check All Product in All Sub Company
               </Typography>
@@ -293,10 +344,23 @@ export function EditProductFilterView() {
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Checkbox
-                    // checked={selectedHoldingProducts?.includes(child?.id)}
-                    // value={selectedHoldingProducts?.filter((item) => item === child?.id)}
-                    // onChange={() => onChangeSubCompanyProduct(index, child?.id)}
-                    />{' '}
+                      checked={product?.products
+                        ?.map((p: any) => p.id)
+                        ?.every((id: any) =>
+                          (selectedSubCompaniesProducts?.[product?.id] ?? []).includes(id)
+                        )}
+                      indeterminate={
+                        (selectedSubCompaniesProducts?.[product?.id]?.length ?? 0) > 0 &&
+                        !product?.products
+                          ?.map((p: any) => p.id)
+                          ?.every((id: any) =>
+                            (selectedSubCompaniesProducts?.[product?.id] ?? []).includes(id)
+                          )
+                      }
+                      onChange={() => onCheckAllSubCompany(product?.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) => e.stopPropagation()}
+                    />
                     {product?.name}
                   </Box>
                 </AccordionHeader>
