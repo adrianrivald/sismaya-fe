@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { CreateUserView } from 'src/sections/master-data/user/view';
+import { CreateUserView } from 'src/sections/access-control/user-list/view/create-view';
 
 // ----------------------------------------------------------------------
 
