@@ -93,6 +93,7 @@ const columns = (popoverProps: PopoverProps) => [
   }),
 
   columnHelper.display({
+    header: 'Action',
     id: 'actions',
     cell: (info) => ButtonActions(info, popoverProps),
   }),
