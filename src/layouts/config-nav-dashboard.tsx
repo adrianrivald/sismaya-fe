@@ -81,6 +81,12 @@ export const managementMenus = (
     icon: icon('ic-book'),
     list: internalCompaniesTask,
   },
+  {
+    heading: 'Monitor Personal Load',
+    id: 'request:read',
+    path: '/monitor-personal-load',
+    icon: icon('ic-user'),
+  },
 ];
 
 export const settingMenus = (

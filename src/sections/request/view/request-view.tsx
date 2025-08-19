@@ -260,7 +260,15 @@ export function RequestView() {
           <RequestSummaryCard title="Canceled" total={requestSummary?.rejected} color="#FF6C40" />
         </Grid>
         <Grid xs={12}>
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={2}
+            sx={{
+              flexWrap: 'nowrap',
+              overflowX: 'auto',
+            }}
+          >
             <Box
               display="flex"
               alignItems="center"
