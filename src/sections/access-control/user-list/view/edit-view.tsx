@@ -327,7 +327,7 @@ function EditForm({
           </FormHelperText>
         )}
       </Grid>
-      {/* <Grid item xs={12} md={12}>
+      <Grid item xs={12} md={12}>
         <TextField
           error={Boolean(formState?.errors?.phone)}
           sx={{
@@ -346,7 +346,7 @@ function EditForm({
             {String(formState?.errors?.phone?.message)}
           </FormHelperText>
         )}
-      </Grid> */}
+      </Grid>
       {/* 
       <Grid item xs={12} md={12}>
         <TextField
@@ -440,56 +440,6 @@ function EditForm({
           </Button>
         </ModalDialog>
       </Grid>
-
-      {type === 'client' ? (
-        <Grid item xs={12} md={12}>
-          <FormControl fullWidth>
-            {/* <InputLabel id="select-company">Company</InputLabel> */}
-            <Controller
-              name="company_id"
-              control={control}
-              rules={{
-                required: 'Company must be filled out',
-              }}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <Autocomplete
-                  options={clientCompanies || []}
-                  getOptionLabel={(option) =>
-                    `${option?.parent?.name ? `${option?.parent?.name} - ` : ''}${option?.name}` ||
-                    ''
-                  }
-                  isOptionEqualToValue={(option, val) => option?.id === val?.id}
-                  value={clientCompanies?.find((company) => company.id === value) || null}
-                  onChange={(_, selectedCompany) => {
-                    const selectedId = selectedCompany?.id || null;
-                    onChange(selectedId);
-                    setValue('department_id', null);
-                    if (selectedId) {
-                      fetchDivision(selectedId);
-                      onFetchRelationCompany(selectedId);
-                      removeAllCompanies(userCompanies?.map((itm) => itm.id));
-                      onSubmit(watch());
-                    }
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Company"
-                      error={!!error}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              )}
-            />
-          </FormControl>
-          {formState?.errors?.company_id && (
-            <FormHelperText sx={{ color: 'error.main' }}>
-              {String(formState?.errors?.company_id?.message)}
-            </FormHelperText>
-          )}
-        </Grid>
-      ) : null}
 
       <Grid item xs={12} md={12}>
         <Typography variant="h4" color="primary" mb={2}>
@@ -752,6 +702,56 @@ function EditForm({
           </Box>
         )}
       </Grid>
+
+      {type === 'client' ? (
+        <Grid item xs={12} md={12}>
+          <FormControl fullWidth>
+            {/* <InputLabel id="select-company">Company</InputLabel> */}
+            <Controller
+              name="company_id"
+              control={control}
+              rules={{
+                required: 'Company must be filled out',
+              }}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <Autocomplete
+                  options={clientCompanies || []}
+                  getOptionLabel={(option) =>
+                    `${option?.parent?.name ? `${option?.parent?.name} - ` : ''}${option?.name}` ||
+                    ''
+                  }
+                  isOptionEqualToValue={(option, val) => option?.id === val?.id}
+                  value={clientCompanies?.find((company) => company.id === value) || null}
+                  onChange={(_, selectedCompany) => {
+                    const selectedId = selectedCompany?.id || null;
+                    onChange(selectedId);
+                    setValue('department_id', null);
+                    if (selectedId) {
+                      fetchDivision(selectedId);
+                      onFetchRelationCompany(selectedId);
+                      removeAllCompanies(userCompanies?.map((itm) => itm.id));
+                      onSubmit(watch());
+                    }
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Company"
+                      error={!!error}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              )}
+            />
+          </FormControl>
+          {formState?.errors?.company_id && (
+            <FormHelperText sx={{ color: 'error.main' }}>
+              {String(formState?.errors?.company_id?.message)}
+            </FormHelperText>
+          )}
+        </Grid>
+      ) : null}
 
       {type === 'client' ? (
         watch('company_id') ? (
