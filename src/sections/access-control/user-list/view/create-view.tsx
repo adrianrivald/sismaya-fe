@@ -24,7 +24,7 @@ import { useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect, useState } from 'react';
 import { Iconify } from 'src/components/iconify';
-import { useAddUser, useUserById } from 'src/services/master-data/user';
+import { useAddUser, useUpdateUser, useUserById } from 'src/services/master-data/user';
 import { useRole } from 'src/services/master-data/role';
 import {
   useInternalCompanies,
@@ -86,6 +86,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
   const [divisions, setDivisions] = React.useState<Department[] | []>([]);
   const [titles, setTitles] = React.useState<any[] | []>([]);
   const { mutate: addUser } = useAddUser({ isRbac: false });
+  const { mutate: updateUser } = useUpdateUser({ isRbac: false });
   const { data: roles } = useRole();
   const [isOpenCompanySelection, setIsOpenCompanySelection] = useState(false);
   const { data: companies } = useNonInternalCompanies(true);
@@ -195,7 +196,14 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
     console.log(payload, 'payloadnya');
 
     try {
-      addUser(payload);
+      if (isEdit) {
+        updateUser({
+          id: user?.id ?? 0,
+          ...payload,
+        });
+      } else {
+        addUser(payload);
+      }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
