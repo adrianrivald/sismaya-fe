@@ -15,7 +15,7 @@ async function fetchUserById(userId: number) {
       ['user-items', userId],
       () => fetchUserById(userId),
       {
-        enabled: userId !== undefined,
+        enabled: !!userId,
       }
     );
   
