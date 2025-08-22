@@ -1,15 +1,4 @@
-import {
-  Box,
-  TableContainer,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  capitalize,
-} from '@mui/material';
+import { capitalize } from '@mui/material';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import type { Dayjs, OpUnitType } from 'dayjs';
 import dayjs from 'dayjs';

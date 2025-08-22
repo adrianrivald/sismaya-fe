@@ -104,7 +104,7 @@ export function CreateUserView() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [companyRelation, setCompanyRelation] = useState<Company[]>([]);
 
-  const defaultValues = { internal_id: [] };
+  const defaultValues = {};
 
   const [divisionsOption, setDivisionsOption] = useState<any[]>([]);
   const [titlesOption, setTitlesOption] = useState<any[]>([]);
@@ -182,14 +182,23 @@ export function CreateUserView() {
   };
 
   const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
+    console.log(formData, 'formData');
     setIsLoading(true);
     const payload = {
       ...formData,
       user_type: companyType,
       // internal_id: selectedCompanies?.length > 0 ? selectedCompanies : formData?.internal_id,
-      product_id: selectedProducts,
-      internal_arr: internalCompanyData,
+      // product_id: selectedProducts,
+      // internalCompanies: selectedInternalCompanies,
+      // internal_arr: internalCompanyData,
     };
+    if (companyType === 'internal') {
+      Object.assign(payload, {
+        internal_arr: selectedInternalCompanies,
+      });
+    }
+    console.log(payload, 'payloadnya');
+
     try {
       addUser(payload);
       setIsLoading(false);
@@ -556,6 +565,7 @@ export function CreateUserView() {
                             onChange(selectedIdCompany);
                             if (selectedIdCompany) {
                               await fetchDivision(selectedIdCompany);
+                              await fetchTitles(selectedIdCompany);
                               await fetchRelationCompany(selectedIdCompany);
                             }
                           }}
