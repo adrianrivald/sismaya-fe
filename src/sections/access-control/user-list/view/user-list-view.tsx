@@ -47,25 +47,36 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Email',
   }),
 
+  columnHelper.accessor('phone', {
+    header: 'Phone Number',
+  }),
+
   columnHelper.accessor('internal_companies', {
     header: 'Company',
     cell: (info) => {
       const companies = info.getValue();
       return (
-        <Box display="flex" gap={2}>
-          {companies?.map((company) => (
-            <Box
-              sx={{
-                backgroundColor: '#D6F3F9',
-                color: 'info.dark',
-                px: 1,
-                py: 0.5,
-                borderRadius: '8px',
-              }}
-            >
-              <Typography fontWeight="500">{company?.company?.name}</Typography>
-            </Box>
-          ))}
+        <Box display="flex" flexDirection="column" gap={1}>
+          {companies?.map((company) => {
+            const renderColor = () => '#8E33FF';
+            return (
+              <Box
+                sx={{
+                  backgroundColor: '#D6F3F9',
+                  color: 'info.dark',
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Typography fontWeight="500">{company?.company?.name}</Typography>
+                <Box p={0.75} borderRadius="100%" bgcolor={renderColor()} />{' '}
+              </Box>
+            );
+          })}
         </Box>
       );
     },
@@ -159,7 +170,7 @@ export function AccessControlUserListView() {
   const { getDataTableProps } = useUserList({
     internal_company: companyFilter,
     role_id: roleFilter,
-    type: 'internal',
+    // type: 'internal',
     internalCompanies: userRole === 2 ? userCompanies?.toString() : null,
     name: sortOrder,
   });
