@@ -15,7 +15,7 @@ async function fetchCompanyById(companyId: number) {
       ['company-items', companyId],
       () => fetchCompanyById(companyId),
       {
-        enabled: companyId !== undefined,
+       enabled: !!companyId,
       }
     );
   

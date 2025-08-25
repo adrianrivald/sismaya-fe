@@ -5,7 +5,7 @@ import { uploadImage } from "src/services/utils/upload-image";
 import { http } from "src/utils/http";
 import type { CompanyDTO } from "./schemas/company-schema";
 
-export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any, image?:string, cito_quota?: number};
+export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any, image?:string, cito_quota?: number, subCompaniesCover?: any; clientSubCompanies?: any[] };
 
 export function useUpdateCompany() {
     const queryClient = useQueryClient();
@@ -13,10 +13,27 @@ export function useUpdateCompany() {
     const location = useLocation()
     return useMutation(
       async (formData: UpdateCompany) => {
-        const { id, cover,  ...form } = formData;
+        const { id, cover, clientSubCompanies, subCompaniesCover, ...form } = formData;
         const payload = {
-          ...form
+          ...form,
+          sub_companies: clientSubCompanies,
         }
+        
+
+      
+     if (subCompaniesCover?.length > 0) {
+        await Promise.all(
+          (clientSubCompanies ?? []).map(async (company, index) => {
+            const imageData = new FormData();
+            imageData.append("file", subCompaniesCover[index]);
+
+            const { url } = await uploadImage(imageData);
+
+            Object.assign(company, { image: url });
+          })
+        );
+      }
+      
 
         if (cover) {
 

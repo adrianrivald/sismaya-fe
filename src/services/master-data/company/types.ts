@@ -18,6 +18,7 @@ export interface Company {
     image: string;
     name: string;
     type: string;
+    internal_id: number[]
   }[];
   vendors?: {
     id: number;

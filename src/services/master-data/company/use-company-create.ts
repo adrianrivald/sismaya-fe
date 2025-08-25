@@ -106,24 +106,25 @@ export function useAddCompanyBulk() {
   const location = useLocation();
   return useMutation(
     async (formData: StoreCompany) => {
-      const { name, abbreviation, type, cover, parent_id, subCompaniesCover, clientSubCompanies } = formData;
+      const { name, abbreviation, type, cover, parent_id, subCompaniesCover, clientSubCompanies, internal_id } = formData;
       const payload = {
         name,
         abbreviation,
         type,
-        sub_companies: clientSubCompanies
+        sub_companies: clientSubCompanies,
       };
 
-      if (subCompaniesCover?.length > 0) {
-        clientSubCompanies?.forEach(async(company, index) => {
-          
-        const imageData = new FormData();
-        imageData.append('file', subCompaniesCover[index] as unknown as File);
-        const { url } = await uploadImage(imageData);
-        Object.assign(company, {
-          image: url
-        })
-        })
+     if (subCompaniesCover?.length > 0) {
+        await Promise.all(
+          (clientSubCompanies ?? []).map(async (company, index) => {
+            const imageData = new FormData();
+            imageData.append("file", subCompaniesCover[index]); 
+
+            const { url } = await uploadImage(imageData);
+
+            Object.assign(company, { image: url });
+          })
+        );
       }
 
       if (cover) {
@@ -142,7 +143,13 @@ export function useAddCompanyBulk() {
           parent_id,
         });
       }
-      return http(`companies`, {
+      
+      if (internal_id) {
+        Object.assign(payload, {
+          internal_id,
+        });
+      }
+      return http(`companies/bulk`, {
         data: payload,
       });
     },

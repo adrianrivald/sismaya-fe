@@ -21,45 +21,111 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Form } from 'src/components/form/form';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LoadingButton } from '@mui/lab';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FieldDropzone } from 'src/components/form';
 import type { CompanyDTO } from 'src/services/master-data/company/schemas/company-schema';
 import {
   useAddCompany,
   useAddCompanyBulk,
   useAddCompanyRelation,
+  useCompanyById,
   useInternalCompanies,
+  useUpdateCompany,
 } from 'src/services/master-data/company';
 import { Iconify } from 'src/components/iconify';
 import { Bounce, toast } from 'react-toastify';
 import { Icon } from '@iconify/react';
+import { Department } from 'src/services/master-data/company/types';
 
+interface ClientCompanyValues {
+  name: string | undefined;
+  abbreviation: string | undefined;
+  department: Department[];
+  image: string | undefined;
+  subsidiaries: {
+    abbreviation: string;
+    id: number;
+    image: string;
+    name: string;
+    type: string;
+  }[];
+  vendors: {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    client_company_id: number;
+    internal_company_id: number;
+    internal_company: {
+      id: number;
+      created_at: string;
+      updated_at: string;
+      parent_id: number;
+      name: string;
+      abbreviation: string;
+      type: string;
+      image: string;
+    };
+  }[];
+  internal_id: number[];
+}
 export function CreateClientCompanyView() {
+  const { id } = useParams();
+  console.log(Number(id), 'Number(id)');
+  const { data } = useCompanyById(Number(id));
+
   const { mutate: addCompany } = useAddCompanyBulk();
+  const { mutate: updateCompany } = useUpdateCompany();
+
   const { mutate: addCompanyRelation } = useAddCompanyRelation();
+
+  const defaultValues: ClientCompanyValues = {
+    name: data?.name,
+    abbreviation: data?.abbreviation,
+    department: data?.department ?? [],
+    image: data?.image,
+    subsidiaries: data?.subsidiaries ?? [],
+    vendors: data?.vendors ?? [],
+    internal_id: data?.vendors?.map((item) => item.internal_company_id) || [],
+  };
+
   const handleSubmit = (formData: CompanyDTO) => {
-    console.log(formData, 'log: formDatanya');
     // setIsLoading(true);
-    addCompany(
-      {
+    if (id) {
+      const payload = {
         ...formData,
+        cito_quota: data?.cito_quota,
+        id: Number(id),
         type: 'holding',
         clientSubCompanies: subCompanies,
-      },
-      {
-        onSuccess(data) {
-          formData.internal_id?.map((item: any) => {
-            addCompanyRelation({
-              internal_company_id: item,
-              client_company_id: Number(data?.data?.id),
-            });
-            return null;
-          });
-        },
+      };
+      if (defaultValues?.image) {
+        Object.assign(payload, {
+          image: defaultValues?.image,
+        });
       }
-    );
+      updateCompany(payload);
+    } else {
+      addCompany(
+        {
+          ...formData,
+          type: 'holding',
+          clientSubCompanies: subCompanies,
+        },
+        {
+          onSuccess(resData) {
+            formData.internal_id?.map((item: any) => {
+              addCompanyRelation({
+                internal_company_id: item,
+                client_company_id: Number(resData?.data?.id),
+              });
+              return null;
+            });
+          },
+        }
+      );
+    }
   };
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -67,14 +133,27 @@ export function CreateClientCompanyView() {
   const { data: internalCompanies } = useInternalCompanies();
   const [internalCompanyId, setInternalCompanyId] = React.useState<number>(0);
 
-  const [subCompanies, setSubCompanies] = React.useState([
+  const [subCompanies, setSubCompanies] = React.useState<
     {
-      name: '',
-      abbreviation: '',
-      image: '',
-      internal_id: null,
-    },
-  ]);
+      name: string;
+      abbreviation: string;
+      image: string;
+      internal_id: number[] | null;
+    }[]
+  >([{ name: '', abbreviation: '', image: '', internal_id: null }]);
+
+  useEffect(() => {
+    if (id) {
+      setSubCompanies(
+        (data?.subsidiaries ?? []).map((item) => ({
+          name: item?.name ?? '',
+          abbreviation: item?.abbreviation ?? '',
+          image: item?.image ?? '',
+          internal_id: item?.internal_id,
+        }))
+      );
+    }
+  }, [data?.subsidiaries, id]);
 
   const onAddSubCompany = () => {
     setSubCompanies((prev) => [
@@ -122,7 +201,13 @@ export function CreateClientCompanyView() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: { xs: 3, md: 5 }, ml: 0 }}>
-        <Form width="100%" onSubmit={handleSubmit}>
+        <Form
+          width="100%"
+          onSubmit={handleSubmit}
+          options={{
+            defaultValues: { ...defaultValues },
+          }}
+        >
           {({ register, watch, formState, setValue, control }) => (
             <Grid container spacing={3} xs={12}>
               <Grid item xs={12} md={12}>
@@ -177,6 +262,7 @@ export function CreateClientCompanyView() {
                     //   },
                     // },
                   }}
+                  defaultImage={defaultValues?.image}
                   error={formState.errors?.cover}
                   maxSize={5000000}
                 />
@@ -281,6 +367,7 @@ export function CreateClientCompanyView() {
                           label="Client Name"
                           autoComplete="off"
                           name="name"
+                          value={company.name}
                           onChange={(e) => handleChangeSubCompany(e, index)}
                         />
                       </Grid>
@@ -294,6 +381,7 @@ export function CreateClientCompanyView() {
                           label="Client Description"
                           rows={4}
                           name="abbreviation"
+                          value={company.abbreviation}
                           onChange={(e) => handleChangeSubCompany(e, index)}
                         />
                         {formState?.errors?.abbreviation && (
@@ -317,6 +405,7 @@ export function CreateClientCompanyView() {
                             //   },
                             // },
                           }}
+                          defaultImage={company.image}
                           error={formState.errors?.cover}
                           maxSize={5000000}
                         />
@@ -341,9 +430,7 @@ export function CreateClientCompanyView() {
                                 options={internalCompanies || []}
                                 getOptionLabel={(option) => option.name || ''}
                                 value={(internalCompanies || []).filter((internalCompany) =>
-                                  (subCompanies[index].internal_id || []).includes(
-                                    internalCompany.id as never
-                                  )
+                                  (company.internal_id || []).includes(internalCompany.id as never)
                                 )}
                                 onChange={(event, newValue) => {
                                   handleChangeSubCompany(

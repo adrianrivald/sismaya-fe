@@ -1,7 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
-import { EditClientCompanyView } from 'src/sections/master-data/client-company/view';
+import {
+  CreateClientCompanyView,
+  EditClientCompanyView,
+} from 'src/sections/master-data/client-company/view';
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +20,7 @@ export default function ClientCompanyEditPage() {
         <meta name="keywords" content="react,material,kit,application,dashboard,admin,template" />
       </Helmet>
 
-      <EditClientCompanyView />
+      <CreateClientCompanyView />
     </>
   );
 }
