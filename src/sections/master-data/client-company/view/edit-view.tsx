@@ -225,98 +225,47 @@ function EditForm({
 
         {/* <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel> */}
         <Box display="flex" flexDirection="column" gap={2}>
-          {data?.vendors &&
-            data?.vendors?.length > 0 &&
-            data?.vendors?.map((item, index) => (
-              <FormControl fullWidth>
-                <Stack
-                  key={index}
-                  direction="row"
-                  justifyContent="space-between"
-                  spacing={3}
-                  alignItems="center"
-                >
-                  <Box width="100%">
-                    <InputLabel id={`type-${item.id}`}>Internal Company</InputLabel>
-                    <Select
-                      id={String(item.id)}
-                      label="Internal Company"
-                      value={item?.internal_company_id}
-                      fullWidth
-                      onChange={(e: SelectChangeEvent<number>) => {
-                        onChangeVendors(item.id, item.internal_company_id);
-                      }}
-                    >
-                      {internalCompanies?.map((company) => (
-                        <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </Box>
-                  <MenuList
-                    disablePadding
-                    sx={{
-                      p: 0.5,
-                      gap: 0.5,
-                      display: 'flex',
-                      flexDirection: 'row',
-                      [`& .${menuItemClasses.root}`]: {
-                        px: 1,
-                        gap: 2,
-                        borderRadius: 0.75,
-                        [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                      },
-                    }}
-                  >
-                    <MenuItem onClick={() => onRemoveVendors(item.id)} sx={{ color: 'error.main' }}>
-                      <Iconify icon="solar:trash-bin-trash-bold" />
-                      Delete
-                    </MenuItem>
-                  </MenuList>
-                </Stack>
-              </FormControl>
-            ))}
           <Stack direction="row" justifyContent="space-between" spacing={3} alignItems="center">
             <Box width="100%">
-              <FormControl fullWidth>
-                <InputLabel id="userCompany">Internal Company</InputLabel>
-                <Select
-                  label="Internal Company"
-                  value={internalCompanyId}
-                  onChange={(e: SelectChangeEvent<number>) =>
-                    setInternalCompanyId(Number(e.target.value))
-                  }
-                >
-                  {internalCompanies?.map((company) => (
-                    <MenuItem value={company?.id}>{company?.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <Box
-              sx={{
-                p: 0.5,
-                gap: 0.5,
-                display: 'flex',
-                flexDirection: 'row',
-                [`& .${menuItemClasses.root}`]: {
-                  px: 1,
-                  gap: 2,
-                  borderRadius: 0.75,
-                  [`&.${menuItemClasses.selected}`]: { bgcolor: 'action.selected' },
-                },
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  onAddVendors(internalCompanyId);
-                  setInternalCompanyId(0);
+              <Autocomplete
+                multiple
+                options={internalCompanies || []}
+                getOptionLabel={(option) => option.name || ''}
+                value={(internalCompanies || []).filter((internalCompany) =>
+                  (watch('internal_id') || []).includes(internalCompany.id as never)
+                )}
+                onChange={(event, newValue) => {
+                  setValue(
+                    'internal_id',
+                    newValue.map((companyValue) => companyValue.id)
+                  );
                 }}
-                sx={{ marginY: 2 }}
-              >
-                Save
-              </Button>
+                renderTags={(value, getTagProps) =>
+                  value.map((option, idx) => (
+                    <Chip
+                      label={option.name}
+                      {...getTagProps({ index: idx })}
+                      key={option.id}
+                      sx={{
+                        bgcolor: '#D6F3F9',
+                        color: 'info.dark',
+                      }}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Internal Company"
+                    label="Internal Company"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                )}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+              />
             </Box>
           </Stack>
         </Box>
