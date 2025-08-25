@@ -149,7 +149,7 @@ export function CreateClientCompanyView() {
           name: item?.name ?? '',
           abbreviation: item?.abbreviation ?? '',
           image: item?.image ?? '',
-          internal_id: item?.internal_id,
+          internal_id: item?.vendors?.map((internalItem) => internalItem?.internal_company_id),
         }))
       );
     }

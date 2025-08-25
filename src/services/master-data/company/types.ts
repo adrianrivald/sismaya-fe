@@ -19,6 +19,7 @@ export interface Company {
     name: string;
     type: string;
     internal_id: number[]
+    vendors: any[]
   }[];
   vendors?: {
     id: number;
