@@ -46,6 +46,7 @@ export interface UserInfo {
     internal_id: number[]
     internal_companies?: Company[]
     title: string;
+    title_id: number
 }
 
 export interface UserCompany {

@@ -47,7 +47,7 @@ export function useUpdateUser({ isRbac = false }: { isRbac?: boolean }) {
           transition: Bounce,
         });
         navigate(
-          `${!isRbac ? (isClient ? '/client-user' : '/access-control/user-list') : '/access-control/user-list'}`
+          `/access-control/user-list`
         );
       },
       onError: (error) => {

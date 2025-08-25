@@ -178,7 +178,6 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
   };
 
   const handleSubmit = (formData: UserClientDTO | UserInternalDTO) => {
-    console.log(formData, 'formData');
     setIsLoading(true);
     const payload = {
       ...formData,
@@ -193,7 +192,6 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
         internal_arr: selectedInternalCompanies,
       });
     }
-    console.log(payload, 'payloadnya');
 
     try {
       if (isEdit) {
@@ -251,7 +249,6 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
   ]);
 
   const onChangeCompanyType = (e: SelectChangeEvent) => {
-    console.log(e.target.value);
     setCompanyType(e.target.value);
   };
 
@@ -266,8 +263,6 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
       },
     ]);
   };
-
-  console.log(selectedInternalCompanies, 'log: selected');
 
   const handleChangeInternalCompanies = (e: React.ChangeEvent<any>, index: number) => {
     const newArr = selectedInternalCompanies?.map((company, companyIndex) => {
@@ -320,6 +315,8 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
           company_id: user?.user_info?.company_id,
           department_id: user?.user_info?.department_id,
           internal_id: user?.internal_companies?.map((item) => item?.company_id) ?? [],
+          title_id: user?.user_info?.title_id,
+          companyType: 'holding',
         }
     : {};
 
@@ -365,12 +362,11 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
           schema={companyType === 'internal' ? userInternalSchema : userClientSchema}
           options={{ defaultValues: { ...defaultValues } }}
         >
-          {({ register, control, watch, formState, setValue }) => {
+          {({ register, control, watch, formState, setValue, getValues }) => {
             useEffect(() => {
               if (isEdit && user?.user_info) {
-                console.log('set role?');
-                setValue('role_id', user.user_info.role_id);
                 setCompanyType(user.user_info.user_type);
+                setValue('role_id', user.user_info.role_id);
                 const newArr =
                   user?.internal_companies?.map((internal) => ({
                     department_id: String(internal.department_id),
@@ -386,8 +382,27 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                 fetchTitles(internal.company_id, index);
                 fetchProducts(internal.company_id, index);
               });
+
               // eslint-disable-next-line react-hooks/exhaustive-deps
             }, [roles, user, isEdit, setValue]);
+
+            useEffect(() => {
+              const fetchDivisionDefault = async () => {
+                await fetchDivision(Number(defaultValues?.company_id));
+                setValue('department_id', user?.user_info?.department_id);
+              };
+              const fetchTitlesDefault = async () => {
+                await fetchTitles(Number(defaultValues?.company_id));
+                setValue('title_id', user?.user_info?.title_id);
+              };
+              if (user?.user_info?.user_type !== 'internal') {
+                // fix this
+                fetchDivisionDefault();
+                fetchTitlesDefault();
+              }
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+            }, [user, setValue]);
+
             return (
               <Grid container spacing={3} xs={12}>
                 {/* <Grid item xs={12} md={12}>
@@ -629,6 +644,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                         error={Boolean(formState?.errors?.department_id)}
                         {...register('department_id', { required: 'Division must be filled out' })}
                         label="Division"
+                        defaultValue={user?.user_info?.department_id}
                       >
                         {divisions?.map((division) => (
                           <MenuItem value={division?.id}>{division?.name}</MenuItem>
@@ -651,6 +667,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                         error={Boolean(formState?.errors?.title_id)}
                         {...register('title_id', { required: 'Title must be filled out' })}
                         label="Title"
+                        defaultValue={user?.user_info?.title_id}
                       >
                         {titles?.map((title) => (
                           <MenuItem value={title?.id}>{title?.name}</MenuItem>

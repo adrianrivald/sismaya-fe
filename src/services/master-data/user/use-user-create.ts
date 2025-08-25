@@ -46,7 +46,7 @@ export function useAddUser({isRbac = false} : {isRbac: boolean}) {
             theme: 'light',
             transition: Bounce,
           });
-          navigate(`${!isRbac ? isClient ? "/client-user" : "/access-control/user-list" : "/access-control/user-list"}`)
+          navigate(`/access-control/user-list`)
 
         },
         onError: (error) => {
