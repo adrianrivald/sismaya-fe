@@ -51,15 +51,35 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Phone Number',
   }),
 
-  columnHelper.accessor('internal_companies', {
+  columnHelper.accessor((row) => row, {
     header: 'Company',
     cell: (info) => {
-      const companies = info.getValue();
+      const internalCompanies = info.getValue().internal_companies;
+      const nonInternalCompanies = info.getValue().user_info.company;
+      const userType = info.getValue().user_info.user_type;
+      const renderColor = () => {
+        if (userType === 'internal') {
+          return '#8E33FF';
+        }
+        if (userType !== 'internal') {
+          if (nonInternalCompanies?.type === 'holding') {
+            return '#22C55E';
+          }
+          return '#FFAB00';
+        }
+        return '';
+      };
       return (
-        <Box display="flex" flexDirection="column" gap={1}>
-          {companies?.map((company) => {
-            const renderColor = () => '#8E33FF';
-            return (
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={1}
+          sx={{
+            width: 'fit-content',
+          }}
+        >
+          {userType === 'internal' ? (
+            internalCompanies?.map((company) => (
               <Box
                 sx={{
                   backgroundColor: '#D6F3F9',
@@ -75,8 +95,24 @@ const columns = (popoverProps: PopoverProps) => [
                 <Typography fontWeight="500">{company?.company?.name}</Typography>
                 <Box p={0.75} borderRadius="100%" bgcolor={renderColor()} />{' '}
               </Box>
-            );
-          })}
+            ))
+          ) : (
+            <Box
+              sx={{
+                backgroundColor: '#D6F3F9',
+                color: 'info.dark',
+                px: 1,
+                py: 0.5,
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Typography fontWeight="500">{nonInternalCompanies?.name}</Typography>
+              <Box p={0.75} borderRadius="100%" bgcolor={renderColor()} />{' '}
+            </Box>
+          )}
         </Box>
       );
     },
