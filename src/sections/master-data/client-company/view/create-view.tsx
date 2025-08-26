@@ -80,13 +80,13 @@ export function CreateClientCompanyView() {
 
   const { mutate: addCompanyRelation } = useAddCompanyRelation();
 
-  const defaultValues: ClientCompanyValues = {
+  const defaultValues: any = {
     name: data?.name,
     abbreviation: data?.abbreviation,
     department: data?.department ?? [],
     image: data?.image,
-    subsidiaries: data?.subsidiaries ?? [],
-    vendors: data?.vendors ?? [],
+    // subsidiaries: data?.subsidiaries ?? [],
+    // vendors: data?.vendors ?? [],
     internal_id: data?.vendors?.map((item) => item.internal_company_id) || [],
   };
 
@@ -131,7 +131,6 @@ export function CreateClientCompanyView() {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const { data: internalCompanies } = useInternalCompanies();
-  const [internalCompanyId, setInternalCompanyId] = React.useState<number>(0);
 
   const [subCompanies, setSubCompanies] = React.useState<
     {
@@ -146,6 +145,7 @@ export function CreateClientCompanyView() {
     if (id) {
       setSubCompanies(
         (data?.subsidiaries ?? []).map((item) => ({
+          id: item?.id,
           name: item?.name ?? '',
           abbreviation: item?.abbreviation ?? '',
           image: item?.image ?? '',
@@ -186,8 +186,6 @@ export function CreateClientCompanyView() {
     });
     setSubCompanies(newArr);
   };
-
-  console.log(subCompanies, 'subCompanies');
 
   return (
     <DashboardContent maxWidth="xl">

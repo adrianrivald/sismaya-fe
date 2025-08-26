@@ -20,23 +20,24 @@ export function useUpdateCompany() {
         }
         
 
-      
+        console.log(subCompaniesCover?.length,'subCompaniesCover?.length')
      if (subCompaniesCover?.length > 0) {
         await Promise.all(
           (clientSubCompanies ?? []).map(async (company, index) => {
             const imageData = new FormData();
             imageData.append("file", subCompaniesCover[index]);
+            if (Object.keys(imageData).length > 0 ){
+              const { url } = await uploadImage(imageData);
+  
+              Object.assign(company, { image: url });
 
-            const { url } = await uploadImage(imageData);
-
-            Object.assign(company, { image: url });
+            }
           })
         );
       }
       
 
         if (cover) {
-
           const imageData = new FormData();
           imageData.append('file', cover as unknown as File);
           const { url } = await uploadImage(
@@ -49,7 +50,7 @@ export function useUpdateCompany() {
           
         }
   
-        return http(`companies/${id}`, {
+        return http(`companies/${id}/bulk`, {
             method: "PUT",
             data: payload
         });
