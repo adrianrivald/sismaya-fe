@@ -118,7 +118,7 @@ export function ClientCompanyView() {
       setOpenRemoveModal(false);
     };
 
-    const handleViewSubCompany = (id: number) => {
+    const handleViewSubCompany = async (id: number) => {
       setOpenViewCompanyModal(true);
       setSelectedCompany(id);
     };

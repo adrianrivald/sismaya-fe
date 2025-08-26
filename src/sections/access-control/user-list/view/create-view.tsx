@@ -316,7 +316,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
           department_id: user?.user_info?.department_id,
           internal_id: user?.internal_companies?.map((item) => item?.company_id) ?? [],
           title_id: user?.user_info?.title_id,
-          companyType: 'holding',
+          companyType: 'client',
         }
     : {};
 
@@ -583,13 +583,13 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                       defaultValue={isEdit ? user?.user_info.user_type : ''}
                     >
                       <MenuItem value="internal">Internal</MenuItem>
-                      <MenuItem value="holding">Holding</MenuItem>
-                      <MenuItem value="sub-company">Sub-Company</MenuItem>
+                      <MenuItem value="client">Holding</MenuItem>
+                      <MenuItem value="client">Sub-Company</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
 
-                {companyType === 'holding' || companyType === 'sub-company' ? (
+                {companyType === 'client' ? (
                   <Grid item xs={12} md={12}>
                     <FormControl fullWidth>
                       {/* <InputLabel id="select-company">Company</InputLabel> */}
@@ -635,7 +635,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                   </Grid>
                 ) : null}
 
-                {companyType === 'holding' || companyType === 'sub-company' ? (
+                {companyType === 'client' ? (
                   <Grid item xs={12} md={12}>
                     <FormControl fullWidth>
                       <InputLabel id="select-division">Division</InputLabel>
@@ -658,7 +658,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                     )}
                   </Grid>
                 ) : null}
-                {(companyType === 'holding' || companyType === 'sub-company') && (
+                {companyType === 'client' && (
                   <Grid item xs={12} md={12}>
                     <FormControl fullWidth>
                       <InputLabel id="select-division">Title</InputLabel>
@@ -1043,9 +1043,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                     >
                       {roles
                         ?.filter((role) =>
-                          companyType === 'holding' || companyType === 'sub-company'
-                            ? role?.id === 6
-                            : role?.id !== 6
+                          companyType === 'client' ? role?.id === 6 : role?.id !== 6
                         )
                         .map((role) => <MenuItem value={role?.id}>{role?.name}</MenuItem>)}
                     </Select>
