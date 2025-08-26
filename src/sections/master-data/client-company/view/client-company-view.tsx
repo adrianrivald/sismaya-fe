@@ -15,6 +15,8 @@ import { useBulkDeleteCompany } from 'src/services/master-data/company/use-compa
 import { DialogBulkDelete } from 'src/components/dialog/dialog-bulk-delete';
 import { Icon } from '@iconify/react';
 import DialogViewCompany from 'src/components/dialog/dialog-view-company';
+import { API_URL } from 'src/constants';
+import { getSession } from 'src/sections/auth/session/session';
 import type { Companies } from './types';
 
 // ----------------------------------------------------------------------
@@ -95,6 +97,7 @@ export function ClientCompanyView() {
   const [openViewCompanyModal, setOpenViewCompanyModal] = React.useState(false);
   const [openBulkDelete, setOpenBulkDelete] = React.useState(false);
   const { mutate: mutateBulkDeleteCompany } = useBulkDeleteCompany();
+  const [openedCompanyList, setOpenedCompanyList] = React.useState([]);
 
   const { getDataTableProps, refetch } = useCompanyList(
     {
@@ -118,12 +121,7 @@ export function ClientCompanyView() {
       setOpenRemoveModal(false);
     };
 
-    const handleViewSubCompany = async (id: number) => {
-      setOpenViewCompanyModal(true);
-      setSelectedCompany(id);
-    };
-
-    return { handleEdit, handleDelete, handleViewSubCompany };
+    return { handleEdit, handleDelete };
   };
 
   const onSort = (id: string) => {
@@ -159,6 +157,34 @@ export function ClientCompanyView() {
         }, 500);
       },
     });
+  };
+
+  const handleViewSubCompany = async (companyId: number) => {
+    setOpenedCompanyList([]);
+
+    try {
+      const companyData = await fetch(`${API_URL}/companies?parent=${companyId}`, {
+        headers: {
+          Authorization: `Bearer ${getSession()}`,
+        },
+      }).then((res) =>
+        res.json().then((value) => {
+          const transformed =
+            value?.data !== null
+              ? value?.data.map((item: any) => ({
+                  name: item.name,
+                }))
+              : [];
+          setOpenedCompanyList(transformed ?? []);
+        })
+      );
+      setOpenViewCompanyModal(true);
+      return companyData;
+    } catch (error) {
+      setOpenedCompanyList([]);
+      setOpenViewCompanyModal(true);
+      return error;
+    }
   };
 
   return (
@@ -198,7 +224,12 @@ export function ClientCompanyView() {
         </Grid>
         <Grid xs={12}>
           <DataTable
-            columns={columns({ ...popoverFuncs(), setOpenRemoveModal, setSelectedId })}
+            columns={columns({
+              ...popoverFuncs(),
+              setOpenRemoveModal,
+              setSelectedId,
+              handleViewSubCompany,
+            })}
             order={sortOrder}
             orderBy="name_sort"
             onSort={onSort}
@@ -218,7 +249,11 @@ export function ClientCompanyView() {
         }}
       />
 
-      <DialogViewCompany open={openViewCompanyModal} setOpen={setOpenViewCompanyModal} />
+      <DialogViewCompany
+        open={openViewCompanyModal}
+        setOpen={setOpenViewCompanyModal}
+        list={openedCompanyList}
+      />
     </DashboardContent>
   );
 }
