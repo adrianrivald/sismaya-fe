@@ -51,7 +51,7 @@ export function useUpdateCompany() {
         }
   
         return http(`companies/${id}/bulk`, {
-            method: "PUT",
+            method: "POST",
             data: payload
         });
       },

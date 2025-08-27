@@ -19,13 +19,14 @@ import { DataTable } from 'src/components/table/data-tables';
 import type { Dispatch, SetStateAction } from 'react';
 import { createColumnHelper, type CellContext } from '@tanstack/react-table';
 import type { User } from 'src/services/master-data/user/types';
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useRole } from 'src/services/master-data/role';
 import { useDeleteUserById, useUserList } from 'src/services/master-data/user';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useInternalCompaniesAll } from 'src/services/master-data/company';
 import { useAuth } from 'src/sections/auth/providers/auth';
+import { useSearchDebounce } from 'src/utils/hooks/use-debounce';
 import { RemoveAction } from '../../remove-action';
 
 interface PopoverProps {
@@ -202,11 +203,13 @@ export function AccessControlUserListView() {
   const [roleFilter, setRoleFilter] = React.useState<number | null>(null);
   const [companyFilter, setCompanyFilter] = React.useState<number | null>(null);
   const [sortOrder, setSortOrder] = React.useState('');
+  const [search, setSearch] = useSearchDebounce();
 
   const { getDataTableProps } = useUserList({
     internal_company: companyFilter,
     role_id: roleFilter,
     // type: 'internal',
+    search,
     internalCompanies: userRole === 2 ? userCompanies?.toString() : null,
     name: sortOrder,
   });
@@ -367,6 +370,7 @@ export function AccessControlUserListView() {
                       'aria-label': 'search',
                     }}
                     placeholder="Search..."
+                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </FormControl>
               </Box>
