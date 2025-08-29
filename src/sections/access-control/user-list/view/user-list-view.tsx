@@ -201,12 +201,12 @@ export function AccessControlUserListView() {
   const pathname = location.pathname?.split('/')[2];
   const mode = pathname === 'user-list' ? 'user-list' : 'user-group';
   const [roleFilter, setRoleFilter] = React.useState<number | null>(null);
-  const [companyFilter, setCompanyFilter] = React.useState<number | null>(null);
+  const [companyFilter, setCompanyFilter] = React.useState('');
   const [sortOrder, setSortOrder] = React.useState('');
   const [search, setSearch] = useSearchDebounce();
 
   const { getDataTableProps } = useUserList({
-    internal_company: companyFilter,
+    type: companyFilter,
     role_id: roleFilter,
     // type: 'internal',
     search,
@@ -223,8 +223,8 @@ export function AccessControlUserListView() {
     navigate('/access-control/user-list/create');
   };
 
-  const handleChangeCompanyFilter = (e: SelectChangeEvent<number>) => {
-    setCompanyFilter(Number(e.target.value));
+  const handleChangeCompanyFilter = (e: SelectChangeEvent<string>) => {
+    setCompanyFilter(String(e.target.value));
   };
 
   const handleChangeRoleFilter = (e: SelectChangeEvent<number>) => {
@@ -336,18 +336,16 @@ export function AccessControlUserListView() {
                 }}
               >
                 <FormControl fullWidth>
-                  <InputLabel id="select-company">Company</InputLabel>
+                  <InputLabel id="select-company">Company Type</InputLabel>
                   <Select
                     labelId="select-company"
                     label="Company"
                     onChange={handleChangeCompanyFilter}
                   >
                     <MenuItem value="">All</MenuItem>
-                    {internalCompanies
-                      ?.filter((item) =>
-                        userRole === 2 ? userCompanies?.includes(item?.id) : item
-                      )
-                      .map((company) => <MenuItem value={company?.id}>{company?.name}</MenuItem>)}
+                    <MenuItem value="internal">Internal</MenuItem>
+                    <MenuItem value="holding">Holding</MenuItem>
+                    <MenuItem value="sub-company">Sub-company</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -373,6 +371,26 @@ export function AccessControlUserListView() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </FormControl>
+              </Box>
+            </Box>
+
+            <Box mt={4} mb={2}>
+              <Typography fontWeight="bold">Badge Information:</Typography>
+              <Box display="flex" gap={2} mt={1}>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box borderRadius="100%" bgcolor="#8E33FF" width={10} height={10} />{' '}
+                  <Typography fontSize={14}>Internal Company</Typography>
+                </Box>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box borderRadius="100%" bgcolor="#22C55E" width={10} height={10} />{' '}
+                  <Typography fontSize={14}>Holding Company</Typography>
+                </Box>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box borderRadius="100%" bgcolor="#FFAB00" width={10} height={10} />{' '}
+                  <Typography fontSize={14}>Sub-Company</Typography>
+                </Box>
               </Box>
             </Box>
 

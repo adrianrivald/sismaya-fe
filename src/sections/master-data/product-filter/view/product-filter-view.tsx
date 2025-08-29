@@ -221,16 +221,14 @@ export function ProductFilterView() {
     } = event;
     setSelectedCompanies(value as number[]);
   };
+  const results: any[] = Array.isArray(dataTable?.items?.result) ? dataTable.items.result : [];
+  const mappedSubCompanies = results?.[0]?.subsidiaries?.map((s: any) => s?.product_used) ?? [];
 
-  const mappedSubCompanies = dataTable.items.result[0]?.subsidiaries?.map(
-    (item: any) => item?.product_used
-  )[0];
-
-  const [mappedCompanies, setMappedCompanies] = useState([]);
+  const [mappedCompanies, setMappedCompanies] = useState<any[]>([]);
   useEffect(() => {
-    setMappedCompanies(dataTable.items.result?.map((item: any) => item.product_used)[0]);
+    setMappedCompanies(results?.[0]?.product_used ?? []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // or [dataTable?.items?.result]
 
   return (
     <DashboardContent maxWidth="xl">
@@ -328,7 +326,7 @@ export function ProductFilterView() {
               </Box>
             )}
             {...getDataTablePropsProduct()}
-            data={dataTable.items.result}
+            data={results}
           />
         </Grid>
       </Grid>
