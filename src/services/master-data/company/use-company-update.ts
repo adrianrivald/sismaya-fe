@@ -7,7 +7,7 @@ import type { CompanyDTO } from "./schemas/company-schema";
 
 export type UpdateCompany = CompanyDTO & {id: number, type: string, cover?: any, image?:string, cito_quota?: number, subCompaniesCover?: any; clientSubCompanies?: any[] };
 
-export function useUpdateCompany() {
+export function useUpdateCompany(isBulk?: boolean) {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const location = useLocation()
@@ -50,8 +50,8 @@ export function useUpdateCompany() {
           
         }
   
-        return http(`companies/${id}/bulk`, {
-            method: "POST",
+        return http(`companies/${id}${isBulk ? "/bulk" : ""}`, {
+            method: isBulk ? "POST" : "PUT",
             data: payload
         });
       },

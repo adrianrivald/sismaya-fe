@@ -560,7 +560,7 @@ export function EditClientCompanyView() {
   const navigate = useNavigate();
   const { data, refetch } = useCompanyById(Number(id));
   const { mutate: addSubCompany } = useAddCompany();
-  const { mutate: updateCompany } = useUpdateCompany();
+  const { mutate: updateCompany } = useUpdateCompany(true);
   const { mutate: deleteCompany } = useDeleteCompanyById();
   const { mutate: deleteDivision } = useDeleteDivisionItem(Number(id));
   const { mutate: addDivision } = useAddDivision();
