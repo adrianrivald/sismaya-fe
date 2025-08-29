@@ -107,7 +107,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
   const [productsOption, setProductsOption] = useState<any[]>([]);
 
   const fetchDivision = async (companyId: number, index?: number) => {
-    const data = await fetch(`${API_URL}/departments?company_id=${companyId}?page_size=9999`, {
+    const data = await fetch(`${API_URL}/departments?company_id=${companyId}&page_size=9999`, {
       headers: { Authorization: `Bearer ${getSession()}` },
     }).then((res) =>
       res.json().then((value) => {
@@ -126,7 +126,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
   };
 
   const fetchTitles = async (companyId: number, index?: number) => {
-    const data = await fetch(`${API_URL}/titles?company_id=${companyId}?page_size=9999`, {
+    const data = await fetch(`${API_URL}/titles?company_id=${companyId}&page_size=9999`, {
       headers: { Authorization: `Bearer ${getSession()}` },
     }).then((res) =>
       res.json().then((value) => {
@@ -145,7 +145,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
   };
 
   const fetchProducts = async (companyId: number, index?: number) => {
-    const data = await fetch(`${API_URL}/products?company_id=${companyId}?page_size=9999`, {
+    const data = await fetch(`${API_URL}/products?company_id=${companyId}&page_size=9999`, {
       headers: { Authorization: `Bearer ${getSession()}` },
     }).then((res) =>
       res.json().then((value) => {
