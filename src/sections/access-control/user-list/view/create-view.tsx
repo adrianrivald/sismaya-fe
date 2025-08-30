@@ -1030,6 +1030,67 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                   </>
                 )}
 
+                {companyType === 'client' && (
+                  <Grid item xs={12} md={12}>
+                    {/* <InputLabel id="demo-simple-select-outlined-label-type">Internal Company</InputLabel> */}
+                    <Box display="flex" flexDirection="column" gap={2}>
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={3}
+                        alignItems="center"
+                      >
+                        <Box width="100%">
+                          <Autocomplete
+                            multiple
+                            options={internalCompanies || []}
+                            getOptionLabel={(option) => option.name || ''}
+                            value={(internalCompanies || []).filter((internalCompany) =>
+                              (watch('internal_id') || []).includes(internalCompany.id as never)
+                            )}
+                            onChange={(event, newValue) => {
+                              setValue(
+                                'internal_id',
+                                newValue.map((companyValue) => companyValue.id)
+                              );
+                            }}
+                            renderTags={(value, getTagProps) =>
+                              value.map((option, idx) => (
+                                <Chip
+                                  label={option.name}
+                                  {...getTagProps({ index: idx })}
+                                  key={option.id}
+                                  sx={{
+                                    bgcolor: '#D6F3F9',
+                                    color: 'info.dark',
+                                  }}
+                                />
+                              ))
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                variant="outlined"
+                                placeholder="Internal Company"
+                                label="Internal Company"
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                              />
+                            )}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                          />
+                        </Box>
+                      </Stack>
+                    </Box>
+                    {formState?.errors?.internal_id && (
+                      <FormHelperText sx={{ color: 'error.main' }}>
+                        {String(formState?.errors?.internal_id?.message)}
+                      </FormHelperText>
+                    )}
+                  </Grid>
+                )}
+
                 <Grid item xs={12} md={12}>
                   <FormControl fullWidth>
                     <InputLabel id="select-role">Role</InputLabel>
