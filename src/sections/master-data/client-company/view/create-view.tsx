@@ -29,7 +29,7 @@ import type { CompanyDTO } from 'src/services/master-data/company/schemas/compan
 import {
   useAddCompany,
   useAddCompanyBulk,
-  useAddCompanyRelation,
+  // useAddCompanyRelation,
   useCompanyById,
   useInternalCompanies,
   useUpdateCompany,
@@ -78,7 +78,7 @@ export function CreateClientCompanyView() {
   const { mutate: addCompany } = useAddCompanyBulk();
   const { mutate: updateCompany } = useUpdateCompany();
 
-  const { mutate: addCompanyRelation } = useAddCompanyRelation();
+  // const { mutate: addCompanyRelation } = useAddCompanyRelation();
 
   const defaultValues: any = {
     name: data?.name,
@@ -107,24 +107,11 @@ export function CreateClientCompanyView() {
       }
       updateCompany(payload);
     } else {
-      addCompany(
-        {
-          ...formData,
-          type: 'holding',
-          clientSubCompanies: subCompanies,
-        },
-        {
-          onSuccess(resData) {
-            formData.internal_id?.map((item: any) => {
-              addCompanyRelation({
-                internal_company_id: item,
-                client_company_id: Number(resData?.data?.id),
-              });
-              return null;
-            });
-          },
-        }
-      );
+      addCompany({
+        ...formData,
+        type: 'holding',
+        clientSubCompanies: subCompanies,
+      });
     }
   };
   const theme = useTheme();
