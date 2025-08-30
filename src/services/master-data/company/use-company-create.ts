@@ -27,10 +27,12 @@ export function useAddCompany() {
           
         const imageData = new FormData();
         imageData.append('file', subCompaniesCover[index] as unknown as File);
-        const { url } = await uploadImage(imageData);
-        Object.assign(company, {
-          image: url
-        })
+         if (Object.keys(imageData).length > 0 ){
+              const { url } = await uploadImage(imageData);
+  
+              Object.assign(company, { image: url });
+
+            }
         })
       }
 
@@ -120,9 +122,12 @@ export function useAddCompanyBulk() {
             const imageData = new FormData();
             imageData.append("file", subCompaniesCover[index]); 
 
-            const { url } = await uploadImage(imageData);
+           if (Object.keys(imageData).length > 0 ){
+              const { url } = await uploadImage(imageData);
+  
+              Object.assign(company, { image: url });
 
-            Object.assign(company, { image: url });
+            }
           })
         );
       }
