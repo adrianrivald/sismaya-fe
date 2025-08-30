@@ -196,7 +196,9 @@ const columnsSubsidiaries = () => [
           ? 'Sub Company'
           : info.getValue() === 'holding'
             ? 'Holding'
-            : '-'}
+            : info.getValue() === 'subsidiary'
+              ? 'Sub Company'
+              : '-'}
       </Typography>
     ),
   }),
