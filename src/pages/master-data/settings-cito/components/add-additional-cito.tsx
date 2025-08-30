@@ -168,7 +168,7 @@ export default function DialogAddAdditionalCito({
     const formData = methods.watch();
 
     const dataMutation = {
-      details: formData.quota.map((item) => ({ id: item.company_id, quota: item.quota })),
+      details: formData.quota.map((item) => ({ id: item.company_id, quota: Number(item.quota) })),
       po_number: formData.files.map((item) => item.file_number).join(','),
       documents: formData?.files?.map((item) => item.file_url),
     };

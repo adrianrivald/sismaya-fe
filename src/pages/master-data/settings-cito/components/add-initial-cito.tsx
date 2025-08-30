@@ -300,11 +300,13 @@ export default function DialogAddInitialCito({ open, onClose, id }: DialogAddIni
                     ? methods
                         .watch('quota')
                         .filter((item) => item.type !== 'subsidiary')
-                        .map((item) => ({ company_id: item.company_id, quota: item.quota }))
+                        .map((item) => ({ company_id: item.company_id, quota: Number(item.quota) }))
                     : methods
                         .watch('quota')
-                        .filter((item) => item.type === 'subsidiary')
-                        .map((item) => ({ company_id: item.company_id, quota: item.quota }));
+                        .map((item) => ({
+                          company_id: item.company_id,
+                          quota: Number(item.quota),
+                        }));
 
                 mutation.mutate({ cito_type: methods.watch('cito_type'), quotas: quota });
                 onClose();
