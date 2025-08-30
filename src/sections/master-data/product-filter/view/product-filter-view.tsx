@@ -41,7 +41,7 @@ import type { ProductFilter } from '../type/types';
 interface PopoverProps {
   handleEdit: (id: number) => void;
   setSelectedId: Dispatch<SetStateAction<number | null>>;
-  mappedCompanies: any[];
+  filteredCompanies: any[];
   fetchCompanyPopupList: (
     companyId: number,
     internalCompanyId: number,
@@ -72,7 +72,7 @@ const columns = (popoverProps: PopoverProps) => [
     header: 'Type',
   }),
 
-  ...(popoverProps.mappedCompanies?.map((company: any) =>
+  ...(popoverProps.filteredCompanies?.map((company: any) =>
     columnHelper.accessor((row) => row, {
       header: company.name,
       id: `product_used_${company.name}`,
@@ -174,7 +174,6 @@ export function ProductFilterView() {
         }
       ).then((res) =>
         res.json().then((value) => {
-          console.log(value, 'valuenya');
           const transformed =
             value?.data !== null
               ? value?.data.map((item: any) => ({
@@ -223,12 +222,25 @@ export function ProductFilterView() {
   };
   const results: any[] = Array.isArray(dataTable?.items?.result) ? dataTable.items.result : [];
   const mappedSubCompanies = results?.[0]?.subsidiaries?.map((s: any) => s?.product_used) ?? [];
-
   const [mappedCompanies, setMappedCompanies] = useState<any[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
+
   useEffect(() => {
-    setMappedCompanies(results?.[0]?.product_used ?? []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (results?.length > 0) {
+      setMappedCompanies(results?.[0]?.product_used ?? []);
+      setFilteredCompanies(results?.[0]?.product_used ?? []);
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // or [dataTable?.items?.result]
+
+  useEffect(() => {
+    const newArr = mappedCompanies?.filter((item) => selectedCompanies.includes(item.id));
+    if (selectedCompanies?.length > 0) {
+      setFilteredCompanies(newArr);
+    } else {
+      setFilteredCompanies(mappedCompanies);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompanies]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -278,7 +290,7 @@ export function ProductFilterView() {
             columns={columns({
               ...popoverFuncs(),
               setSelectedId,
-              mappedCompanies,
+              filteredCompanies,
               fetchCompanyPopupList,
             })}
             order={sortOrder}
