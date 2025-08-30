@@ -344,8 +344,7 @@ export function AccessControlUserListView() {
                   >
                     <MenuItem value="">All</MenuItem>
                     <MenuItem value="internal">Internal</MenuItem>
-                    <MenuItem value="holding">Holding</MenuItem>
-                    <MenuItem value="sub-company">Sub-company</MenuItem>
+                    <MenuItem value="client">Client</MenuItem>
                   </Select>
                 </FormControl>
               </Box>

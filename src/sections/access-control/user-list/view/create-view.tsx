@@ -583,8 +583,7 @@ export function CreateUserView({ isEdit }: { isEdit?: boolean }) {
                       defaultValue={isEdit ? user?.user_info.user_type : ''}
                     >
                       <MenuItem value="internal">Internal</MenuItem>
-                      <MenuItem value="client">Holding</MenuItem>
-                      <MenuItem value="client">Sub-Company</MenuItem>
+                      <MenuItem value="client">Client</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
