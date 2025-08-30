@@ -161,7 +161,7 @@ export function ListDivisionView() {
       name: sortOrder,
     },
     String(idCurrentCompany),
-    isInternalCompanyPage ? 'internal' : 'holding'
+    isInternalCompanyPage ? 'internal' : 'client'
   );
   const { mutate: deleteDivision } = useDeleteDivision();
 
