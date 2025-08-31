@@ -224,11 +224,13 @@ export function ProductFilterView() {
   const mappedSubCompanies = results?.[0]?.subsidiaries?.map((s: any) => s?.product_used) ?? [];
   const [mappedCompanies, setMappedCompanies] = useState<any[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
-
+  console.log(results, 'results');
   useEffect(() => {
+    console.log(results?.[0]?.product_used, 'results?.[0]?.product_used');
     if (results?.length > 0) {
       setMappedCompanies(results?.[0]?.product_used ?? []);
       setFilteredCompanies(results?.[0]?.product_used ?? []);
+      setSelectedCompanies(results?.[0]?.product_used?.map((item: any) => item.id) ?? []);
     } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // or [dataTable?.items?.result]
 
