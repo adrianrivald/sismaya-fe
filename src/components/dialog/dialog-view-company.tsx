@@ -18,9 +18,15 @@ interface DialogViewCompanyProps {
   list?: any[];
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  title?: string;
 }
 
-export default function DialogViewCompany({ list = [], open, setOpen }: DialogViewCompanyProps) {
+export default function DialogViewCompany({
+  list = [],
+  open,
+  setOpen,
+  title = 'Client Sub Company',
+}: DialogViewCompanyProps) {
   const handleClose = () => {
     setOpen(false);
   };
@@ -35,7 +41,7 @@ export default function DialogViewCompany({ list = [], open, setOpen }: DialogVi
                 <strong>No</strong>
               </TableCell>
               <TableCell>
-                <strong>Client Sub Company</strong>
+                <strong>{title}</strong>
               </TableCell>
             </TableRow>
           </TableHead>

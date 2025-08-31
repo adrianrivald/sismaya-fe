@@ -28,7 +28,7 @@ import { DataTable } from 'src/components/table/data-tables';
 import type { CellContext } from '@tanstack/react-table';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Iconify } from 'src/components/iconify';
-import { useDeleteCompanyById } from 'src/services/master-data/company';
+import { useDeleteCompanyById, useInternalCompaniesAll } from 'src/services/master-data/company';
 import { useProductUse } from 'src/services/master-data/product-filter/use-product-use';
 import type { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import DialogViewCompany from 'src/components/dialog/dialog-view-company';
@@ -45,6 +45,7 @@ interface PopoverProps {
   fetchCompanyPopupList: (
     companyId: number,
     internalCompanyId: number,
+    companyName: string,
     isSubCompany?: boolean
   ) => void;
 }
@@ -82,7 +83,9 @@ const columns = (popoverProps: PopoverProps) => [
             <Typography>
               Holding:{' '}
               <Typography
-                onClick={() => popoverProps.fetchCompanyPopupList(info.getValue().id, company.id)}
+                onClick={() =>
+                  popoverProps.fetchCompanyPopupList(info.getValue().id, company.id, company.name)
+                }
                 sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
               >
                 {company?.parent_count}
@@ -94,7 +97,12 @@ const columns = (popoverProps: PopoverProps) => [
               Sub Company:{' '}
               <Typography
                 onClick={() =>
-                  popoverProps.fetchCompanyPopupList(info.getValue().id, company.id, true)
+                  popoverProps.fetchCompanyPopupList(
+                    info.getValue().id,
+                    company.id,
+                    company.name,
+                    true
+                  )
                 }
                 sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
               >
@@ -156,17 +164,19 @@ export function ProductFilterView() {
   });
   const dataTable = data as any;
   const navigate = useNavigate();
+  const [openedCompanyName, setOpenedCompanyName] = useState('');
 
   const fetchCompanyPopupList = async (
     companyId: number,
     internalCompanyId: number,
+    companyName: string,
     isSubCompany?: boolean
   ) => {
     setOpenedCompanyList([]);
-
+    setOpenedCompanyName(companyName);
     try {
       const companyData = await fetch(
-        `${API_URL}/product-use?company_id=${companyId}&internal_company_id=${internalCompanyId}&is_active=all${isSubCompany ? '&mode=subsidiaries' : ''}`,
+        `${API_URL}/product-use?company_id=${companyId}&page_size=9999&internal_company_id=${internalCompanyId}&is_active=all${isSubCompany ? '&mode=subsidiaries' : ''}`,
         {
           headers: {
             Authorization: `Bearer ${getSession()}`,
@@ -177,7 +187,7 @@ export function ProductFilterView() {
           const transformed =
             value?.data !== null
               ? value?.data.map((item: any) => ({
-                  name: item.company.name,
+                  name: item.product.name,
                 }))
               : [];
           setOpenedCompanyList(transformed ?? []);
@@ -224,13 +234,14 @@ export function ProductFilterView() {
   const mappedSubCompanies = results?.[0]?.subsidiaries?.map((s: any) => s?.product_used) ?? [];
   const [mappedCompanies, setMappedCompanies] = useState<any[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
-  console.log(results, 'results');
+  const { data: internalCompanies } = useInternalCompaniesAll();
+  console.log(internalCompanies, 'results');
   useEffect(() => {
     console.log(results?.[0]?.product_used, 'results?.[0]?.product_used');
     if (results?.length > 0) {
       setMappedCompanies(results?.[0]?.product_used ?? []);
       setFilteredCompanies(results?.[0]?.product_used ?? []);
-      setSelectedCompanies(results?.[0]?.product_used?.map((item: any) => item.id) ?? []);
+      setSelectedCompanies(internalCompanies?.map((item: any) => item.id) ?? []);
     } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // or [dataTable?.items?.result]
 
@@ -276,7 +287,7 @@ export function ProductFilterView() {
               },
             }}
           >
-            {mappedCompanies?.map((item: any, index: number) => (
+            {internalCompanies?.map((item: any, index: number) => (
               <MenuItem key={index} value={item.id}>
                 <Checkbox checked={selectedCompanies.indexOf(item.id) > -1} />
                 <ListItemText primary={item.name} />
@@ -345,6 +356,7 @@ export function ProductFilterView() {
         </Grid>
       </Grid>
       <DialogViewCompany
+        title={`Nama Product ${openedCompanyName}`}
         list={openedCompanyList}
         open={openViewCompanyModal}
         setOpen={setOpenViewCompanyModal}

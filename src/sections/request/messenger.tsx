@@ -260,9 +260,6 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
             gap={1}
             justifyContent="space-between"
           >
-            <Box display="flex" justifyContent="center" alignItems="center" px={2}>
-              <SvgColor src="/assets/icons/ic-emoji.svg" />
-            </Box>
             <Box display="flex" flexDirection="column" gap={1} py={2}>
               <TextField
                 InputProps={{
@@ -323,36 +320,38 @@ function RequestChat({ chats, request_id, onSuccess, isFetchingChat }: RequestCh
               </Box>
             </Box>
             <Box display="flex" alignItems="center" gap={2}>
-              <Box>
-                <Input
-                  onChange={handleFileChange}
-                  type="file"
-                  sx={{ display: 'none' }}
-                  hidden
-                  id="uploadPic"
-                />
-                <Typography component="label" htmlFor="uploadPic" sx={{ cursor: 'pointer' }}>
-                  <SvgColor mt={0.5} width={18} height={18} src="/assets/icons/ic-image.svg" />
-                </Typography>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Box>
+                  <Input
+                    onChange={handleFileChange}
+                    type="file"
+                    sx={{ display: 'none' }}
+                    hidden
+                    id="uploadPic"
+                  />
+                  <Typography component="label" htmlFor="uploadPic" sx={{ cursor: 'pointer' }}>
+                    <SvgColor mt={0.5} width={18} height={18} src="/assets/icons/ic-image.svg" />
+                  </Typography>
+                </Box>
+                {/* <SvgColor width={18} height={18} src="/assets/icons/ic-clip.svg" />
+              <SvgColor width={18} height={18} src="/assets/icons/ic-mic.svg" /> */}
               </Box>
-              <SvgColor width={18} height={18} src="/assets/icons/ic-clip.svg" />
-              <SvgColor width={18} height={18} src="/assets/icons/ic-mic.svg" />
-            </Box>
-            <Box
-              component="button"
-              p={2}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              sx={{
-                border: 0,
-                borderLeft: 1,
-                borderColor: 'grey.300',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-              }}
-            >
-              <SvgColor width={24} height={24} src="/assets/icons/ic-send.svg" />
+              <Box
+                component="button"
+                p={2}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                sx={{
+                  border: 0,
+                  borderLeft: 1,
+                  borderColor: 'grey.300',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                }}
+              >
+                <SvgColor width={24} height={24} src="/assets/icons/ic-send.svg" />
+              </Box>
             </Box>
           </Box>
         )}
