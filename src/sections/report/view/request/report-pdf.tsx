@@ -125,6 +125,14 @@ const ReportRequestPDF = ({ data, timePeriod, startDate, endDate }: ReportProps)
     },
   });
 
+  const groupByTwo = (arr: any[] = []) => {
+    const grouped = [];
+    for (let i = 0; i < arr.length; i += 2) {
+      grouped.push([arr[i], arr[i + 1]]);
+    }
+    return grouped;
+  };
+
   return (
     <Document>
       <Page size="A4" style={styles.page} wrap>
@@ -501,27 +509,9 @@ const ReportRequestPDF = ({ data, timePeriod, startDate, endDate }: ReportProps)
 
                 {data?.reportData?.summary?.report_company_detail?.map(
                   (detail: any, index: number) => {
-                    const grouped = [];
-                    for (let i = 0; i < detail?.report_per_category.length; i += 2) {
-                      grouped.push([
-                        detail?.report_per_category[i],
-                        detail?.report_per_category[i + 1],
-                      ]);
-                    }
-                    const groupedDepartment = [];
-                    for (let i = 0; i < detail?.report_per_division.length; i += 2) {
-                      groupedDepartment.push([
-                        detail?.report_per_division[i],
-                        detail?.report_per_division[i + 1],
-                      ]);
-                    }
-                    const groupedStatus = [];
-                    for (let i = 0; i < detail?.report_per_status.length; i += 2) {
-                      groupedStatus.push([
-                        detail?.report_per_status[i],
-                        detail?.report_per_status[i + 1],
-                      ]);
-                    }
+                    const grouped = groupByTwo(detail?.report_per_category ?? []);
+                    const groupedDepartment = groupByTwo(detail?.report_per_division ?? []);
+                    const groupedStatus = groupByTwo(detail?.report_per_status ?? []);
                     return (
                       <>
                         <View style={{ width: '100%', marginTop: '8px' }}>

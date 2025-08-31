@@ -131,6 +131,7 @@ export function ReportRequestView() {
   const hiddenRef = useRef<HTMLDivElement>(null);
 
   const generatePDFFile = async () => {
+    console.log(reportData?.data, 'reportData?.data');
     const blob = await pdf(
       <ReportRequestPDF
         timePeriod={timePeriod}
