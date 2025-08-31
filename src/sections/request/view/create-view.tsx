@@ -78,7 +78,8 @@ export function CreateRequestView() {
     userType === 'client' ? clientCompanyId : (Number(selectedCompanyId) ?? 0),
     true,
     () => {},
-    idCurrentCompany
+    idCurrentCompany,
+    true
   );
   const { data: categories } = useCategoryByCompanyId(idCurrentCompany ?? 0);
   const [files, setFiles] = React.useState<FileList | any>([]);
