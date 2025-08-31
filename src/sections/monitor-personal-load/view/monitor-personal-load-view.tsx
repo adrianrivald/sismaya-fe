@@ -17,6 +17,7 @@ import {
   useTotalTaskCompleted,
 } from 'src/services/monitor-personal-load/use-monitor-personal-load';
 import { StatusBadge } from 'src/sections/request/status-badge';
+import { useAuth } from 'src/sections/auth/providers/auth';
 import { TotalTaskCompletedChart } from '../total-task-completed-chart';
 
 const columnHelper = createColumnHelper<any>();
@@ -72,6 +73,7 @@ const columns = () => [
 ];
 
 export function MonitorPersonalLoadView() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { data: totalTaskByStatus } = useTotalTaskByStatus();
   const { getDataTableProps, data: incompleteTask } = useIncompleteTask({});
@@ -128,7 +130,7 @@ export function MonitorPersonalLoadView() {
                 gap={1}
                 alignItems="center"
                 component={Link}
-                to="/task"
+                to={`/${(user?.internal_companies ?? [])[0].company.name.trim().toLowerCase()}/task`}
                 sx={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <Typography>View All Tasks</Typography>
@@ -193,7 +195,7 @@ export function MonitorPersonalLoadView() {
                 );
               })}
               <Stack width="20%" flex="none" direction="column" gap={1}>
-                <Box
+                {/* <Box
                   position="relative"
                   sx={{
                     borderRadius: 2,
@@ -218,14 +220,14 @@ export function MonitorPersonalLoadView() {
                     src="/assets/background/shape-square.png"
                     sx={{ position: 'absolute', top: 2, left: 2 }}
                   />
-                </Box>
+                </Box> */}
                 <Box
                   position="relative"
                   sx={{
                     borderRadius: 2,
                     background: 'linear-gradient(to right bottom,  #CCDEE5, #80ADBF)',
                     paddingX: 2,
-                    paddingY: 1,
+                    paddingY: 2,
                     width: '100%',
                     color: '#005B7F',
                   }}
@@ -251,8 +253,8 @@ export function MonitorPersonalLoadView() {
         <Grid xs={12} md={12} lg={12}>
           <DataTable
             withPagination={false}
-            withViewAll
-            viewAllHref="/task"
+            // withViewAll
+            // viewAllHref="/task"
             columns={columns()}
             {...getDataTableProps()}
             data={incompleteTask?.items?.slice(0, 5)}
