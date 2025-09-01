@@ -332,7 +332,7 @@ const internalRoutes: NonIndexRouteObject = {
     // Monitor Personal Load
 
     {
-      path: '/monitor-personal-load',
+      path: '/:vendor/monitor-personal-load',
       element: <MonitorPersonalLoadPage />,
     },
 

@@ -67,7 +67,8 @@ export const generalMenus = (
 
 export const managementMenus = (
   internalCompaniesRequest?: ChildMenus[],
-  internalCompaniesTask?: ChildMenus[]
+  internalCompaniesTask?: ChildMenus[],
+  internalCompaniesMonitor?: ChildMenus[]
 ) => [
   {
     heading: 'Request',
@@ -84,8 +85,8 @@ export const managementMenus = (
   {
     heading: 'Monitor Personal Load',
     id: 'request:read',
-    path: '/monitor-personal-load',
     icon: icon('ic-user'),
+    list: internalCompaniesMonitor,
   },
 ];
 
@@ -154,7 +155,8 @@ export const menuItems = (
   clientCompaniesMasterDataSuperAdmin?: ChildMenus[],
   internalCompaniesFaq?: ChildMenus[],
   userType?: string,
-  userRole?: number
+  userRole?: number,
+  internalCompaniesMonitor?: ChildMenus[]
 ) => [
   ...(userRole !== 1
     ? [
@@ -173,7 +175,11 @@ export const menuItems = (
   {
     heading: 'MANAGEMENT',
     id: 'management',
-    list: managementMenus(internalCompaniesRequest, internalCompaniesTask),
+    list: managementMenus(
+      internalCompaniesRequest,
+      internalCompaniesTask,
+      internalCompaniesMonitor
+    ),
   },
 
   {

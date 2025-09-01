@@ -10,7 +10,7 @@ import { DataTable } from 'src/components/table/data-tables';
 import { createColumnHelper } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { SvgColor } from 'src/components/svg-color';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   useIncompleteTask,
   useTotalTaskByStatus,
@@ -73,12 +73,20 @@ const columns = () => [
 ];
 
 export function MonitorPersonalLoadView() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { data: totalTaskByStatus } = useTotalTaskByStatus();
-  const { getDataTableProps, data: incompleteTask } = useIncompleteTask({});
+  const { vendor } = useParams();
 
-  const { data: totalTaskCompleted } = useTotalTaskCompleted();
+  const { user } = useAuth();
+  const idCurrentCompany =
+    user?.internal_companies?.find((item) => item?.company?.name?.toLowerCase() === vendor)?.company
+      ?.id ?? 0;
+  const navigate = useNavigate();
+  const { data: totalTaskByStatus } = useTotalTaskByStatus(Number(idCurrentCompany));
+  const { getDataTableProps, data: incompleteTask } = useIncompleteTask(
+    {},
+    Number(idCurrentCompany)
+  );
+
+  const { data: totalTaskCompleted } = useTotalTaskCompleted(Number(idCurrentCompany));
   const filtered = totalTaskCompleted?.map((item: any) => {
     const filterednya = Object.keys(item)
       .filter((key) => key !== 'month')
@@ -130,7 +138,7 @@ export function MonitorPersonalLoadView() {
                 gap={1}
                 alignItems="center"
                 component={Link}
-                to={`/${(user?.internal_companies ?? [])[0].company.name.trim().toLowerCase()}/task`}
+                to={`/${vendor}/task`}
                 sx={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <Typography>View All Tasks</Typography>

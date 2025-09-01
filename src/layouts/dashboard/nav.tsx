@@ -145,6 +145,11 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
     path: `/${item?.company?.name.toLowerCase()}/task`,
   }));
 
+  const internalCompaniesMonitor = user?.internal_companies?.map((item) => ({
+    heading: item?.company?.name,
+    path: `/${item?.company?.name.toLowerCase()}/monitor-personal-load`,
+  }));
+
   const internalCompaniesAutoResponse = user?.internal_companies?.map((item) => ({
     heading: item?.company?.name,
     path: `/${item?.company?.name.toLowerCase()}/auto-response`,
@@ -251,7 +256,8 @@ export function NavContent({ slots, workspaces, sx }: NavContentProps) {
           clientCompaniesMasterDataSuperAdmin,
           internalCompaniesFaq,
           userType,
-          userRole
+          userRole,
+          internalCompaniesMonitor
         )
           ?.filter((item) =>
             item?.list?.some((listItem) =>

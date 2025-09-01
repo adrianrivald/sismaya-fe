@@ -6,37 +6,37 @@ import type { WithPagination } from 'src/utils/types';
 import type { TotalTaskByStatus, TotalTaskCompleted } from './types';
 
 // Total Task by Status
-async function fetchTotalTaskByStatus() {
-  const { data } = await http<{ data: {status: TotalTaskByStatus[] }}>(`personal-load/total-task-by-status`);
+async function fetchTotalTaskByStatus(internalCompanyId: number) {
+  const { data } = await http<{ data: {status: TotalTaskByStatus[] }}>(`personal-load/total-task-by-status/${internalCompanyId}`);
 
   return data;
 }
 
-export function useTotalTaskByStatus() {
-  const data = useQuery(['total-task-by-status'], () => fetchTotalTaskByStatus());
+export function useTotalTaskByStatus(internalCompanyId: number) {
+  const data = useQuery(['total-task-by-status'], () => fetchTotalTaskByStatus(internalCompanyId));
 
   return data;
 }
 
 
 // Total Task Completed
-async function fetchTotalTaskCompleted() {
-    const { data } = await http<{ data: TotalTaskCompleted[] }>(`personal-load/total-tasks-completed`);
+async function fetchTotalTaskCompleted(internalCompanyId: number) {
+    const { data } = await http<{ data: TotalTaskCompleted[] }>(`personal-load/total-tasks-completed/${internalCompanyId}`);
   
     return data;
   }
   
-  export function useTotalTaskCompleted() {
-    const data = useQuery(['total-tasks-completed'], () => fetchTotalTaskCompleted());
+  export function useTotalTaskCompleted(internalCompanyId: number) {
+    const data = useQuery(['total-tasks-completed'], () => fetchTotalTaskCompleted(internalCompanyId));
   
     return data;
   }
 
 
 // Unresolved CITO
-export function fetchIncompleteTask(params: Partial<any>) {
+export function fetchIncompleteTask(params: Partial<any>, internalCompanyId: number) {
   const baseUrl = window.location.origin;
-  const endpointUrl = new URL('/personal-load/incomplete-task', baseUrl);
+  const endpointUrl = new URL(`/personal-load/incomplete-task/${internalCompanyId}`, baseUrl);
 
 
   if (params.from) {
@@ -58,9 +58,9 @@ export function fetchIncompleteTask(params: Partial<any>) {
   );
 }
 
-export function useIncompleteTask(params: Partial<any> ) {
+export function useIncompleteTask(params: Partial<any> , internalCompanyId: number) {
   return usePaginationQuery(
-    ['incomplete-task', params.keyword, params.from, params.to],
-    (paginationState) => fetchIncompleteTask({ ...params, ...paginationState })
+    ['incomplete-task', params.keyword, params.from, params.to, internalCompanyId],
+    (paginationState) => fetchIncompleteTask({ ...params, ...paginationState }, internalCompanyId)
   );
 }
