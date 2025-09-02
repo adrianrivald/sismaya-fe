@@ -186,6 +186,20 @@ export function useHappinessRating(internalCompanyId: number, dateFrom: string, 
   return data;
 }
 
+// Happiness Rating
+async function fetchHappinessRatingAll() {
+  const { data } = await http<{ data: {company_name: string; rating: number}[] }>(`dashboard-general/rating-summary`);
+
+  return data;
+}
+
+export function useHappinessRatingAll() {
+  const data = useQuery(['happiness-rating-all'], () => fetchHappinessRatingAll());
+
+  return data;
+}
+
+
 
 export function fetchRequestFeedbacks(params: Partial<any>) {
   const baseUrl = window.location.origin;

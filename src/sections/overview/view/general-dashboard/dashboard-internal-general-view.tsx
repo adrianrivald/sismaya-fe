@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import type { SelectChangeEvent } from '@mui/material';
 import { Box, Button, Card, MenuItem, Select, Stack } from '@mui/material';
 
 import {
+  useHappinessRating,
+  useHappinessRatingAll,
   useRequestCito,
   useRequestStats,
   useRequestSummary,
@@ -17,6 +19,8 @@ import dayjs from 'dayjs';
 import { SvgColor } from 'src/components/svg-color';
 import type { RequestSummaryCompany } from 'src/services/dashboard/types';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from 'src/constants';
+import { useAuth } from 'src/sections/auth/providers/auth';
 import { RequestSummaryCard } from '../../request-summary-card';
 import { RequestStatsChart } from '../../request-stats-chart';
 import { SlaComplianceChart } from '../../sla-compliance-chart';
@@ -85,6 +89,7 @@ export function DashboardInternalView() {
   const navigate = useNavigate();
   const [periodFilter, setPeriodFilter] = React.useState('year');
   const { data: requestSummary } = useRequestSummary(periodFilter);
+  const { data: happinessRating } = useHappinessRatingAll();
   const { getDataTableProps, data: requestSummaryCompany } = useRequestSummaryCompany({
     period: periodFilter,
   });
@@ -298,90 +303,36 @@ export function DashboardInternalView() {
                 p: 3,
               }}
             >
-              <Box
-                position="relative"
-                sx={{
-                  borderRadius: 0.5,
-                  background: 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)',
-                  padding: 2,
-                  width: '100%',
-                  color: '#004B50',
-                }}
-              >
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="h5" fontSize={20} fontWeight="bold">
-                    PT SIM
-                  </Typography>
-
-                  <Typography fontWeight="bold" variant="h3" fontSize={32} color="#004B50">
-                    4.42{' '}
-                    <Typography component="span" fontSize={16} fontWeight="normal">
-                      / 5.00
-                    </Typography>
-                  </Typography>
-                </Box>
+              {happinessRating?.map((item: any) => (
                 <Box
-                  component="img"
-                  src="/assets/background/shape-square.png"
-                  sx={{ position: 'absolute', top: 2, left: 2 }}
-                />
-              </Box>
-              <Box
-                position="relative"
-                sx={{
-                  borderRadius: 0.5,
-                  background: 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)',
-                  padding: 2,
-                  width: '100%',
-                  color: '#004B50',
-                }}
-              >
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="h5" fontSize={20} fontWeight="bold">
-                    PT SAS
-                  </Typography>
-
-                  <Typography fontWeight="bold" variant="h3" fontSize={32} color="#004B50">
-                    4.42{' '}
-                    <Typography component="span" fontSize={16} fontWeight="normal">
-                      / 5.00
+                  position="relative"
+                  sx={{
+                    borderRadius: 0.5,
+                    background: 'linear-gradient(to right bottom,  #C8FAD6, #5BE49B)',
+                    padding: 2,
+                    width: '100%',
+                    color: '#004B50',
+                  }}
+                >
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="h5" fontSize={20} fontWeight="bold">
+                      {item?.company_name}
                     </Typography>
-                  </Typography>
-                </Box>
-                <Box
-                  component="img"
-                  src="/assets/background/shape-square.png"
-                  sx={{ position: 'absolute', top: 2, left: 2 }}
-                />
-              </Box>
-              <Box
-                position="relative"
-                sx={{
-                  borderRadius: 0.5,
-                  background: 'linear-gradient(to right bottom, #FFF5CC, #FFD666)',
-                  padding: 2,
-                  width: '100%',
-                  color: '#7A4100',
-                }}
-              >
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="h5" fontSize={20} fontWeight="bold">
-                    PT KMI
-                  </Typography>
 
-                  <Typography fontWeight="bold" variant="h3" fontSize={32} color="#7A4F01">
-                    3.52{' '}
-                    <Typography component="span" fontSize={16} fontWeight="normal">
-                      / 5.00
+                    <Typography fontWeight="bold" variant="h3" fontSize={32} color="#004B50">
+                      {item?.rating}
+                      <Typography component="span" fontSize={16} fontWeight="normal">
+                        / 5.00
+                      </Typography>
                     </Typography>
-                  </Typography>
+                  </Box>
+                  <Box
+                    component="img"
+                    src="/assets/background/shape-square.png"
+                    sx={{ position: 'absolute', top: 2, left: 2 }}
+                  />
                 </Box>
-                <Box
-                  component="img"
-                  src="/assets/background/shape-square.png"
-                  sx={{ position: 'absolute', top: 2, left: 2 }}
-                />
-              </Box>
+              ))}
             </Box>
           </Card>
         </Grid>
