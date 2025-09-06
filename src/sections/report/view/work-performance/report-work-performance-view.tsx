@@ -450,10 +450,10 @@ export function ReportWorkPerformanceView() {
                         {reportType === 'individual' && (
                           <>
                             <FormControl fullWidth>
-                              <InputLabel id="user_id">Select Client</InputLabel>
+                              <InputLabel id="user_id">Select Individual</InputLabel>
 
                               <Select
-                                label="Select Client"
+                                label="Select Individual"
                                 labelId="demo-simple-select-outlined-label-type"
                                 error={Boolean(formState?.errors?.user_id)}
                                 id="user_id"
