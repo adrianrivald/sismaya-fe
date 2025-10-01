@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 import { Icon } from '@iconify/react';
 import {
   Box,
@@ -19,6 +21,7 @@ import {
   useAdditionalQuota,
   useAdditionalQuotaDraft,
 } from 'src/services/settings-cito/use-additional-cito';
+import { useState } from 'react';
 import { useInitialQuota } from 'src/services/settings-cito/use-initial-cito';
 import { RowAdditionalCito } from './row-additional-cito';
 
@@ -39,11 +42,12 @@ export default function DialogAddCitoQuota({
   onClickAttachment,
 }: DialogAddCitoQuotaProps) {
   const { data } = useInitialQuota('', id, open === true);
+  const [loading, setLoading] = useState(false);
   const { data: dataAdditional } = useAdditionalQuota('', id, open === true);
-  const mutation = useAdditionalQuotaDraft(
-    Number(id),
-    (additional) =>
-      onClickAdditional &&
+  const mutation = useAdditionalQuotaDraft(Number(id), (additional) => {
+    setLoading(false);
+
+    onClickAdditional &&
       onClickAdditional(
         {
           details: additional.details,
@@ -53,8 +57,8 @@ export default function DialogAddCitoQuota({
           id: additional?.additional_id,
         },
         data?.cito_type || ''
-      )
-  );
+      );
+  });
 
   return (
     <Dialog
@@ -156,11 +160,16 @@ export default function DialogAddCitoQuota({
           <Button
             variant="contained"
             onClick={() => {
+              setLoading(true);
               mutation.mutate();
             }}
-            disabled={!(data?.cito_type !== '' || data?.cito_type)}
+            disabled={!(data?.cito_type !== '' || data?.cito_type) || loading}
           >
-            Add Additional Quota
+            {loading ? (
+              <Icon icon="line-md:loading-twotone-loop" width="24" height="24" />
+            ) : (
+              'Add Additional Quota'
+            )}
           </Button>
         </Stack>
         {dataAdditional && dataAdditional?.length > 0 && (
