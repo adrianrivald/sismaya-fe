@@ -48,7 +48,16 @@ export function RequestSummaryCard({ title, total, color, sx, ...other }: Props)
           justifyContent: 'flex-end',
         }}
       >
-        <Box sx={{ flexGrow: 1, minWidth: 112 }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            minWidth: 112,
+            pl: {
+              xs: 4,
+              xl: 0,
+            },
+          }}
+        >
           <Box sx={{ mb: 1, typography: 'subtitle2', color: 'grey.600' }}>{title}</Box>
           <Box sx={{ typography: 'h4', color: 'blue.700' }}>{fShortenNumber(total)}</Box>
         </Box>

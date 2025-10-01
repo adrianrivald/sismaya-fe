@@ -209,12 +209,18 @@ export function RequestView() {
     }
   }, [filter, getDataTableProps]);
 
+  // Fix the encoding first (replace %2O with %20 which is the correct space encoding)
+  const fixedEncoding = currentCompany?.toUpperCase().replace(/%2O/g, '%20');
+
+  // Then decode
+  const normalTitle = decodeURIComponent(fixedEncoding);
+
   return (
     <DashboardContent maxWidth="xl">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h4" sx={{ mb: { xs: 1, md: 2 } }}>
-            {currentCompany?.toUpperCase()} Request Management
+            {normalTitle} Request Management
           </Typography>
           <Box display="flex" gap={2} sx={{ mb: { xs: 3, md: 5 } }}>
             <Typography>Request</Typography>
